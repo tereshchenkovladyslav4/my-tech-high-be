@@ -1,0 +1,22 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { StudentGradeLevel } from '../models/student-grade-level.entity';
+import { StudentGradeLevelsArgs } from '../dto/student-grade-level.args';
+
+@Injectable()
+export class StudentGradeLevelsService {
+  constructor(
+    @InjectRepository(StudentGradeLevel)
+    private readonly studentGradeLevelsRepository: Repository<StudentGradeLevel>,
+  ) {}
+
+  findAll(studentGradeLevelsArgs: StudentGradeLevelsArgs): Promise<StudentGradeLevel[]> {
+    
+    return this.studentGradeLevelsRepository.find(studentGradeLevelsArgs);
+  }
+
+  forStudents(student_id:number): Promise<StudentGradeLevel[]> {
+    return this.studentGradeLevelsRepository.find({ where: { student_id: student_id } });
+  }
+}

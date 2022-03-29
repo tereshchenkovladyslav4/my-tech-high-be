@@ -1,0 +1,28 @@
+{
+  "name": "infocenter-v2-be",
+  "version": "1.0.0",
+  "description": "Infocenter V2 Microservices",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-service-authentication": "npm --prefix ./authentication run start:dev",
+    "start-service-users": "npm --prefix ./users-app run start:dev",
+    "start-service-students": "npm --prefix ./students-app run start:dev",
+    "start-service-applications": "npm --prefix ./applications-app run start:dev",
+    "start-service-media": "npm --prefix ./media-app run start:dev",
+    "start-gateway": "npm --prefix ./gateway run start:dev",
+    "start-services": "concurrently \"npm:start-service-*\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/infocenter-v2-be"
+  },
+  "keywords": [
+    "infocenter"
+  ],
+  "author": "Jerex Salingujay",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^6.4.0"
+  }
+}
