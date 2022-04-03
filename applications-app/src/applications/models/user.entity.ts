@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { ApplicationUserRegion } from './user-region.entity';
 @ObjectType()
@@ -37,6 +38,7 @@ export class User extends BaseEntity {
   updatedAt?: string;
 
   @OneToMany(() => ApplicationUserRegion, (userRegion) => userRegion.user)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   // @Field(() => [ApplicationUserRegion], { nullable: true })
-  userRegion?: ApplicationUserRegion;
+  userRegions?: ApplicationUserRegion[];
 }

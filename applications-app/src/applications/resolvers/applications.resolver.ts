@@ -56,7 +56,7 @@ export class ApplicationsResolver {
   }
 
   @Query((returns) => [SchoolYear], { name: 'schoolYears' })
-  @UseGuards(new AuthGuard())
+  // @UseGuards(new AuthGuard())
   async findAllSchoolYear(): Promise<SchoolYear[]> {
     return this.schoolYearService.findAll();
   }

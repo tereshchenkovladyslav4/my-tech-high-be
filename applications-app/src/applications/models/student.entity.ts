@@ -68,4 +68,8 @@ export class Student extends BaseEntity {
   @OneToMany((type) => StudentGradeLevel, (gradeLevels) => gradeLevels.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   grade_levels?: StudentGradeLevel[];
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  testing_preference?: string;
 }

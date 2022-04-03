@@ -10,17 +10,19 @@ export class SchoolYearsService {
     private schoolYearsRepository: Repository<SchoolYear>,
   ) {}
 
-
   findOneById(school_year_id: number): Promise<SchoolYear> {
     return this.schoolYearsRepository.findOne(school_year_id);
   }
 
+  findAll(): Promise<SchoolYear[]> {
+    return this.schoolYearsRepository.find();
+  }
   getCurrent(): Promise<SchoolYear> {
     return this.schoolYearsRepository.findOne({
-      where: { 
+      where: {
         date_begin: LessThanOrEqual(new Date()),
-        date_end: MoreThanOrEqual( new Date() )
-      }
-   });
+        date_end: MoreThanOrEqual(new Date()),
+      },
+    });
   }
 }

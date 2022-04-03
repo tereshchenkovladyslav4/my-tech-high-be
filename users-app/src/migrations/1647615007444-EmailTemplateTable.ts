@@ -33,7 +33,7 @@ export class EmailTemplateTable1647615007444 implements MigrationInterface {
           },
           {
             name: 'body',
-            type: 'varchar',
+            type: 'text',
           },
           {
             name: 'template_name',

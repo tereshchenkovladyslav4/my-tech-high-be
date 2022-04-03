@@ -61,11 +61,13 @@ export class StudentsService {
         diploma_seeking,
         status,
         school_year_id,
+        testing_preference,
       } = updateStudentInput;
       await this.studentsRepository.save({
         student_id,
         special_ed,
         diploma_seeking,
+        testing_preference,
       });
       await this.studentStatusService.update(updateStudentInput);
       return true;

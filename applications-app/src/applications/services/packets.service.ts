@@ -248,4 +248,25 @@ export class PacketsService {
       return [];
     }
   }
+  async getCountGroup(): Promise<ResponseDTO> {
+    let qb = await this.packetsRepository.query(
+      'select status,COUNT(*) As count from mth_packet GROUP BY status',
+    );
+    const statusArray = {
+      'Not Started': 0,
+      'Missing Info': 0,
+      Submitted: 0,
+      Resubmitted: 0,
+      'Age Issue': 0,
+      Conditional: 0,
+      Accepted: 0,
+    };
+    qb.map((item) => {
+      statusArray[item.status] = +item.count;
+    });
+    return <ResponseDTO>{
+      error: false,
+      results: statusArray,
+    };
+  }
 }

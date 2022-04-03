@@ -14,6 +14,7 @@ import { StudentStatusService } from './student-status.service';
 import { StudentStatus } from '../models/student-status.entity';
 import { StudentStatusHistoryService } from './student-status-history.service';
 import { StudentStatusHistory } from '../models/student-status-history.entity';
+import { StudentGradeLevel } from '../models/student-grade-level.entity';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -58,6 +59,7 @@ export class StudentsService {
     const student = await createQueryBuilder(Student)
     .leftJoinAndSelect(Application, "application", "application.student_id = `Student`.student_id")
     .leftJoinAndSelect(Packet, "packet", "packet.student_id = `Student`.student_id")
+    .leftJoinAndSelect(StudentGradeLevel, "gradelevel", "gradelevel.student_id = `Student`.student_id AND gradelevel.school_year_id = application.school_year_id")
     .andWhere("application.school_year_id = :schoolYear", { schoolYear: schoolYear.school_year_id })
     .andWhere("`Student`.student_id = :studentId", { studentId: student_id })
     .orderBy("application.application_id", "DESC")
@@ -68,15 +70,13 @@ export class StudentsService {
     return {
       student_id: student && student.Student_student_id || student_id,
       school_year_id: schoolYear.school_year_id || null,
+      grade_level: student && student.gradelevel_grade_level || null,
       application_id: student && student.application_application_id || null,
       application_status: student && student.application_status || null,
       application_school_year_id: student && student.application_school_year_id || null,
       packet_id: student && student.packet_packet_id || null,
       packet_status: student && student.packet_status || null
     }
-
-    // console.log("StudentStatus: ", currentStatus);
-    // return currentStatus;
   }
 
   async getStatus(student_id: number): Promise<StudentStatus[]> {

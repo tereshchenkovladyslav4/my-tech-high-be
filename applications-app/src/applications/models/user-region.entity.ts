@@ -36,7 +36,7 @@ export class ApplicationUserRegion extends BaseEntity {
   @JoinColumn({ name: 'region_id' })
   regionDetail: ApplicationRegion;
 
-  @ManyToOne(() => User, (user) => user.userRegion, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.userRegions, { onDelete: 'CASCADE' })
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'user_id' })
   user: User;

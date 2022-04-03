@@ -12,6 +12,9 @@ export class StudentCurrentStatus {
   school_year_id?: number
 
   @Field((type) => Int, { nullable: true })
+  grade_level?: number
+
+  @Field((type) => Int, { nullable: true })
   application_id?: number
 
   @Field((type) => String, { nullable: true })

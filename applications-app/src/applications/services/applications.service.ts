@@ -71,6 +71,9 @@ export class ApplicationsService {
           if (!grades.includes(item)) {
             grades.push(item);
           }
+          if (item === 'Kindergarten') {
+            grades.push('K');
+          }
         });
       // qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
       qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
@@ -214,6 +217,7 @@ export class ApplicationsService {
           date_accepted: null,
           date_submitted: null,
           date_last_submitted: null,
+          is_age_issue: false,
         });
 
         const student = await this.studentService.findOneById(student_id);

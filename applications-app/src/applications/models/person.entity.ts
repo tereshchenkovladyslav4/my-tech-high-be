@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { EmailVerifier } from './email-verifier.entity';
 import { PersonAddress } from './person-address.entity';
+import { User } from './user.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -57,4 +58,8 @@ export class Person extends BaseEntity {
   @OneToOne((type) => PersonAddress, (address) => address.person_id)
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
   person_address: PersonAddress;
+
+  @OneToOne((type) => User, (user) => user.user_id)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
+  user: User;
 }

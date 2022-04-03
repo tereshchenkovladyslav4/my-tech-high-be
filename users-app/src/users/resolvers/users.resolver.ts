@@ -31,6 +31,7 @@ import { UpdateUserInput } from './../dto/update-user.input';
 import { UserRegionArgs } from './../dto/user-regions.args';
 import { UserAccessService } from './../services/access/user-access.service';
 import { UserRegionService } from './../services/region/user-region.service';
+import { UserRegion } from 'src/models/user-region.entity';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -297,18 +298,19 @@ export class UsersResolver {
 
   @Mutation((returns) => User, { name: 'removeProfilePhoto' })
   @UseGuards(new AuthGuard())
-  async removeProfilePhoto(
-    @Context('user') user: any
-  ): Promise<User> {
+  async removeProfilePhoto(@Context('user') user: any): Promise<User> {
     if (user) {
       const authUser = await this.usersService.findOneByEmail(user.username);
       if (!authUser) throw new UnauthorizedException();
 
-      return await this.usersService.removeProfilePhoto(
-        authUser
-      );
+      return await this.usersService.removeProfilePhoto(authUser);
     } else {
       throw new UnauthorizedException();
     }
+  }
+
+  @ResolveField((of) => [UserRegion], { name: 'userRegions' })
+  async getUserRegion(@Parent() user: User): Promise<UserRegion[]> {
+    return await this.userRegionService.findUserRegionByUserId(user.user_id);
   }
 }

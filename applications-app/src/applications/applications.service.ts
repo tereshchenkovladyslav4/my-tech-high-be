@@ -76,6 +76,7 @@ export class ApplicationsService {
           parent_id,
           newApplication.program_year,
           studentApplication,
+          newApplication.referred_by,
         ),
     );
 
@@ -195,6 +196,7 @@ export class ApplicationsService {
     parent_id: number,
     school_year_id: number,
     studentApplication: CreateStudentPersonInput,
+    referred_by?: string,
   ): Promise<Student> {
     const { first_name, last_name, grade_level } = studentApplication;
 
@@ -225,6 +227,7 @@ export class ApplicationsService {
     const application = await this.studentApplicationsService.create({
       student_id,
       school_year_id,
+      referred_by,
     });
     if (!application)
       throw new ServiceUnavailableException('Application Not Created');

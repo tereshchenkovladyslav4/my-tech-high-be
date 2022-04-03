@@ -28,7 +28,14 @@ export class ParentsService {
     //   .where('parent.parent_id = :id', { id: parent_id })
     //   .printSql()
     //   .getOne();
-    return this.parentsRepository.findOne(parent_id);
+    return this.parentsRepository.findOne(parent_id, {
+      // relations: [
+      //   'person',
+      //   'person.user',
+      //   'person.user.userRegion',
+      //   'person.user.userRegion.regionDetail',
+      // ],
+    });
   }
 
   async create(parent: CreateParentInput): Promise<Parent> {

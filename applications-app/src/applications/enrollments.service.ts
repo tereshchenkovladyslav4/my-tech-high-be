@@ -339,6 +339,7 @@ export class EnrollmentsService {
       await this.personsService.update({
         person_id,
         date_of_birth: enrollmentPacketPersonalInput.birth_date,
+        gender: enrollmentPacketPersonalInput.gender
       });
 
       const {

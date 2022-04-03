@@ -71,4 +71,9 @@ export class PersonsResolver {
   }): Promise<Person> {
     return this.personsService.findOneById(reference.person_id);
   }
+
+  @ResolveField((of) => User, { name: 'user' })
+  async getUser(@Parent() person: Person): Promise<User | any> {
+    return (await this.usersService.findOneById(person.user_id)) || {};
+  }
 }
