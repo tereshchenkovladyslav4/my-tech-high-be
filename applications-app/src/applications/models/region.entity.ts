@@ -23,7 +23,10 @@ export class ApplicationRegion extends BaseEntity {
   @Field((type) => String, { nullable: true })
   name: string;
 
-  @ManyToOne(() => ApplicationUserRegion, (userRegion) => userRegion.regionDetail)
+  @ManyToOne(
+    () => ApplicationUserRegion,
+    (userRegion) => userRegion.regionDetail,
+  )
   @Field(() => ApplicationUserRegion, { nullable: true })
   region: ApplicationUserRegion;
 }

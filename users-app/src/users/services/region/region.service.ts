@@ -35,6 +35,7 @@ export class RegionService {
   async updateRegion(updateRegionInput: UpdateRegionInput): Promise<any> {
     const data = {
       name: updateRegionInput.name,
+      program: updateRegionInput.program,
     };
     const res = await this.regionRepository.update(updateRegionInput.id, data);
     if (res.affected > 0) {

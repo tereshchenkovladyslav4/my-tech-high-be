@@ -37,8 +37,10 @@ export class StudentImmunizationResolver {
       } else {
         sIm.immunization = imm
       }
+      if (imm.is_deleted && !sIm.value?.length) continue
       res.push(sIm)
     }
+
     return res
   }
 

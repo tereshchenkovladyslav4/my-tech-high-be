@@ -11,11 +11,14 @@ export class SESService {
     secretAccessKey: process.env.AWS_S3_KEY_SECRET,
   });
 
-  async sendEmail(recipientEmail, subject, content) {
+  async sendEmail(recipientEmail, subject, content, bcc?, from?) {
     let params = {
-      Source: this.SES_EMAIL_FROM_NAME + '<' + this.SES_EMAIL_FROM + '>',
+      Source: from
+        ? from
+        : this.SES_EMAIL_FROM_NAME + '<' + this.SES_EMAIL_FROM + '>',
       Destination: {
         ToAddresses: [recipientEmail],
+        BccAddresses: bcc ? [bcc] : undefined,
       },
       ReplyToAddresses: [],
       Message: {

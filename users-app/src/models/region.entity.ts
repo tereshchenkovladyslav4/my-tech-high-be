@@ -9,9 +9,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserRegion } from './user-region.entity';
+import { RegionProgram } from './region-program.enum';
 
 @ObjectType()
-@Directive('@key(fields: "id,name")')
+@Directive('@key(fields: "id,name, program")')
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()
@@ -22,6 +23,10 @@ export class Region extends BaseEntity {
   @Column()
   @Field((type) => String, { nullable: true })
   name: string;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  program: String;
 
   @ManyToOne(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
