@@ -28,6 +28,10 @@ export class Region extends BaseEntity {
   @Field((type) => String, { nullable: true })
   program: String;
 
+  @Column()
+  @Field((type) => String, { nullable: true })
+  state_logo: String;
+
   @ManyToOne(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
   region: UserRegion;

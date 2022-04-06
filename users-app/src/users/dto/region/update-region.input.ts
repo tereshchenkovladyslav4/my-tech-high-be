@@ -12,6 +12,8 @@ export class UpdateRegionInput {
   name?: string;
 
   @Field(() => String, { nullable: true })
-  @IsNotEmpty()
   program?: string;
+
+  @Field(() => String, { nullable: true })
+  state_logo?: string;
 }

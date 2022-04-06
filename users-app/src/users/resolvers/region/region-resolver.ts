@@ -52,7 +52,6 @@ export class RegionResolver {
   async updateRegion(
     @Args('updateRegionInput') updateRegionInput: UpdateRegionInput,
   ): Promise<Region> {
-    console.log('update region');
     const response = await this.regionService.updateRegion(updateRegionInput);
     return response;
   }
