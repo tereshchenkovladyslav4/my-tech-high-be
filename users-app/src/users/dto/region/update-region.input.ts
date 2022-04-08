@@ -16,4 +16,13 @@ export class UpdateRegionInput {
 
   @Field(() => String, { nullable: true })
   state_logo?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  special_ed?: boolean;
+
+  @Field(() => String, { nullable: true })
+  birth_date?: string;
+
+  @Field(() => String, { nullable: true })
+  grades?: string;
 }
