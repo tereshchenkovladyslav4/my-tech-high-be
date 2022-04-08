@@ -32,6 +32,18 @@ export class Region extends BaseEntity {
   @Field((type) => String, { nullable: true })
   state_logo: String;
 
+  @Column()
+  @Field((type) => String, { nullable: true })
+  birth_date: String;
+
+  @Column()
+  @Field((type) => Boolean, { nullable: true })
+  special_ed: Boolean;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  grades: String;
+
   @ManyToOne(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
   region: UserRegion;
