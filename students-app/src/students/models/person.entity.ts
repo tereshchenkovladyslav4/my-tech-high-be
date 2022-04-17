@@ -55,6 +55,10 @@ export class Person extends BaseEntity {
   date_of_birth?: Date;
 
   @Column()
+  @Field(() => String, { nullable: true })
+  photo?: string;
+
+  @Column()
   @Field(() => Int, { nullable: true })
   user_id?: number;
 

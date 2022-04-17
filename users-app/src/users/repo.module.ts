@@ -27,6 +27,8 @@ import { EmailVerifier } from 'src/models/email-verifier.entity';
 import { EmailsService } from './services/emails.service';
 import { SESService } from './services/ses.service';
 import { EmailVerifierService } from './services/email-verifier.service';
+import { SchoolYearsService } from './services/schoolyear.service';
+import { SchoolYear } from 'src/models/schoolyear.entity';
 const RepoServices = [
   UsersService,
   RegionService,
@@ -39,7 +41,8 @@ const RepoServices = [
   EmailCategoryService,
   EmailsService,
   SESService,
-  EmailVerifierService
+  EmailVerifierService,
+  SchoolYearsService
 ];
 
 @Global()
@@ -64,6 +67,7 @@ const RepoServices = [
       ParentUser,
       EmailTemplateCategory,
       EmailVerifier,
+      SchoolYear,
     ]),
   ],
   providers: RepoServices,

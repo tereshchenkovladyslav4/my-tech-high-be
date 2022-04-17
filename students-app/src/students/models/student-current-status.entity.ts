@@ -11,8 +11,8 @@ export class StudentCurrentStatus {
   @Field((type) => Int, { nullable: true })
   school_year_id?: number
 
-  @Field((type) => Int, { nullable: true })
-  grade_level?: number
+  @Field((type) => String, { nullable: true })
+  grade_level?: string
 
   @Field((type) => Int, { nullable: true })
   application_id?: number

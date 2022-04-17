@@ -36,5 +36,5 @@ export class EnrollmentPacketEducationInput {
   last_school_address?: string
 
   @Field({nullable: true})
-  permission_to_request_records?: string
+  permission_to_request_records?: number
 }

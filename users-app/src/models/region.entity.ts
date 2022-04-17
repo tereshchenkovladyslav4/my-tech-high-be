@@ -5,11 +5,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserRegion } from './user-region.entity';
 import { RegionProgram } from './region-program.enum';
+import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
 @Directive('@key(fields: "id,name, program")')
@@ -17,7 +19,7 @@ import { RegionProgram } from './region-program.enum';
 export class Region extends BaseEntity {
   @Column()
   @Field((type) => ID, { nullable: true })
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
   @Column()
@@ -44,7 +46,7 @@ export class Region extends BaseEntity {
   @Field((type) => String, { nullable: true })
   grades: String;
 
-  @ManyToOne(() => UserRegion, (userRegion) => userRegion.regionDetail)
+  @OneToMany(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
   region: UserRegion;
 
@@ -53,4 +55,8 @@ export class Region extends BaseEntity {
 
   @UpdateDateColumn()
   updated_at!: Date;
+
+  @OneToMany(() => SchoolYear, (schoolYear) => schoolYear.Region)
+  @Field(() => [SchoolYear], { nullable: true })
+  SchoolYears: SchoolYear[];
 }

@@ -339,7 +339,7 @@ export class EnrollmentsService {
       await this.personsService.update({
         person_id,
         date_of_birth: enrollmentPacketPersonalInput.birth_date,
-        gender: enrollmentPacketPersonalInput.gender
+        gender: enrollmentPacketPersonalInput.gender,
       });
 
       const {
@@ -426,6 +426,8 @@ export class EnrollmentsService {
         last_school_address: enrollmentPacketEducationInput.last_school_address,
         understands_sped_scheduling:
           enrollmentPacketEducationInput.understands_special_ed || 0,
+        permission_to_request_records:
+          enrollmentPacketEducationInput.permission_to_request_records,
       });
       console.log('Student Packet: ', studentPacket);
 

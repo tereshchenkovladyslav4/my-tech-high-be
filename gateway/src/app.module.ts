@@ -7,7 +7,7 @@ import { decode } from 'jsonwebtoken';
 class AuthenticatedDataSource extends RemoteGraphQLDataSource {
   async willSendRequest({ request, context }) {
     // lets pass authorization token
-    request.http.headers.set('authorization', context.jwt)
+    request.http.headers.set('authorization', context.jwt);
   }
 }
 @Module({
@@ -28,7 +28,7 @@ class AuthenticatedDataSource extends RemoteGraphQLDataSource {
   exports: [GATEWAY_BUILD_SERVICE],
   controllers: [AppController],
 })
-class BuildServiceModule { }
+class BuildServiceModule {}
 @Module({
   imports: [
     GraphQLGatewayModule.forRootAsync({
@@ -50,7 +50,7 @@ class BuildServiceModule { }
       }),
       imports: [BuildServiceModule],
       inject: [GATEWAY_BUILD_SERVICE],
-    })
-  ]
+    }),
+  ],
 })
-export class AppModule { }
+export class AppModule {}

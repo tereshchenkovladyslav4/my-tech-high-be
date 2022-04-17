@@ -6,6 +6,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLFederationModule } from '@nestjs/graphql';
 import { UsersResolver } from './resolvers/users.resolver';
+import { SchoolYearResolver } from './resolvers/schoolyear.resolver';
 import { ApolloServerPluginInlineTraceDisabled } from 'apollo-server-core';
 import RepoModule from './repo.module';
 import { EmailTemplateResolver } from './resolvers/email-template/email-template.resolver';
@@ -16,6 +17,7 @@ const graphQLImports = [
   UserRegionResolver,
   UserAccessResolver,
   EmailTemplateResolver,
+  SchoolYearResolver,
 ];
 
 @Module({

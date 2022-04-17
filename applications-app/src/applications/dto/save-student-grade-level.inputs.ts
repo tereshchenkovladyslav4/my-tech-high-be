@@ -12,6 +12,5 @@ export class SaveStudenGradeLeveltInput {
   school_year_id?: number;
 
   @Field(() => String)
-  @MaxLength(3)
-  grade_level?: string
+  grade_level?: string;
 }
