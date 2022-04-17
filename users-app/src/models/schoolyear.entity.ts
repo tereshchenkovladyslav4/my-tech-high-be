@@ -10,28 +10,36 @@ import {
 import { Region } from './region.entity';
 
 @ObjectType()
-@Directive('@key(fields: "school_year_id")')
+@Directive('@extends')
+@Directive(
+  '@key(fields: "school_year_id , date_begin, date_end, date_reg_open, date_reg_close")',
+)
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
+  @Directive('@external')
   school_year_id?: number;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   date_begin: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   date_end: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   date_reg_open: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   date_reg_close: Date;
 
   @Column()
@@ -89,7 +97,7 @@ export class SchoolYear extends BaseEntity {
   midyear_application?: number;
 
   @Column('int', { name: 'RegionId', nullable: true })
-  @Field(type => Int, { nullable: true })
+  @Field((type) => Int, { nullable: true })
   RegionId: number | null;
 
   @ManyToOne(() => Region, (region) => region.SchoolYears, {
