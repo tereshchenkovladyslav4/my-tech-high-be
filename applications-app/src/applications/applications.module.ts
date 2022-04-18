@@ -30,8 +30,12 @@ import { ApplicationRegion } from './models/region.entity';
 import { ApplicationUserRegion } from './models/user-region.entity';
 import { ApplicationEmailTemplate } from './models/email-template.entity';
 import { ApplicationQuestionsResolver } from './resolvers/application-questions.resolver';
+import { EnrollmentQuestionTabResolver } from './resolvers/enrollment-question-tab.resolver';
 import { ApplicationQuestion } from './models/application-question.entity';
-
+import { EnrollmentQuestionTab } from './models/enrollment-question-tab.entity';
+import { EnrollmentQuestionGroup } from './models/enrollment-question-group.entity';
+import { EnrollmentQuestions } from './models/enrollment-questions.entity';
+import { EnrollmentQuestionGroupResolver } from './resolvers/enrollment-question-groups.resolver';
 const graphQLImports = [
   ApplicationsResolver,
   PacketsResolver,
@@ -41,6 +45,8 @@ const graphQLImports = [
   StudentImmunizationResolver,
   SettingsResolver,
   ApplicationQuestionsResolver,
+  EnrollmentQuestionTabResolver,
+  EnrollmentQuestionGroupResolver,
 ];
 @Module({
   imports: [
@@ -73,6 +79,9 @@ const graphQLImports = [
           ApplicationUserRegion,
           ApplicationEmailTemplate,
           ApplicationQuestion,
+          EnrollmentQuestionTab,
+          EnrollmentQuestionGroup,
+          EnrollmentQuestions,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

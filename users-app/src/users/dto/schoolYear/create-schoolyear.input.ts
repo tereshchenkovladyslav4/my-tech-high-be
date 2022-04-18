@@ -4,15 +4,19 @@ import { IsNotEmpty } from 'class-validator';
 @InputType()
 export class CreateSchoolYearInput {
   @Field(() => Date, { nullable: true })
+  @IsNotEmpty()
   date_begin?: string;
 
   @Field(() => Date, { nullable: true })
+  @IsNotEmpty()
   date_end?: string;
 
   @Field(() => Date, { nullable: true })
+  @IsNotEmpty()
   date_reg_open?: string;
 
   @Field(() => Date, { nullable: true })
+  @IsNotEmpty()
   date_reg_close?: string;
 
   @Field(() => Number, { nullable: true })

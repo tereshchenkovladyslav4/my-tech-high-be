@@ -159,9 +159,12 @@ export class EnrollmentsService {
           templates[status],
         );
         if (emailTemplate) {
+          const tmp = await this.packetsService.findOneById(packet_id);
+
           const studentPerson = await this.studentsService.findOneById(
-            studentPacket.student_id,
+            tmp.student_id,
           );
+
           await this.sesEmailService.sendEmail({
             email: studentPerson.parent?.person?.email,
             subject: emailTemplate.subject,
@@ -460,7 +463,6 @@ export class EnrollmentsService {
     const packet = await this.packetsService.findOneById(packet_id);
 
     if (!packet) throw new ServiceUnavailableException('Packet Not Found');
-    //console.log("Packet: ", packet);
 
     const { student_id } = packet;
     const student = await this.studentsService.findOneById(student_id);

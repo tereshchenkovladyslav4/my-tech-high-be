@@ -35,8 +35,6 @@ export class ApplicationsService {
   ): Promise<Pagination<Application>> {
     const { skip, take, sort, filter, search } = applicationsArgs;
     const _sortBy = sort.split('|');
-    let order = {};
-    order[_sortBy && _sortBy[0]] = (_sortBy && _sortBy[1]) || 'ASC';
     const qb = this.applicationsRepository
       .createQueryBuilder('application')
       .leftJoinAndSelect('application.student', 'student')
@@ -148,10 +146,58 @@ export class ApplicationsService {
         }),
       );
     }
+    if(sort) {
+      if(_sortBy[1].toLocaleLowerCase() === 'desc') {
+        if(_sortBy[0] === 'verified') {
+          qb.orderBy('email_verifier.verified', 'DESC' )
+        } else if(_sortBy[0] === 'grade') {
+          qb.orderBy('grade_levels.grade_level', 'DESC')
+        } else if(_sortBy[0] === 'emailed') {
+          qb.orderBy('application_emails.created_at', 'DESC')
+        } else if(_sortBy[0] === 'year') {
+          qb.orderBy('school_year.date_begin', 'DESC')
+          qb.orderBy('school_year.date_end', 'DESC')
+        } else if(_sortBy[0] === 'submitted') {
+          qb.orderBy('application.date_submitted', 'DESC')
+        } else if(_sortBy[0] === 'sped') {
+          qb.orderBy('student.special_ed', 'DESC')
+        } else if(_sortBy[0] === 'student') {
+          qb.orderBy('person.last_name', 'DESC')
+        } else if(_sortBy[0] === 'parent') {
+          qb.orderBy('p_person.last_name', 'DESC')
+        } else if(_sortBy[0] === 'relation') {
+          qb.orderBy('application.relation_status', 'DESC')
+        } else {
+          qb.orderBy('application.status', 'DESC')
+        }
+      } else {
+        if(_sortBy[0] === 'verified') {
+          qb.orderBy('email_verifier.verified', 'ASC' )
+        } else if(_sortBy[0] === 'grade') {
+          qb.orderBy('grade_levels.grade_level', 'ASC')
+        } else if(_sortBy[0] === 'emailed') {
+          qb.orderBy('application_emails.created_at', 'ASC')
+        } else if(_sortBy[0] === 'year') {
+          qb.orderBy('school_year.date_begin', 'ASC')
+          qb.orderBy('school_year.date_end', 'ASC')
+        } else if(_sortBy[0] === 'submitted') {
+          qb.orderBy('application.date_submitted', 'ASC')
+        } else if(_sortBy[0] === 'sped') {
+          qb.orderBy('student.special_ed', 'ASC')
+        } else if(_sortBy[0] === 'student') {
+          qb.orderBy('person.last_name', 'ASC')
+        } else if(_sortBy[0] === 'parent') {
+          qb.orderBy('p_person.last_name', 'ASC')
+        } else if(_sortBy[0] === 'relation') {
+          qb.orderBy('application.relation_status', 'ASC')
+        } else {
+          qb.orderBy('application.status', 'ASC')
+        } 
+      }
+    }
     const [results, total] = await qb
       .skip(skip)
       .take(take)
-      .orderBy('application.application_id', 'DESC')
       .getManyAndCount();
     return new Pagination<Application>({
       results,

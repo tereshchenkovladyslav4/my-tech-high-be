@@ -14,13 +14,13 @@ export class addProgramSettingFieldsToSchoolYear1650245747737
       `ALTER TABLE \`region\` DROP COLUMN \`special_ed\``,
     );
     await queryRunner.query(
-      `ALTER TABLE \`mth_schoolyear\` ADD \`birth_date_cut\` varchar(255) NOT NULL`,
+      `ALTER TABLE \`mth_schoolyear\` ADD \`birth_date_cut\` date DEFAULT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE \`mth_schoolyear\` ADD \`special_ed\` tinyint(1) NULL DEFAULT '0'`,
     );
     await queryRunner.query(
-      `ALTER TABLE \`mth_schoolyear\` ADD \`grades\` varchar(255) NOT NULL`,
+      `ALTER TABLE \`mth_schoolyear\` ADD \`grades\` varchar(255) DEFAULT NULL`,
     );
   }
 

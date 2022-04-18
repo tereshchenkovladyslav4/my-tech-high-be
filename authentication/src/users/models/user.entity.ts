@@ -1,13 +1,19 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, UpdateDateColumn } from 'typeorm';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql'
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  UpdateDateColumn
+} from 'typeorm'
 
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "user_id")')
-@Entity({ name: 'core_users'})
-export class User extends BaseEntity{
+@Entity({ name: 'core_users' })
+export class User extends BaseEntity {
   @Column()
-  @Field(type => ID, { nullable: true })
+  @Field((type) => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   user_id?: number
 
@@ -43,7 +49,11 @@ export class User extends BaseEntity{
   @Field(() => String, { nullable: true })
   avatarUrl?: string
 
-  @Field(() => String, {nullable: true})
   @Column()
-  updatedAt?: string;
+  @Field(() => String, { nullable: true })
+  status?: string
+
+  @Field(() => String, { nullable: true })
+  @Column()
+  updatedAt?: string
 }

@@ -54,7 +54,12 @@ import { EmailTemplatesService } from './services/email-templates.service';
 import { ApplicationEmailTemplate } from './models/email-template.entity';
 import { ApplicationQuestionsService } from './services/application-questions.service';
 import { ApplicationQuestion } from './models/application-question.entity';
-
+import { EnrollmentQuestionTabService } from './services/enrollment-question-tab.service';
+import { EnrollmentQuestionTab } from './models/enrollment-question-tab.entity';
+import { EnrollmentQuestionGroup } from './models/enrollment-question-group.entity';
+import { EnrollmentQuestions } from './models/enrollment-questions.entity';
+import { EnrollmentQuestionGroupService } from './services/enrollment-question-group.service';
+import { EnrollmentQuestionsService } from './services/enrollment-questions.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -85,6 +90,9 @@ const servicesImports = [
   UserRegionService,
   EmailTemplatesService,
   ApplicationQuestionsService,
+  EnrollmentQuestionTabService,
+  EnrollmentQuestionGroupService,
+  EnrollmentQuestionsService,
 ];
 
 @Global()
@@ -116,6 +124,9 @@ const servicesImports = [
       ApplicationUserRegion,
       ApplicationEmailTemplate,
       ApplicationQuestion,
+      EnrollmentQuestionTab,
+      EnrollmentQuestionGroup,
+      EnrollmentQuestions,
     ]),
   ],
   providers: [...servicesImports],

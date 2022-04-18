@@ -13,6 +13,7 @@ import { DeleteApplicationInput } from '../dto/delete-application.inputs';
 import { ApplicationsService } from './applications.service';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
+import * as Moment from 'moment';
 @Injectable()
 export class PacketsService {
   constructor(
@@ -22,13 +23,11 @@ export class PacketsService {
     @Inject(forwardRef(() => ApplicationsService))
     private applicationService: ApplicationsService,
     private emailTemplateService: EmailTemplatesService,
-  ) {}
+  ) { }
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
     const { skip, take, sort, filters, search } = packetsArgs;
     const _sortBy = sort.split('|');
-    let order = {};
-    order[_sortBy && _sortBy[0]] = (_sortBy && _sortBy[1]) || 'ASC';
 
     if (filters.length === 0) {
       return new Pagination<Packet>({
@@ -43,29 +42,69 @@ export class PacketsService {
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
+      .leftJoinAndSelect('student.grade_levels', 'grade')
       .where('packet.status IN (:status)', { status: filters });
 
     if (filters.includes('Age Issue')) {
       qb = qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
     }
-
     if (search) {
+      const date = search.split('/').filter((v) => v).join('-')
       qb.andWhere(
         new Brackets((sub) => {
-          sub
-            .orWhere('packet.status like :text', { text: `%${search}%` })
-            .orWhere('packet.packet_id like :text', { text: `%${search}%` })
-            .orWhere('s_person.first_name like :text', { text: `%${search}%` })
-            .orWhere('s_person.last_name like :text', { text: `%${search}%` })
-            .orWhere('p_person.first_name like :text', { text: `%${search}%` })
-            .orWhere('p_person.last_name like :text', { text: `%${search}%` });
+          if (search.indexOf('st') > -1 || search.indexOf('th') > -1 || search.indexOf('rd') > -1 || search.indexOf('nd') > -1) {
+            sub.where('grade.grade_level like :text', { text: `%${search.match(/\d+/)[0]}%` })
+          } else {
+            sub
+              .orWhere('packet.status like :text', { text: `%${search}%` })
+              .orWhere('packet.packet_id like :text', { text: `%${search}%` })
+              .orWhere('s_person.first_name like :text', { text: `%${search}%` })
+              .orWhere('s_person.last_name like :text', { text: `%${search}%` })
+              .orWhere('p_person.first_name like :text', { text: `%${search}%` })
+              .orWhere('p_person.last_name like :text', { text: `%${search}%` })
+              .orWhere('packet.deadline like :text', { text: `%${date}%` })
+            if (Moment(search, "MM/DD/YY", true).isValid()) {
+              sub.orWhere('packet.deadline like :text', { text: `%${Moment(search).format('YYYY-MM-DD')}%` });
+            }
+          }
         }),
       );
+    }
+
+    if(sort) {
+      if(_sortBy[1].toLocaleLowerCase() === 'desc') {
+          if(_sortBy[0] === 'student') {
+            qb.orderBy('s_person.first_name', 'DESC' )
+          } else if(_sortBy[0] === 'grade') {
+            qb.orderBy('grade.grade_level', 'DESC')
+          } else if(_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
+            qb.orderBy('packet.deadline', 'DESC')
+          } else if('status') {
+            qb.orderBy('packet.status', 'DESC')
+          } else if('parent') {
+            qb.orderBy('p_person.first_name', 'DESC')
+          } else {
+            qb.orderBy('packet.packet_id', 'DESC')
+          }
+        } else {
+          if(_sortBy[0] === 'student') {
+            qb.orderBy('s_person.first_name', 'ASC' )
+          } else if(_sortBy[0] === 'grade') {
+            qb.orderBy('grade.grade_level', 'ASC')
+          } else if(_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
+            qb.orderBy('packet.deadline', 'ASC')
+          } else if('status') {
+            qb.orderBy('packet.status', 'ASC')
+          } else if('parent') {
+            qb.orderBy('p_person.first_name', 'ASC')
+          } else {
+            qb.orderBy('packet.packet_id', 'ASC')
+          }
+      }
     }
     const [results, total] = await qb
       .skip(skip)
       .take(take)
-      .orderBy('packet.packet_id', 'DESC')
       .getManyAndCount();
     return new Pagination<Packet>({
       results,

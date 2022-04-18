@@ -1,0 +1,35 @@
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { IsNotEmpty } from 'class-validator';
+
+@InputType()
+export class NewEnrollmentQuestionsInput {
+  @Field(() => Int, { nullable: true })
+  id?: number;
+
+  @Field(() => Int, { nullable: true })
+  group_id?: number;
+
+  @Field(() => Int)
+  type: number;
+
+  @Field(() => Int)
+  order: number;
+
+  @Field(() => String)
+  question: string;
+
+  @Field(() => String, { nullable: true })
+  options?: string;
+
+  @Field(() => String, { nullable: true })
+  additional?: string;
+
+  @Field(() => String, { nullable: true })
+  additional2?: string;
+
+  @Field(() => Boolean, { defaultValue: false })
+  required?: boolean;
+
+  @Field(() => Boolean, { defaultValue: false })
+  removable?: boolean;
+}
