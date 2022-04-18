@@ -100,6 +100,18 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => Int, { nullable: true })
   RegionId: number | null;
 
+  @Column()
+  @Field((type) => String, { nullable: true })
+  birth_date_cut: string;
+
+  @Column()
+  @Field((type) => Boolean, { nullable: true })
+  special_ed: boolean;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  grades: string;
+
   @ManyToOne(() => Region, (region) => region.SchoolYears, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',

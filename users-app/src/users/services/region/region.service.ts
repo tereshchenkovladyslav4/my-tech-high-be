@@ -37,9 +37,6 @@ export class RegionService {
       name: updateRegionInput.name,
       program: updateRegionInput.program,
       state_logo: updateRegionInput.state_logo,
-      special_ed: updateRegionInput.special_ed,
-      birth_date: updateRegionInput.birth_date,
-      grades: updateRegionInput.grades,
     };
     const res = await this.regionRepository.update(updateRegionInput.id, data);
     if (res.affected > 0) {
