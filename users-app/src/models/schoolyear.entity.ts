@@ -101,8 +101,8 @@ export class SchoolYear extends BaseEntity {
   RegionId: number | null;
 
   @Column()
-  @Field((type) => String, { nullable: true })
-  birth_date_cut: string;
+  @Field((type) => Date, { nullable: true })
+  birth_date_cut: Date;
 
   @Column()
   @Field((type) => Boolean, { nullable: true })
