@@ -28,7 +28,7 @@ export class UpdateSchoolYearInput {
   @Field(() => Date, { nullable: true })
   midyear_application_close?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => Date, { nullable: true })
   birth_date_cut?: string;
 
   @Field(() => Boolean, { nullable: true })
