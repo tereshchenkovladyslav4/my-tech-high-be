@@ -7,6 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { ApplicationUserRegion } from './user-region.entity';
 
@@ -28,5 +29,6 @@ export class ApplicationRegion extends BaseEntity {
     (userRegion) => userRegion.regionDetail,
   )
   @Field(() => ApplicationUserRegion, { nullable: true })
+  @JoinColumn({ name: 'id', referencedColumnName: 'region_id' })
   region: ApplicationUserRegion;
 }
