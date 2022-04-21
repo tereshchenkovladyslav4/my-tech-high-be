@@ -11,24 +11,21 @@ export class ImmunizationSettingsService {
   constructor(
     @InjectRepository(ImmunizationSettings)
     private readonly immunizationSettingsRepository: Repository<ImmunizationSettings>,
-  ) { }
+  ) {}
 
   async findAll(
     where: FindImunizationSettingsInput | null,
   ): Promise<Pagination<ImmunizationSettings>> {
     let qb = this.immunizationSettingsRepository
-      .createQueryBuilder(
-        'immunization_settings',
-      ).orderBy('immunization_settings.order', 'ASC')
+      .createQueryBuilder('immunization_settings')
+      .orderBy('immunization_settings.order', 'ASC')
       .where('immunization_settings.is_deleted = 0');
     if (typeof where?.is_enabled !== 'undefined') {
       qb = qb.where(
-        'immunization_settings.is_enabled = ' +
-        (where.is_enabled ? 1 : 0),
+        'immunization_settings.is_enabled = ' + (where.is_enabled ? 1 : 0),
       );
     }
     const [results, total] = await qb.getManyAndCount();
-
 
     return new Pagination<ImmunizationSettings>({
       results: this.sortImmunizations(results),
@@ -37,29 +34,29 @@ export class ImmunizationSettingsService {
   }
 
   private sortImmunizations(immunizations: ImmunizationSettings[]) {
-    function getConsecutivesId(imId: number,) {
-      let ids: number[] = []
+    function getConsecutivesId(imId: number) {
+      let ids: number[] = [];
       for (const im of immunizations) {
         if (im.consecutive_vaccine === imId) {
-          ids = [...ids, im.id, ...getConsecutivesId(im.id)]
+          ids = [...ids, im.id, ...getConsecutivesId(im.id)];
         }
       }
-      return ids
+      return ids;
     }
 
-    let sortedRes: ImmunizationSettings[] = []
+    let sortedRes: ImmunizationSettings[] = [];
     for (const e of immunizations) {
-      if (!e.id || !e.title) continue
+      if (!e.id || !e.title) continue;
       if (e.consecutive_vaccine === 0) {
-        e.consecutives = getConsecutivesId(e.id)
+        e.consecutives = getConsecutivesId(e.id);
         sortedRes = [
           ...sortedRes,
           e,
-          ...e.consecutives.map((id) => immunizations.find((v) => v.id === id))
-        ]
+          ...e.consecutives.map((id) => immunizations.find((v) => v.id === id)),
+        ];
       }
     }
-    return sortedRes
+    return sortedRes;
   }
 
   async updateOrAdd(input: UpdateImmunizationSettingsInput) {
@@ -70,8 +67,26 @@ export class ImmunizationSettingsService {
   async deleteOne(id: number): Promise<boolean> {
     const affected = await this.immunizationSettingsRepository.save({
       id,
-      is_deleted: true
-    })
+      is_deleted: true,
+    });
+    const parentId = await (
+      await this.immunizationSettingsRepository.findOne(id)
+    ).consecutive_vaccine;
+    let qb = await this.immunizationSettingsRepository
+      .createQueryBuilder('immunization_settings')
+      .orderBy('immunization_settings.order', 'ASC')
+      .where('immunization_settings.is_deleted = 0')
+      .andWhere('consecutive_vaccine = :parentId', { parentId: affected.id })
+      .getMany();
+    await Promise.all(
+      qb.map(
+        async (i) =>
+          await this.immunizationSettingsRepository.save({
+            id: i.id,
+            consecutive_vaccine: parentId,
+          }),
+      ),
+    );
     return affected ? true : false;
   }
 

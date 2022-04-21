@@ -96,7 +96,8 @@ export class PacketsResolver {
   async getGetSignatureFile(
     @Args({ name: 'file_id', type: () => ID }) file_id: number,
   ): Promise<File> {
-    return this.packetFilesService.getSignatureFile(file_id);
+    // return this.packetFilesService.getSignatureFile(file_id);
+    return this.fileService.findOneById(file_id);
   }
 
   @Query((returns) => ImmunizationSettingsData, {

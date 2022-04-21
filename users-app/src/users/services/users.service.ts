@@ -230,6 +230,7 @@ export class UsersService {
       .update(Phone)
       .set({
         number: updateProfileInput.phone_number,
+        recieve_text: updateProfileInput.recieve_text,
       })
       .where('person_id = :id', { id: person.person_id })
       .execute();
@@ -326,9 +327,7 @@ export class UsersService {
     });
   }
 
-  async removeProfilePhoto(
-    user: User
-  ): Promise<User> {
+  async removeProfilePhoto(user: User): Promise<User> {
     const updated_at = Moment().format('YYYY-MM-DD HH:mm:ss');
     return this.usersRepository.save({
       ...user,

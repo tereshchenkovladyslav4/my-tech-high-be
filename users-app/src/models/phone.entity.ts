@@ -25,4 +25,7 @@ export class Phone extends BaseEntity {
 
   @Column()
   ext?: string
+
+  @Column()
+  recieve_text?: number
 }

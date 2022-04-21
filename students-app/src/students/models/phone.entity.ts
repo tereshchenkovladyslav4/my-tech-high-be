@@ -5,28 +5,32 @@ import { Person } from './person.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "phone_id, person_id")')
-@Entity({ name: 'mth_phone'})
+@Entity({ name: 'mth_phone' })
 export class Phone extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  phone_id?: number
+  phone_id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
   @Directive('@external')
-  person_id?: number
+  person_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
-  name?: string
+  name?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
-  number?: string
+  number?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
-  ext?: string
+  ext?: string;
+
+  @Column()
+  @Field(() => Int, { nullable: true })
+  recieve_text?: number;
 }

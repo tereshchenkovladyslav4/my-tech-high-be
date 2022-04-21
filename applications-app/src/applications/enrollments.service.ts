@@ -84,7 +84,6 @@ export class EnrollmentsService {
       birth_country,
       hispanic,
       race,
-      gender,
       language,
       language_home,
       language_home_child,
@@ -110,7 +109,6 @@ export class EnrollmentsService {
       if (student_person_id) {
         await this.personsService.update({
           person_id: student_person_id,
-          gender: gender,
           date_of_birth: Moment(date_of_birth).toDate(),
         });
       }
