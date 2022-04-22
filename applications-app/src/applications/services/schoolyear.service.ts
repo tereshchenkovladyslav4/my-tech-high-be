@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { SchoolYear } from '../models/schoolyear.entity';
+import { SchoolYearDataInput } from '../dto/school-year-data.Input'
+import { SchoolYearData } from '../models/school-year-data.entity'
 
 @Injectable()
 export class SchoolYearService {
@@ -26,6 +28,7 @@ export class SchoolYearService {
   findAll(): Promise<SchoolYear[]> {
     return this.schoolYearsRepository.find();
   }
+
   findThisYear(): Promise<SchoolYear> {
     const today = new Date();
     return this.schoolYearsRepository.createQueryBuilder('year')

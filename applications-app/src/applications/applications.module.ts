@@ -16,6 +16,7 @@ import { Address } from './models/address.entity';
 import { PersonAddress } from './models/person-address.entity';
 import { PacketsResolver } from './resolvers/packets.resolver';
 import { ApplicationPagination } from './models/application-pagination.entity';
+import { SchoolYearData } from './models/school-year-data.entity';
 import { PacketPagination } from './models/packet-pagination.entity';
 import { StudentsResolver } from './resolvers/students.resolver';
 import { UploadedFileResponse } from './models/uploaded-file-response.entity';
@@ -69,6 +70,7 @@ const graphQLImports = [
           Address,
           PersonAddress,
           ApplicationPagination,
+          SchoolYearData,
           PacketPagination,
           //FileUpload,
           UploadedFileResponse,

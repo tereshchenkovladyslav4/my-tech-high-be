@@ -51,13 +51,6 @@ export class StudentsResolver {
     return this.studentsService.findAll(studentsArgs);
   }
 
-  @ResolveField((of) => Person, { name: 'person' })
-  public async getPerson(
-    @TypeParent() student: Student,
-  ): Promise<Person | any> {
-    return (await this.personsService.findOneById(student.person_id)) || {};
-  }
-
   @ResolveField((of) => Parent, { name: 'parent' })
   public async getParent(@TypeParent() student: Student): Promise<Parent> {
     return this.parentsService.findOneById(student.parent_id);
@@ -148,7 +141,7 @@ export class StudentsResolver {
     if (!student) {
       throw new UnauthorizedException();
     }
-    
+
     return await this.studentsService.removeProfilePhoto(student);
   }
 

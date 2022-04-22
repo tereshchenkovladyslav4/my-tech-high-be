@@ -21,6 +21,7 @@ import { AuthGuard } from '../../guards/auth.guard';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
 import { MePermission } from '../../models/me-permission.entity';
 import { User } from '../../models/user.entity';
+import { PersonInfo } from '../../models/person-info';
 import { LoginInput } from '../dto/login.inputs';
 import { AuthPayload } from '../dto/login.payload';
 import { ParentUserService } from '../services/parent-user.service';
@@ -32,6 +33,7 @@ import { UserRegionArgs } from './../dto/user-regions.args';
 import { UserAccessService } from './../services/access/user-access.service';
 import { UserRegionService } from './../services/region/user-region.service';
 import { UserRegion } from 'src/models/user-region.entity';
+import { GetPersonInfoArgs } from '../dto/get-person-info.args';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -97,6 +99,14 @@ export class UsersResolver {
   @UseGuards(new AuthGuard())
   getUsers(): Promise<User[]> {
     return this.usersService.findAll();
+  }
+
+  @Query(() => [PersonInfo], { name: 'allPersonInfoBySearchItem' })
+  @UseGuards(new AuthGuard())
+  getAllPersonInfoBySearchItem(
+    @Args('getPersonInfoArgs') getPersonInfoArgs: GetPersonInfoArgs,
+  ): Promise<PersonInfo[]> {
+    return this.usersService.findAllPersonInfoBySearchItem(getPersonInfoArgs);
   }
 
   @Query(() => [User], { name: 'usersByRegions', nullable: true })

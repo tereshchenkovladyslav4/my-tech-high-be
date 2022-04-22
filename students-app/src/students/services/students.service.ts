@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, createQueryBuilder, getConnection } from 'typeorm';
 import { Student } from '../models/student.entity';
@@ -16,6 +16,8 @@ import { StudentStatusHistoryService } from './student-status-history.service';
 import { StudentStatusHistory } from '../models/student-status-history.entity';
 import { StudentGradeLevel } from '../models/student-grade-level.entity';
 import { UpdateStudentProfileInput } from '../dto/update-profile.inputs';
+import { UsersService } from './users.service';
+import { PersonsService } from './persons.service';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -24,7 +26,24 @@ export class StudentsService {
     private schoolYearsService: SchoolYearsService,
     private studentStatusService: StudentStatusService,
     private studentStatusHistoryService: StudentStatusHistoryService,
+    private usersService: UsersService,
+    private personsService: PersonsService,
   ) {}
+
+  protected user: User;
+  protected NewUser;
+
+  generatePassword() {
+    const characterList = 'mthv2@2022';
+    let password = '';
+    const characterListLength = characterList.length;
+
+    for (let i = 0; i < 8; i++) {
+      const characterIndex = Math.round(Math.random() * characterListLength);
+      password = password + characterList.charAt(characterIndex);
+    }
+    return password;
+  }
 
   findAll(studentsArgs: StudentsArgs): Promise<Student[]> {
     return this.studentsRepository.find(studentsArgs);
@@ -45,10 +64,17 @@ export class StudentsService {
       .where('user.user_id = :userId', { userId: user_id })
       .printSql()
       .getOne();
+
     if (parent !== undefined) {
-      return this.studentsRepository.find({
-        where: { parent_id: parent.parent_id },
-      });
+      return await this.studentsRepository
+        .createQueryBuilder('student')
+        .leftJoinAndSelect('student.person', 'person')
+        .where('student.parent_id = :parentId', {
+          parentId: parent.parent_id,
+        })
+        .orderBy('person.first_name', 'ASC')
+        .printSql()
+        .getMany();
     } else {
       return [];
     }
@@ -119,13 +145,20 @@ export class StudentsService {
     student: Student,
     updateProfileInput: UpdateStudentProfileInput,
   ): Promise<Student> {
+
+    const { preferred_first_name, preferred_last_name, email, photo, testing_preference, password } =
+      updateProfileInput;
+
     const person = await createQueryBuilder(Person)
       .where('`Person`.person_id = :personId', { personId: student.person_id })
       .printSql()
       .getOne();
 
-    const { preferred_first_name, preferred_last_name, email, photo } =
-      updateProfileInput;
+      const currStudent = await createQueryBuilder(Student)
+      .where('`Student`.student_id = :studentId', { studentId: student.student_id })
+      .printSql()
+      .getOne();
+
     // Update Person Data
     await getConnection()
       .createQueryBuilder()
@@ -138,6 +171,39 @@ export class StudentsService {
       })
       .where('person_id = :id', { id: person.person_id })
       .execute();
+
+    await getConnection()
+      .createQueryBuilder()
+      .update(Student)
+      .set({
+        testing_preference
+      })
+      .where('student_id = :id', { id: currStudent.student_id })
+      .execute();
+
+      const { person_id } = person;
+      // create user if pass provide
+      if(password){
+        const user = await this.usersService.create({
+          firstName: student.person.first_name,
+          lastName: student.person.last_name,
+          email: student.person.email,
+          level: 12,
+          updateAt: new Date().toString(),
+          password,
+        });
+        
+        // update person id on person
+        const { user_id } = user;
+        const updatedPerson = await this.personsService.updateUserId({
+          person_id,
+          user_id,
+        });
+
+        if (!updatedPerson)
+        throw new ServiceUnavailableException('Person User ID Not been Updated');
+        console.log('Updated Person: ', updatedPerson);
+      }
 
     return student;
   }

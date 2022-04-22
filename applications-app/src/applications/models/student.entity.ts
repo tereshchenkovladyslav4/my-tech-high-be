@@ -17,7 +17,7 @@ import { StudentGradeLevel } from './student-grade-level.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking")',
+  '@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking, testing_preference")',
 )
 @Entity('mth_student')
 export class Student extends BaseEntity {
@@ -71,5 +71,6 @@ export class Student extends BaseEntity {
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   testing_preference?: string;
 }

@@ -5,6 +5,8 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   OneToMany,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Person } from './person.entity';
 import { Parent } from './parent.entity';
@@ -17,7 +19,7 @@ import { StudentStatusHistory } from './student-status-history.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking")',
+  '@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking, testing_preference")',
 )
 @Entity('mth_student')
 export class Student extends BaseEntity {
@@ -62,8 +64,9 @@ export class Student extends BaseEntity {
   @Field(() => String, { nullable: true })
   teacher_notes: string;
 
-  @Field((type) => Person)
-  person?: Person;
+  @Column()
+  @Field(() => String, { nullable: true })
+  testing_preference: string;
 
   @Field((type) => Parent)
   parent?: Parent;
@@ -73,6 +76,11 @@ export class Student extends BaseEntity {
 
   @Field((type) => StudentCurrentStatus)
   current_school_year_status?: StudentCurrentStatus;
+
+  @OneToOne((type) => Person, (person) => person.user_id)
+  @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
+  @Field(() => Person, { nullable: true })
+  person: Person;
 
   @OneToMany((type) => Application, (application) => application.student_id)
   applications?: Application[];

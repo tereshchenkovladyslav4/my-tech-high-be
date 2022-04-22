@@ -15,4 +15,22 @@ export class User extends BaseEntity{
 
   @Field((type) => [Student])
   students?: Student[];
+
+  @Column()
+  email?: string;
+
+  @Column()
+  password?: string;
+
+  @Column()
+  firstName?: string;
+
+  @Column()
+  lastName?: string;
+
+  @Column()
+  level?: number;
+
+  @Column()
+  updatedAt?: string;
 }

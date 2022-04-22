@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets } from 'typeorm';
+import { Repository, Brackets, getConnection } from 'typeorm';
 import { Application } from '../models/application.entity';
 import { ApplicationsArgs } from '../dto/applications.args';
 import { CreateStudentApplicationInput } from '../dto/new-student-application.inputs';
@@ -17,6 +17,7 @@ import { SchoolYear } from '../models/schoolyear.entity';
 import { UpdateApplicationInput } from '../dto/update-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
 import { StudentsService } from './students.service';
+import { ResponseDTO } from '../dto/response.dto';
 @Injectable()
 export class ApplicationsService {
   constructor(
@@ -29,6 +30,30 @@ export class ApplicationsService {
     private emailTemplateService: EmailTemplatesService,
     private studentService: StudentsService,
   ) {}
+
+  async getSubmittedApplicationCount(): Promise<ResponseDTO> {
+    const queryRunner = await getConnection().createQueryRunner();
+    const result = await queryRunner.query(
+      `SELECT count(*) AS count FROM infocenter.mth_application WHERE status = 'Submitted'`,
+    );
+    queryRunner.release();
+    const statusArray = {
+      'Not Started': 0,
+      'Missing Info': 0,
+      Submitted: 0,
+      Resubmitted: 0,
+      'Age Issue': 0,
+      Conditional: 0,
+      Accepted: 0,
+    };
+    result.map((item) => {
+      statusArray.Submitted = +item.count;
+    });
+    return <ResponseDTO>{
+      error: false,
+      results: statusArray,
+    };
+  }
 
   async findAll(
     applicationsArgs: ApplicationsArgs,
@@ -146,59 +171,56 @@ export class ApplicationsService {
         }),
       );
     }
-    if(sort) {
-      if(_sortBy[1].toLocaleLowerCase() === 'desc') {
-        if(_sortBy[0] === 'verified') {
-          qb.orderBy('email_verifier.verified', 'DESC' )
-        } else if(_sortBy[0] === 'grade') {
-          qb.orderBy('grade_levels.grade_level', 'DESC')
-        } else if(_sortBy[0] === 'emailed') {
-          qb.orderBy('application_emails.created_at', 'DESC')
-        } else if(_sortBy[0] === 'year') {
-          qb.orderBy('school_year.date_begin', 'DESC')
-          qb.orderBy('school_year.date_end', 'DESC')
-        } else if(_sortBy[0] === 'submitted') {
-          qb.orderBy('application.date_submitted', 'DESC')
-        } else if(_sortBy[0] === 'sped') {
-          qb.orderBy('student.special_ed', 'DESC')
-        } else if(_sortBy[0] === 'student') {
-          qb.orderBy('person.last_name', 'DESC')
-        } else if(_sortBy[0] === 'parent') {
-          qb.orderBy('p_person.last_name', 'DESC')
-        } else if(_sortBy[0] === 'relation') {
-          qb.orderBy('application.relation_status', 'DESC')
+    if (sort) {
+      if (_sortBy[1].toLocaleLowerCase() === 'desc') {
+        if (_sortBy[0] === 'verified') {
+          qb.orderBy('email_verifier.verified', 'DESC');
+        } else if (_sortBy[0] === 'grade') {
+          qb.orderBy('grade_levels.grade_level', 'DESC');
+        } else if (_sortBy[0] === 'emailed') {
+          qb.orderBy('application_emails.created_at', 'DESC');
+        } else if (_sortBy[0] === 'year') {
+          qb.orderBy('school_year.date_begin', 'DESC');
+          qb.orderBy('school_year.date_end', 'DESC');
+        } else if (_sortBy[0] === 'submitted') {
+          qb.orderBy('application.date_submitted', 'DESC');
+        } else if (_sortBy[0] === 'sped') {
+          qb.orderBy('student.special_ed', 'DESC');
+        } else if (_sortBy[0] === 'student') {
+          qb.orderBy('person.last_name', 'DESC');
+        } else if (_sortBy[0] === 'parent') {
+          qb.orderBy('p_person.last_name', 'DESC');
+        } else if (_sortBy[0] === 'relation') {
+          qb.orderBy('application.relation_status', 'DESC');
         } else {
-          qb.orderBy('application.status', 'DESC')
+          qb.orderBy('application.status', 'DESC');
         }
       } else {
-        if(_sortBy[0] === 'verified') {
-          qb.orderBy('email_verifier.verified', 'ASC' )
-        } else if(_sortBy[0] === 'grade') {
-          qb.orderBy('grade_levels.grade_level', 'ASC')
-        } else if(_sortBy[0] === 'emailed') {
-          qb.orderBy('application_emails.created_at', 'ASC')
-        } else if(_sortBy[0] === 'year') {
-          qb.orderBy('school_year.date_begin', 'ASC')
-          qb.orderBy('school_year.date_end', 'ASC')
-        } else if(_sortBy[0] === 'submitted') {
-          qb.orderBy('application.date_submitted', 'ASC')
-        } else if(_sortBy[0] === 'sped') {
-          qb.orderBy('student.special_ed', 'ASC')
-        } else if(_sortBy[0] === 'student') {
-          qb.orderBy('person.last_name', 'ASC')
-        } else if(_sortBy[0] === 'parent') {
-          qb.orderBy('p_person.last_name', 'ASC')
-        } else if(_sortBy[0] === 'relation') {
-          qb.orderBy('application.relation_status', 'ASC')
+        if (_sortBy[0] === 'verified') {
+          qb.orderBy('email_verifier.verified', 'ASC');
+        } else if (_sortBy[0] === 'grade') {
+          qb.orderBy('grade_levels.grade_level', 'ASC');
+        } else if (_sortBy[0] === 'emailed') {
+          qb.orderBy('application_emails.created_at', 'ASC');
+        } else if (_sortBy[0] === 'year') {
+          qb.orderBy('school_year.date_begin', 'ASC');
+          qb.orderBy('school_year.date_end', 'ASC');
+        } else if (_sortBy[0] === 'submitted') {
+          qb.orderBy('application.date_submitted', 'ASC');
+        } else if (_sortBy[0] === 'sped') {
+          qb.orderBy('student.special_ed', 'ASC');
+        } else if (_sortBy[0] === 'student') {
+          qb.orderBy('person.last_name', 'ASC');
+        } else if (_sortBy[0] === 'parent') {
+          qb.orderBy('p_person.last_name', 'ASC');
+        } else if (_sortBy[0] === 'relation') {
+          qb.orderBy('application.relation_status', 'ASC');
         } else {
-          qb.orderBy('application.status', 'ASC')
-        } 
+          qb.orderBy('application.status', 'ASC');
+        }
       }
     }
-    const [results, total] = await qb
-      .skip(skip)
-      .take(take)
-      .getManyAndCount();
+    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
     return new Pagination<Application>({
       results,
       total,

@@ -11,6 +11,7 @@ import { PersonAddress } from '../../models/person-address.entity';
 import { Person } from '../../models/person.entity';
 import { Phone } from '../../models/phone.entity';
 import { User } from '../../models/user.entity';
+import { PersonInfo } from '../../models/person-info';
 import { CreateUserInput } from './../dto/create-user.input';
 import { UpdateProfileInput } from './../dto/update-profile.inputs';
 import { UpdateAccountInput } from '../dto/update-account.inputs';
@@ -18,6 +19,7 @@ import { UpdateUserInput } from './../dto/update-user.input';
 import * as Moment from 'moment';
 import { EmailsService } from 'src/users/services/emails.service';
 import { EmailVerifierService } from './email-verifier.service';
+import { GetPersonInfoArgs } from '../dto/get-person-info.args';
 const crypto = require('crypto');
 const salt = process.env.MTH_SALT || 'asin';
 
@@ -45,6 +47,76 @@ export class UsersService {
     });
     if (user) return true;
     return false;
+  }
+
+  async findAllPersonInfoBySearchItem(
+    getPersonInfoArgs: GetPersonInfoArgs,
+  ): Promise<PersonInfo[]> {
+    console.log('findAllPersonInfoBySearchItem service start');
+    try {
+      const queryRunner = await getConnection().createQueryRunner();
+      const response = (await queryRunner.query(
+        `SELECT
+            t1.id,
+            t1.parentId,
+            t1.name,
+            t1.role,
+            t1.email,
+            t1.phoneNumber
+          FROM (
+            SELECT
+              student.student_id AS id,
+              student.parent_id AS parentId,
+              CONCAT(person.first_name, ' ', person.last_name) AS name,
+              person.email AS email,
+              phone.number AS phoneNumber,
+              'Student' AS role
+            FROM 
+            (
+              SELECT * FROM infocenter.mth_student
+            ) AS student
+            LEFT JOIN infocenter.mth_person AS person ON (person.person_id = student.person_id)
+            LEFT JOIN infocenter.user_region AS region ON (region.user_id = person.user_id)
+            LEFT JOIN infocenter.mth_phone AS phone ON (phone.person_id = person.person_id)
+            WHERE
+              region.region_id IS NOT NULL AND 
+              region.region_id = ${getPersonInfoArgs.region_id} AND (
+                CONCAT(person.first_name, ' ', person.last_name) LIKE '%${getPersonInfoArgs.search}%' OR
+                person.email LIKE '%${getPersonInfoArgs.search}%' OR
+                phone.number LIKE '%${getPersonInfoArgs.search}%'
+              )
+            UNION
+            SELECT
+              parent.parent_id AS id,
+              '' AS parentId,
+              CONCAT(person.first_name, ' ', person.last_name) AS name,
+              person.email AS email,
+              phone.number AS phoneNumber,
+              'Parent' AS role
+            FROM 
+            (
+              SELECT * FROM infocenter.mth_parent
+            ) AS parent
+            LEFT JOIN infocenter.mth_person AS person ON (person.person_id = parent.person_id) 
+            LEFT JOIN infocenter.user_region AS region ON (region.user_id = person.user_id)
+            LEFT JOIN infocenter.mth_phone AS phone ON (phone.person_id = person.person_id)
+            WHERE
+              region.region_id IS NOT NULL AND 
+              region.region_id = ${getPersonInfoArgs.region_id} AND (
+                CONCAT(person.first_name, ' ', person.last_name) LIKE '%${getPersonInfoArgs.search}%' OR
+                person.email LIKE '%${getPersonInfoArgs.search}%' OR
+                phone.number LIKE '%${getPersonInfoArgs.search}%'
+              )
+          ) AS t1
+          ORDER BY t1.name     
+          limit 0, 10  
+        `,
+      )) as PersonInfo[];
+      await queryRunner.release();
+      return response;
+    } catch (err) {
+      return err;
+    }
   }
 
   async findAll(): Promise<User[]> {
