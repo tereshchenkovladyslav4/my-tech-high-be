@@ -40,8 +40,9 @@ export class Student extends BaseEntity {
   @Field((type) => [Packet], { nullable: true })
   packets?: Packet[];
 
-  @OneToOne((type) => Person)
-  @JoinColumn({ name: 'person_id' })
+  @OneToOne((type) => Person, (person) => person.person_id)
+  @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
+  @Field(() => Person, { nullable: true })
   person: Person;
 
   @OneToOne((type) => Parent)

@@ -19,7 +19,7 @@ export class StudentsService {
   async findOneById(student_id: number): Promise<Student> {
     return this.studentsRepository.findOne({
       where: { student_id: student_id },
-      relations: ['parent', 'parent.person'],
+      relations: ['person', 'parent', 'parent.person'],
     });
   }
 

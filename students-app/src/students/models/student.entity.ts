@@ -77,9 +77,8 @@ export class Student extends BaseEntity {
   @Field((type) => StudentCurrentStatus)
   current_school_year_status?: StudentCurrentStatus;
 
-  @OneToOne((type) => Person, (person) => person.user_id)
+  @OneToOne((type) => Person, (person) => person.person_id)
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
-  @Field(() => Person, { nullable: true })
   person: Person;
 
   @OneToMany((type) => Application, (application) => application.student_id)
