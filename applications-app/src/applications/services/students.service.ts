@@ -26,7 +26,7 @@ export class StudentsService {
   async findOneByParent(parent_id: number): Promise<Student[]> {
     return await this.studentsRepository
       .createQueryBuilder('student')
-      .leftJoin(Person, 'person', 'person.person_id = student.person_id')
+      .leftJoinAndSelect('student.person', 'person')
       .leftJoin(
         StudentGradeLevel,
         'grade_level',

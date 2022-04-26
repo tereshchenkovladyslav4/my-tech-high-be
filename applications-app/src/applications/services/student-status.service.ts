@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, getConnection } from 'typeorm';
 import { StudentStatus } from '../models/student-status.entity';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { SchoolYearDataInput } from '../dto/school-year-data.Input'
 import { SchoolYearData } from '../models/school-year-data.entity'
+import { Parent } from '../models/parent.entity';
+import { Student  } from '../models/student.entity';
+
 @Injectable()
 export class StudentStatusService {
   constructor(
@@ -28,14 +31,89 @@ export class StudentStatusService {
   }
 
   async getAllCount(schoolYearDataInput: SchoolYearDataInput): Promise<SchoolYearData[]> {
-    const total = await this.studentStatussRepository.count({ where: { school_year_id: schoolYearDataInput.school_year_id } });
-    const pending = await this.studentStatussRepository.count({ where: { school_year_id: schoolYearDataInput.school_year_id, status: 0 } });
-    const active = await this.studentStatussRepository.count({ where: { school_year_id: schoolYearDataInput.school_year_id, status: 1 } });
-    const withdrawn = await this.studentStatussRepository.count({ where: { school_year_id: schoolYearDataInput.school_year_id, status: 2 } });
+    const queryRunner = await getConnection().createQueryRunner();
+    const ParentResult = await queryRunner.query(
+      `SELECT 
+      COUNT(DISTINCT p.parent_id) as count, ss.status 
+      FROM mth_student_status AS ss 
+        INNER JOIN mth_student AS s ON s.student_id=ss.student_id
+        INNER JOIN mth_parent AS p ON p.parent_id=s.parent_id
+      WHERE ss.school_year_id='${schoolYearDataInput.school_year_id}'
+      GROUP BY ss.status ORDER BY ss.status`
+    );
+
+    const studentResult = await queryRunner.query(`SELECT 
+    COUNT(s.student_id) as count, ss.status, SUM(IF(s.special_ed>0,1,0)) as sped
+    FROM mth_student_status AS ss 
+    INNER JOIN mth_student AS s ON s.student_id=ss.student_id
+    WHERE ss.school_year_id='${schoolYearDataInput.school_year_id}'
+    GROUP BY ss.status ORDER BY ss.status`);
+
+    queryRunner.release();
+    let students = [];
+    let sped = [];
+    let parents= [];
+    const status = ['Pending', 'Active', 'Total', 'Withdrawn', 'Graduated']
+
+    const studentTotal = studentResult.reduce((accumulator, object) => {
+      return accumulator + Number(object.count || 0);
+    }, 0);
+    const spedTotal = studentResult.reduce((accumulator, object) => {
+      return accumulator + Number(object.sped || 0);
+    }, 0);
+    studentResult.forEach(element => {
+      if(Number(element.status) === 0) {
+        students.push({ status: 'Pending', count: element.count });
+        sped.push({ status: 'Pending', count: element.sped })
+      } else if(Number(element.status) === 1) {
+        students.push({ status: 'Active', count: element.count });
+        sped.push({ status: 'Active', count: element.sped })
+      } else if(Number(element.status) === 2) {
+        students.push({ status: 'Withdrawn', count: element.count })
+        sped.push({ status: 'Withdrawn', count: element.sped })
+      } else if(Number(element.status) === 3) {
+        students.push({ status: 'Graduated', count: element.count })
+        sped.push({ status: 'Graduated', count: element.sped })
+      }
+    });
+    students.push({ status: 'Total', count: studentTotal })
+    studentResult
+    sped.push({ status: 'Total', count: spedTotal })
+
+    const parentTotal = ParentResult.reduce((accumulator, object) => {
+      return accumulator + Number(object.count || 0);
+    }, 0);
+    ParentResult.forEach(element => {
+      if(Number(element.status) === 0) {
+        parents.push({ status: 'Pending', count: element.count });
+      } else if(Number(element.status) === 1) {
+        parents.push({ status: 'Active', count: element.count })
+      } else if(Number(element.status) === 2) {
+        parents.push({ status: 'Withdrawn', count: element.count })
+      } else if(Number(element.status) === 3) {
+        parents.push({ status: 'Graduated', count: element.count })
+      }
+    });
+    parents.push({ status: 'Total', count: parentTotal })
+    status.forEach(status => {
+      const found = students.some(el => el.status === status);
+      if (!found) students.push({ status: status, count: 0 });
+    })
+    status.forEach(status => {
+      const found = parents.some(el => el.status === status);
+      if (!found) parents.push({ status: status, count: 0 });
+    })
+    status.forEach(status => {
+      const found = sped.some(el => el.status === status);
+      if (!found) sped.push({ status: status, count: 0 });
+    })
+    students.sort((a, b) => status.indexOf(a.status) - status.indexOf(b.status));
+    parents.sort((a, b) => status.indexOf(a.status) - status.indexOf(b.status));
+    sped.sort((a, b) => status.indexOf(a.status) - status.indexOf(b.status));
     const data = [{ 
-      students: [{ status: 'pending', count: pending }, { status: 'Active', count: active }, { status: 'Total', count: total },{ status: 'Withdrawn', count: withdrawn },{ status: 'Graduated', count: 0 }], 
-      parents: [{  status: 'pending', count: 37 }, { status: 'Active', count: 61 }, { status: 'Total', count: 106 },{ status: 'Withdrawn', count: 13 },{ status: 'Graduated', count: 11 }], 
-      special_ed: [{ status: 'pending', count: 31 }, { status: 'Active', count: 38 }, { status: 'Total', count: 74 },{ status: 'Withdrawn', count: 7 },{ status: 'Graduated', count: 8 }] 
+      students: students,
+      parents: parents,
+      special_ed: sped
     }]
     return data
   }
