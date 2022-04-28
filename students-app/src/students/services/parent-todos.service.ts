@@ -26,7 +26,7 @@ export class ParentToDosService {
 
   async forUsers(user_id: number): Promise<Student[]> {
     const parent = await createQueryBuilder(Parent)
-      .innerJoin(Person, 'person', 'person.person_id = parent.person_id')
+      .innerJoin(Person, 'person', 'person.person_id = `Parent`.person_id')
       .innerJoin(User, 'user', 'user.user_id = person.user_id')
       .where('user.user_id = :userId', { userId: user_id })
       .printSql()
@@ -41,14 +41,12 @@ export class ParentToDosService {
     return students;
   }
 
-  async submitEnrollmentPacket(user: User): Promise<ToDoItem> {
-    // Fetch students for Enrollment Packets
-    //const students = await this.forUsers(user.user_id);
-    const parent = await createQueryBuilder(Parent)
+  async getParent(user_id: number): Promise<any> {
+    return await createQueryBuilder(Parent)
       .innerJoinAndSelect(
         Person,
         'person',
-        'person.person_id = parent.person_id',
+        'person.person_id = `Parent`.person_id',
       )
       .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
       .innerJoinAndSelect(
@@ -56,9 +54,14 @@ export class ParentToDosService {
         'userRegion',
         'userRegion.user_id = user.user_id',
       )
-      .where('user.user_id = :userId', { userId: user.user_id })
+      .where('user.user_id = :userId', { userId: user_id })
       .printSql()
       .getRawOne();
+  }
+
+  async submitEnrollmentPacket(user: User): Promise<ToDoItem> {
+    // Fetch students for Enrollment Packets
+    const parent = await this.getParent(user.user_id);
 
     if (!parent) {
       return {
@@ -72,9 +75,6 @@ export class ParentToDosService {
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
-
-    console.log('Parent: ', parent);
-
     const schoolYear = await this.schoolYearsService.getCurrent(
       userRegion_region_id,
     );
@@ -90,7 +90,7 @@ export class ParentToDosService {
         'packet',
         "packet.student_id = `Student`.student_id AND ( packet.status <> 'Accepted' AND packet.status <> 'Submitted' ) AND packet.deleted = 0",
       )
-      .where('student.parent_id = :parent', { parent: Parent_parent_id })
+      .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .orderBy('application.application_id', 'DESC')
       .orderBy('packet.packet_id', 'DESC')
       .printSql()
@@ -108,23 +108,7 @@ export class ParentToDosService {
 
   async resubmitEnrollmentPacket(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    //const students = await this.forUsers(user.user_id);
-
-    const parent = await createQueryBuilder(Parent)
-      .innerJoinAndSelect(
-        Person,
-        'person',
-        'person.person_id = parent.person_id',
-      )
-      .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
-      .innerJoinAndSelect(
-        UserRegion,
-        'userRegion',
-        'userRegion.user_id = user.user_id',
-      )
-      .where('user.user_id = :userId', { userId: user.user_id })
-      .printSql()
-      .getRawOne();
+    const parent = await this.getParent(user.user_id);
 
     if (!parent) {
       return {
@@ -138,7 +122,6 @@ export class ParentToDosService {
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
-
     const schoolYear = await this.schoolYearsService.getCurrent(
       userRegion_region_id,
     );
@@ -154,7 +137,7 @@ export class ParentToDosService {
         'packet',
         "packet.student_id = `Student`.student_id AND packet.status = 'Submitted' AND packet.deleted = 0",
       )
-      .where('student.parent_id = :parent', { parent: Parent_parent_id })
+      .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .orderBy('application.application_id', 'DESC')
       .orderBy('packet.packet_id', 'DESC')
       .printSql()
@@ -172,56 +155,7 @@ export class ParentToDosService {
 
   async submitSchedule(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    //const students = await this.forUsers(user.user_id);
-    const parent = await createQueryBuilder(Parent)
-      .innerJoinAndSelect(
-        Person,
-        'person',
-        'person.person_id = parent.person_id',
-      )
-      .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
-      .innerJoinAndSelect(
-        UserRegion,
-        'userRegion',
-        'userRegion.user_id = user.user_id',
-      )
-      .where('user.user_id = :userId', { userId: user.user_id })
-      .printSql()
-      .getRawOne();
-
-    if (!parent) {
-      return {
-        phrase: 'Submit Enrollment Packet',
-        button: 'Submit Now',
-        icon: '',
-        dashboard: 1, // yes
-        homeroom: 1, // yes
-        students: [],
-      };
-    }
-
-    const { userRegion_region_id, Parent_parent_id } = parent;
-
-    const schoolYear = await this.schoolYearsService.getCurrent(
-      userRegion_region_id,
-    );
-    const students = await createQueryBuilder(Student)
-      .innerJoin(
-        Application,
-        'application',
-        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND application.school_year_id = :schoolYear",
-        { schoolYear: schoolYear.school_year_id },
-      )
-      .innerJoin(
-        Packet,
-        'packet',
-        "packet.student_id = `Student`.student_id AND packet.status = 'Accepted' AND packet.deleted = 0",
-      )
-      .where('student.parent_id = :parent', { parent: Parent_parent_id })
-      .orderBy('application.application_id', 'DESC')
-      .orderBy('packet.packet_id', 'DESC')
-      .printSql()
-      .getMany();
+    const students = [];
 
     return {
       phrase: 'Submit Schedule',
@@ -235,25 +169,7 @@ export class ParentToDosService {
 
   async resubmitSchedule(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    // const parent = await createQueryBuilder(Parent)
-    //   .innerJoin(Person, "person", "person.person_id = parent.person_id")
-    //   .innerJoin(User, "user", "user.user_id = person.user_id")
-    //   .where("user.user_id = :userId", { userId: user.user_id })
-    //   .printSql()
-    //   .getOne();
-
-    // const schoolYear = await this.schoolYearsService.getCurrent();
-    // const students = await createQueryBuilder(Student)
-    // .innerJoin(Application, "application", "application.student_id = student.student_id")
-    // .innerJoin(Packet, "packet", "packet.student_id = student.student_id")
-    // .where("student.parent_id = :parent", { parent: parent.parent_id })
-    // .andWhere("application.school_year_id = :schoolYear", { schoolYear: schoolYear.school_year_id })
-    // .andWhere("application.status = :status", { status: "Accepted" })
-    // .andWhere("packet.status = :packetStatus", { packetStatus: "Accepted" })
-    // .printSql()
-    // .getMany();
-
+    const students = [];
     return {
       phrase: 'Resubmit Schedule',
       button: 'Resubmit Now',
@@ -266,8 +182,7 @@ export class ParentToDosService {
 
   async resubmitReimbursement(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    //const  students = [];
+    const students = [];
     return {
       phrase: 'Resubmit Reimbursement',
       button: 'Resubmit Now',
@@ -280,8 +195,7 @@ export class ParentToDosService {
 
   async resubmitDirectOrder(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    //const  students = [];
+    const students = [];
     return {
       phrase: 'Resubmit Direct Order',
       button: 'Resubmit Now',
@@ -294,8 +208,7 @@ export class ParentToDosService {
 
   async testingPrefernce(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    //const  students = [];
+    const students = [];
     return {
       phrase: 'Testing Prefernce',
       button: 'Submit Now',
@@ -308,8 +221,7 @@ export class ParentToDosService {
 
   async missingLearningLog(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    //const  students = [];
+    const students = [];
     return {
       phrase: 'Missing Learning Log',
       button: 'Submit Now',
@@ -322,8 +234,7 @@ export class ParentToDosService {
 
   async resubmitLearningLog(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    //const  students = [];
+    const students = [];
     return {
       phrase: 'Resubmit Learning Log',
       button: 'Resubmit Now',
@@ -336,8 +247,7 @@ export class ParentToDosService {
 
   async intentToReenroll(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    //const  students = [];
+    const students = [];
     return {
       phrase: 'Intent to Re-enroll',
       button: 'Submit Now',
@@ -350,8 +260,7 @@ export class ParentToDosService {
 
   async requestHomeroomResources(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = await this.forUsers(user.user_id);
-    //const  students = [];
+    const students = [];
     return {
       phrase: 'Request Homeroom Resources',
       button: 'Request Now',
