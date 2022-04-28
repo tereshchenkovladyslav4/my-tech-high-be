@@ -31,10 +31,19 @@ export class ApplicationsService {
     private studentService: StudentsService,
   ) {}
 
-  async getSubmittedApplicationCount(): Promise<ResponseDTO> {
+  async getSubmittedApplicationCount(regionId: number): Promise<ResponseDTO> {
     const queryRunner = await getConnection().createQueryRunner();
     const result = await queryRunner.query(
-      `SELECT count(*) AS count FROM infocenter.mth_application WHERE status = 'Submitted'`,
+      `SELECT
+          COUNT(*) AS count
+        FROM (
+          SELECT 
+            *
+            FROM infocenter.mth_application
+            WHERE status = 'Submitted'
+        ) AS application
+        LEFT JOIN infocenter.mth_schoolyear AS schoolYear ON (schoolYear.school_year_id=application.school_year_id)
+        WHERE schoolYear.RegionId = ${regionId}`,
     );
     queryRunner.release();
     const statusArray = {
@@ -176,7 +185,8 @@ export class ApplicationsService {
         if (_sortBy[0] === 'verified') {
           qb.orderBy('email_verifier.verified', 'DESC');
         } else if (_sortBy[0] === 'grade') {
-          qb.orderBy('grade_levels.grade_level', 'DESC');
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+          qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy('application_emails.created_at', 'DESC');
         } else if (_sortBy[0] === 'year') {
@@ -199,7 +209,8 @@ export class ApplicationsService {
         if (_sortBy[0] === 'verified') {
           qb.orderBy('email_verifier.verified', 'ASC');
         } else if (_sortBy[0] === 'grade') {
-          qb.orderBy('grade_levels.grade_level', 'ASC');
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+          qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy('application_emails.created_at', 'ASC');
         } else if (_sortBy[0] === 'year') {

@@ -1,25 +1,32 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  ManyToOne,
+} from 'typeorm';
 import { Student } from './student.entity';
 import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "application_id")')
+@Directive('@key(fields: "application_id, student_id")')
 @Entity('mth_application')
 export class Application extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  application_id?: number
+  application_id?: number;
 
   @Column()
-  student_id?: number
+  @Directive('@external')
+  student_id?: number;
 
   @Column()
-  school_year_id?: number
-  
+  school_year_id?: number;
+
   @Column()
   status?: string;
 
@@ -27,5 +34,5 @@ export class Application extends BaseEntity {
   city_of_residence?: string;
 
   @Column()
-  date_started?: Date
+  date_started?: Date;
 }

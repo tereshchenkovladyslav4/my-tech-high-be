@@ -38,6 +38,9 @@ export class EmailTemplate {
   @Field(() => String, { nullable: true })
   deadline?: string;
 
+  @Field(() => String, { nullable: true })
+  standard_responses?: string;
+
   @Field(() => [EmailTemplateReminder], { nullable: true })
   reminders?: EmailTemplateReminder[];
 }

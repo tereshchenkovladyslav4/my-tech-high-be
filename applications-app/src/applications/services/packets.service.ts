@@ -23,7 +23,7 @@ export class PacketsService {
     @Inject(forwardRef(() => ApplicationsService))
     private applicationService: ApplicationsService,
     private emailTemplateService: EmailTemplatesService,
-  ) { }
+  ) {}
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
     const { skip, take, sort, filters, search } = packetsArgs;
@@ -49,63 +49,76 @@ export class PacketsService {
       qb = qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
     }
     if (search) {
-      const date = search.split('/').filter((v) => v).join('-')
+      const date = search
+        .split('/')
+        .filter((v) => v)
+        .join('-');
       qb.andWhere(
         new Brackets((sub) => {
-          if (search.indexOf('st') > -1 || search.indexOf('th') > -1 || search.indexOf('rd') > -1 || search.indexOf('nd') > -1) {
-            sub.where('grade.grade_level like :text', { text: `%${search.match(/\d+/)[0]}%` })
+          if (
+            search.indexOf('st') > -1 ||
+            search.indexOf('th') > -1 ||
+            search.indexOf('rd') > -1 ||
+            search.indexOf('nd') > -1
+          ) {
+            sub.where('grade.grade_level like :text', {
+              text: `%${search.match(/\d+/)[0]}%`,
+            });
           } else {
             sub
               .orWhere('packet.status like :text', { text: `%${search}%` })
               .orWhere('packet.packet_id like :text', { text: `%${search}%` })
-              .orWhere('s_person.first_name like :text', { text: `%${search}%` })
+              .orWhere('s_person.first_name like :text', {
+                text: `%${search}%`,
+              })
               .orWhere('s_person.last_name like :text', { text: `%${search}%` })
-              .orWhere('p_person.first_name like :text', { text: `%${search}%` })
+              .orWhere('p_person.first_name like :text', {
+                text: `%${search}%`,
+              })
               .orWhere('p_person.last_name like :text', { text: `%${search}%` })
-              .orWhere('packet.deadline like :text', { text: `%${date}%` })
-            if (Moment(search, "MM/DD/YY", true).isValid()) {
-              sub.orWhere('packet.deadline like :text', { text: `%${Moment(search).format('YYYY-MM-DD')}%` });
+              .orWhere('packet.deadline like :text', { text: `%${date}%` });
+            if (Moment(search, 'MM/DD/YY', true).isValid()) {
+              sub.orWhere('packet.deadline like :text', {
+                text: `%${Moment(search).format('YYYY-MM-DD')}%`,
+              });
             }
           }
         }),
       );
     }
 
-    if(sort) {
-      if(_sortBy[1].toLocaleLowerCase() === 'desc') {
-          if(_sortBy[0] === 'student') {
-            qb.orderBy('s_person.first_name', 'DESC' )
-          } else if(_sortBy[0] === 'grade') {
-            qb.orderBy('grade.grade_level', 'DESC')
-          } else if(_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
-            qb.orderBy('packet.deadline', 'DESC')
-          } else if('status') {
-            qb.orderBy('packet.status', 'DESC')
-          } else if('parent') {
-            qb.orderBy('p_person.first_name', 'DESC')
-          } else {
-            qb.orderBy('packet.packet_id', 'DESC')
-          }
+    if (sort) {
+      if (_sortBy[1].toLocaleLowerCase() === 'desc') {
+        if (_sortBy[0] === 'student') {
+          qb.orderBy('s_person.first_name', 'DESC');
+        } else if (_sortBy[0] === 'grade') {
+          qb.orderBy('grade.grade_level', 'DESC');
+        } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
+          qb.orderBy('packet.deadline', 'DESC');
+        } else if ('status') {
+          qb.orderBy('packet.status', 'DESC');
+        } else if ('parent') {
+          qb.orderBy('p_person.first_name', 'DESC');
         } else {
-          if(_sortBy[0] === 'student') {
-            qb.orderBy('s_person.first_name', 'ASC' )
-          } else if(_sortBy[0] === 'grade') {
-            qb.orderBy('grade.grade_level', 'ASC')
-          } else if(_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
-            qb.orderBy('packet.deadline', 'ASC')
-          } else if('status') {
-            qb.orderBy('packet.status', 'ASC')
-          } else if('parent') {
-            qb.orderBy('p_person.first_name', 'ASC')
-          } else {
-            qb.orderBy('packet.packet_id', 'ASC')
-          }
+          qb.orderBy('packet.packet_id', 'DESC');
+        }
+      } else {
+        if (_sortBy[0] === 'student') {
+          qb.orderBy('s_person.first_name', 'ASC');
+        } else if (_sortBy[0] === 'grade') {
+          qb.orderBy('grade.grade_level', 'ASC');
+        } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
+          qb.orderBy('packet.deadline', 'ASC');
+        } else if ('status') {
+          qb.orderBy('packet.status', 'ASC');
+        } else if ('parent') {
+          qb.orderBy('p_person.first_name', 'ASC');
+        } else {
+          qb.orderBy('packet.packet_id', 'ASC');
+        }
       }
     }
-    const [results, total] = await qb
-      .skip(skip)
-      .take(take)
-      .getManyAndCount();
+    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
     return new Pagination<Packet>({
       results,
       total,
@@ -290,6 +303,37 @@ export class PacketsService {
   async getCountGroup(): Promise<ResponseDTO> {
     let qb = await this.packetsRepository.query(
       'select status,COUNT(*) As count from mth_packet GROUP BY status',
+    );
+    const statusArray = {
+      'Not Started': 0,
+      'Missing Info': 0,
+      Submitted: 0,
+      Resubmitted: 0,
+      'Age Issue': 0,
+      Conditional: 0,
+      Accepted: 0,
+    };
+    qb.map((item) => {
+      statusArray[item.status] = +item.count;
+    });
+    return <ResponseDTO>{
+      error: false,
+      results: statusArray,
+    };
+  }
+
+  async getpacketCountByRegionId(region_id: number): Promise<ResponseDTO> {
+    let qb = await this.packetsRepository.query(
+      `SELECT
+          t1.status AS status,
+          COUNT(*) AS count
+        FROM (
+          SELECT * FROM infocenter.mth_packet
+        ) AS t1
+        LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
+        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+        WHERE schoolYear.RegionId=${region_id}
+        GROUP BY t1.status`,
     );
     const statusArray = {
       'Not Started': 0,

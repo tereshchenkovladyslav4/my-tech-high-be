@@ -18,6 +18,7 @@ import { StudentGradeLevel } from '../models/student-grade-level.entity';
 import { UpdateStudentProfileInput } from '../dto/update-profile.inputs';
 import { UsersService } from './users.service';
 import { PersonsService } from './persons.service';
+import { UserRegion } from '../models/user-region.entity';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -80,8 +81,45 @@ export class StudentsService {
     }
   }
 
-  async getCurrentStatus(student_id: number): Promise<StudentCurrentStatus> {
-    const schoolYear = await this.schoolYearsService.getCurrent();
+  async getCurrentStatus(studentData: Student): Promise<StudentCurrentStatus> {
+    const defaultResponse = {
+      student_id: studentData.student_id,
+      school_year_id: null,
+      grade_level: null,
+      application_id: null,
+      application_status: null,
+      application_school_year_id: null,
+      packet_id: null,
+      packet_status: null,
+    };
+
+    const parent = await createQueryBuilder(Parent)
+      .innerJoinAndSelect(
+        Person,
+        'person',
+        'person.person_id = `Parent`.person_id',
+      )
+      .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
+      .innerJoinAndSelect(
+        UserRegion,
+        'userRegion',
+        'userRegion.user_id = user.user_id',
+      )
+      .where('`Parent`.parent_id = :parentId', {
+        parentId: studentData.parent_id,
+      })
+      .printSql()
+      .getRawOne();
+
+    const region_id = (parent && parent.userRegion_region_id) || null;
+    if (!region_id) {
+      return defaultResponse;
+    }
+    const schoolYear = await this.schoolYearsService.getCurrent(region_id);
+
+    if (!schoolYear) {
+      return defaultResponse;
+    }
 
     const student = await createQueryBuilder(Student)
       .leftJoinAndSelect(
@@ -100,16 +138,19 @@ export class StudentsService {
         'gradelevel.student_id = `Student`.student_id AND gradelevel.school_year_id = application.school_year_id',
       )
       .andWhere('application.school_year_id = :schoolYear', {
-        schoolYear: schoolYear.school_year_id,
+        schoolYear: (schoolYear && schoolYear.school_year_id) || null,
       })
-      .andWhere('`Student`.student_id = :studentId', { studentId: student_id })
+      .andWhere('`Student`.student_id = :studentId', {
+        studentId: studentData.student_id,
+      })
       .orderBy('application.application_id', 'DESC')
       .orderBy('packet.packet_id', 'DESC')
       .printSql()
       .getRawOne();
 
     return {
-      student_id: (student && student.Student_student_id) || student_id,
+      student_id:
+        (student && student.Student_student_id) || studentData.student_id,
       school_year_id: schoolYear.school_year_id || null,
       grade_level: (student && student.gradelevel_grade_level) || null,
       application_id: (student && student.application_application_id) || null,
@@ -145,19 +186,24 @@ export class StudentsService {
     student: Student,
     updateProfileInput: UpdateStudentProfileInput,
   ): Promise<Student> {
-
-    const { preferred_first_name, preferred_last_name, email, photo, testing_preference, password } =
-      updateProfileInput;
+    const {
+      preferred_first_name,
+      preferred_last_name,
+      email,
+      photo,
+      testing_preference,
+      password,
+    } = updateProfileInput;
 
     const person = await createQueryBuilder(Person)
       .where('`Person`.person_id = :personId', { personId: student.person_id })
       .printSql()
       .getOne();
 
-      const currStudent = await createQueryBuilder(Student)
-      .where('`Student`.student_id = :studentId', { studentId: student.student_id })
-      .printSql()
-      .getOne();
+    const currStudent = await createQueryBuilder(Student)
+    .where('`Student`.student_id = :studentId', { studentId: student.student_id })
+    .printSql()
+    .getOne();
 
     // Update Person Data
     await getConnection()
@@ -176,7 +222,7 @@ export class StudentsService {
       .createQueryBuilder()
       .update(Student)
       .set({
-        testing_preference
+        testing_preference,
       })
       .where('student_id = :id', { id: currStudent.student_id })
       .execute();
@@ -185,9 +231,9 @@ export class StudentsService {
       // create user if pass provide
       if(password){
         const user = await this.usersService.create({
-          firstName: student.person.first_name,
-          lastName: student.person.last_name,
-          email: student.person.email,
+          firstName: person.first_name,
+          lastName: person.last_name,
+          email: person.email,
           level: 12,
           updateAt: new Date().toString(),
           password,

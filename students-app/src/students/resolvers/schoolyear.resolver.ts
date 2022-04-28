@@ -25,8 +25,8 @@ export class SchoolYearResolver {
     return this.schoolYearsService.findAll();
   }
   @Query((returns) => SchoolYear, { name: 'schoolyear_getcurrent' })
-  async getCurrent(): Promise<SchoolYear> {
-    return this.schoolYearsService.getCurrent();
+  async getCurrent(region_id: number): Promise<SchoolYear> {
+    return this.schoolYearsService.getCurrent(region_id);
   }
 
   @ResolveReference()

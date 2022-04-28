@@ -44,6 +44,10 @@ export class EmailTemplate extends BaseEntity {
   @Field((type) => String, { nullable: true })
   body: string;
 
+  @Column()
+  @Field((type) => String, { nullable: true, defaultValue: '' })
+  standard_responses: String;
+
   // @Column()
   // @Field((type) => String, { nullable: true })
   // notes: string;

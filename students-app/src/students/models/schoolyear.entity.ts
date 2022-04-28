@@ -105,4 +105,7 @@ export class SchoolYear extends BaseEntity {
   @Column()
   @Field(() => Int, { nullable: true })
   midyear_application?: number;
+
+  @Column('int', { name: 'RegionId', nullable: true })
+  RegionId?: number;
 }

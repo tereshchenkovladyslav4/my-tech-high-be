@@ -17,11 +17,12 @@ export class SchoolYearsService {
   findAll(): Promise<SchoolYear[]> {
     return this.schoolYearsRepository.find();
   }
-  getCurrent(): Promise<SchoolYear> {
+  getCurrent(region_id: number): Promise<SchoolYear> {
     return this.schoolYearsRepository.findOne({
       where: {
         date_begin: LessThanOrEqual(new Date()),
         date_end: MoreThanOrEqual(new Date()),
+        RegionId: region_id,
       },
     });
   }

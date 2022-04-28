@@ -26,7 +26,7 @@ import { CreateApplicationInput } from '../dto/new-application.inputs';
 import { ApplicationsService as StudentApplicationsService } from '../applications.service';
 import { CreateParentStudentInput } from '../dto/new-parent-student.inputs';
 import { AcceptApplicationInput } from '../dto/accept-application.inputs';
-import { SchoolYearDataInput } from '../dto/school-year-data.Input'; 
+import { SchoolYearDataInput } from '../dto/school-year-data.Input';
 import { Pagination } from '../../paginate';
 import { ApplicationPagination } from '../models/application-pagination.entity';
 import { CreateStudentApplicationsInput } from '../dto/new-student-applications.inputs';
@@ -54,7 +54,7 @@ export class ApplicationsResolver {
     private applicationEmailsService: ApplicationEmailsService,
     private immunizationSettingsService: ImmunizationSettingsService,
     private usersService: UsersService,
-    private studentStatusService: StudentStatusService
+    private studentStatusService: StudentStatusService,
   ) {}
 
   @Query((returns) => ApplicationPagination, { name: 'applications' })
@@ -69,9 +69,12 @@ export class ApplicationsResolver {
 
   @Query((returns) => ResponseDTO, { name: 'submittedApplicationCount' })
   @UseGuards(new AuthGuard())
-  async getSubmittedApplicationCount(): Promise<ResponseDTO> {
-    const results =
-      await this.applicationsService.getSubmittedApplicationCount();
+  async getSubmittedApplicationCount(
+    @Args({ name: 'regionId', type: () => ID }) regionId: number,
+  ): Promise<ResponseDTO> {
+    const results = await this.applicationsService.getSubmittedApplicationCount(
+      regionId,
+    );
     return results;
   }
 
@@ -91,12 +94,13 @@ export class ApplicationsResolver {
 
   @Query((returns) => [SchoolYearData], { name: 'schoolYearsData' })
   // @UseGuards(new AuthGuard())
-  async getSchoolYearData(@Args('schoolYearDataInput') schoolYearDataInput: SchoolYearDataInput): Promise<SchoolYearData[]> {
-  return this.studentStatusService.getAllCount(schoolYearDataInput);
+  async getSchoolYearData(
+    @Args('schoolYearDataInput') schoolYearDataInput: SchoolYearDataInput,
+  ): Promise<SchoolYearData[]> {
+    return this.studentStatusService.getAllCount(schoolYearDataInput);
   }
 
-
-  @Mutation((returns) => Application, { name: 'createApplication' } )
+  @Mutation((returns) => Application, { name: 'createApplication' })
   @UseGuards(new AuthGuard())
   async addApplication(
     @Context('user') user: User,

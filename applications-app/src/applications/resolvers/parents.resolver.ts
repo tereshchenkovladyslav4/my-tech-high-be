@@ -70,6 +70,14 @@ export class ParentsResolver {
     return this.parentsService.findOneById(parent_id);
   }
 
+  @Query((returns) => Parent, { name: 'parentDetailByEmail' })
+  @UseGuards(new AuthGuard())
+  async getParent(
+    @Args({ name: 'email', type: () => String }) parent_email: string,
+  ): Promise<Parent> {
+    return this.parentsService.findOneByEmail(parent_email);
+  }
+
   @Mutation((returns) => Parent, { name: 'updatePersonAddress' })
   @UseGuards(new AuthGuard())
   async updatePersonAddress(

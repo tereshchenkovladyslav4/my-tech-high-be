@@ -5,8 +5,8 @@ import { Student } from './student.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "user_id")')
-@Entity({ name: 'core_users'})
-export class User extends BaseEntity{
+@Entity({ name: 'core_users' })
+export class User extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
@@ -21,6 +21,9 @@ export class User extends BaseEntity{
 
   @Column()
   password?: string;
+
+  @Column({ default: '0' })
+  status?: string;
 
   @Column()
   firstName?: string;

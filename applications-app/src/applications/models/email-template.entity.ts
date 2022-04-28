@@ -43,4 +43,8 @@ export class ApplicationEmailTemplate extends BaseEntity {
   @Column()
   @Field(() => Int, { nullable: true })
   category_id?: number;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  standard_responses?: string;
 }

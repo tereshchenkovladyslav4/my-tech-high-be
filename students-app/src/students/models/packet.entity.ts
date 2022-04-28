@@ -1,35 +1,43 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  In,
+  ManyToOne,
+} from 'typeorm';
 import { Student } from '../models/student.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "packet_id")')
+@Directive('@key(fields: "packet_id, student_id")')
 @Entity('mth_packet')
 export class Packet extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  packet_id?: number
+  packet_id?: number;
 
   @Column()
-  student_id?: number
-  
+  @Directive('@external')
+  student_id?: number;
+
   @Column()
   status?: string;
 
   @Column()
-  deadline: Date
+  deadline: Date;
 
   @Column()
-  date_submitted: Date
+  date_submitted: Date;
 
   @Column()
-  date_last_submitted: Date
+  date_last_submitted: Date;
 
   @Column()
-  date_accepted: Date
+  date_accepted: Date;
 
   @Column()
   school_district?: string;
@@ -162,9 +170,8 @@ export class Packet extends BaseEntity {
 
   @Column()
   date_assigned_to_soe?: Date;
-  
+
   @Column()
   @Field(() => Boolean, { defaultValue: false })
   is_age_issue?: boolean;
-
 }

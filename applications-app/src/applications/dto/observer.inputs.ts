@@ -4,6 +4,7 @@ import {
   IsDate,
   MaxLength,
   IsEmail,
+  IsNotEmpty,
   Length,
   IsInt,
 } from 'class-validator';
@@ -33,4 +34,7 @@ export class ObserverInput {
 
   @Field((type) => String, { nullable: true })
   notes?: string;
+
+  @Field(() => [Int], { nullable: true })
+  regions?: [number];
 }

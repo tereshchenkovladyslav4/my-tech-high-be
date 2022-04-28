@@ -9,6 +9,8 @@ import { UsersService } from './users.service';
 import { PersonsService } from './persons.service';
 import { EmailVerifierService } from './email-verifier.service';
 import { EmailsService } from './emails.service';
+import { UserRegionService } from './user-region.service';
+
 @Injectable()
 export class ObserversService {
   constructor(
@@ -18,6 +20,7 @@ export class ObserversService {
     private personsService: PersonsService,
     private emailVerifierService: EmailVerifierService,
     private emailsService: EmailsService,
+    private userRegionService: UserRegionService,
   ) {}
 
   generatePassword() {
@@ -45,7 +48,7 @@ export class ObserversService {
   }
 
   async create(observerInput: ObserverInput): Promise<Observer[]> {
-    const { student_ids, parent_id, first_name, last_name, email } =
+    const { student_ids, parent_id, first_name, last_name, email, regions } =
       observerInput;
     const hasUser = await this.usersService.findOneByEmail(email);
     if (hasUser) throw new ServiceUnavailableException('Email Already Exist!');
@@ -64,14 +67,21 @@ export class ObserversService {
       firstName: first_name,
       lastName: last_name,
       email: email,
-      level: 2,
+      level: 14,
       updateAt: new Date().toString(),
       password,
     });
 
     if (!user) throw new ServiceUnavailableException('User Not Created');
-
+    console.log('regions-------------------', regions);
     const { user_id } = user;
+    if(regions) {
+      const regionPayload = {
+        user_id: user_id,
+        region_id: regions,
+      };
+      await this.userRegionService.createUserRegion(regionPayload);
+    }
     const updatedPerson = await this.personsService.updateUserId({
       person_id,
       user_id,

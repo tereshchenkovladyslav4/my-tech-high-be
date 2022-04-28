@@ -29,34 +29,46 @@ import { StudentStatusService } from './services/student-status.service';
 import { StudentStatus } from './models/student-status.entity';
 import { StudentStatusHistoryService } from './services/student-status-history.service';
 import { StudentStatusHistory } from './models/student-status-history.entity';
+import { UserRegion } from './models/user-region.entity';
 const servicesImports = [
-    UsersService,
-    PersonsService,
-    StudentsService,
-    ParentsService,
-    StudentGradeLevelsService,
-    PhonesService,
-    SchoolYearsService,
-    ParentToDosService,
-    ApplicationsService,
-    PacketsService, 
-    AddressService,
-    EmailVerifiersService,
-    StudentStatusService,
-    StudentStatusHistoryService,
+  UsersService,
+  PersonsService,
+  StudentsService,
+  ParentsService,
+  StudentGradeLevelsService,
+  PhonesService,
+  SchoolYearsService,
+  ParentToDosService,
+  ApplicationsService,
+  PacketsService,
+  AddressService,
+  EmailVerifiersService,
+  StudentStatusService,
+  StudentStatusHistoryService,
 ];
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-        User, Person, Student, Parent, StudentGradeLevel, Phone, Address, SchoolYear, Application, Packet,EmailVerifier, StudentStatus, StudentStatusHistory
+      User,
+      Person,
+      Student,
+      Parent,
+      StudentGradeLevel,
+      Phone,
+      Address,
+      SchoolYear,
+      Application,
+      Packet,
+      EmailVerifier,
+      StudentStatus,
+      StudentStatusHistory,
+      UserRegion,
     ]),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule {
-
-}
+class RepoModule {}
 export default RepoModule;

@@ -273,4 +273,12 @@ export class PacketsResolver {
   async getpacketCountGroup(): Promise<ResponseDTO> {
     return this.packetsService.getCountGroup();
   }
+
+  @Query((returns) => ResponseDTO, { name: 'packetCountByRegionId' })
+  @UseGuards(new AuthGuard())
+  async getpacketCountByRegionId(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+  ): Promise<ResponseDTO> {
+    return this.packetsService.getpacketCountByRegionId(region_id);
+  }
 }

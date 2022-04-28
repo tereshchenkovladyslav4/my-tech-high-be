@@ -69,7 +69,7 @@ export class StudentsResolver {
   public async getStudentCurrentStatus(
     @TypeParent() student: Student,
   ): Promise<StudentCurrentStatus> {
-    return this.studentsService.getCurrentStatus(student.student_id);
+    return this.studentsService.getCurrentStatus(student);
   }
 
   @ResolveField((of) => [StudentStatus], { name: 'status', nullable: true })
