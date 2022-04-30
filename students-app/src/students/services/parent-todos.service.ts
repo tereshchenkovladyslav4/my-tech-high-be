@@ -88,7 +88,7 @@ export class ParentToDosService {
       .innerJoin(
         Packet,
         'packet',
-        "packet.student_id = `Student`.student_id AND ( packet.status <> 'Accepted' AND packet.status <> 'Submitted' ) AND packet.deleted = 0",
+        "packet.student_id = `Student`.student_id AND ( packet.status <> 'Accepted' AND packet.status <> 'Submitted' AND packet.status <> 'Resubmitted' AND packet.status <> 'Missing Info' ) AND packet.deleted = 0",
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .orderBy('application.application_id', 'DESC')
@@ -112,8 +112,8 @@ export class ParentToDosService {
 
     if (!parent) {
       return {
-        phrase: 'Submit Enrollment Packet',
-        button: 'Submit Now',
+        phrase: 'Resubmit Enrollment Packet',
+        button: 'Resubmit Now',
         icon: '',
         dashboard: 1, // yes
         homeroom: 1, // yes
@@ -135,7 +135,7 @@ export class ParentToDosService {
       .innerJoin(
         Packet,
         'packet',
-        "packet.student_id = `Student`.student_id AND packet.status = 'Submitted' AND packet.deleted = 0",
+        "packet.student_id = `Student`.student_id AND packet.status = 'Missing Info' AND packet.deleted = 0",
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .orderBy('application.application_id', 'DESC')

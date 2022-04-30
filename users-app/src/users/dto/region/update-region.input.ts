@@ -16,4 +16,22 @@ export class UpdateRegionInput {
 
   @Field(() => String, { nullable: true })
   state_logo?: string;
+
+  @Field(() => String, { nullable: true })
+  county_file_name?: string;
+
+  @Field(() => String, { nullable: true })
+  county_file_path?: string;
+
+  @Field(() => String, { nullable: true })
+  county_array?: string;
+
+  @Field(() => String, { nullable: true })
+  school_district_file_name?: string;
+
+  @Field(() => String, { nullable: true })
+  school_district_file_path?: string;
+
+  @Field(() => String, { nullable: true })
+  school_district_array?: string;
 }

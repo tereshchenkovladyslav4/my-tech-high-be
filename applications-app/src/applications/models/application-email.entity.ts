@@ -1,5 +1,12 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Application } from './application.entity';
 
 @ObjectType()
@@ -9,22 +16,32 @@ export class ApplicationEmail extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  application_email_id?: number
+  application_email_id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  application_id?: number
+  application_id?: number;
 
   @Column()
   @Field(() => String)
   subject: string;
 
   @Column()
+  @Field(() => String, { nullable: true })
+  body: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  from_email: string;
+
+  @Column()
   @Field(() => Date, { nullable: true })
-  created_at?: Date
+  created_at?: Date;
 
-  @ManyToOne(type => Application)
-  @JoinColumn({ name: 'application_id', referencedColumnName: 'application_id' })
-  application: Application
-
+  @ManyToOne((type) => Application)
+  @JoinColumn({
+    name: 'application_id',
+    referencedColumnName: 'application_id',
+  })
+  application: Application;
 }

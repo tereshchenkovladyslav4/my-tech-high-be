@@ -33,10 +33,55 @@ export class RegionService {
   }
 
   async updateRegion(updateRegionInput: UpdateRegionInput): Promise<any> {
+    if (updateRegionInput.county_array) {
+      const countyArray = JSON.parse(updateRegionInput.county_array);
+      let values = '';
+      for (let i = 0; i < countyArray.length; i++) {
+        if (i == 0)
+          values += `("${countyArray[i].county_name}", ${updateRegionInput.id})`;
+        else
+          values += `, ("${countyArray[i].county_name}", ${updateRegionInput.id})`;
+      }
+
+      if (values != '') {
+        await this.regionRepository.query(
+          `DELETE FROM infocenter.county WHERE Region_id = ${updateRegionInput.id}; `,
+        );
+        await this.regionRepository.query(
+          `INSERT INTO infocenter.county (county_name, Region_id) VALUES ${values} `,
+        );
+      }
+    }
+
+    if (updateRegionInput.school_district_array) {
+      const schoolDistrictArray = JSON.parse(
+        updateRegionInput.school_district_array,
+      );
+      let values = '';
+      for (let i = 0; i < schoolDistrictArray.length; i++) {
+        if (i == 0)
+          values += `("${schoolDistrictArray[i].school_district_name}", "${schoolDistrictArray[i].school_district_code}", ${updateRegionInput.id})`;
+        else
+          values += `, ("${schoolDistrictArray[i].school_district_name}", "${schoolDistrictArray[i].school_district_code}", ${updateRegionInput.id})`;
+      }
+
+      if (values != '') {
+        await this.regionRepository.query(
+          `DELETE FROM infocenter.school_district WHERE Region_id = ${updateRegionInput.id};`,
+        );
+        await this.regionRepository.query(
+          `INSERT INTO infocenter.school_district (school_district_name, school_district_code, Region_id) VALUES ${values}`,
+        );
+      }
+    }
     const data = {
       name: updateRegionInput.name,
       program: updateRegionInput.program,
       state_logo: updateRegionInput.state_logo,
+      county_file_name: updateRegionInput.county_file_name,
+      county_file_path: updateRegionInput.county_file_path,
+      school_district_file_name: updateRegionInput.school_district_file_name,
+      school_district_file_path: updateRegionInput.school_district_file_path,
     };
     const res = await this.regionRepository.update(updateRegionInput.id, data);
     if (res.affected > 0) {
@@ -53,5 +98,25 @@ export class RegionService {
     } else {
       return 'Region with this ID does not exist';
     }
+  }
+
+  async removeCountyInfoByRegionId(region_id: number): Promise<String> {
+    await this.regionRepository.query(
+      `DELETE FROM infocenter.county WHERE Region_id = ${region_id};`,
+    );
+    await this.regionRepository.query(
+      `UPDATE infocenter.region SET county_file_name = '', county_file_path = '' WHERE id = ${region_id};`,
+    );
+    return 'CountyInfo Removed';
+  }
+
+  async removeSchoolDistrictInfoByRegionId(region_id: number): Promise<String> {
+    await this.regionRepository.query(
+      `DELETE FROM infocenter.school_district WHERE Region_id = ${region_id};`,
+    );
+    await this.regionRepository.query(
+      `UPDATE infocenter.region SET school_district_file_name = '', school_district_file_path = '' WHERE id = ${region_id};`,
+    );
+    return 'School District Info Removed';
   }
 }

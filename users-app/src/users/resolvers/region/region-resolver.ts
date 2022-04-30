@@ -64,4 +64,25 @@ export class RegionResolver {
     const response = await this.regionService.removeRegionById(id);
     return response;
   }
+
+  @Mutation((of) => String, { name: 'removeCountyInfoByRegionId' })
+  @UseGuards(new AuthGuard())
+  public async removeCountyInfoByRegionId(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+  ): Promise<String> {
+    const response = await this.regionService.removeCountyInfoByRegionId(
+      region_id,
+    );
+    return response;
+  }
+
+  @Mutation((of) => String, { name: 'removeSchoolDistrictInfoByRegionId' })
+  @UseGuards(new AuthGuard())
+  public async removeSchoolDistrictInfoByRegionId(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+  ): Promise<String> {
+    const response =
+      await this.regionService.removeSchoolDistrictInfoByRegionId(region_id);
+    return response;
+  }
 }

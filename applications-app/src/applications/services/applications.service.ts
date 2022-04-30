@@ -185,7 +185,10 @@ export class ApplicationsService {
         if (_sortBy[0] === 'verified') {
           qb.orderBy('email_verifier.verified', 'DESC');
         } else if (_sortBy[0] === 'grade') {
-          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+          qb.addSelect(
+            'ABS(grade_levels.grade_level + 0)',
+            'student_grade_level',
+          );
           qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy('application_emails.created_at', 'DESC');
@@ -209,7 +212,10 @@ export class ApplicationsService {
         if (_sortBy[0] === 'verified') {
           qb.orderBy('email_verifier.verified', 'ASC');
         } else if (_sortBy[0] === 'grade') {
-          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+          qb.addSelect(
+            'ABS(grade_levels.grade_level + 0)',
+            'student_grade_level',
+          );
           qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy('application_emails.created_at', 'ASC');
@@ -362,6 +368,8 @@ export class ApplicationsService {
         return await this.applicationEmailsService.create({
           application_id: id,
           subject: subject,
+          body: body,
+          from_email: emailTemplate.from,
         });
       }),
     );

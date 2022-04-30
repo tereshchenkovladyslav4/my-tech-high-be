@@ -33,6 +33,7 @@ export class AppController {
     { 'text/plain': 'txt' },
     { 'application/x-shockwave-flash': 'swf' },
     { 'video/x-flv': 'flv' },
+    { 'text/csv': 'csv' },
 
     // images
     { 'image/png': 'png' },
@@ -67,6 +68,10 @@ export class AppController {
     // open office
     { 'application/vnd.oasis.opendocument.text': 'odt' },
     { 'application/vnd.oasis.opendocument.spreadsheet': 'ods' },
+    {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        'xlsx',
+    },
   ];
 
   @Get()
@@ -100,9 +105,11 @@ export class AppController {
       const { body } = request;
       if (!body.region)
         throw new HttpException('Region is requied!', HttpStatus.CONFLICT);
-
-      const currentSchoolYear = await this.getCurrentSchoolYear(body.year);
-      console.log('CurrentSchoolYear: ', currentSchoolYear);
+      let currentSchoolYear = 0;
+      if (body.year) {
+        currentSchoolYear = await this.getCurrentSchoolYear(body.year);
+        console.log('CurrentSchoolYear: ', currentSchoolYear);
+      }
 
       const { buffer, mimetype, originalname, size } = file;
 
@@ -118,15 +125,27 @@ export class AppController {
           'Filetype ' + mimetype + ' is not allowed!',
           HttpStatus.CONFLICT,
         );
-
-      const file_name =
-        body.region +
-        '/' +
-        currentSchoolYear +
-        '/' +
-        this.encryptFileName(originalname) +
-        '.' +
-        extension;
+      let file_name = '';
+      if (body.directory) {
+        file_name =
+          body.region +
+          '/' +
+          body.directory +
+          '/' +
+          this.encryptFileName(originalname) +
+          '.' +
+          extension;
+      } else {
+        file_name =
+          body.region +
+          '/' +
+          currentSchoolYear +
+          '/' +
+          this.encryptFileName(originalname) +
+          '.' +
+          extension;
+      }
+      console.log(file_name, 'file_Name');
       const upload = await this.s3Service.s3_upload(
         buffer,
         null,
@@ -136,7 +155,11 @@ export class AppController {
 
       const userFile = await this.fileService.create({
         name: originalname,
-        type: mimetype,
+        type:
+          mimetype ==
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ? 'text/csv'
+            : mimetype,
         item1: upload.Key,
         item2: upload.ServerSideEncryption,
         item3: upload.ETag,
