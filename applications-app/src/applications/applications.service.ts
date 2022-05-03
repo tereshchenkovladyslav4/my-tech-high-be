@@ -25,6 +25,8 @@ import { SESService } from './services/ses.service';
 import { EmailsService } from './services/emails.service';
 import { EmailVerifierService } from './services/email-verifier.service';
 import { UserRegionService } from './services/user-region.service';
+import { EmailTemplatesService } from '../applications/services/email-templates.service';
+
 @Injectable()
 export class ApplicationsService {
   constructor(
@@ -39,6 +41,7 @@ export class ApplicationsService {
     private emailsService: EmailsService,
     private emailVerifierService: EmailVerifierService,
     private userRegionService: UserRegionService,
+    private emailTemplateService: EmailTemplatesService,
   ) {}
 
   protected user: User;
@@ -94,6 +97,19 @@ export class ApplicationsService {
       recipients: newApplication.parent.email,
     });
 
+    const emailTemplate = await this.emailTemplateService.findByTemplate(
+      'Application Received',
+    );
+    if (emailTemplate) {
+      await this.emailsService.sendEmail({
+        email: newApplication.parent.email,
+        subject: emailTemplate.subject,
+        content: emailTemplate.body,
+        bcc: emailTemplate.bcc,
+        from: emailTemplate.from,
+      });
+    }
+
     return {
       parent,
       students,
@@ -107,14 +123,11 @@ export class ApplicationsService {
     console.log('User: ', user);
 
     const parent = await createQueryBuilder(Parent)
-      .innerJoin(Person, 'person', 'person.person_id = `Parent`.person_id')
-      .innerJoin(User, 'user', 'user.user_id = person.user_id')
+      .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
+      .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
       .where('user.user_id = :userId', { userId: user.user_id })
       .printSql()
       .getOne();
-
-    console.log('Parent: ', parent);
-
     const studentApplications = (await newApplication).students;
     let students = [];
     students = await studentApplications.map(
@@ -125,6 +138,20 @@ export class ApplicationsService {
           studentApplication,
         ),
     );
+
+    const person = await this.personsService.findOneById(parent.person_id)
+    const emailTemplate = await this.emailTemplateService.findByTemplate(
+      'Application Received',
+    );
+    if (emailTemplate) {
+      await this.emailsService.sendEmail({
+        email: person?.email,
+        subject: emailTemplate.subject,
+        content: emailTemplate.body,
+        bcc: emailTemplate.bcc,
+        from: emailTemplate.from,
+      });
+    }
 
     return {
       parent,

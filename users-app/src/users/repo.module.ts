@@ -19,7 +19,9 @@ import { Person } from '../models/person.entity';
 import { Phone } from '../models/phone.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { EmailTemplate } from 'src/models/email-template.entity';
+import { EmailReminder } from 'src/models/email-reminder.entity';
 import { EmailTemplatesService } from './services/email-templates/email-templates.service';
+import { EmailReminderService } from './services/email-templates/email-reminder.service';
 import { ParentUser } from '../models/parent.entity';
 import { EmailCategoryService } from './services/email-templates/email-category.service';
 import { EmailTemplateCategory } from 'src/models/email-template-category.entity';
@@ -38,6 +40,7 @@ const RepoServices = [
   AuthService,
   ParentUserService,
   EmailTemplatesService,
+  EmailReminderService,
   EmailCategoryService,
   EmailsService,
   SESService,
@@ -64,6 +67,7 @@ const RepoServices = [
       UserAccess,
       ParentUser,
       EmailTemplate,
+      EmailReminder,
       ParentUser,
       EmailTemplateCategory,
       EmailVerifier,

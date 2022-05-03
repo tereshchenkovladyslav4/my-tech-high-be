@@ -12,17 +12,22 @@ export class PacketsArgs {
   @Max(50)
   take = 25;
 
+  @Field((type) => Int)
+  @Min(1)
+  @Max(100)
+  region_id = 0;
+
   @Field((type) => String)
   @Min(1)
   @Max(50)
   sort = 'status|ASC';
 
-  @Field(type => String)
+  @Field((type) => String)
   @Min(1)
   @Max(50)
   search = '';
 
-  @Field(type => [String])
+  @Field((type) => [String])
   filters: string[] = ['Submitted', 'Resubmitted'];
 }
 

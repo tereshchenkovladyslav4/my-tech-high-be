@@ -14,4 +14,8 @@ export class StudentGradeLevelsService {
     async createOrUpdate( gradeLevel: SaveStudenGradeLeveltInput ): Promise<StudentGradeLevel> {
         return this.studentGradeLevelsRepository.save(gradeLevel);
     }
+
+    forStudents(student_id:number): Promise<StudentGradeLevel[]> {
+      return this.studentGradeLevelsRepository.find({ where: { student_id: student_id } });
+    }
 }

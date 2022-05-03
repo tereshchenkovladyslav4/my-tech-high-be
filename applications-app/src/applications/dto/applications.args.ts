@@ -1,50 +1,53 @@
-import { ArgsType, Field, Int ,InputType} from '@nestjs/graphql';
+import { ArgsType, Field, Int, InputType } from '@nestjs/graphql';
 import { Max, Min, IsOptional } from 'class-validator';
 
 @ArgsType()
 export class ApplicationsArgs {
-  @Field(type => Int)
+  @Field((type) => Int)
   @Min(0)
   skip = 0;
 
-  @Field(type => Int)
+  @Field((type) => Int)
   @Min(1)
   @Max(50)
   take = 25;
 
-  @Field(type => String)
+  @Field((type) => String)
   @Min(1)
   @Max(50)
   sort = 'status|ASC';
 
-  @Field(type => ApplicationFilters)
+  @Field((type) => Int)
+  @Min(1)
+  @Max(100)
+  region_id = 0;
+
+  @Field((type) => ApplicationFilters)
   filter = null;
 
-  @Field(type => String)
+  @Field((type) => String)
   @Min(1)
   @Max(50)
   search = '';
-
 }
 
 @InputType('ApplicationFilters')
 export class ApplicationFilters {
-  @Field(type => [String])
-  grades = []
+  @Field((type) => [String])
+  grades = [];
 
-  @Field(type => [String])
-  schoolYear = []
+  @Field((type) => [String])
+  schoolYear = [];
 
-  @Field(type => [String])
-  specialEd = []
+  @Field((type) => [String])
+  specialEd = [];
 
-  @Field(type => [String])
-  status = []
+  @Field((type) => [String])
+  status = [];
 
-  @Field(type => [String])
-  accountStatus = []
+  @Field((type) => [String])
+  accountStatus = [];
 
-  @Field(type => [String])
-  visibility = []
+  @Field((type) => [String])
+  visibility = [];
 }
-

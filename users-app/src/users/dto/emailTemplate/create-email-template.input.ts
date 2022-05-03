@@ -59,6 +59,6 @@ export class EmailTemplateReminder {
   @Field(() => String, { nullable: true })
   body?: string;
 
-  @Field(() => String, { nullable: true })
-  deadline?: string;
+  @Field(() => Int, { nullable: true })
+  deadline?: number;
 }

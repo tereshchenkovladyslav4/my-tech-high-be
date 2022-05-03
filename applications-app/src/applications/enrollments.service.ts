@@ -37,6 +37,7 @@ import { EnrollmentPacketSubmissionInput } from './dto/enrollment-packet-submiss
 import { PersonAddress } from './models/person-address.entity';
 import { EmailTemplatesService } from './services/email-templates.service';
 import { EmailsService } from './services/emails.service';
+import { EmailReminderService } from './services/email-reminder.service'
 
 const common_1 = require('@nestjs/common');
 const templates = {
@@ -63,6 +64,7 @@ export class EnrollmentsService {
     private packetFilesService: PacketFilesService,
     private emailTemplateService: EmailTemplatesService,
     private sesEmailService: EmailsService,
+    private emailReminderService: EmailReminderService,
   ) {}
 
   async saveEnrollmentPacket(
@@ -530,21 +532,27 @@ export class EnrollmentsService {
       const emailTemplate = await this.emailTemplateService.findByTemplate(
         'Packet Reminders',
       );
-      const deadlineDate = new Date();
-      deadlineDate.setDate(deadlineDate.getDate() - 5);
-      if (emailTemplate) {
-        const emails = await this.packetsService.findReminders(deadlineDate);
-        await Promise.all(
-          emails.map(async (email) => {
-            await this.sesEmailService.sendEmail({
-              email: email,
-              subject: emailTemplate.subject,
-              content: emailTemplate.body,
-              bcc: emailTemplate.bcc,
-              from: emailTemplate.from,
-            });
-          }),
-        );
+      const emailReminder = await this.emailReminderService.findByTemplateId(emailTemplate.id);
+      if(emailReminder.length > 0) {
+        emailReminder.forEach(async remind => {
+          const deadline = remind.deadline;
+          const deadlineDate = new Date();
+          deadlineDate.setDate(deadlineDate.getDate() + deadline);
+          const emails = await this.packetsService.findReminders(deadlineDate);
+          if (emailTemplate) {
+            await Promise.all(
+              emails.map(async (email) => {
+                await this.sesEmailService.sendEmail({
+                  email: email,
+                  subject: remind.subject || emailTemplate.subject,
+                  content: remind.body || emailTemplate.body,
+                  bcc: emailTemplate.bcc,
+                  from: emailTemplate.from,
+                });
+              }),
+            );
+          }
+        })
       }
       return 'Successfully run schedule reminders.';
     } catch (error) {

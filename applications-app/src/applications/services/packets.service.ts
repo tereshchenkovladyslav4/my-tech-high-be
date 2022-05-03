@@ -14,19 +14,22 @@ import { ApplicationsService } from './applications.service';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
 import * as Moment from 'moment';
+import { SchoolYearService } from './schoolyear.service';
+
 @Injectable()
 export class PacketsService {
   constructor(
     @InjectRepository(Packet)
     private readonly packetsRepository: Repository<Packet>,
     private sesEmailService: EmailsService,
+    private schoolYearService: SchoolYearService,
     @Inject(forwardRef(() => ApplicationsService))
     private applicationService: ApplicationsService,
     private emailTemplateService: EmailTemplatesService,
   ) {}
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
-    const { skip, take, sort, filters, search } = packetsArgs;
+    const { skip, take, sort, filters, search, region_id } = packetsArgs;
     const _sortBy = sort.split('|');
 
     if (filters.length === 0) {
@@ -39,11 +42,14 @@ export class PacketsService {
     let qb = this.packetsRepository
       .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.student', 'student')
+      .leftJoinAndSelect('student.applications', 'applications')
+      .leftJoinAndSelect('applications.school_year', 'school_year')
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('student.grade_levels', 'grade')
-      .where('packet.status IN (:status)', { status: filters });
+      .where('packet.status IN (:status)', { status: filters })
+      .andWhere(`school_year.RegionId = ${region_id}`);
 
     if (filters.includes('Age Issue')) {
       qb = qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
@@ -189,11 +195,32 @@ export class PacketsService {
     const [results, total] = await this.packetsRepository
       .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.student', 'student')
+      .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
-      .leftJoinAndSelect('parent.person', 'person')
+      .leftJoinAndSelect('parent.person', 'p_person')
+      .leftJoinAndSelect('student.grade_levels', 'grade')
       .whereInIds(application_ids)
       .getManyAndCount();
-    const emails = results.map((item) => item.student.parent.person.email);
+
+      const setEmailBodyInfo = (student, school_year) => {
+        const yearbegin = new Date(school_year.date_begin).getFullYear().toString()
+        const yearend = new Date(school_year.date_end).getFullYear().toString()
+    
+        return body.toString()
+          .replace(/\[STUDENT\]/g, student.person.first_name)
+          .replace(/\[PARENT\]/g, student.parent.person.first_name)
+          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+      }
+
+    const emailBody = []
+     results.forEach(async (item) => {
+      const school_year = await this.schoolYearService.findOneById(results[0].student.grade_levels[0].school_year_id)
+      const temp = {
+          email: item.student.parent.person.email,
+          body: setEmailBodyInfo(item.student, school_year)
+        }
+        emailBody.push(temp)
+    })
     const emailTemplate = await this.emailTemplateService.findByTemplate(
       'Enrollment Packet Page',
     );
@@ -204,11 +231,11 @@ export class PacketsService {
         body,
       );
     }
-    emails.forEach(async (email) => {
+    emailBody.forEach(async (emailData) => {
       const result = await this.sesEmailService.sendEmail({
-        email,
+        email: emailData.email,
         subject,
-        content: body,
+        content: emailData.body,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
       });

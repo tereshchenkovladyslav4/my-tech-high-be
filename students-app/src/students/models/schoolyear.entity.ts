@@ -4,7 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id ,date_begin, date_end, date_reg_open, date_reg_close")',
+  '@key(fields: "school_year_id ,date_begin, date_end, date_reg_open, date_reg_close, RegionId")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -107,5 +107,7 @@ export class SchoolYear extends BaseEntity {
   midyear_application?: number;
 
   @Column('int', { name: 'RegionId', nullable: true })
+  @Field((type) => Int, { nullable: true })
+  @Directive('@external')
   RegionId?: number;
 }

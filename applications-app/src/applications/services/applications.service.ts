@@ -13,11 +13,13 @@ import { EmailsService } from './emails.service';
 import { ApplicationEmailsService } from './application-emails.service';
 import { ApplicationEmail } from '../models/application-email.entity';
 import { SchoolYearService } from './schoolyear.service';
+import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { SchoolYear } from '../models/schoolyear.entity';
 import { UpdateApplicationInput } from '../dto/update-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
 import { StudentsService } from './students.service';
 import { ResponseDTO } from '../dto/response.dto';
+import * as Moment from 'moment';
 @Injectable()
 export class ApplicationsService {
   constructor(
@@ -27,6 +29,7 @@ export class ApplicationsService {
     private sesEmailService: EmailsService,
     private applicationEmailsService: ApplicationEmailsService,
     private schoolYearService: SchoolYearService,
+    private studentGradeLevelsService: StudentGradeLevelsService,
     private emailTemplateService: EmailTemplatesService,
     private studentService: StudentsService,
   ) {}
@@ -67,7 +70,7 @@ export class ApplicationsService {
   async findAll(
     applicationsArgs: ApplicationsArgs,
   ): Promise<Pagination<Application>> {
-    const { skip, take, sort, filter, search } = applicationsArgs;
+    const { skip, take, sort, filter, search, region_id } = applicationsArgs;
     const _sortBy = sort.split('|');
     const qb = this.applicationsRepository
       .createQueryBuilder('application')
@@ -79,7 +82,8 @@ export class ApplicationsService {
       .leftJoinAndSelect('p_person.email_verifier', 'email_verifier')
       .leftJoinAndSelect('application.school_year', 'school_year')
       .leftJoinAndSelect('application.application_emails', 'application_emails')
-      .where('application.status = "Submitted"');
+      .where('application.status = "Submitted"')
+      .andWhere(`school_year.RegionId = ${region_id}`);
     if (
       filter &&
       filter.grades &&
@@ -293,12 +297,12 @@ export class ApplicationsService {
           student_id,
         );
         const packet_id = existingPacket && existingPacket.packet_id;
-
+        const deadline = new Date()
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
           student_id,
           status: 'Not Started',
-          deadline: new Date(),
+          deadline: deadline,
           date_accepted: null,
           date_submitted: null,
           date_last_submitted: null,
@@ -306,11 +310,27 @@ export class ApplicationsService {
         });
 
         const student = await this.studentService.findOneById(student_id);
+        const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id)
         if (emailTemplate) {
+          const setEmailBodyInfo = (student, school_year) => {
+            const yearbegin = new Date(school_year.date_begin).getFullYear().toString()
+            const yearend = new Date(school_year.date_end).getFullYear().toString()
+        
+            return emailTemplate.body.toString()
+              .replace(/\[STUDENT\]/g, student.person.first_name)
+              .replace(/\[PARENT\]/g, student.parent.person.first_name)
+              .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+              .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+              .replace(/\[DEADLINE\]/g, `${Moment(deadline).format('MM/DD/yy')}`)
+          }
+
+          const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id)
+          const body = setEmailBodyInfo(student, school_year)
+
           await this.sesEmailService.sendEmail({
             email: student.parent?.person?.email,
             subject: emailTemplate.subject,
-            content: emailTemplate.body,
+            content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
           });
@@ -339,6 +359,7 @@ export class ApplicationsService {
     const [results, total] = await this.applicationsRepository
       .createQueryBuilder('application')
       .leftJoinAndSelect('application.student', 'student')
+      .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'person')
       .whereInIds(application_ids)
@@ -353,12 +374,24 @@ export class ApplicationsService {
         body,
       );
     }
-    const emails = results.map((item) => item.student.parent.person.email);
-    emails.forEach(async (email) => {
+    results.forEach(async (item) => {
+      const setEmailBodyInfo = (student, school_year) => {
+        const yearbegin = new Date(school_year.date_begin).getFullYear().toString()
+        const yearend = new Date(school_year.date_end).getFullYear().toString()
+    
+        return emailTemplate.body.toString()
+          .replace(/\[STUDENT\]/g, student.person?.first_name)
+          .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
+          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+          .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+      }
+      const gradeLevels = await this.studentGradeLevelsService.forStudents(item.student.student_id)
+      const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id)
+      const emailBody = setEmailBodyInfo(item.student, school_year)
       const result = await this.sesEmailService.sendEmail({
-        email,
+        email: item.student.parent.person.email,
         subject,
-        content: body,
+        content: emailBody,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
       });

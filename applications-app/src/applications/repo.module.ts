@@ -60,6 +60,8 @@ import { EnrollmentQuestionGroup } from './models/enrollment-question-group.enti
 import { EnrollmentQuestions } from './models/enrollment-questions.entity';
 import { EnrollmentQuestionGroupService } from './services/enrollment-question-group.service';
 import { EnrollmentQuestionsService } from './services/enrollment-questions.service';
+import { EmailReminderService } from './services/email-reminder.service';
+import { EmailReminder } from './models/email-reminder.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -89,6 +91,7 @@ const servicesImports = [
   SettingsService,
   UserRegionService,
   EmailTemplatesService,
+  EmailReminderService,
   ApplicationQuestionsService,
   EnrollmentQuestionTabService,
   EnrollmentQuestionGroupService,
@@ -127,6 +130,7 @@ const servicesImports = [
       EnrollmentQuestionTab,
       EnrollmentQuestionGroup,
       EnrollmentQuestions,
+      EmailReminder,
     ]),
   ],
   providers: [...servicesImports],
