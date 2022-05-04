@@ -52,65 +52,112 @@ export class UsersService {
   async findAllPersonInfoBySearchItem(
     getPersonInfoArgs: GetPersonInfoArgs,
   ): Promise<PersonInfo[]> {
-    console.log('findAllPersonInfoBySearchItem service start');
     try {
       const queryRunner = await getConnection().createQueryRunner();
       const response = (await queryRunner.query(
         `SELECT
-            t1.id,
-            t1.parentId,
-            t1.name,
-            t1.role,
-            t1.email,
-            t1.phoneNumber
-          FROM (
-            SELECT
-              student.student_id AS id,
-              student.parent_id AS parentId,
-              CONCAT(person.first_name, ' ', person.last_name) AS name,
-              person.email AS email,
-              phone.number AS phoneNumber,
-              'Student' AS role
-            FROM 
+          t1.id,
+          t1.parentId,
+          t1.name,
+          t1.role,
+          t1.email,
+          t1.phoneNumber
+        FROM (
+          SELECT
+            student.student_id AS id,
+            student.parent_id AS parentId,
+            CONCAT(person.last_name, ', ', person.first_name) AS name,
+            person.email AS email,
+            phone.number AS phoneNumber,
+            'Student' AS role
+          FROM 
+          (
+            SELECT * FROM infocenter.mth_student
+          ) AS student
+          LEFT JOIN infocenter.mth_person AS person ON (person.person_id = student.person_id)
+          LEFT JOIN infocenter.user_region AS region ON (region.user_id = person.user_id)
+          LEFT JOIN infocenter.mth_phone AS phone ON (phone.person_id = person.person_id)
+          WHERE
+            region.region_id IS NOT NULL AND 
+            region.region_id = ${getPersonInfoArgs.region_id} AND (
+              CONCAT(person.last_name, ', ', person.first_name) LIKE '%${getPersonInfoArgs.search}%' OR
+              person.email LIKE '%${getPersonInfoArgs.search}%' OR
+              phone.number LIKE '%${getPersonInfoArgs.search}%'
+            )
+          UNION
+          SELECT
+            parent.parent_id AS id,
+            '' AS parentId,
+            CONCAT(person.last_name, ', ', person.first_name) AS name,
+            person.email AS email,
+            phone.number AS phoneNumber,
+            'Parent' AS role
+          FROM 
+          (
+            SELECT * FROM infocenter.mth_parent
+          ) AS parent
+          LEFT JOIN infocenter.mth_person AS person ON (person.person_id = parent.person_id) 
+          LEFT JOIN infocenter.user_region AS region ON (region.user_id = person.user_id)
+          LEFT JOIN infocenter.mth_phone AS phone ON (phone.person_id = person.person_id)
+          WHERE
+            region.region_id IS NOT NULL AND 
+            region.region_id = ${getPersonInfoArgs.region_id} AND (
+              CONCAT(person.last_name, ', ', person.first_name) LIKE '%${getPersonInfoArgs.search}%' OR
+              person.email LIKE '%${getPersonInfoArgs.search}%' OR
+              phone.number LIKE '%${getPersonInfoArgs.search}%'
+            )
+          UNION
+          SELECT
+            student.student_id AS id,
+            parent.parent_id AS parentId,
+            CONCAT(person.last_name, ', ', person.first_name) AS name,
+            person.email AS email,
+            phone.number AS phoneNumber,
+            'Student' AS role
+          FROM
+          (
+            SELECT * FROM infocenter.mth_application
+          ) AS applications
+          LEFT JOIN infocenter.mth_student student ON (student.student_id = applications.student_id)
+          LEFT JOIN infocenter.mth_parent parent ON (parent.parent_id = student.parent_id)
+          LEFT JOIN infocenter.mth_person person ON (person.person_id = student.person_id)
+          LEFT JOIN infocenter.mth_phone phone ON (phone.person_id = person.person_id)
+          LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = applications.school_year_id)
+          WHERE
+            schoolYear.RegionId = ${getPersonInfoArgs.region_id} AND
             (
-              SELECT * FROM infocenter.mth_student
-            ) AS student
-            LEFT JOIN infocenter.mth_person AS person ON (person.person_id = student.person_id)
-            LEFT JOIN infocenter.user_region AS region ON (region.user_id = person.user_id)
-            LEFT JOIN infocenter.mth_phone AS phone ON (phone.person_id = person.person_id)
-            WHERE
-              region.region_id IS NOT NULL AND 
-              region.region_id = ${getPersonInfoArgs.region_id} AND (
-                CONCAT(person.first_name, ' ', person.last_name) LIKE '%${getPersonInfoArgs.search}%' OR
-                person.email LIKE '%${getPersonInfoArgs.search}%' OR
-                phone.number LIKE '%${getPersonInfoArgs.search}%'
-              )
-            UNION
-            SELECT
-              parent.parent_id AS id,
-              '' AS parentId,
-              CONCAT(person.first_name, ' ', person.last_name) AS name,
-              person.email AS email,
-              phone.number AS phoneNumber,
-              'Parent' AS role
-            FROM 
+              CONCAT(person.last_name, ', ', person.first_name) LIKE '%${getPersonInfoArgs.search}%' OR
+              person.email LIKE '%${getPersonInfoArgs.search}%' OR
+              phone.number LIKE '%${getPersonInfoArgs.search}%'
+            )
+          UNION
+          SELECT
+            parent.parent_id AS id,
+            '' AS parentId,
+            CONCAT(person.last_name, ', ', person.first_name) AS name,
+            person.email AS email,
+            phone.number AS phoneNumber,
+            'Parent' AS role
+          FROM
+          (
+            SELECT * FROM infocenter.mth_application
+          ) AS applications
+          LEFT JOIN infocenter.mth_student student ON (student.student_id = applications.student_id)
+          LEFT JOIN infocenter.mth_parent parent ON (parent.parent_id = student.parent_id)
+          LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
+          LEFT JOIN infocenter.mth_phone phone ON (phone.person_id = person.person_id)
+          LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = applications.school_year_id)
+          WHERE
+            schoolYear.RegionId = ${getPersonInfoArgs.region_id} AND
             (
-              SELECT * FROM infocenter.mth_parent
-            ) AS parent
-            LEFT JOIN infocenter.mth_person AS person ON (person.person_id = parent.person_id) 
-            LEFT JOIN infocenter.user_region AS region ON (region.user_id = person.user_id)
-            LEFT JOIN infocenter.mth_phone AS phone ON (phone.person_id = person.person_id)
-            WHERE
-              region.region_id IS NOT NULL AND 
-              region.region_id = ${getPersonInfoArgs.region_id} AND (
-                CONCAT(person.first_name, ' ', person.last_name) LIKE '%${getPersonInfoArgs.search}%' OR
-                person.email LIKE '%${getPersonInfoArgs.search}%' OR
-                phone.number LIKE '%${getPersonInfoArgs.search}%'
-              )
-          ) AS t1
-          ORDER BY t1.name     
-          limit 0, 10  
-        `,
+              CONCAT(person.last_name, ', ', person.first_name) LIKE '%${getPersonInfoArgs.search}%' OR
+              person.email LIKE '%${getPersonInfoArgs.search}%' OR
+              phone.number LIKE '%${getPersonInfoArgs.search}%'
+            )
+        ) AS t1
+        ORDER BY t1.name     
+        limit 0, 10 
+      `,
       )) as PersonInfo[];
       await queryRunner.release();
       return response;
@@ -275,11 +322,30 @@ export class UsersService {
     user: User,
     updateProfileInput: UpdateProfileInput,
   ): Promise<User> {
+    const anotherperson = await createQueryBuilder(Person)
+      .where('email = :email AND user_id != :userId', {email: updateProfileInput.email, userId: user.user_id})
+      .getOne();
+    if(anotherperson) {
+      throw new BadRequestException(
+        'Email is already in use. Please choose another one.',
+      );
+    }
+
     const person = await createQueryBuilder(Person)
       .innerJoin(User, 'user', 'user.user_id = `Person`.user_id')
       .where('user.user_id = :userId', { userId: user.user_id })
       .printSql()
       .getOne();
+
+    //  Update core user
+    await getConnection()
+      .createQueryBuilder()
+      .update(User)
+      .set({
+        email: updateProfileInput.email
+      })
+      .where('user_id = :id', { id: user.user_id })
+      .execute();
 
     // Update Person Data
     await getConnection()
@@ -370,21 +436,20 @@ export class UsersService {
     return user;
   }
 
-  async updateAccount(user: User, updateAccountInput: UpdateAccountInput) {
-    const { password, confirm_password, current_password } = updateAccountInput;
-
-    if (!user.password.match(this.saltPassword(current_password)))
-      throw new BadRequestException('Current password is not correct.');
-
+  async updateAccount(
+    user: User,
+    updateAccountInput: UpdateAccountInput,
+  ): Promise<User> {
+    const { oldpassword, password } = updateAccountInput;
     let pattern = new RegExp('^(?=(.*[a-zA-Z]){1,})(?=(.*[0-9]){2,}).{8,}$'); //Regex: At least 8 characters with at least 2 numericals
     if (!pattern.test(password))
       throw new BadRequestException(
         'At least 8 characters with at least 2 numericals.',
       );
 
-    if (!password.match(confirm_password))
+    if (user.level == 1 && !user.password.match(this.saltPassword(oldpassword)))
       throw new BadRequestException(
-        'The password and confirmation password do not match.',
+        'Please enter the correct password.',
       );
 
     if (user.password.match(this.saltPassword(password)))

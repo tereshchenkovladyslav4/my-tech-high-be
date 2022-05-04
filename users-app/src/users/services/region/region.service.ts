@@ -107,7 +107,21 @@ export class RegionService {
     await this.regionRepository.query(
       `UPDATE infocenter.region SET county_file_name = '', county_file_path = '' WHERE id = ${region_id};`,
     );
-    return 'CountyInfo Removed';
+    let regionName = '';
+    let fileId = '';
+    const getRegionNameResponse = await this.regionRepository.query(
+      `SELECT name FROM infocenter.region WHERE id = ${region_id}`,
+    );
+    getRegionNameResponse.map((item) => {
+      regionName = item.name;
+    });
+    const getFileIdResponse = await this.regionRepository.query(
+      `SELECT MAX(file_id) AS fileId FROM infocenter.mth_file WHERE item1 LIKE '%${regionName}/county%'`,
+    );
+    getFileIdResponse.map((item) => {
+      fileId = item.fileId;
+    });
+    return fileId;
   }
 
   async removeSchoolDistrictInfoByRegionId(region_id: number): Promise<String> {
@@ -117,6 +131,20 @@ export class RegionService {
     await this.regionRepository.query(
       `UPDATE infocenter.region SET school_district_file_name = '', school_district_file_path = '' WHERE id = ${region_id};`,
     );
-    return 'School District Info Removed';
+    let regionName = '';
+    let fileId = '';
+    const getRegionNameResponse = await this.regionRepository.query(
+      `SELECT name FROM infocenter.region WHERE id = ${region_id}`,
+    );
+    getRegionNameResponse.map((item) => {
+      regionName = item.name;
+    });
+    const getFileIdResponse = await this.regionRepository.query(
+      `SELECT MAX(file_id) AS fileId FROM infocenter.mth_file WHERE item1 LIKE '%${regionName}/schoolDistrict/%'`,
+    );
+    getFileIdResponse.map((item) => {
+      fileId = item.fileId;
+    });
+    return fileId;
   }
 }

@@ -4,7 +4,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   BaseEntity,
-  UpdateDateColumn
+  UpdateDateColumn,
+  CreateDateColumn
 } from 'typeorm'
 
 @ObjectType()
@@ -53,7 +54,9 @@ export class User extends BaseEntity {
   @Field(() => String, { nullable: true })
   status?: string
 
-  @Field(() => String, { nullable: true })
-  @Column()
-  updatedAt?: string
+  @CreateDateColumn()
+  created_at!: Date;
+
+  @UpdateDateColumn()
+  updated_at!: Date;
 }

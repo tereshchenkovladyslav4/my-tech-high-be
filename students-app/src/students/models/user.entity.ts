@@ -1,5 +1,5 @@
 import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, UpdateDateColumn } from 'typeorm';
 import { Student } from './student.entity';
 
 @ObjectType()
@@ -34,6 +34,6 @@ export class User extends BaseEntity {
   @Column()
   level?: number;
 
-  @Column()
-  updatedAt?: string;
+  @UpdateDateColumn()
+  updated_at!: Date;
 }

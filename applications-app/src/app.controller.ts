@@ -133,6 +133,8 @@ export class AppController {
           body.directory +
           '/' +
           this.encryptFileName(originalname) +
+          '/' +
+          originalname +
           '.' +
           extension;
       } else {

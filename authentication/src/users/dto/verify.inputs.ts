@@ -9,8 +9,4 @@ export class VerifyInput {
   @Field()
   @Length(6, 12)
   password?: string;
-
-  @Field()
-  @Length(6, 12)
-  confirm_password?: string;
 }

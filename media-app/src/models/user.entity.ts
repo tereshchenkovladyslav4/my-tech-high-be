@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'core_users' })
 export class User extends BaseEntity {
@@ -21,8 +21,8 @@ export class User extends BaseEntity {
   @Column()
   level?: number
 
-  @Column()
-  updatedAt?: string
+  @UpdateDateColumn()
+  updated_at!: Date;
 
   @Column()
   avatarUrl?: string

@@ -4,14 +4,9 @@ import { MinLength } from 'class-validator';
 @InputType()
 export class UpdateAccountInput {
   @Field()
+  oldpassword?: string;
+
+  @Field()
   @MinLength(8)
   password?: string;
-
-  @Field()
-  @MinLength(8)
-  confirm_password?: string;
-
-  @Field()
-  @MinLength(8)
-  current_password?: string;
 }

@@ -1,5 +1,11 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  In,
+} from 'typeorm';
 
 @ObjectType()
 @Directive('@key(fields: "file_id, item1")')
@@ -8,7 +14,7 @@ export class File extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  file_id?: number
+  file_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
@@ -18,7 +24,7 @@ export class File extends BaseEntity {
   @Field(() => String, { nullable: true })
   type?: string;
 
-  @Column()
+  @Column('varchar', { length: 1000 })
   @Field(() => String, { nullable: true })
   item1?: string;
 

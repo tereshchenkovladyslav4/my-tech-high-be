@@ -6,6 +6,8 @@ import {
   BaseEntity,
   OneToMany,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ApplicationUserRegion } from './user-region.entity';
 @ObjectType()
@@ -34,8 +36,11 @@ export class User extends BaseEntity {
   @Column()
   level?: number;
 
-  @Column()
-  updatedAt?: string;
+  @CreateDateColumn()
+  created_at!: Date;
+
+  @UpdateDateColumn()
+  updated_at!: Date;
 
   @OneToMany(() => ApplicationUserRegion, (userRegion) => userRegion.user)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
