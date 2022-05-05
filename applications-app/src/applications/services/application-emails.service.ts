@@ -11,7 +11,15 @@ export class ApplicationEmailsService {
   ) { }
 
   async findByApplication(application_id: number): Promise<ApplicationEmail[]> {
-    return this.applicationEmailsRepository.find({ where: { application_id: application_id }, order: { created_at: 'DESC' } });
+    return this.applicationEmailsRepository.find({ where: { application_id: application_id }, order: { created_at: 'ASC' } });
+  }
+
+  async findByOrder(): Promise<string> {
+    return this.applicationEmailsRepository.createQueryBuilder('applicationEmail')
+    .select()
+    .orderBy('applicationEmail.created_at', 'DESC')
+    .addGroupBy('applicationEmail.application_id')
+    .getQuery();
   }
 
   async create(applicationEmail: CreateApplicationEmailInput): Promise<ApplicationEmail> {

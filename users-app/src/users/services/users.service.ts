@@ -361,6 +361,22 @@ export class UsersService {
       })
       .where('person_id = :id', { id: person.person_id })
       .execute();
+           
+     // update email
+     if(person.email !== updateProfileInput.email) {
+        const emailVerifier = await this.emailVerifierService.create({
+          user_id: user.user_id,
+          email: updateProfileInput.email,
+          verification_type: 0,
+        });
+
+        if (!emailVerifier)
+          throw new HttpException(
+            'EmailVerifier Not Created',
+            HttpStatus.CONFLICT,
+          );
+        await this.emailService.sendEmailUpdateVerificationEmail(emailVerifier);
+      }
 
     // Update Phone
     await getConnection()

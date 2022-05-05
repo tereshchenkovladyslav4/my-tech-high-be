@@ -72,6 +72,8 @@ export class ApplicationsService {
   ): Promise<Pagination<Application>> {
     const { skip, take, sort, filter, search, region_id } = applicationsArgs;
     const _sortBy = sort.split('|');
+    const userEmails = this.applicationEmailsService.findByOrder();
+
     const qb = this.applicationsRepository
       .createQueryBuilder('application')
       .leftJoinAndSelect('application.student', 'student')
@@ -82,6 +84,18 @@ export class ApplicationsService {
       .leftJoinAndSelect('p_person.email_verifier', 'email_verifier')
       .leftJoinAndSelect('application.school_year', 'school_year')
       .leftJoinAndSelect('application.application_emails', 'application_emails')
+      .leftJoinAndSelect('application.application_emails', '(' + userEmails + ')')
+
+      // .leftJoinAndSelect(
+      //   qb => qb
+      //      .select()
+      //      .from(ApplicationEmail, 'e')
+      //      .orderBy({ 'e.created_at': 'ASC' })
+      //      .groupBy('e.application_id'),
+      //      .limit(1),
+      //      'e.created_at'
+      // )
+      // .leftJoinAndSelect('application.application_emails', 'application_emails')
       .where('application.status = "Submitted"')
       .andWhere(`school_year.RegionId = ${region_id}`);
     if (
@@ -195,7 +209,7 @@ export class ApplicationsService {
           );
           qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'emailed') {
-          qb.orderBy('application_emails.created_at', 'DESC');
+          qb.orderBy(`(${userEmails}).created_at`, 'DESC');
         } else if (_sortBy[0] === 'year') {
           qb.orderBy('school_year.date_begin', 'DESC');
           qb.orderBy('school_year.date_end', 'DESC');
@@ -204,9 +218,11 @@ export class ApplicationsService {
         } else if (_sortBy[0] === 'sped') {
           qb.orderBy('student.special_ed', 'DESC');
         } else if (_sortBy[0] === 'student') {
-          qb.orderBy('person.last_name', 'DESC');
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
+          qb.orderBy('student_name', 'DESC')
         } else if (_sortBy[0] === 'parent') {
-          qb.orderBy('p_person.last_name', 'DESC');
+          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
+          qb.orderBy('parent_name', 'DESC')
         } else if (_sortBy[0] === 'relation') {
           qb.orderBy('application.relation_status', 'DESC');
         } else {
@@ -222,7 +238,7 @@ export class ApplicationsService {
           );
           qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'emailed') {
-          qb.orderBy('application_emails.created_at', 'ASC');
+          qb.orderBy(`(${userEmails}).created_at`, 'ASC');
         } else if (_sortBy[0] === 'year') {
           qb.orderBy('school_year.date_begin', 'ASC');
           qb.orderBy('school_year.date_end', 'ASC');
@@ -231,9 +247,11 @@ export class ApplicationsService {
         } else if (_sortBy[0] === 'sped') {
           qb.orderBy('student.special_ed', 'ASC');
         } else if (_sortBy[0] === 'student') {
-          qb.orderBy('person.last_name', 'ASC');
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
+          qb.orderBy('student_name', 'ASC')
         } else if (_sortBy[0] === 'parent') {
-          qb.orderBy('p_person.last_name', 'ASC');
+          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
+          qb.orderBy('parent_name', 'ASC')
         } else if (_sortBy[0] === 'relation') {
           qb.orderBy('application.relation_status', 'ASC');
         } else {
