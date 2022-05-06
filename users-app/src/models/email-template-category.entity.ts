@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import { EmailTemplate } from './email-template.entity';
 @ObjectType()
-@Directive('@key(fields: "id")')
+@Directive('@key(fields: "category_id")')
 @Entity({ name: 'email_category' })
 export class EmailTemplateCategory extends BaseEntity {
   @Column()
@@ -25,13 +25,7 @@ export class EmailTemplateCategory extends BaseEntity {
   @Field((type) => String, { nullable: true })
   category_name: string;
 
-  @OneToMany(
-    (type) => EmailTemplate,
-    (email_template) => email_template.category,
-  )
-  @JoinColumn({
-    name: 'category_id',
-    referencedColumnName: 'category_id',
-  })
+  @OneToMany(() => EmailTemplate, (emailTemplate) => emailTemplate.category)
+  @Field(() => [EmailTemplate], { nullable: true })
   email_templates: EmailTemplate[];
 }

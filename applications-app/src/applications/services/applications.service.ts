@@ -289,6 +289,13 @@ export class ApplicationsService {
     });
   }
 
+
+  async delete(application_id: number): Promise<Application> {
+    const application = await this.findOneById(application_id);
+    await this.applicationsRepository.delete(application_id);
+    return application
+  }
+  
   async acceptApplication(
     acceptApplicationInput: AcceptApplicationInput,
   ): Promise<Application[]> {
@@ -359,14 +366,10 @@ export class ApplicationsService {
     return promise;
   }
 
-  async deleteApplication(
-    deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Application[]> {
-    const { application_ids } = deleteApplicationInput;
+  async findByIds(application_ids: string[]): Promise<Application[]> {
     const applications = await this.applicationsRepository.findByIds(
       application_ids,
     );
-    const result = await this.applicationsRepository.delete(application_ids);
     return applications;
   }
 

@@ -40,4 +40,16 @@ export class EmailTemplate extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   standard_responses?: string
+
+  @Column()
+  @Field((type) => String, { nullable: true, defaultValue: '' })
+  template: String;
+
+  @Column()
+  @Field((type) => String, { nullable: true, defaultValue: '' })
+  inserts: String;
+
+  @Column()
+  @Field((type) => Int, { nullable: true, defaultValue: 1 })
+  region_id: number
 }

@@ -47,7 +47,7 @@ export class PacketsService {
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
-      .leftJoinAndSelect('student.grade_levels', 'grade')
+      .leftJoinAndSelect('student.grade_levels', 'grade_levels')
       .where('packet.status IN (:status)', { status: filters })
       .andWhere(`school_year.RegionId = ${region_id}`);
 
@@ -98,13 +98,18 @@ export class PacketsService {
         if (_sortBy[0] === 'student') {
           qb.orderBy('s_person.first_name', 'DESC');
         } else if (_sortBy[0] === 'grade') {
-          qb.orderBy('grade.grade_level', 'DESC');
+          qb.addSelect(
+            'ABS(grade_levels.grade_level + 0)',
+            'student_grade_level',
+          );
+          qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
           qb.orderBy('packet.deadline', 'DESC');
-        } else if ('status') {
+        } else if (_sortBy[0] ==='status') {
           qb.orderBy('packet.status', 'DESC');
-        } else if ('parent') {
-          qb.orderBy('p_person.first_name', 'DESC');
+        } else if (_sortBy[0] === 'parent') {
+          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
+          qb.orderBy('parent_name', 'DESC')
         } else {
           qb.orderBy('packet.packet_id', 'DESC');
         }
@@ -112,13 +117,18 @@ export class PacketsService {
         if (_sortBy[0] === 'student') {
           qb.orderBy('s_person.first_name', 'ASC');
         } else if (_sortBy[0] === 'grade') {
-          qb.orderBy('grade.grade_level', 'ASC');
+          qb.addSelect(
+            'ABS(grade_levels.grade_level + 0)',
+            'student_grade_level',
+          );
+          qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
           qb.orderBy('packet.deadline', 'ASC');
-        } else if ('status') {
+        } else if (_sortBy[0] === 'status') {
           qb.orderBy('packet.status', 'ASC');
-        } else if ('parent') {
-          qb.orderBy('p_person.first_name', 'ASC');
+        } else if (_sortBy[0] === 'parent') {
+          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
+          qb.orderBy('parent_name', 'ASC')
         } else {
           qb.orderBy('packet.packet_id', 'ASC');
         }

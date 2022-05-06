@@ -184,8 +184,9 @@ export class ApplicationsResolver {
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
   ): Promise<Application[]> {
-    return await this.applicationsService.deleteApplication(
-      deleteApplicationInput,
+    const  { application_ids  } = deleteApplicationInput
+    return await this.studentApplicationsService.deleteStudentApplication(
+      application_ids
     );
   }
 

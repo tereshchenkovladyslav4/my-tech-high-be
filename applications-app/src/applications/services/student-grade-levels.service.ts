@@ -18,4 +18,9 @@ export class StudentGradeLevelsService {
     forStudents(student_id:number): Promise<StudentGradeLevel[]> {
       return this.studentGradeLevelsRepository.find({ where: { student_id: student_id } });
     }
+
+    async delete(student_id: number, school_year_id: number): Promise<string> {
+      await this.studentGradeLevelsRepository.delete({student_id, school_year_id})
+      return 'deleted'
+    } 
 }

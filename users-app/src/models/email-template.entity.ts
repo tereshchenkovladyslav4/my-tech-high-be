@@ -56,10 +56,23 @@ export class EmailTemplate extends BaseEntity {
   @Field(() => Int, { nullable: true })
   category_id?: number;
 
-  @ManyToOne((type) => EmailTemplateCategory, { nullable: true })
-  @JoinColumn({
-    name: 'category_id',
-    referencedColumnName: 'category_id',
+  @ManyToOne(() => EmailTemplateCategory, (category) => category.email_templates, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE'
   })
-  category?: EmailTemplateCategory;
+  @JoinColumn([{ name: 'category_id', referencedColumnName: 'category_id' }])
+  @Field(() => EmailTemplateCategory, { nullable: true })
+  category: EmailTemplateCategory;
+  
+  @Column()
+  @Field((type) => String, { nullable: true, defaultValue: '' })
+  template: String;
+
+  @Column()
+  @Field((type) => String, { nullable: true, defaultValue: '' })
+  inserts: String;
+
+  @Column()
+  @Field((type) => Int, { nullable: true, defaultValue: 1 })
+  region_id: number;
 }

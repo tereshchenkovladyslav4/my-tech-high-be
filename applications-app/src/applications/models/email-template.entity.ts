@@ -47,4 +47,16 @@ export class ApplicationEmailTemplate extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   standard_responses?: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  template?: string
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  inserts?: string
+
+  @Column()
+  @Field(() => Int, { nullable: false })
+  region_id?: number;
 }

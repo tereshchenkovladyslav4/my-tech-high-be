@@ -30,4 +30,10 @@ export class PersonsService {
   ): Promise<Person> {
     return this.personsRepository.save(savePersonUserIdInput);
   }
+
+  async delete(person_id: number): Promise<Person> {
+    const person = await this.findOneById(person_id);
+    await this.personsRepository.delete(person_id);
+    return person;
+  }
 }

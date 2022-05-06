@@ -9,7 +9,7 @@ export class EmailTemplateResolver {
 
   @Query(() => EmailTemplate, { name: 'emailTemplate', nullable: true })
   getEmailTemplate(
-    @Args({ name: 'id', type: () => ID }) id: number,
+    @Args({ name: 'templateId', type: () => ID }) id: number,
   ): Promise<EmailTemplate> {
     return this.emailTemplatesService.findById(id);
   }
@@ -19,9 +19,11 @@ export class EmailTemplateResolver {
   ): Promise<EmailTemplate> {
     return this.emailTemplatesService.findByTemplate(template);
   }
-  @Query(() => [EmailTemplate], { name: 'emailTemplates' })
-  getEmailTemplates(): Promise<EmailTemplate[]> {
-    return this.emailTemplatesService.findAll();
+  @Query(() => [EmailTemplate], { name: 'emailTemplatesByRegion' })
+  getEmailTemplatesByRegion(
+    @Args({ name: 'regionId', type: () => ID }) regionId: number,
+  ): Promise<EmailTemplate[]> {
+    return this.emailTemplatesService.findByRegion(regionId);
   }
 
   @Mutation((of) => EmailTemplate, { name: 'createEmailTemplate' })

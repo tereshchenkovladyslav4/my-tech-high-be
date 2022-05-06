@@ -41,6 +41,15 @@ export class EmailTemplate {
   @Field(() => String, { nullable: true })
   standard_responses?: string;
 
+  @Field(() => String, { nullable: true })
+  template?: string;
+
+  @Field(() => String, { nullable: true })
+  inserts?: string;
+
+  @Field(() => Int, { nullable: true })
+  region_id?: number;
+
   @Field(() => [EmailTemplateReminder], { nullable: true })
   reminders?: EmailTemplateReminder[];
 }

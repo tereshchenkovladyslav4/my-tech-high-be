@@ -26,6 +26,7 @@ import { EmailsService } from './services/emails.service';
 import { EmailVerifierService } from './services/email-verifier.service';
 import { UserRegionService } from './services/user-region.service';
 import { EmailTemplatesService } from '../applications/services/email-templates.service';
+import { Application } from './models/application.entity';
 
 @Injectable()
 export class ApplicationsService {
@@ -261,6 +262,32 @@ export class ApplicationsService {
     console.log('Application: ', student);
 
     return student;
+  }
+
+  async deleteStudentApplication(application_ids: string[]): Promise<Application[]> {
+    const applications = await this.studentApplicationsService.findByIds(application_ids);
+    await application_ids.map(
+      async (application_id) => {
+      const application = await this.studentApplicationsService.findOneById(Number(application_id))
+
+      if (!application) throw new ServiceUnavailableException('Application Not Found');
+      const student = await this.studentsService.findOneById(application.student_id)
+      if (!student) throw new ServiceUnavailableException('Student Not Found');
+
+      const deletedStudent = await this.studentsService.delete(student.student_id)
+      if (!deletedStudent) throw new ServiceUnavailableException('Student Not Deleted');
+
+      const deletedStudentGradeLevel = await this.studentGradeLevelsService.delete(student.student_id, application.school_year_id);
+      if (!deletedStudentGradeLevel) throw new ServiceUnavailableException('StudentGradeLevel Not Deleted');
+
+      const deletePerson = await this.personsService.delete(student.person_id);
+      if (!deletePerson) throw new ServiceUnavailableException('Person Not Deleted');
+
+      const studentApplication = await this.studentApplicationsService.delete(Number(application_id));
+      if (!studentApplication) throw new ServiceUnavailableException('Application Not Deleted');
+
+      })
+      return applications
   }
 
   async createObserPerson() {}

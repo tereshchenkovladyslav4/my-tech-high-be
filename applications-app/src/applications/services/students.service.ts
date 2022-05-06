@@ -23,6 +23,12 @@ export class StudentsService {
     });
   }
 
+  async delete(student_id): Promise<Student> {
+    const student = await this.findOneById(student_id)
+    await this.studentsRepository.delete(student_id)
+    return student
+  }
+
   async findOneByParent(parent_id: number): Promise<Student[]> {
     return await this.studentsRepository
       .createQueryBuilder('student')

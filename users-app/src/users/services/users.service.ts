@@ -323,9 +323,12 @@ export class UsersService {
     updateProfileInput: UpdateProfileInput,
   ): Promise<User> {
     const anotherperson = await createQueryBuilder(Person)
-      .where('email = :email AND user_id != :userId', {email: updateProfileInput.email, userId: user.user_id})
+      .where('email = :email AND user_id != :userId', {
+        email: updateProfileInput.email,
+        userId: user.user_id,
+      })
       .getOne();
-    if(anotherperson) {
+    if (anotherperson) {
       throw new BadRequestException(
         'Email is already in use. Please choose another one.',
       );
@@ -342,10 +345,15 @@ export class UsersService {
       .createQueryBuilder()
       .update(User)
       .set({
-        email: updateProfileInput.email
+        email: updateProfileInput.email,
       })
       .where('user_id = :id', { id: user.user_id })
       .execute();
+
+    // Check if the curent user exists in person table
+    if(!person) {
+      return user;
+    }
 
     // Update Person Data
     await getConnection()
@@ -379,15 +387,36 @@ export class UsersService {
       }
 
     // Update Phone
-    await getConnection()
-      .createQueryBuilder()
-      .update(Phone)
-      .set({
-        number: updateProfileInput.phone_number,
-        recieve_text: updateProfileInput.recieve_text,
-      })
-      .where('person_id = :id', { id: person.person_id })
-      .execute();
+    const queryRunner = await getConnection().createQueryRunner();
+    const response = await queryRunner.query(
+      `SELECT COUNT(*) as count
+        FROM infocenter.mth_phone
+        WHERE 
+          person_id = ${person.person_id}
+      `,
+    );
+    let count = 0;
+    response.map((item) => {
+      count = item.count;
+    });
+    if (count == 0) {
+      await queryRunner.query(
+        `INSERT INTO infocenter.mth_phone (person_id, number, recieve_text)
+          VALUES (${person.person_id} , ${updateProfileInput.phone_number}, ${updateProfileInput.recieve_text})
+        `,
+      );
+    } else {
+      await getConnection()
+        .createQueryBuilder()
+        .update(Phone)
+        .set({
+          number: updateProfileInput.phone_number,
+          recieve_text: updateProfileInput.recieve_text,
+        })
+        .where('person_id = :id', { id: person.person_id })
+        .execute();
+    }
+    await queryRunner.release();
 
     // Update Address
     const hasAddress = await createQueryBuilder(PersonAddress)
@@ -464,9 +493,7 @@ export class UsersService {
       );
 
     if (user.level == 1 && !user.password.match(this.saltPassword(oldpassword)))
-      throw new BadRequestException(
-        'Please enter the correct password.',
-      );
+      throw new BadRequestException('Please enter the correct password.');
 
     if (user.password.match(this.saltPassword(password)))
       throw new BadRequestException(

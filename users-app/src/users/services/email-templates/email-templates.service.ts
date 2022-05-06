@@ -15,9 +15,36 @@ export class EmailTemplatesService {
   ) {}
 
   async findAll(): Promise<EmailTemplate[]> {
-    const data = await this.emailTemplateRepository.find();
+    const data = await this.emailTemplateRepository.find({
+      relations: [
+        'category'
+      ]
+    });
+    return data;
+
+    /*if (regions.length > 0) {
+      const response = await User.createQueryBuilder('users')
+        .innerJoinAndSelect('users.userRegion', 'userRegion')
+        .innerJoinAndSelect('users.role', 'role')
+        .where('userRegion.region_id IN (:region_id)', { region_id: regions })
+        .getMany();
+
+      return response;
+    } else {
+      return [];
+    }*/
+  }
+
+  async findByRegion(regionId: number): Promise<EmailTemplate[]> {
+    const data = await this.emailTemplateRepository.find({
+      where: {region_id: regionId },
+      relations: [
+        'category'
+      ]
+    });
     return data;
   }
+
   async findById(id: number): Promise<EmailTemplate> {
     const data = await this.emailTemplateRepository.findOne(id);
     return data;
@@ -57,7 +84,7 @@ export class EmailTemplatesService {
     delete emailTemplate.reminders;
     await this.emailTemplateRepository.update(template, emailTemplate);
 
-    if(reminders.length > 0) {
+    if(reminders && reminders.length > 0) {
       reminders.forEach(async remind => {
        if(!remind.id) {
         const payload = { ...remind, email_template_id: emailTemplate.id}
