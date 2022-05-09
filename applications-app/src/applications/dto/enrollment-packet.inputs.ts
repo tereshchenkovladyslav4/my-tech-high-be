@@ -106,4 +106,7 @@ export class EnrollmentPacketInput {
 
   @Field(() => String, { nullable: true })
   missing_files?: string;
+
+  @Field({ nullable: true })
+  meta?: string;
 }

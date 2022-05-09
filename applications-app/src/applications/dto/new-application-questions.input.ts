@@ -24,4 +24,16 @@ export class NewApplicationQuestionsInput {
   @Field(() => Int)
   @IsNotEmpty()
   region_id?: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  validation?: number;
+
+  @Field(() => Boolean, { defaultValue: false })
+  student_question?: boolean;
+
+  @Field(() => Boolean, { defaultValue: false })
+  default_question?: boolean;
+
+  @Field(() => String)
+  slug: string;
 }

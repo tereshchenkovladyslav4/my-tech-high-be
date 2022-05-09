@@ -37,7 +37,7 @@ import { EnrollmentPacketSubmissionInput } from './dto/enrollment-packet-submiss
 import { PersonAddress } from './models/person-address.entity';
 import { EmailTemplatesService } from './services/email-templates.service';
 import { EmailsService } from './services/emails.service';
-import { EmailReminderService } from './services/email-reminder.service'
+import { EmailReminderService } from './services/email-reminder.service';
 
 const common_1 = require('@nestjs/common');
 const templates = {
@@ -231,15 +231,15 @@ export class EnrollmentsService {
     enrollmentPacketContactInput: EnrollmentPacketContactInput,
   ): Promise<EnrollmentPacket> {
     console.log('Input: ', enrollmentPacketContactInput);
-    const { student_id, secondaryParent } = enrollmentPacketContactInput;
+    const { student_id, packet, school_year_id } = enrollmentPacketContactInput;
     const student = await this.studentsService.findOneById(student_id);
 
     if (!student) throw new ServiceUnavailableException('Student Not Found');
     console.log('Student: ', student);
 
-    const packet = await this.packetsService.findOneByStudentId(student_id);
-    console.log('Enrollment Packet: ', packet);
-    const packet_id = (packet && (await packet).packet_id) || null;
+    const packetData = await this.packetsService.findOneByStudentId(student_id);
+    console.log('Enrollment Packet: ', packetData);
+    const packet_id = (packetData && (await packetData).packet_id) || null;
 
     const parentId = (await student).parent_id;
     const parent = this.parentsService.findOneById(parentId);
@@ -286,6 +286,14 @@ export class EnrollmentsService {
         throw new ServiceUnavailableException('Student Phone Not Created');
       console.log('Student Phone: ', phone);
 
+      const { grade_level } = enrollmentPacketContactInput.student;
+      const studentGradeLevel =
+        await this.studentGradeLevelsService.createOrUpdate({
+          student_id,
+          school_year_id,
+          grade_level,
+        });
+
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
@@ -294,10 +302,10 @@ export class EnrollmentsService {
         date_accepted: null,
         date_submitted: null,
         date_last_submitted: null,
-        secondary_contact_first: secondaryParent.first_name,
-        secondary_contact_last: secondaryParent.last_name,
-        secondary_email: secondaryParent.email,
-        secondary_phone: secondaryParent.phone_number,
+        secondary_contact_first: packet.secondary_contact_first,
+        secondary_contact_last: packet.secondary_contact_last,
+        school_district: packet.school_district,
+        meta: packet.meta,
       });
       console.log('Student Packet: ', studentPacket);
 
@@ -532,9 +540,11 @@ export class EnrollmentsService {
       const emailTemplate = await this.emailTemplateService.findByTemplate(
         'Packet Reminders',
       );
-      const emailReminder = await this.emailReminderService.findByTemplateId(emailTemplate.id);
-      if(emailReminder.length > 0) {
-        emailReminder.forEach(async remind => {
+      const emailReminder = await this.emailReminderService.findByTemplateId(
+        emailTemplate.id,
+      );
+      if (emailReminder.length > 0) {
+        emailReminder.forEach(async (remind) => {
           const deadline = remind.deadline;
           const deadlineDate = new Date();
           deadlineDate.setDate(deadlineDate.getDate() + deadline);
@@ -552,7 +562,7 @@ export class EnrollmentsService {
               }),
             );
           }
-        })
+        });
       }
       return 'Successfully run schedule reminders.';
     } catch (error) {

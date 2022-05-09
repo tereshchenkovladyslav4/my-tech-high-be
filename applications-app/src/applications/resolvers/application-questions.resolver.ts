@@ -15,6 +15,13 @@ export class ApplicationQuestionsResolver {
     return this.service.find(input);
   }
 
+  @Query(() => [ApplicationQuestion], { name: 'getExistApplicationQuestions' })
+  public async getExistApplicationQuestions(
+    @Args('input', { nullable: true }) input?: ApplicatinQuestionsInput,
+  ): Promise<ApplicationQuestion[]> {
+    return this.service.findExist(input);
+  }
+
   @Mutation((returns) => Boolean, {
     name: 'saveApplicationQuestions',
   })

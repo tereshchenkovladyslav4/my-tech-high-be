@@ -252,4 +252,8 @@ export class Packet extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   missing_files?: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  meta?: string;
 }

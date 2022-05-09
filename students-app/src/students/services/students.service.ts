@@ -147,7 +147,6 @@ export class StudentsService {
       .orderBy('packet.packet_id', 'DESC')
       .printSql()
       .getRawOne();
-
     return {
       student_id:
         (student && student.Student_student_id) || studentData.student_id,
@@ -201,9 +200,11 @@ export class StudentsService {
       .getOne();
 
     const currStudent = await createQueryBuilder(Student)
-    .where('`Student`.student_id = :studentId', { studentId: student.student_id })
-    .printSql()
-    .getOne();
+      .where('`Student`.student_id = :studentId', {
+        studentId: student.student_id,
+      })
+      .printSql()
+      .getOne();
 
     // Update Person Data
     await getConnection()
@@ -227,29 +228,31 @@ export class StudentsService {
       .where('student_id = :id', { id: currStudent.student_id })
       .execute();
 
-      const { person_id } = person;
-      // create user if pass provide
-      if(password){
-        const user = await this.usersService.create({
-          firstName: person.first_name,
-          lastName: person.last_name,
-          email: person.email,
-          level: 12,
-          updateAt: new Date().toString(),
-          password,
-        });
-        
-        // update person id on person
-        const { user_id } = user;
-        const updatedPerson = await this.personsService.updateUserId({
-          person_id,
-          user_id,
-        });
+    const { person_id } = person;
+    // create user if pass provide
+    if (password) {
+      const user = await this.usersService.create({
+        firstName: person.first_name,
+        lastName: person.last_name,
+        email: person.email,
+        level: 12,
+        updateAt: new Date().toString(),
+        password,
+      });
 
-        if (!updatedPerson)
-        throw new ServiceUnavailableException('Person User ID Not been Updated');
-        console.log('Updated Person: ', updatedPerson);
-      }
+      // update person id on person
+      const { user_id } = user;
+      const updatedPerson = await this.personsService.updateUserId({
+        person_id,
+        user_id,
+      });
+
+      if (!updatedPerson)
+        throw new ServiceUnavailableException(
+          'Person User ID Not been Updated',
+        );
+      console.log('Updated Person: ', updatedPerson);
+    }
 
     return student;
   }

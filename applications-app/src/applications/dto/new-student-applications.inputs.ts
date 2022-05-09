@@ -4,11 +4,14 @@ import { CreateStudentPersonInput } from './new-student-person.inputs';
 @InputType()
 export class CreateStudentApplicationsInput {
   @Field(() => String)
-  state?: string
+  state?: string;
 
   @Field(() => Int)
-  program_year?: number
+  program_year?: number;
 
-  @Field((type) => [CreateStudentPersonInput], {nullable: true})
-  students?: CreateStudentPersonInput[]
+  @Field((type) => [CreateStudentPersonInput], { nullable: true })
+  students?: CreateStudentPersonInput[];
+
+  @Field(() => String, { nullable: true })
+  meta?: string;
 }

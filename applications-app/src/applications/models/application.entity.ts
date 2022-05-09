@@ -1,5 +1,14 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { Student } from './student.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { ApplicationEmail } from './application-email.entity';
@@ -11,23 +20,23 @@ export class Application extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  application_id?: number
+  application_id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  student_id?: number
+  student_id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  school_year_id?: number
+  school_year_id?: number;
 
   @Column()
   @Field(() => Boolean, { nullable: true })
-  midyear_application?: boolean
+  midyear_application?: boolean;
 
   @Column()
   @Field(() => Boolean, { nullable: true })
-  hidden?: boolean
+  hidden?: boolean;
 
   @Column()
   @Field(() => String, { nullable: true })
@@ -47,25 +56,38 @@ export class Application extends BaseEntity {
 
   @Column()
   @Field(() => Date, { nullable: true })
-  date_started?: Date
+  date_started?: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
-  date_submitted?: Date
+  date_submitted?: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
-  date_accepted?: Date
+  date_accepted?: Date;
 
-  @ManyToOne(type => Student, { nullable: true })
+  @Column()
+  @Field(() => String, { nullable: true })
+  meta?: string;
+
+  @ManyToOne((type) => Student, { nullable: true })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
-  student?: Student
+  student?: Student;
 
-  @ManyToOne(type => SchoolYear, { nullable: true })
-  @JoinColumn({ name: 'school_year_id', referencedColumnName: 'school_year_id' })
-  school_year?: SchoolYear
+  @ManyToOne((type) => SchoolYear, { nullable: true })
+  @JoinColumn({
+    name: 'school_year_id',
+    referencedColumnName: 'school_year_id',
+  })
+  school_year?: SchoolYear;
 
-  @OneToMany(type => ApplicationEmail, application_email => application_email.application)
-  @JoinColumn({ name: 'application_id', referencedColumnName: 'application_id' })
-  application_emails: ApplicationEmail[]
+  @OneToMany(
+    (type) => ApplicationEmail,
+    (application_email) => application_email.application,
+  )
+  @JoinColumn({
+    name: 'application_id',
+    referencedColumnName: 'application_id',
+  })
+  application_emails: ApplicationEmail[];
 }

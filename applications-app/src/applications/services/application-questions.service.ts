@@ -23,6 +23,20 @@ export class ApplicationQuestionsService {
     return await this.repo.find();
   }
 
+  async findExist(
+    input?: ApplicatinQuestionsInput,
+  ): Promise<ApplicationQuestion[]> {
+    if (input) {
+      return await this.repo.find({
+        where: {
+          region_id: input.region_id,
+          student_question: 1,
+        },
+      });
+    }
+    return await this.repo.find();
+  }
+
   async createOrUpdate(
     input: NewApplicationQuestionsInput,
   ): Promise<ApplicationQuestion> {

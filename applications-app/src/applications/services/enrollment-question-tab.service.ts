@@ -26,6 +26,20 @@ export class EnrollmentQuestionTabService {
     return await this.repo.find();
   }
 
+  async findByActive(
+    input?: EnrollmentQuestionsInput,
+  ): Promise<EnrollmentQuestionTab[]> {
+    if (input) {
+      return await this.repo.find({
+        where: {
+          region_id: input.region_id,
+          is_active: 1,
+        },
+      });
+    }
+    return await this.repo.find();
+  }
+
   async createOrUpdate(
     input: NewEnrollmentQuestionTabInput,
   ): Promise<EnrollmentQuestionTab> {

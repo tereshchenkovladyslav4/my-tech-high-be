@@ -13,8 +13,7 @@ import { Application } from './application.entity';
 import { Parent } from './parent.entity';
 import { Person } from './person.entity';
 import { StudentGradeLevel } from './student-grade-level.entity';
-import { StudentStatus } from './student-status.entity'
-
+import { StudentStatus } from './student-status.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(

@@ -11,6 +11,7 @@ import { ApolloServerPluginInlineTraceDisabled } from 'apollo-server-core';
 import RepoModule from './repo.module';
 import { EmailTemplateResolver } from './resolvers/email-template/email-template.resolver';
 import { EmailReminderResolver } from './resolvers/email-template/email-reminder.resolver';
+import { SchoolDistrictsResolver } from './resolvers/region/schoolDistricts.resolver';
 
 const graphQLImports = [
   UsersResolver,
@@ -21,6 +22,7 @@ const graphQLImports = [
   EmailTemplateResolver,
   SchoolYearResolver,
   EmailReminderResolver,
+  SchoolDistrictsResolver,
 ];
 
 @Module({

@@ -27,6 +27,7 @@ import { EmailVerifierService } from './services/email-verifier.service';
 import { UserRegionService } from './services/user-region.service';
 import { EmailTemplatesService } from '../applications/services/email-templates.service';
 import { Application } from './models/application.entity';
+import { StudentStatusService } from './services/student-status.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -43,6 +44,7 @@ export class ApplicationsService {
     private emailVerifierService: EmailVerifierService,
     private userRegionService: UserRegionService,
     private emailTemplateService: EmailTemplatesService,
+    private studentStatusService: StudentStatusService,
   ) {}
 
   protected user: User;
@@ -81,6 +83,7 @@ export class ApplicationsService {
           newApplication.program_year,
           studentApplication,
           newApplication.referred_by,
+          newApplication.meta,
         ),
     );
 
@@ -124,7 +127,11 @@ export class ApplicationsService {
     console.log('User: ', user);
 
     const parent = await createQueryBuilder(Parent)
-      .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
+      .innerJoinAndSelect(
+        Person,
+        'person',
+        'person.person_id = `Parent`.person_id',
+      )
       .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
       .where('user.user_id = :userId', { userId: user.user_id })
       .printSql()
@@ -137,10 +144,12 @@ export class ApplicationsService {
           parent.parent_id,
           newApplication.program_year,
           studentApplication,
+          '',
+          newApplication.meta,
         ),
     );
 
-    const person = await this.personsService.findOneById(parent.person_id)
+    const person = await this.personsService.findOneById(parent.person_id);
     const emailTemplate = await this.emailTemplateService.findByTemplate(
       'Application Received',
     );
@@ -225,10 +234,11 @@ export class ApplicationsService {
     school_year_id: number,
     studentApplication: CreateStudentPersonInput,
     referred_by?: string,
-  ): Promise<Student> {
+    meta?: string,
+  ): Promise<any> {
     const { first_name, last_name, grade_level } = studentApplication;
-
-    const person = await this.personsService.create({ first_name, last_name });
+    const studentApplicationInput = omit(studentApplication, ['grade_level']);
+    const person = await this.personsService.create(studentApplicationInput);
     if (!person) throw new ServiceUnavailableException('Person Not Created');
     console.log('Person: ', person);
 
@@ -252,16 +262,23 @@ export class ApplicationsService {
       throw new ServiceUnavailableException('Student Grade Level Not Created');
     console.log('Student Grade Level: ', student);
 
+    const statudUpdated = this.studentStatusService.update({
+      student_id: student_id,
+      school_year_id: school_year_id,
+      status: 0,
+    });
+
     const application = await this.studentApplicationsService.create({
       student_id,
       school_year_id,
       referred_by,
+      meta,
     });
     if (!application)
       throw new ServiceUnavailableException('Application Not Created');
     console.log('Application: ', student);
 
-    return student;
+    return { ...student, person: person, status: statudUpdated };
   }
 
   async deleteStudentApplication(application_ids: string[]): Promise<Application[]> {

@@ -3,7 +3,6 @@ import { IsOptional, IsInt, MaxLength, Min, IsDate } from 'class-validator';
 
 @InputType()
 export class CreateStudentApplicationInput {
-  
   @Field(() => Int)
   @IsInt()
   student_id?: number;
@@ -12,7 +11,7 @@ export class CreateStudentApplicationInput {
   @IsInt()
   school_year_id?: number;
 
-  @Field({defaultValue: 'Submitted'})
+  @Field({ defaultValue: 'Submitted' })
   status?: string;
 
   @Field({ nullable: true })
@@ -32,9 +31,12 @@ export class CreateStudentApplicationInput {
 
   @Field({ defaultValue: new Date() })
   @IsDate()
-  date_started?: Date
+  date_started?: Date;
 
   @Field({ defaultValue: new Date() })
   @IsDate()
-  date_submitted?: Date
+  date_submitted?: Date;
+
+  @Field(() => String, { nullable: true })
+  meta?: string;
 }

@@ -33,4 +33,20 @@ export class ApplicationQuestion extends BaseEntity {
   @Column()
   @Field(() => Int, { nullable: true })
   region_id?: number;
+
+  @Column()
+  @Field(() => Boolean, { defaultValue: false })
+  default_question: boolean;
+
+  @Column()
+  @Field(() => Boolean, { defaultValue: false })
+  student_question: boolean;
+
+  @Column()
+  @Field(() => Int, { defaultValue: 0 })
+  validation: number;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  slug?: string;
 }

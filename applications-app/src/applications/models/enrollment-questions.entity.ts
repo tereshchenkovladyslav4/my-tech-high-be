@@ -44,4 +44,20 @@ export class EnrollmentQuestions extends BaseEntity {
   @Column()
   @Field(() => Boolean, { defaultValue: true })
   removable: boolean;
+
+  @Column()
+  @Field(() => Boolean, { defaultValue: false })
+  default_question: boolean;
+
+  @Column()
+  @Field(() => Boolean, { defaultValue: false })
+  student_question: boolean;
+
+  @Column()
+  @Field(() => Int, { defaultValue: 0 })
+  validation: number;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  slug?: string;
 }

@@ -5,17 +5,20 @@ import { CreateStudentPersonInput } from './new-student-person.inputs';
 @InputType()
 export class CreateApplicationInput {
   @Field(() => String)
-  state?: string
+  state?: string;
 
   @Field(() => Int)
-  program_year?: number
+  program_year?: number;
 
   @Field((type) => CreateParentPersonInput)
   parent?: CreateParentPersonInput;
 
-  @Field((type) => [CreateStudentPersonInput], {nullable: true})
-  students?: CreateStudentPersonInput[]
+  @Field((type) => [CreateStudentPersonInput], { nullable: true })
+  students?: CreateStudentPersonInput[];
 
-  @Field({nullable: true})
-  referred_by?: string
+  @Field({ nullable: true })
+  referred_by?: string;
+
+  @Field({ nullable: true })
+  meta?: string;
 }

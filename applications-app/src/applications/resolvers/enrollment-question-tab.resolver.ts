@@ -36,6 +36,15 @@ export class EnrollmentQuestionTabResolver {
     return this.service.find(input);
   }
 
+  @Query(() => [EnrollmentQuestionTab], {
+    name: 'getParentEnrollmentQuestions',
+  })
+  public async getParentEnrollmentQuestionTabs(
+    @Args('input', { nullable: true }) input?: EnrollmentQuestionsInput,
+  ): Promise<EnrollmentQuestionTab[]> {
+    return this.service.findByActive(input);
+  }
+
   @Mutation((returns) => Boolean, {
     name: 'saveEnrollmentQuestions',
   })
