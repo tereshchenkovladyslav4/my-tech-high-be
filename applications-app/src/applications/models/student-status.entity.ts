@@ -1,5 +1,6 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Student } from './student.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -25,4 +26,8 @@ export class StudentStatus {
   @UpdateDateColumn()
   @Directive('@external')
   date_updated?: Date;
+
+  @ManyToOne((type) => Student, { nullable: true })
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  student?: Student;
 }

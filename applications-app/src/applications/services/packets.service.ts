@@ -46,6 +46,7 @@ export class PacketsService {
       .leftJoinAndSelect('applications.school_year', 'school_year')
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
+      .leftJoinAndSelect('student.status', 'status')
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('student.grade_levels', 'grade_levels')
       .where('packet.status IN (:status)', { status: filters })
@@ -67,7 +68,7 @@ export class PacketsService {
             search.indexOf('rd') > -1 ||
             search.indexOf('nd') > -1
           ) {
-            sub.where('grade.grade_level like :text', {
+            sub.where('grade_levels.grade_level like :text', {
               text: `%${search.match(/\d+/)[0]}%`,
             });
           } else {
@@ -105,11 +106,16 @@ export class PacketsService {
           qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
           qb.orderBy('packet.deadline', 'DESC');
-        } else if (_sortBy[0] ==='status') {
+        } else if (_sortBy[0] === 'status') {
           qb.orderBy('packet.status', 'DESC');
+        }  else if(_sortBy[0] === 'studentStatus') {
+          qb.orderBy('status.status', 'DESC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
-          qb.orderBy('parent_name', 'DESC')
+          qb.addSelect(
+            "CONCAT(p_person.first_name, ' ', p_person.last_name)",
+            'parent_name',
+          );
+          qb.orderBy('parent_name', 'DESC');
         } else {
           qb.orderBy('packet.packet_id', 'DESC');
         }
@@ -124,21 +130,41 @@ export class PacketsService {
           qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
           qb.orderBy('packet.deadline', 'ASC');
+        } else if(_sortBy[0] === 'studentStatus') {
+          qb.orderBy('status.status', 'ASC');
         } else if (_sortBy[0] === 'status') {
           qb.orderBy('packet.status', 'ASC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
-          qb.orderBy('parent_name', 'ASC')
+          qb.addSelect(
+            "CONCAT(p_person.first_name, ' ', p_person.last_name)",
+            'parent_name',
+          );
+          qb.orderBy('parent_name', 'ASC');
         } else {
           qb.orderBy('packet.packet_id', 'ASC');
         }
       }
     }
-    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+
+    let result = []
+    const [results, total] = await qb.getManyAndCount()
+    if(take) {
+      if(total < ((skip || 0) + take)) {
+        result = results.slice(skip || 0, results.length)
+      } else {
+        result = results.slice(skip || 0, take)
+      }
+    }
     return new Pagination<Packet>({
-      results,
+      results: result,
       total,
     });
+    
+    // const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+    // return new Pagination<Packet>({
+    //   results,
+    //   total,
+    // });
   }
 
   async findOneById(packet_id: number): Promise<Packet> {
@@ -212,25 +238,30 @@ export class PacketsService {
       .whereInIds(application_ids)
       .getManyAndCount();
 
-      const setEmailBodyInfo = (student, school_year) => {
-        const yearbegin = new Date(school_year.date_begin).getFullYear().toString()
-        const yearend = new Date(school_year.date_end).getFullYear().toString()
-    
-        return body.toString()
-          .replace(/\[STUDENT\]/g, student.person.first_name)
-          .replace(/\[PARENT\]/g, student.parent.person.first_name)
-          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-      }
+    const setEmailBodyInfo = (student, school_year) => {
+      const yearbegin = new Date(school_year.date_begin)
+        .getFullYear()
+        .toString();
+      const yearend = new Date(school_year.date_end).getFullYear().toString();
 
-    const emailBody = []
-     results.forEach(async (item) => {
-      const school_year = await this.schoolYearService.findOneById(results[0].student.grade_levels[0].school_year_id)
+      return body
+        .toString()
+        .replace(/\[STUDENT\]/g, student.person.first_name)
+        .replace(/\[PARENT\]/g, student.parent.person.first_name)
+        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
+    };
+
+    const emailBody = [];
+    results.forEach(async (item) => {
+      const school_year = await this.schoolYearService.findOneById(
+        results[0].student.grade_levels[0].school_year_id,
+      );
       const temp = {
-          email: item.student.parent.person.email,
-          body: setEmailBodyInfo(item.student, school_year)
-        }
-        emailBody.push(temp)
-    })
+        email: item.student.parent.person.email,
+        body: setEmailBodyInfo(item.student, school_year),
+      };
+      emailBody.push(temp);
+    });
     const emailTemplate = await this.emailTemplateService.findByTemplate(
       'Enrollment Packet Page',
     );

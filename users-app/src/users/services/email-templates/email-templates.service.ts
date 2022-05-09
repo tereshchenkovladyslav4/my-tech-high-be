@@ -49,12 +49,21 @@ export class EmailTemplatesService {
     const data = await this.emailTemplateRepository.findOne(id);
     return data;
   }
+
   async findByTemplate(template: string): Promise<EmailTemplate> {
     const data = await this.emailTemplateRepository.findOne({
       where: { template_name: template },
     });
     return data;
   }
+
+  async findByTemplateAndRegion(template: string, regionId: number): Promise<EmailTemplate> {
+    const data = await this.emailTemplateRepository.findOne({
+      where: { template_name: template, region_id: regionId },
+    });
+    return data;
+  }
+
   async createEmailTemplate(
     createEmailTemplateInput: CreateEmailTemplateInput,
   ): Promise<EmailTemplate> {

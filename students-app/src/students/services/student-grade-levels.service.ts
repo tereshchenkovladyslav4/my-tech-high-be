@@ -17,6 +17,13 @@ export class StudentGradeLevelsService {
   }
 
   forStudents(student_id:number): Promise<StudentGradeLevel[]> {
-    return this.studentGradeLevelsRepository.find({ where: { student_id: student_id } });
+    return this.studentGradeLevelsRepository.createQueryBuilder('studentGradeLevel')
+    .where('student_id = :student_id', { student_id: student_id })
+    .addSelect(
+      'ABS(studentGradeLevel.grade_level + 0)',
+      'student_grade_level',
+    )
+    .orderBy('student_grade_level', 'ASC')
+    .getMany()
   }
 }

@@ -84,7 +84,10 @@ export class ApplicationsService {
       .leftJoinAndSelect('p_person.email_verifier', 'email_verifier')
       .leftJoinAndSelect('application.school_year', 'school_year')
       .leftJoinAndSelect('application.application_emails', 'application_emails')
-      .leftJoinAndSelect('application.application_emails', '(' + userEmails + ')')
+      .leftJoinAndSelect(
+        'application.application_emails',
+        '(' + userEmails + ')',
+      )
 
       // .leftJoinAndSelect(
       //   qb => qb
@@ -218,11 +221,17 @@ export class ApplicationsService {
         } else if (_sortBy[0] === 'sped') {
           qb.orderBy('student.special_ed', 'DESC');
         } else if (_sortBy[0] === 'student') {
-          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
-          qb.orderBy('student_name', 'DESC')
+          qb.addSelect(
+            "CONCAT(person.last_name, ' ', person.first_name)",
+            'student_name',
+          );
+          qb.orderBy('student_name', 'DESC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
-          qb.orderBy('parent_name', 'DESC')
+          qb.addSelect(
+            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
+            'parent_name',
+          );
+          qb.orderBy('parent_name', 'DESC');
         } else if (_sortBy[0] === 'relation') {
           qb.orderBy('application.relation_status', 'DESC');
         } else {
@@ -247,11 +256,17 @@ export class ApplicationsService {
         } else if (_sortBy[0] === 'sped') {
           qb.orderBy('student.special_ed', 'ASC');
         } else if (_sortBy[0] === 'student') {
-          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
-          qb.orderBy('student_name', 'ASC')
+          qb.addSelect(
+            "CONCAT(person.last_name, ' ', person.first_name)",
+            'student_name',
+          );
+          qb.orderBy('student_name', 'ASC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
-          qb.orderBy('parent_name', 'ASC')
+          qb.addSelect(
+            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
+            'parent_name',
+          );
+          qb.orderBy('parent_name', 'ASC');
         } else if (_sortBy[0] === 'relation') {
           qb.orderBy('application.relation_status', 'ASC');
         } else {
@@ -289,13 +304,12 @@ export class ApplicationsService {
     });
   }
 
-
   async delete(application_id: number): Promise<Application> {
     const application = await this.findOneById(application_id);
     await this.applicationsRepository.delete(application_id);
-    return application
+    return application;
   }
-  
+
   async acceptApplication(
     acceptApplicationInput: AcceptApplicationInput,
   ): Promise<Application[]> {
@@ -322,7 +336,7 @@ export class ApplicationsService {
           student_id,
         );
         const packet_id = existingPacket && existingPacket.packet_id;
-        const deadline = new Date()
+        const deadline = new Date();
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
           student_id,
@@ -335,22 +349,37 @@ export class ApplicationsService {
         });
 
         const student = await this.studentService.findOneById(student_id);
-        const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id)
+        const gradeLevels = await this.studentGradeLevelsService.forStudents(
+          student.student_id,
+        );
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {
-            const yearbegin = new Date(school_year.date_begin).getFullYear().toString()
-            const yearend = new Date(school_year.date_end).getFullYear().toString()
-        
-            return emailTemplate.body.toString()
+            const yearbegin = new Date(school_year.date_begin)
+              .getFullYear()
+              .toString();
+            const yearend = new Date(school_year.date_end)
+              .getFullYear()
+              .toString();
+
+            return emailTemplate.body
+              .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
               .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-              .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-              .replace(/\[DEADLINE\]/g, `${Moment(deadline).format('MM/DD/yy')}`)
-          }
+              .replace(
+                /\[APPLICATION_YEAR\]/g,
+                `${yearbegin}-${yearend.substring(2, 4)}`,
+              )
+              .replace(
+                /\[DEADLINE\]/g,
+                `${Moment(deadline).format('MM/DD/yy')}`,
+              );
+          };
 
-          const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id)
-          const body = setEmailBodyInfo(student, school_year)
+          const school_year = await this.schoolYearService.findOneById(
+            gradeLevels[0].school_year_id,
+          );
+          const body = setEmailBodyInfo(student, school_year);
 
           await this.sesEmailService.sendEmail({
             email: student.parent?.person?.email,
@@ -397,18 +426,28 @@ export class ApplicationsService {
     }
     results.forEach(async (item) => {
       const setEmailBodyInfo = (student, school_year) => {
-        const yearbegin = new Date(school_year.date_begin).getFullYear().toString()
-        const yearend = new Date(school_year.date_end).getFullYear().toString()
-    
-        return emailTemplate.body.toString()
+        const yearbegin = new Date(school_year.date_begin)
+          .getFullYear()
+          .toString();
+        const yearend = new Date(school_year.date_end).getFullYear().toString();
+
+        return emailTemplate.body
+          .toString()
           .replace(/\[STUDENT\]/g, student.person?.first_name)
           .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
           .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-          .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-      }
-      const gradeLevels = await this.studentGradeLevelsService.forStudents(item.student.student_id)
-      const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id)
-      const emailBody = setEmailBodyInfo(item.student, school_year)
+          .replace(
+            /\[APPLICATION_YEAR\]/g,
+            `${yearbegin}-${yearend.substring(2, 4)}`,
+          );
+      };
+      const gradeLevels = await this.studentGradeLevelsService.forStudents(
+        item.student.student_id,
+      );
+      const school_year = await this.schoolYearService.findOneById(
+        gradeLevels[0].school_year_id,
+      );
+      const emailBody = setEmailBodyInfo(item.student, school_year);
       const result = await this.sesEmailService.sendEmail({
         email: item.student.parent.person.email,
         subject,

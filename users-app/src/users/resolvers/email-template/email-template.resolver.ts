@@ -16,8 +16,9 @@ export class EmailTemplateResolver {
   @Query(() => EmailTemplate, { name: 'emailTemplateName', nullable: true })
   getEmailTemplateByName(
     @Args({ name: 'template', type: () => String }) template: string,
+    @Args({ name: 'regionId', type: () => ID }) regionId: number,
   ): Promise<EmailTemplate> {
-    return this.emailTemplatesService.findByTemplate(template);
+    return this.emailTemplatesService.findByTemplateAndRegion(template, regionId);
   }
   @Query(() => [EmailTemplate], { name: 'emailTemplatesByRegion' })
   getEmailTemplatesByRegion(

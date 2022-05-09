@@ -10,6 +10,7 @@ import {
   Mutation,
 } from '@nestjs/graphql';
 import { Student } from '../models/student.entity';
+import { StudentStatus } from '../models/student-status.entity';
 import { Person } from '../models/person.entity';
 import { Parent } from '../models/parent.entity';
 import { StudentGradeLevel } from '../models/student-grade-level.entity';
