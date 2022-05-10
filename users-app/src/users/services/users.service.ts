@@ -5,7 +5,12 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { createQueryBuilder, getConnection, Repository } from 'typeorm';
+import {
+  Brackets,
+  createQueryBuilder,
+  getConnection,
+  Repository,
+} from 'typeorm';
 import { Address } from '../../models/address.entity';
 import { PersonAddress } from '../../models/person-address.entity';
 import { Person } from '../../models/person.entity';
@@ -20,6 +25,8 @@ import * as Moment from 'moment';
 import { EmailsService } from 'src/users/services/emails.service';
 import { EmailVerifierService } from './email-verifier.service';
 import { GetPersonInfoArgs } from '../dto/get-person-info.args';
+import { UserRegionArgs } from '../dto/user-regions.args';
+import { Pagination } from '../paginate';
 const crypto = require('crypto');
 const salt = process.env.MTH_SALT || 'asin';
 
@@ -158,18 +165,82 @@ export class UsersService {
     });
   }
 
-  async findUsersByRegions(regions: [number]): Promise<User[]> {
-    if (regions.length > 0) {
-      const response = await User.createQueryBuilder('users')
-        .innerJoinAndSelect('users.userRegion', 'userRegion')
-        .innerJoinAndSelect('users.role', 'role')
-        .where('userRegion.region_id IN (:region_id)', { region_id: regions })
-        .getMany();
-
-      return response;
-    } else {
-      return [];
+  async findUsersByRegions(
+    userRegionArgs: UserRegionArgs,
+  ): Promise<Pagination<User>> {
+    const { skip, take, sort, filters, search, region_id } = userRegionArgs;
+    const _sortBy = sort.split('|');
+    if (filters.length === 0) {
+      return new Pagination<User>({
+        results: [],
+        total: 0,
+      });
     }
+
+    let qb = this.usersRepository
+      .createQueryBuilder('users')
+      .innerJoinAndSelect('users.userRegion', 'userRegion')
+      .innerJoinAndSelect('users.role', 'role')
+      .where('userRegion.region_id IN (:region_id)', { region_id: region_id })
+      .andWhere('role.name IN (:name)', { name: filters });
+
+    if (filters.includes('Inactive')) {
+      qb = qb.andWhere('users.status = 0');
+    } else {
+      qb = qb.andWhere('users.status <> 0');
+    }
+
+    if (search) {
+      qb.andWhere(
+        new Brackets((sub) => {
+          sub.where('users.first_name like :text', { text: `%${search}%` });
+          sub.orWhere('users.last_name like :text', { text: `%${search}%` });
+          sub.orWhere('users.email like :text', { text: `%${search}%` });
+        }),
+      );
+    }
+
+    if (sort) {
+      if (_sortBy[1].toLocaleLowerCase() === 'desc') {
+        if (_sortBy[0] === 'user_id') {
+          qb.orderBy('users.user_id', 'DESC');
+        } else if (_sortBy[0] == 'first_name') {
+          qb.orderBy('users.first_name', 'DESC');
+        } else if (_sortBy[0] == 'email') {
+          qb.orderBy('users.email', 'DESC');
+        } else if (_sortBy[0] == 'level') {
+          qb.orderBy('users.level', 'DESC');
+        } else if (_sortBy[0] == 'last_login') {
+          qb.orderBy('users.last_login', 'DESC');
+        } else if (_sortBy[0] == 'status') {
+          qb.orderBy('users.status', 'DESC');
+        } else if (_sortBy[0] == 'can_emulate') {
+          qb.orderBy('users.can_emulate', 'DESC');
+        }
+      } else {
+        if (_sortBy[0] === 'user_id') {
+          qb.orderBy('users.user_id', 'ASC');
+        } else if (_sortBy[0] == 'first_name') {
+          qb.orderBy('users.first_name', 'ASC');
+        } else if (_sortBy[0] == 'email') {
+          qb.orderBy('users.email', 'ASC');
+        } else if (_sortBy[0] == 'level') {
+          qb.orderBy('users.level', 'ASC');
+        } else if (_sortBy[0] == 'last_login') {
+          qb.orderBy('users.last_login', 'ASC');
+        } else if (_sortBy[0] == 'status') {
+          qb.orderBy('users.status', 'ASC');
+        } else if (_sortBy[0] == 'can_emulate') {
+          qb.orderBy('users.can_emulate', 'ASC');
+        }
+      }
+    }
+
+    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+    return new Pagination<User>({
+      results,
+      total,
+    });
   }
 
   async findOneByEmail(email: string): Promise<User> {

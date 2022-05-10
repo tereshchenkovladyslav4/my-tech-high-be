@@ -21,6 +21,7 @@ import { AuthGuard } from '../../guards/auth.guard';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
 import { MePermission } from '../../models/me-permission.entity';
 import { User } from '../../models/user.entity';
+import { UserPagination } from '../../models/user-pagination';
 import { PersonInfo } from '../../models/person-info';
 import { LoginInput } from '../dto/login.inputs';
 import { AuthPayload } from '../dto/login.payload';
@@ -34,6 +35,7 @@ import { UserAccessService } from './../services/access/user-access.service';
 import { UserRegionService } from './../services/region/user-region.service';
 import { UserRegion } from 'src/models/user-region.entity';
 import { GetPersonInfoArgs } from '../dto/get-person-info.args';
+import { Pagination } from '../paginate';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -120,10 +122,12 @@ export class UsersResolver {
     return this.usersService.findAllPersonInfoBySearchItem(getPersonInfoArgs);
   }
 
-  @Query(() => [User], { name: 'usersByRegions', nullable: true })
+  @Query((returns) => UserPagination, { name: 'usersByRegions' })
   @UseGuards(new AuthGuard())
-  getUserByRegions(@Args() userRegionArgs: UserRegionArgs): Promise<User[]> {
-    return this.usersService.findUsersByRegions(userRegionArgs.regions);
+  getUserByRegions(
+    @Args() userRegionArgs: UserRegionArgs,
+  ): Promise<Pagination<User>> {
+    return this.usersService.findUsersByRegions(userRegionArgs);
   }
 
   @UseGuards(new AuthGuard())
