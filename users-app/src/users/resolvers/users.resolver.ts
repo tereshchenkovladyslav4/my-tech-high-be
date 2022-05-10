@@ -74,6 +74,17 @@ export class UsersResolver {
       loginInput.username,
       loginInput.password,
     );
+    const emailVerifier = await this.authService.getEmailVerification(
+      loginInput.username,
+    );
+
+    if (emailVerifier?.verified == 0) {
+      return {
+        unverified: true,
+        jwt: '',
+      };
+    }
+
     if (!user) {
       throw new UnauthorizedException('Invalid email or password.');
     }

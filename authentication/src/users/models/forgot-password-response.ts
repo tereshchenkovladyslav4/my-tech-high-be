@@ -2,9 +2,9 @@ import { Directive, Field, ObjectType } from '@nestjs/graphql'
 import { User } from './user.entity'
 
 @ObjectType()
-export class MePermission {
-  @Field((type) => String)
-  jwt?: string
+export class ForgotPasswordResponse {
+  @Field((type) => Boolean)
+  status?: boolean
 
   @Field((type) => Boolean)
   unverified?: boolean

@@ -1,41 +1,44 @@
 import { UsersService } from '../../users/services/users.service';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { EmailVerifierService } from 'src/users/services/email-verifier.service';
+import { EmailVerifier } from 'src/models/email-verifier.entity';
 const crypto = require('crypto');
 
 const salt = process.env.MTH_SALT || 'asin';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private usersService: UsersService,
-        private jwtService: JwtService,
-    ) { }
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    private emailVerifierService: EmailVerifierService,
+  ) {}
 
-    saltPassword(password: string) {
-        return crypto
-            .createHash('md5')
-            .update(`${password}${salt}`)
-            .digest('hex');
+  saltPassword(password: string) {
+    return crypto.createHash('md5').update(`${password}${salt}`).digest('hex');
+  }
+
+  async validateUser(username: string, pass: string): Promise<any> {
+    const user = await this.usersService.findOneByEmail(username);
+    if (user && user.password === this.saltPassword(pass)) {
+      if (user.status) {
+        const { password, ...result } = user;
+        return result;
+      }
     }
+    return null;
+  }
 
-    async validateUser(username: string, pass: string): Promise<any> {
-        const user = await this.usersService.findOneByEmail(username);
-        
+  async getEmailVerification(username: string): Promise<EmailVerifier> {
+    return await this.emailVerifierService.getEmailVerificationStatus(username);
+  }
 
-        if (user && user.password === this.saltPassword(pass)) {
-            if (user.status) {
-                const { password, ...result } = user;
-                return result;
-            }
-        }
-        return null;
-    }
-
-    async login(user: any) {
-        const payload = { username: user.email, sub: user.user_id };
-        return {
-            jwt: this.jwtService.sign(payload),
-        };
-    }
+  async login(user: any) {
+    const payload = { username: user.email, sub: user.user_id };
+    return {
+      jwt: this.jwtService.sign(payload),
+      unverified: false,
+    };
+  }
 }

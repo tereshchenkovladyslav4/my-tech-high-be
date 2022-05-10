@@ -500,6 +500,22 @@ export class ApplicationsService {
   ): Promise<Application> {
     const { application_id, midyear_application, status, school_year_id } =
       updateApplicationInput;
+
+    if (status == 'Accepted') {
+      let application_ids = [];
+      application_ids.push(application_id);
+      const acceptApplicationInput = {
+        application_ids,
+        midyear_application,
+      };
+      console.log('Accept Inputs: ', acceptApplicationInput);
+      const acceptApplication = await this.acceptApplication(
+        acceptApplicationInput,
+      );
+
+      console.log('Accepted Applications: ', acceptApplication);
+    }
+
     const application = await this.applicationsRepository.save({
       application_id,
       midyear_application,

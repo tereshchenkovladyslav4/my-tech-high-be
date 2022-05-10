@@ -6,12 +6,17 @@ const crypto = require('crypto')
 const salt = process.env.MTH_SALT || 'asin'
 import * as Moment from 'moment'
 import { VerifyInput } from '../dto/verify.inputs'
+import { EmailsService } from './emails.service'
+import { EmailVerifierService } from './email-verifier.service'
+import { EmailVerifier } from '../models/email-verifier.entity'
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>
+    private readonly usersRepository: Repository<User>,
+    private emailService: EmailsService,
+    private emailVerifierService: EmailVerifierService
   ) {}
 
   async findOneById(user_id: number): Promise<User> {
@@ -20,6 +25,20 @@ export class UsersService {
 
   findOneByEmail(email: string): Promise<User> {
     return this.usersRepository.findOne({ email: email })
+  }
+
+  async resendVerificationEmail(email: string): Promise<any> {
+    const emailVerifier =
+      await this.emailVerifierService.getEmailVerificationStatus(email)
+    if (emailVerifier) {
+      return await this.emailService.sendAccountVerificationEmail(emailVerifier)
+    } else {
+      return null
+    }
+  }
+
+  async getEmailVerification(username: string): Promise<EmailVerifier> {
+    return await this.emailVerifierService.getEmailVerificationStatus(username)
   }
 
   touchLastLogin(user: User): Promise<User> {

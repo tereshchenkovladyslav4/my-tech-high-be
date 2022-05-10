@@ -1,3 +1,4 @@
 export class AuthPayload {
-    jwt: string;
+  jwt: string;
+  unverified: boolean;
 }
