@@ -19,6 +19,7 @@ import { UpdateStudentProfileInput } from '../dto/update-profile.inputs';
 import { UsersService } from './users.service';
 import { PersonsService } from './persons.service';
 import { UserRegion } from '../models/user-region.entity';
+import * as Moment from 'moment';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -89,6 +90,9 @@ export class StudentsService {
       application_id: null,
       application_status: null,
       application_school_year_id: null,
+      application_date_started: null,
+      application_date_submitted: null,
+      application_date_accepted: null,
       packet_id: null,
       packet_status: null,
     };
@@ -147,6 +151,8 @@ export class StudentsService {
       .orderBy('packet.packet_id', 'DESC')
       .printSql()
       .getRawOne();
+
+    //console.log('Student: ', student);
     return {
       student_id:
         (student && student.Student_student_id) || studentData.student_id,
@@ -156,6 +162,14 @@ export class StudentsService {
       application_status: (student && student.application_status) || null,
       application_school_year_id:
         (student && student.application_school_year_id) || null,
+      application_date_started:
+        (student && student.application_date_started) || null,
+      application_date_submitted:
+        (student && student.application_date_submitted) || null,
+      application_date_accepted:
+        (student &&
+          Moment(student.application_date_accepted).format('MMM Do, YYYY')) ||
+        null,
       packet_id: (student && student.packet_packet_id) || null,
       packet_status: (student && student.packet_status) || null,
     };

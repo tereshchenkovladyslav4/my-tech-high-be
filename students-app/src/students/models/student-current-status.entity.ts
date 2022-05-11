@@ -6,26 +6,35 @@ import { Packet } from './packet.entity';
 @ObjectType()
 export class StudentCurrentStatus {
   @Field(() => ID, { nullable: true })
-  student_id?: number
+  student_id?: number;
 
   @Field((type) => Int, { nullable: true })
-  school_year_id?: number
+  school_year_id?: number;
 
   @Field((type) => String, { nullable: true })
-  grade_level?: string
+  grade_level?: string;
 
   @Field((type) => Int, { nullable: true })
-  application_id?: number
+  application_id?: number;
 
   @Field((type) => String, { nullable: true })
-  application_status?: string
+  application_status?: string;
 
   @Field((type) => Int, { nullable: true })
-  application_school_year_id?: number
+  application_school_year_id?: number;
+
+  @Field(() => Date, { nullable: true })
+  application_date_started?: Date;
+
+  @Field(() => Date, { nullable: true })
+  application_date_submitted?: Date;
+
+  @Field(() => String, { nullable: true })
+  application_date_accepted?: String;
 
   @Field((type) => Int, { nullable: true })
-  packet_id?: number
+  packet_id?: number;
 
   @Field((type) => String, { nullable: true })
-  packet_status?: string
+  packet_status?: string;
 }

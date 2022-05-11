@@ -35,4 +35,10 @@ export class Application extends BaseEntity {
 
   @Column()
   date_started?: Date;
+
+  @Column()
+  date_submitted?: Date;
+
+  @Column()
+  date_accepted?: Date;
 }
