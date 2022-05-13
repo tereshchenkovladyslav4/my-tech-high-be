@@ -199,6 +199,75 @@ export class AppController {
     }
   }
 
+  @Post('uploadImage')
+  @UseGuards(new JWTAuthGuard())
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(@Req() request: any, @UploadedFile() file) {
+    try{
+      if( !file )
+        throw new HttpException("File Upload is Required!", HttpStatus.CONFLICT);
+
+      const username = request && request.user && request.user.username || null;
+      if( !username )
+        throw new HttpException("Username Not Defined!", HttpStatus.CONFLICT);
+
+      const user = await this.usersService.findOneByEmail(username);
+      if( !user )
+        throw new HttpException("You don't have permission to upload a file to storage!", HttpStatus.CONFLICT);
+      
+      const { buffer, mimetype, originalname, size } = file;
+
+      const allowed_files = [
+        { 'image/png' :  'png'},
+        { 'image/jpeg' : 'jpg'},
+        { 'image/gif' :  'gif'},
+        { 'image/bmp' : 'bmp'},
+        { 'image/vnd.microsoft.icon' : 'ico'},
+        { 'image/tiff' : 'tiff'},
+        { 'image/svg+xml' : 'svg'},
+      ];
+       
+      let extension = false;
+      allowed_files.map( (item, i) => {
+         //console.log("Item: ", item, " = ", i, " = ", mimetype);
+         if( typeof item[mimetype] !== "undefined" ) extension = item[mimetype];
+       } );
+
+       //console.log("Allowed: ", extension);
+      if( !extension )
+        throw new HttpException("Filetype "+mimetype+" is not allowed!", HttpStatus.CONFLICT);
+
+     
+      const file_name = 'image/' + user.user_id + '/' + this.encryptFileName(originalname) + '.' + extension;
+      const upload = await this.s3Service.s3_upload(buffer, null, file_name, mimetype );
+      const year = parseInt( Moment().format('YYYY') );
+      const userFile = await this.fileService.create({
+        name: originalname,
+        type: mimetype,
+        item1: upload.Key,
+        item2: upload.ServerSideEncryption,
+        item3: upload.ETag,
+        uploaded_by: user.user_id,
+        year
+      });
+
+      // Lets update User Avatar URL by S3 Key
+      await this.usersService.updateAvatarUrl(user, upload.Key);
+
+      return {status: "Success", data: {
+        name: originalname,
+        key: upload.Key,
+        type: mimetype,
+        size: size,
+        file: userFile,
+        //s3: upload
+      }, success: true, code: 200};
+    } catch (err) {
+      //console.log(err);
+      return {status: "Error", message: err.response, error: true, code: err.status};
+    }
+  }
+
   private encryptFileName(name: string) {
     return crypto
       .createHash('md5')

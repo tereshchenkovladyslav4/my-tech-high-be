@@ -34,9 +34,9 @@ export class EnrollmentQuestionGroupService {
     const { id, order, group_name, tab_id, questions } = input;
 
     const groupData = await this.repo.save({ id, order, group_name, tab_id });
-    await Promise.all(
-      questions.map((el) =>
-        this.enrollmentQuestionsService.createOrUpdate({
+    Promise.all(
+      questions.map(async el =>
+        await this.enrollmentQuestionsService.createOrUpdate({
           ...el,
           group_id: groupData.id,
         }),

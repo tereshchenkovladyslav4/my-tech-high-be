@@ -36,6 +36,7 @@ import { UserRegionService } from './../services/region/user-region.service';
 import { UserRegion } from 'src/models/user-region.entity';
 import { GetPersonInfoArgs } from '../dto/get-person-info.args';
 import { Pagination } from '../paginate';
+import { MasqueradeInput } from '../dto/masquerade-input';
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -337,5 +338,56 @@ export class UsersResolver {
   @ResolveField((of) => [UserRegion], { name: 'userRegions' })
   async getUserRegion(@Parent() user: User): Promise<UserRegion[]> {
     return await this.userRegionService.findUserRegionByUserId(user.user_id);
+  }
+
+  @Mutation((returns) => User, { name: 'toggleMasquerade' })
+  @UseGuards(new AuthGuard())
+  async toggleMasquerade(
+    @Context('user') user: any,
+    @Args('masqueradeInput') masqueradeInput: MasqueradeInput,
+  ): Promise<User> {
+    if (user) {
+      const authUser = await this.usersService.findOneByEmail(user.username);
+      if (!authUser) throw new UnauthorizedException();
+      if ( masqueradeInput.masquerade === true && authUser.level !== 1) throw new UnauthorizedException();
+
+      const userToUpdate =  await this.usersService.findOneById(masqueradeInput.user_id)
+      if (!userToUpdate) throw new BadRequestException();
+
+      if(userToUpdate.level !== 2) throw new UnauthorizedException()
+
+      if(userToUpdate.level === 2){
+        return await this.usersService.toggleMasquerade(
+          userToUpdate,
+          masqueradeInput,
+        );
+      }
+    } else {
+      throw new UnauthorizedException();
+    }
+  }
+
+  @Mutation((of) => MePermission)
+  @UseGuards(new AuthGuard())
+  public async masqueradeUser(
+    @Context('user') user: any,
+    @Args('userId') userId: number,
+  ): Promise<AuthPayload | any> {
+    if (user) {
+      const authUser = await this.usersService.findOneByEmail(user.username);
+      if (!authUser || authUser.masquerade === 0) throw new UnauthorizedException();
+      const masquerade = await this.usersService.findOneById(userId);
+      const token = await this.authService.masquerade(masquerade, authUser);
+      const payload = {
+        user_id: masquerade.user_id,
+        auth_token: token.jwt,
+        last_login: new Date(),
+      };
+      await this.usersService.updateUser(payload);
+      return token;
+
+    } else {
+      throw new UnauthorizedException();
+    }
   }
 }

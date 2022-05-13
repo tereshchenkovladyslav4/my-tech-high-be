@@ -50,9 +50,9 @@ export class EnrollmentQuestionTabService {
       tab_name,
       region_id,
     });
-    await Promise.all(
-      groups.map((el) =>
-        this.enrollmentQuestionGroupService.createOrUpdate({
+    Promise.all(
+      groups.map(async el =>
+        await this.enrollmentQuestionGroupService.createOrUpdate({
           ...el,
           tab_id: tabData.id,
         }),

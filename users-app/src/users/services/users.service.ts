@@ -27,6 +27,8 @@ import { EmailVerifierService } from './email-verifier.service';
 import { GetPersonInfoArgs } from '../dto/get-person-info.args';
 import { UserRegionArgs } from '../dto/user-regions.args';
 import { Pagination } from '../paginate';
+import { MasqueradeInput } from '../dto/masquerade-input';
+
 const crypto = require('crypto');
 const salt = process.env.MTH_SALT || 'asin';
 
@@ -276,6 +278,7 @@ export class UsersService {
         password: this.saltPassword('password'),
         level: createUserInput.level,
         status: '0',
+        masquerade: createUserInput.level === 1 ? 1 :  0
       };
 
       const data = this.usersRepository.create(payload);
@@ -538,6 +541,22 @@ export class UsersService {
       .update(User)
       .set({ password: this.saltPassword(password), updated_at })
       .where('user_id = :id', { id: user.user_id })
+      .execute();
+
+    return user;
+  }
+
+  async toggleMasquerade(
+    user: User,
+    masqueradeInput: MasqueradeInput,
+  ): Promise<User> {
+    const { user_id, masquerade } = masqueradeInput;
+
+    await getConnection()
+      .createQueryBuilder()
+      .update(User)
+      .set({ masquerade: masquerade ? 1 : 0 })
+      .where('user_id = :id', { id: user_id })
       .execute();
 
     return user;

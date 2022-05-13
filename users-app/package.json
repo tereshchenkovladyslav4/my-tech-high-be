@@ -57,6 +57,7 @@
     "rimraf": "3.0.2",
     "rxjs": "7.4.0",
     "ts-morph": "12.2.0",
+    "typegraphql-nestjs": "^0.4.1",
     "typeorm": "^0.2.41",
     "typeorm-naming-strategies": "^2.0.0"
   },

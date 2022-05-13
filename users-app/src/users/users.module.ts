@@ -11,7 +11,9 @@ import { ApolloServerPluginInlineTraceDisabled } from 'apollo-server-core';
 import RepoModule from './repo.module';
 import { EmailTemplateResolver } from './resolvers/email-template/email-template.resolver';
 import { EmailReminderResolver } from './resolvers/email-template/email-reminder.resolver';
+import { QuickLinkResolver } from './resolvers/quick-link/quick-link.resolver';
 import { SchoolDistrictsResolver } from './resolvers/region/schoolDistricts.resolver';
+import { CountyResolver } from './resolvers/couty.resolver';
 
 const graphQLImports = [
   UsersResolver,
@@ -19,10 +21,12 @@ const graphQLImports = [
   RegionResolver,
   UserRegionResolver,
   UserAccessResolver,
+  QuickLinkResolver,
   EmailTemplateResolver,
   SchoolYearResolver,
   EmailReminderResolver,
   SchoolDistrictsResolver,
+  CountyResolver,
 ];
 
 @Module({

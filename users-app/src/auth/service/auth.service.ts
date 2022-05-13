@@ -35,7 +35,15 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.email, sub: user.user_id };
+    const payload = { username: user.email, sub: user.user_id};
+    return {
+      jwt: this.jwtService.sign(payload, { expiresIn: '1 day'}),
+      unverified: false,
+    };
+  }
+
+  async masquerade(masqueradeUser: any, currUser: any) {
+    const payload = { username: masqueradeUser.email, sub: masqueradeUser.user_id, masquerade: true, level: currUser.level };
     return {
       jwt: this.jwtService.sign(payload, { expiresIn: '1 day'}),
       unverified: false,

@@ -70,6 +70,10 @@ export class User extends BaseEntity {
   red_notifications?: string;
 
   @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
+  masquerade?: number;
+
+  @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   auth_token?: string;
 

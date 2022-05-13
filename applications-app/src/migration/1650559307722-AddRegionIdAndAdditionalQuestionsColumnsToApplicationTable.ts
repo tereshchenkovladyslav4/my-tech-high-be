@@ -8,7 +8,7 @@ export class AddRegionIdAndAdditionalQuestionsColumnsToApplicationTable165055930
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE \`mth_application\` ADD \`meta\` TEXT NULL DEFAULT NULL`,
+      `ALTER TABLE \`mth_application\` ADD \`meta\` longtext NULL DEFAULT NULL`,
     );
   }
 

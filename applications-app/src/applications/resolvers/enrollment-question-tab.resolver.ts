@@ -53,7 +53,9 @@ export class EnrollmentQuestionTabResolver {
     data: NewEnrollmentQuestionTabInput[],
   ): Promise<boolean> {
     try {
-      await Promise.all(data.map((el) => this.service.createOrUpdate(el)));
+      for(const el of data) {
+        await this.service.createOrUpdate(el)
+      }
       return true;
     } catch (e) {
       console.error('saveEnrollmentQuestion', e);

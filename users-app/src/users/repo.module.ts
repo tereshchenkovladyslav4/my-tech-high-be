@@ -31,8 +31,13 @@ import { SESService } from './services/ses.service';
 import { EmailVerifierService } from './services/email-verifier.service';
 import { SchoolYearsService } from './services/schoolyear.service';
 import { SchoolYear } from 'src/models/schoolyear.entity';
+import { QuickLinkService } from './services/quick-link/quick-link.service';
+import { QuickLink } from 'src/models/quick-link.entity';
 import { SchoolDistrictService } from './services/schoolDistrict.service';
 import { SchoolDistrict } from 'src/models/school-district.entity';
+import { CountyService } from './services/county.service';
+import { County } from 'src/models/county.entity';
+
 const RepoServices = [
   UsersService,
   RegionService,
@@ -49,6 +54,8 @@ const RepoServices = [
   SESService,
   EmailVerifierService,
   SchoolYearsService,
+  QuickLinkService,
+  CountyService,
 ];
 
 @Global()
@@ -75,7 +82,9 @@ const RepoServices = [
       EmailTemplateCategory,
       EmailVerifier,
       SchoolYear,
+      QuickLink,
       SchoolDistrict,
+      County,
     ]),
   ],
   providers: RepoServices,
