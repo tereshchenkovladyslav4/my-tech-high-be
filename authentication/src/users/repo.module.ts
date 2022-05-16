@@ -1,19 +1,37 @@
-import { Global, Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "./models/user.entity";
-import { MePermission } from "./models/me-permission.entity";
-import { UsersService } from "./services/users.service";
-import { EmailVerifierService } from "./services/email-verifier.service";
-import { EmailVerifier } from "./models/email-verifier.entity";
-import { EmailTemplate } from "./models/email-template.entity";
-import { EmailTemplatesService } from "./services/email-templates.service";
-import { EmailsService } from "./services/emails.service";
-import { SESService } from "./services/ses.service";
+import { Global, Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { User } from './models/user.entity'
+import { MePermission } from './models/me-permission.entity'
+import { UsersService } from './services/users.service'
+import { EmailVerifierService } from './services/email-verifier.service'
+import { EmailVerifier } from './models/email-verifier.entity'
+import { EmailTemplate } from './models/email-template.entity'
+import { UserRegion } from './models/user-region.entity'
+import { EmailTemplatesService } from './services/email-templates.service'
+import { EmailsService } from './services/emails.service'
+import { SESService } from './services/ses.service'
+import { UserRegionService } from './services/user-region.service'
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([User, EmailVerifier, EmailTemplate])],
-  providers: [UsersService, EmailVerifierService, EmailTemplatesService, EmailsService, SESService],
-  exports: [UsersService, EmailVerifierService, EmailTemplatesService, EmailsService, SESService],
+  imports: [
+    TypeOrmModule.forFeature([User, EmailVerifier, EmailTemplate, UserRegion])
+  ],
+  providers: [
+    UsersService,
+    EmailVerifierService,
+    EmailTemplatesService,
+    EmailsService,
+    SESService,
+    UserRegionService
+  ],
+  exports: [
+    UsersService,
+    EmailVerifierService,
+    EmailTemplatesService,
+    EmailsService,
+    SESService,
+    UserRegionService
+  ]
 })
 class RepoModule {}
-export default RepoModule;
+export default RepoModule

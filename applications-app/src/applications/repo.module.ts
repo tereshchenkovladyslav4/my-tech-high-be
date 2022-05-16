@@ -38,7 +38,9 @@ import { EmailVerifierService } from './services/email-verifier.service';
 import { ImmunizationSettingsService } from './services/immunization-settings.service';
 import { ImmunizationSettings } from './models/immunization-settings.entity';
 import { ApplicationEmailsService } from './services/application-emails.service';
+import { PacketEmailsService } from './services/packet-emails.service';
 import { ApplicationEmail } from './models/application-email.entity';
+import { PacketEmail } from './models/packet-email.entity';
 import { StudentStatus } from './models/student-status.entity';
 import { Observer } from './models/observer.entity';
 import { ObserversService } from './services/observers.service';
@@ -85,6 +87,7 @@ const servicesImports = [
   EmailVerifierService,
   ImmunizationSettingsService,
   ApplicationEmailsService,
+  PacketEmailsService,
   ObserversService,
   StudentImmunizationService,
   StudentStatusService,
@@ -119,6 +122,7 @@ const servicesImports = [
       EmailVerifier,
       ImmunizationSettings,
       ApplicationEmail,
+      PacketEmail,
       StudentStatus,
       Observer,
       StudentImmunization,

@@ -24,6 +24,16 @@ export class EmailTemplatesService {
     return data;
   }
 
+  async findByTemplateAndRegion(
+    template: string,
+    regionId: number,
+  ): Promise<ApplicationEmailTemplate> {
+    const data = await this.emailTemplateRepository.findOne({
+      where: { template_name: template, region_id: regionId },
+    });
+    return data;
+  }
+
   async updateEmailTemplate(
     id: number,
     subject: string,

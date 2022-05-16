@@ -25,6 +25,7 @@ import { CreateApplicationInput } from '../dto/new-application.inputs';
 import { ApplicationsService as StudentApplicationsService } from '../applications.service';
 import { CreateParentStudentInput } from '../dto/new-parent-student.inputs';
 import { Packet } from '../models/packet.entity';
+import { PacketEmail } from '../models/packet-email.entity'
 import { PacketsService } from '../services/packets.service';
 import { EnrollmentPacketContactInput } from '../dto/enrollment-packet-contact.inputs';
 import { EnrollmentPacketPersonalInput } from '../dto/enrollment-packet-personal.inputs';
@@ -53,6 +54,8 @@ import { EnrollmentPacketSubmissionInput } from '../dto/enrollment-packet-submis
 import { DeleteApplicationInput } from '../dto/delete-application.inputs';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
 import { FindImunizationSettingsInput } from '../dto/find-immunization';
+import { PacketEmailsService } from '../services/packet-emails.service';
+import { EnrollmentPacketSubmitInput } from '../dto/enrollment-packet-submit.input';
 
 @Resolver((of) => Packet)
 export class PacketsResolver {
@@ -67,6 +70,7 @@ export class PacketsResolver {
     private immunizationSettingsService: ImmunizationSettingsService,
     private fileService: FilesService,
     private emailService: EmailsService,
+    private packetEmailsService: PacketEmailsService,
   ) {}
 
   @Query((returns) => PacketPagination, { name: 'packets' })
@@ -129,6 +133,20 @@ export class PacketsResolver {
     );
   }
 
+  @Mutation((returns) => EnrollmentPacket, {
+    name: 'saveEnrollmentPacketSubmit',
+  })
+  //@UseGuards(new AuthGuard())
+  async saveEnrollmentPacketSubmit(
+    //@Context('user') user: User,
+    @Args('enrollmentPacketContactInput')
+    enrollmentPacketContactInput: EnrollmentPacketSubmitInput,
+  ): Promise<EnrollmentPacket> {
+    return await this.enrollmentsService.submitEnrollment(
+      enrollmentPacketContactInput,
+    );
+  }
+
   @Mutation((returns) => EnrollmentPacket, { name: 'saveEnrollmentPacket' })
   async saveEnrollmentPacket(
     @Args('enrollmentPacketInput') enrollmentPacketInput: EnrollmentPacketInput,
@@ -142,15 +160,14 @@ export class PacketsResolver {
   async sendEmail(
     @Args('emailInput') emailInput: EmailInput,
   ): Promise<ResponseDTO> {
-    const { content } = emailInput
+    const { content } = emailInput;
     const webAppUrl = process.env.WEB_APP_URL;
-    const body = content.toString()
-    .replace(/\[HOST\]/g, webAppUrl)
-    delete emailInput.content
+    const body = content.toString().replace(/\[HOST\]/g, webAppUrl);
+    delete emailInput.content;
     const emailData = {
       ...emailInput,
-      content: body
-    }
+      content: body,
+    };
     return await this.emailService.sendEmail(emailData);
   }
 
@@ -252,12 +269,21 @@ export class PacketsResolver {
     return this.fileService.deleteFile(input);
   }
 
-  @Mutation((returns) => [Packet], { name: 'emailPacket' })
+  @ResolveField((of) => [PacketEmail], { name: 'packet_emails' })
+  public async getPacketEmails(
+    @Parent() packet: Packet,
+  ): Promise<PacketEmail[]> {
+    return this.packetEmailsService.findByPacket(
+      packet.packet_id,
+    );
+  }
+
+  @Mutation((returns) => [PacketEmail], { name: 'emailPacket' })
   @UseGuards(new AuthGuard())
   async emailPacket(
     @Context('user') user: User,
     @Args('emailApplicationInput') emailPacketInput: EmailApplicationInput,
-  ): Promise<Packet[]> {
+  ): Promise<PacketEmail[]> {
     return await this.packetsService.sendEmail(emailPacketInput);
   }
 

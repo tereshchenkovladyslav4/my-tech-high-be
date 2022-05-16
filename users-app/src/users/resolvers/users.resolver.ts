@@ -182,12 +182,6 @@ export class UsersResolver {
         // }
         // await this.userRoleService.createRole(rolePayload);
 
-        const regionPayload = {
-          user_id: response.user_id,
-          region_id: createUserInput.regions,
-          creator_id: createUserInput.creator_id,
-        };
-        await this.userRegionService.createUserRegion(regionPayload);
         const accessPayload = {
           user_id: response.user_id,
           access_id: createUserInput.access,

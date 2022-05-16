@@ -3,13 +3,12 @@ import { IsOptional, MaxLength, IsEmail, Length, IsInt } from 'class-validator';
 
 @InputType()
 export class CreateParentUserInput {
- 
-  @Field()
+  @Field({ nullable: true })
   @MaxLength(60)
   @IsOptional()
   firstName?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @MaxLength(60)
   @IsOptional()
   lastName?: string;
@@ -18,13 +17,13 @@ export class CreateParentUserInput {
   @IsEmail()
   email?: string;
 
-  @Field({nullable: true})
-  password?: string
+  @Field({ nullable: true })
+  password?: string;
 
   @Field(() => Int, { defaultValue: 2 })
   @IsInt()
-  level?: number
+  level?: number;
 
-  @Field({nullable: true})
-  updateAt?: string
+  @Field({ nullable: true })
+  updateAt?: string;
 }

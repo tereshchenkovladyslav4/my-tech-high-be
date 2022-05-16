@@ -28,6 +28,7 @@ import { UserRegionService } from './services/user-region.service';
 import { EmailTemplatesService } from '../applications/services/email-templates.service';
 import { Application } from './models/application.entity';
 import { StudentStatusService } from './services/student-status.service';
+import { ApplicationUserRegion } from './models/user-region.entity';
 
 @Injectable()
 export class ApplicationsService {
@@ -100,20 +101,21 @@ export class ApplicationsService {
     await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
       recipients: newApplication.parent.email,
     });
-
-    // const emailTemplate = await this.emailTemplateService.findByTemplate(
-    //   'Application Received',
-    // );
-    // if (emailTemplate) {
-    //   await this.emailsService.sendEmail({
-    //     email: newApplication.parent.email,
-    //     subject: emailTemplate.subject,
-    //     content: emailTemplate.body,
-    //     bcc: emailTemplate.bcc,
-    //     from: emailTemplate.from,
-    //   });
-    // }
-
+      
+    const emailTemplate =
+      await this.emailTemplateService.findByTemplateAndRegion(
+        'Application Received',
+        Number(newApplication.state),
+      );
+    if (emailTemplate) {
+      await this.emailsService.sendEmail({
+        email: newApplication.parent.email,
+        subject: emailTemplate.subject,
+        content: emailTemplate.body,
+        bcc: emailTemplate.bcc,
+        from: emailTemplate.from,
+      });
+    }
     return {
       parent,
       students,
@@ -150,9 +152,19 @@ export class ApplicationsService {
     );
 
     const person = await this.personsService.findOneById(parent.person_id);
-    const emailTemplate = await this.emailTemplateService.findByTemplate(
-      'Application Received',
-    );
+    const regions: ApplicationUserRegion[] =
+      await this.userRegionService.findUserRegionByUserId(person.user_id);
+
+    var region_id = 0;
+    if (regions.length != 0) {
+      region_id = regions[0].region_id;
+    }
+
+    const emailTemplate =
+      await this.emailTemplateService.findByTemplateAndRegion(
+        'Application Received',
+        region_id,
+      );
     if (emailTemplate) {
       await this.emailsService.sendEmail({
         email: person?.email,

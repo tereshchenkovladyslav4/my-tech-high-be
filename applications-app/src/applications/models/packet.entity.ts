@@ -7,9 +7,11 @@ import {
   In,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Student } from './student.entity';
 import { PacketFile } from './packet-file.entity';
+import { PacketEmail } from './packet-email.entity';
 
 export enum StatusEnum {
   not_started = 'Not Started',
@@ -253,6 +255,10 @@ export class Packet extends BaseEntity {
   @Field(() => String, { nullable: true })
   missing_files?: string;
 
+  @OneToMany(type => PacketEmail, packet_email => packet_email.packet)
+  @JoinColumn({ name: 'packet_id', referencedColumnName: 'packet_id' })
+  packet_emails: PacketEmail[];
+  
   @Column()
   @Field(() => String, { nullable: true })
   meta?: string;

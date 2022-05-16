@@ -51,7 +51,7 @@ export class EnrollmentQuestions extends BaseEntity {
 
   @Column()
   @Field(() => Boolean, { defaultValue: false })
-  student_question: boolean;
+  display_admin: boolean;
 
   @Column()
   @Field(() => Int, { defaultValue: 0 })

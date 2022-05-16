@@ -10,8 +10,8 @@ export class Address extends BaseEntity {
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  address_id?: number
-  
+  address_id?: number;
+
   @Column()
   @Field(() => String, { nullable: true })
   name?: string;
@@ -35,4 +35,8 @@ export class Address extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   zip?: string;
+
+  @Column()
+  @Field({ nullable: true })
+  county_id?: number;
 }

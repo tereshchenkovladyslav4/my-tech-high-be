@@ -19,7 +19,10 @@ import { UpdateApplicationInput } from '../dto/update-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
 import { StudentsService } from './students.service';
 import { ResponseDTO } from '../dto/response.dto';
+import { ApplicationUserRegion } from '../models/user-region.entity';
+import { UserRegionService } from './user-region.service';
 import * as Moment from 'moment';
+
 @Injectable()
 export class ApplicationsService {
   constructor(
@@ -32,6 +35,7 @@ export class ApplicationsService {
     private studentGradeLevelsService: StudentGradeLevelsService,
     private emailTemplateService: EmailTemplatesService,
     private studentService: StudentsService,
+    private userRegionService: UserRegionService,
   ) {}
 
   async getSubmittedApplicationCount(regionId: number): Promise<ResponseDTO> {
@@ -314,9 +318,7 @@ export class ApplicationsService {
     acceptApplicationInput: AcceptApplicationInput,
   ): Promise<Application[]> {
     const { application_ids, midyear_application } = acceptApplicationInput;
-    const emailTemplate = await this.emailTemplateService.findByTemplate(
-      'Application Accepted',
-    );
+
     const promise = Promise.all(
       application_ids.map(async (id) => {
         const application_id = Number(id);
@@ -352,6 +354,23 @@ export class ApplicationsService {
         const gradeLevels = await this.studentGradeLevelsService.forStudents(
           student.student_id,
         );
+
+        const regions: ApplicationUserRegion[] =
+          await this.userRegionService.findUserRegionByUserId(
+            student.parent?.person?.user_id,
+          );
+
+        var region_id = 1;
+        if (regions.length != 0) {
+          region_id = regions[0].region_id;
+        }
+
+        const emailTemplate =
+          await this.emailTemplateService.findByTemplateAndRegion(
+            'Application Accepted',
+            region_id,
+          );
+
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {
             const yearbegin = new Date(school_year.date_begin)

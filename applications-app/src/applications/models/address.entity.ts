@@ -8,8 +8,8 @@ export class Address extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  address_id?: number
-  
+  address_id?: number;
+
   @Column()
   name?: string;
 
@@ -27,4 +27,7 @@ export class Address extends BaseEntity {
 
   @Column()
   zip?: string;
+
+  @Column()
+  county_id?: number;
 }

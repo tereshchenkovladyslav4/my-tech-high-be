@@ -26,6 +26,7 @@ import { EmailsService } from 'src/users/services/emails.service';
 import { EmailVerifierService } from './email-verifier.service';
 import { GetPersonInfoArgs } from '../dto/get-person-info.args';
 import { UserRegionArgs } from '../dto/user-regions.args';
+import { UserRegionService } from './region/user-region.service';
 import { Pagination } from '../paginate';
 import { MasqueradeInput } from '../dto/masquerade-input';
 
@@ -39,6 +40,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     private emailService: EmailsService,
     private emailVerifierService: EmailVerifierService,
+    private userRegionService: UserRegionService,
   ) {}
 
   saltPassword(password: string) {
@@ -284,6 +286,13 @@ export class UsersService {
       const data = this.usersRepository.create(payload);
       const user = await this.usersRepository.save(data);
       if (user) {
+        const regionPayload = {
+          user_id: user.user_id,
+          region_id: createUserInput.regions,
+          creator_id: createUserInput.creator_id,
+        };
+        await this.userRegionService.createUserRegion(regionPayload);
+
         const emailVerifier = await this.emailVerifierService.create({
           user_id: user.user_id,
           email: user.email,

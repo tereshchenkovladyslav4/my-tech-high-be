@@ -7199,7 +7199,7 @@ tslib@^2.3.1:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
   integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
-
+  
 tslib@~2.0.1:
   version "2.0.3"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.0.3.tgz"
@@ -7277,7 +7277,7 @@ typegraphql-nestjs@^0.4.1:
   integrity sha512-goK2i+XxmqIPofFEY/6JGYqXuArCo+67pPeFcNAhayfLwtJ45XF28o1NzfuyVVkeFweo14qGzrOht4k4IHxO8w==
   dependencies:
     tslib "^2.3.1"
-
+    
 typeorm-naming-strategies@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/typeorm-naming-strategies/-/typeorm-naming-strategies-2.0.0.tgz"

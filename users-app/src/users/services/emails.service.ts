@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { SESService } from './ses.service';
 import { EmailVerifier } from 'src/models/email-verifier.entity';
 import { EmailTemplatesService } from './email-templates/email-templates.service';
+import { UserRegionService } from './region/user-region.service';
+import { UserRegion } from 'src/models/user-region.entity';
 var base64 = require('base-64');
 @Injectable()
 export class EmailsService {
   constructor(
     private SESService: SESService,
     private emailTemplateService: EmailTemplatesService,
+    private userRegionService: UserRegionService,
   ) {}
 
   async sendAccountVerificationEmail(
@@ -18,8 +21,19 @@ export class EmailsService {
     const webAppUrl = process.env.WEB_APP_URL;
     const token = this.encrypt(emailVerifier);
     const recipientEmail = emailVerifier.email;
-    const template = await this.emailTemplateService.findByTemplate(
+    const regions: UserRegion[] =
+      await this.userRegionService.findUserRegionByUserId(
+        emailVerifier.user_id,
+      );
+
+    var region_id = 0;
+    if (regions.length != 0) {
+      region_id = regions[0].region_id;
+    }
+
+    const template = await this.emailTemplateService.findByTemplateAndRegion(
       'Email Verification',
+      region_id,
     );
 
     let subject =
@@ -62,8 +76,18 @@ export class EmailsService {
     const webAppUrl = process.env.WEB_APP_URL;
     const token = this.encrypt(emailVerifier);
     const recipientEmail = emailVerifier.email;
-    const template = await this.emailTemplateService.findByTemplate(
+    const regions: UserRegion[] =
+      await this.userRegionService.findUserRegionByUserId(
+        emailVerifier.user_id,
+      );
+
+    var region_id = 0;
+    if (regions.length != 0) {
+      region_id = regions[0].region_id;
+    }
+    const template = await this.emailTemplateService.findByTemplateAndRegion(
       'Email Changed',
+      region_id,
     );
 
     let subject = 'Email Change';
@@ -86,7 +110,7 @@ export class EmailsService {
         '/confirm/?token=' +
         token +
         '">Click here to verify</a><br></p>';
-        subject = template.subject;
+      subject = template.subject;
     }
     return this.SESService.sendEmail(
       recipientEmail,

@@ -4,6 +4,9 @@ import { Repository } from 'typeorm'
 import { SESService } from './ses.service'
 import { EmailVerifier } from 'src/users/models/email-verifier.entity'
 import { EmailTemplatesService } from './email-templates.service'
+import { UserRegionService } from './user-region.service'
+import { UserRegion } from './../models/user-region.entity'
+
 var base64 = require('base-64')
 import * as Moment from 'moment'
 
@@ -11,7 +14,8 @@ import * as Moment from 'moment'
 export class EmailsService {
   constructor(
     private SESService: SESService,
-    private emailTemplateService: EmailTemplatesService
+    private emailTemplateService: EmailTemplatesService,
+    private userRegionService: UserRegionService
   ) {}
 
   async sendAccountResetPasswordEmail(
@@ -19,9 +23,18 @@ export class EmailsService {
     email: string,
     date_created: string = Moment().format('YYYY-MM-DD HH:mm:ss')
   ): Promise<any> {
-    const template = await this.emailTemplateService.findByTemplate(
-      'Forgot Password'
+    const regions: UserRegion[] =
+      await this.userRegionService.findUserRegionByUserId(user_id)
+
+    var region_id = 0
+    if (regions.length != 0) {
+      region_id = regions[0].region_id
+    }
+    const template = await this.emailTemplateService.findByTemplateAndRegion(
+      'Forgot Password',
+      region_id
     )
+
     const webAppUrl = process.env.WEB_APP_URL
     const token = this.encrypt(user_id, email, date_created)
     const recipientEmail = email

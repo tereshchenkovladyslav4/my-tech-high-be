@@ -37,7 +37,7 @@ export class NewEnrollmentQuestionsInput {
   validation?: number;
 
   @Field(() => Boolean, { defaultValue: false })
-  student_question?: boolean;
+  display_admin?: boolean;
 
   @Field(() => Boolean, { defaultValue: false })
   default_question?: boolean;

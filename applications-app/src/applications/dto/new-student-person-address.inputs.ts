@@ -11,7 +11,7 @@ import { CreateAddressInput } from './new-address.inputs';
 
 @InputType()
 export class CreateStudentPersonAddressInput {
-  @Field()
+  @Field({ nullable: true })
   @MaxLength(60)
   @IsOptional()
   first_name?: string;
@@ -21,7 +21,7 @@ export class CreateStudentPersonAddressInput {
   @IsOptional()
   middle_name?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @MaxLength(60)
   @IsOptional()
   last_name?: string;

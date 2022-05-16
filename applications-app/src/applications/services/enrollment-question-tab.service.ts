@@ -40,6 +40,20 @@ export class EnrollmentQuestionTabService {
     return await this.repo.find();
   }
 
+  async findByAdmin(
+    input?: EnrollmentQuestionsInput,
+  ): Promise<EnrollmentQuestionTab[]> {
+    if (input) {
+      return await this.repo.find({
+        where: {
+          region_id: input.region_id,
+          is_active: 1,
+        },
+      });
+    }
+    return await this.repo.find();
+  }
+
   async createOrUpdate(
     input: NewEnrollmentQuestionTabInput,
   ): Promise<EnrollmentQuestionTab> {
@@ -51,11 +65,12 @@ export class EnrollmentQuestionTabService {
       region_id,
     });
     Promise.all(
-      groups.map(async el =>
-        await this.enrollmentQuestionGroupService.createOrUpdate({
-          ...el,
-          tab_id: tabData.id,
-        }),
+      groups.map(
+        async (el) =>
+          await this.enrollmentQuestionGroupService.createOrUpdate({
+            ...el,
+            tab_id: tabData.id,
+          }),
       ),
     );
     return tabData;

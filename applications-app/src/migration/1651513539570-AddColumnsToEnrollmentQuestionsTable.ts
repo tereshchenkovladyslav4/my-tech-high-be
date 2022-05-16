@@ -7,7 +7,7 @@ export class AddColumnsToEnrollmentQuestionsTable1651513539570
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE \`mth_enrollment_questions\` ADD \`student_question\` tinyint NOT NULL`,
+      `ALTER TABLE \`mth_enrollment_questions\` ADD \`display_admin\` tinyint NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE \`mth_enrollment_questions\` ADD \`default_question\` tinyint NOT NULL`,
@@ -22,7 +22,7 @@ export class AddColumnsToEnrollmentQuestionsTable1651513539570
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE \`mth_enrollment_questions\` DROP COLUMN \`student_question\``,
+      `ALTER TABLE \`mth_enrollment_questions\` DROP COLUMN \`display_admin\``,
     );
     await queryRunner.query(
       `ALTER TABLE \`mth_enrollment_questions\` DROP COLUMN \`default_question\``,

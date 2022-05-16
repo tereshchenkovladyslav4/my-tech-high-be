@@ -45,6 +45,15 @@ export class EnrollmentQuestionTabResolver {
     return this.service.findByActive(input);
   }
 
+  @Query(() => [EnrollmentQuestionTab], {
+    name: 'getPacketEnrollmentQuestions',
+  })
+  public async getPacketEnrollmentQuestionTabs(
+    @Args('input', { nullable: true }) input?: EnrollmentQuestionsInput,
+  ): Promise<EnrollmentQuestionTab[]> {
+    return this.service.findByAdmin(input);
+  }
+
   @Mutation((returns) => Boolean, {
     name: 'saveEnrollmentQuestions',
   })
@@ -53,8 +62,8 @@ export class EnrollmentQuestionTabResolver {
     data: NewEnrollmentQuestionTabInput[],
   ): Promise<boolean> {
     try {
-      for(const el of data) {
-        await this.service.createOrUpdate(el)
+      for (const el of data) {
+        await this.service.createOrUpdate(el);
       }
       return true;
     } catch (e) {

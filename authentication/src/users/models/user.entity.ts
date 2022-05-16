@@ -5,8 +5,11 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   UpdateDateColumn,
-  CreateDateColumn
+  CreateDateColumn,
+  OneToMany
 } from 'typeorm'
+
+import { UserRegion } from './user-region.entity'
 
 @ObjectType()
 @Directive('@extends')
@@ -16,47 +19,43 @@ export class User extends BaseEntity {
   @Column()
   @Field((type) => ID, { nullable: true })
   @PrimaryGeneratedColumn()
+  @Directive('@external')
   user_id?: number
 
   @Column()
-  @Field(() => String, { nullable: true })
   email?: string
 
   @Column()
-  @Field(() => String, { nullable: true })
   firstName?: string
 
   @Column()
-  @Field(() => String, { nullable: true })
   lastName?: string
 
   @Column()
-  @Field(() => String, { nullable: true })
   password?: string
 
   @Column()
-  @Field(() => Number, { nullable: true })
   level?: number
 
   @Column()
-  @Field(() => String, { nullable: true })
   cookie?: string
 
   @Column()
-  @Field(() => Date, { nullable: true })
   lastLogin?: Date
 
   @Column()
-  @Field(() => String, { nullable: true })
   avatarUrl?: string
 
   @Column()
-  @Field(() => String, { nullable: true })
   status?: string
 
   @CreateDateColumn()
-  created_at!: Date;
+  created_at!: Date
 
   @UpdateDateColumn()
-  updated_at!: Date;
+  updated_at!: Date
+
+  @OneToMany(() => UserRegion, (userRegion) => userRegion.user)
+  // @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
+  userRegion?: UserRegion[]
 }

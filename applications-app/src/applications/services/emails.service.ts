@@ -9,6 +9,9 @@ import { User } from '../models/user.entity';
 import { EmailVerifier } from '../models/email-verifier.entity';
 import { ResponseDTO } from '../dto/response.dto';
 import { EmailTemplatesService } from './email-templates.service';
+import { UserRegionService } from './user-region.service';
+import { ApplicationUserRegion } from '../models/user-region.entity';
+
 var base64 = require('base-64');
 @Injectable()
 export class EmailsService {
@@ -16,6 +19,7 @@ export class EmailsService {
     private coreSettingsService: CoreSettingsService,
     private SESService: SESService,
     private emailTemplateService: EmailTemplatesService,
+    private userRegionService: UserRegionService,
   ) {}
 
   async sendAccountVerificationEmail(
@@ -24,9 +28,22 @@ export class EmailsService {
   ): Promise<any> {
     let settings = [];
     const webAppUrl = process.env.WEB_APP_URL;
-    const emailTemplate = await this.emailTemplateService.findByTemplate(
-      'Application Received',
-    );
+
+    const regions: ApplicationUserRegion[] =
+      await this.userRegionService.findUserRegionByUserId(
+        emailVerifier.user_id,
+      );
+
+    var region_id = 1;
+    if (regions.length != 0) {
+      region_id = regions[0].region_id;
+    }
+
+    const emailTemplate =
+      await this.emailTemplateService.findByTemplateAndRegion(
+        'Application Received',
+        region_id,
+      );
 
     // const siteSettings = this.coreSettingsService.getSiteSettings();
 

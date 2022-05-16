@@ -4,11 +4,13 @@ import { Repository, In, Brackets } from 'typeorm';
 import { PacketsArgs, DeletePacketArgs } from '../dto/packets.args';
 import { CreatePacketInput } from '../dto/new-packet.inputs';
 import { Packet } from '../models/packet.entity';
+import { PacketEmail } from '../models/packet-email.entity';
 import { UpdatePacketInput } from '../dto/update-packet.inputs';
 import { SaveStudentPacketInput } from '../dto/save-student-packet.inputs';
 import { Pagination, PaginationOptionsInterface } from '../../paginate';
 import { ResponseDTO } from '../dto/response.dto';
 import { EmailsService } from './emails.service';
+import { PacketEmailsService } from './packet-emails.service'
 import { DeleteApplicationInput } from '../dto/delete-application.inputs';
 import { ApplicationsService } from './applications.service';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
@@ -23,6 +25,7 @@ export class PacketsService {
     private readonly packetsRepository: Repository<Packet>,
     private sesEmailService: EmailsService,
     private schoolYearService: SchoolYearService,
+    private packetEmailsService: PacketEmailsService,
     @Inject(forwardRef(() => ApplicationsService))
     private applicationService: ApplicationsService,
     private emailTemplateService: EmailTemplatesService,
@@ -39,6 +42,9 @@ export class PacketsService {
       });
     }
 
+    const userEmails = this.packetEmailsService.findByOrder();
+
+
     let qb = this.packetsRepository
       .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.student', 'student')
@@ -49,6 +55,12 @@ export class PacketsService {
       .leftJoinAndSelect('student.status', 'status')
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+      .leftJoinAndSelect('packet.packet_emails', 'packet_emails')
+      .leftJoinAndSelect(
+        'packet.packet_emails',
+        '(' + userEmails + ')',
+      )
+
       .where('packet.status IN (:status)', { status: filters })
       .andWhere(`school_year.RegionId = ${region_id}`);
 
@@ -110,6 +122,8 @@ export class PacketsService {
           qb.orderBy('packet.status', 'DESC');
         }  else if(_sortBy[0] === 'studentStatus') {
           qb.orderBy('status.status', 'DESC');
+        }  else if (_sortBy[0] === 'emailed') {
+          qb.orderBy(`(${userEmails}).created_at`, 'DESC');
         } else if (_sortBy[0] === 'parent') {
           qb.addSelect(
             "CONCAT(p_person.first_name, ' ', p_person.last_name)",
@@ -132,6 +146,8 @@ export class PacketsService {
           qb.orderBy('packet.deadline', 'ASC');
         } else if(_sortBy[0] === 'studentStatus') {
           qb.orderBy('status.status', 'ASC');
+        } else if (_sortBy[0] === 'emailed') {
+          qb.orderBy(`(${userEmails}).created_at`, 'ASC');
         } else if (_sortBy[0] === 'status') {
           qb.orderBy('packet.status', 'ASC');
         } else if (_sortBy[0] === 'parent') {
@@ -226,7 +242,7 @@ export class PacketsService {
       results: statusArray,
     };
   }
-  async sendEmail(emailPacketInput: EmailApplicationInput): Promise<Packet[]> {
+  async sendEmail(emailPacketInput: EmailApplicationInput): Promise<PacketEmail[]> {
     const { application_ids, subject, body } = emailPacketInput;
     const [results, total] = await this.packetsRepository
       .createQueryBuilder('packet')
@@ -281,7 +297,17 @@ export class PacketsService {
         bcc: emailTemplate.bcc,
       });
     });
-    return results;
+    const packetEmails = Promise.all(
+      application_ids.map(async (id) => {
+        return await this.packetEmailsService.create({
+          packet_id: id,
+          subject: subject,
+          body: body,
+          from_email: emailTemplate.from,
+        });
+      }),
+    );
+    return packetEmails;
   }
 
   async deletePacket(

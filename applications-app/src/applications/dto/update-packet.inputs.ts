@@ -166,4 +166,7 @@ export class UpdatePacketInput {
 
   @Field(() => String, { nullable: true })
   missing_files?: string;
+
+  @Field(() => String, { nullable: true })
+  meta?: string;
 }
