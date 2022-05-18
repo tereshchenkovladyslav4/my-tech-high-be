@@ -35,8 +35,8 @@ export class EmailTemplate {
   @Field(() => String, { nullable: true })
   template_name?: string;
 
-  @Field(() => String, { nullable: true })
-  deadline?: string;
+  @Field(() => Int, { nullable: true })
+  deadline?: number;
 
   @Field(() => String, { nullable: true })
   standard_responses?: string;

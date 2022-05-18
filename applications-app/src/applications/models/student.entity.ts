@@ -14,6 +14,7 @@ import { Parent } from './parent.entity';
 import { Person } from './person.entity';
 import { StudentGradeLevel } from './student-grade-level.entity';
 import { StudentStatus } from './student-status.entity';
+import { Withdrawal } from './withdrawal.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
@@ -23,7 +24,7 @@ import { StudentStatus } from './student-status.entity';
 export class Student extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'int', name: 'student_id' })
   @Directive('@external')
   student_id?: number;
 
@@ -40,11 +41,6 @@ export class Student extends BaseEntity {
   @Field((type) => [Packet], { nullable: true })
   packets?: Packet[];
 
-  @OneToOne((type) => Person, (person) => person.person_id)
-  @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
-  @Field(() => Person, { nullable: true })
-  person: Person;
-
   @OneToOne((type) => Parent)
   @JoinColumn({ name: 'parent_id' })
   parent: Parent;
@@ -52,8 +48,9 @@ export class Student extends BaseEntity {
   @OneToMany((type) => Application, (application) => application.student)
   applications?: Application[];
 
-  @OneToOne((type) => StudentGradeLevel)
-  @JoinColumn({ name: 'student_id' })
+  @OneToOne((type) => StudentGradeLevel, (gradeLevel) => gradeLevel.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  @Field(() => StudentGradeLevel, { nullable: true })
   student_grade_level: StudentGradeLevel;
 
   @Column()
@@ -78,4 +75,16 @@ export class Student extends BaseEntity {
   @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status?: StudentStatus[];
+
+  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.Student)
+  @Field(() => [Withdrawal], { nullable: true })
+  Withdrawals: Withdrawal[];
+
+  @OneToOne(() => Person, (person) => person.Student, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
+  @Field(() => Person, { nullable: true })
+  person: Person;
 }

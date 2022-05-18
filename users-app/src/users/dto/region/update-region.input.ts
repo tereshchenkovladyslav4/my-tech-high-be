@@ -34,4 +34,10 @@ export class UpdateRegionInput {
 
   @Field(() => String, { nullable: true })
   school_district_array?: string;
+
+  @Field((type) => Int, { nullable: true })
+  application_deadline_num_days: number;
+
+  @Field((type) => Int, { nullable: true })
+  enrollment_packet_deadline_num_days: number;
 }

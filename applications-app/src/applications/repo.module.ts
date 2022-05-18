@@ -64,6 +64,8 @@ import { EnrollmentQuestionGroupService } from './services/enrollment-question-g
 import { EnrollmentQuestionsService } from './services/enrollment-questions.service';
 import { EmailReminderService } from './services/email-reminder.service';
 import { EmailReminder } from './models/email-reminder.entity';
+import { WithdrawalService } from './services/withdrawal.service';
+import { Withdrawal } from './models/withdrawal.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -91,6 +93,7 @@ const servicesImports = [
   ObserversService,
   StudentImmunizationService,
   StudentStatusService,
+  WithdrawalService,
   SettingsService,
   UserRegionService,
   EmailTemplatesService,
@@ -124,6 +127,7 @@ const servicesImports = [
       ApplicationEmail,
       PacketEmail,
       StudentStatus,
+      Withdrawal,
       Observer,
       StudentImmunization,
       Settings,

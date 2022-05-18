@@ -5,6 +5,7 @@ import { EmailTemplate } from 'src/models/email-template.entity';
 import { CreateEmailTemplateInput } from 'src/users/dto/emailTemplate/create-email-template.input';
 import { EmailCategoryService } from './email-category.service';
 import { EmailReminderService } from './email-reminder.service';
+import { RegionService } from '../region/region.service';
 @Injectable()
 export class EmailTemplatesService {
   constructor(
@@ -12,13 +13,12 @@ export class EmailTemplatesService {
     private readonly emailTemplateRepository: Repository<EmailTemplate>,
     private categoryService: EmailCategoryService,
     private emailReminderService: EmailReminderService,
+    private regionService: RegionService,
   ) {}
 
   async findAll(): Promise<EmailTemplate[]> {
     const data = await this.emailTemplateRepository.find({
-      relations: [
-        'category'
-      ]
+      relations: ['category', 'region'],
     });
     return data;
 
@@ -37,16 +37,17 @@ export class EmailTemplatesService {
 
   async findByRegion(regionId: number): Promise<EmailTemplate[]> {
     const data = await this.emailTemplateRepository.find({
-      where: {region_id: regionId },
-      relations: [
-        'category'
-      ]
+      where: { region_id: regionId },
+      relations: ['category', 'region'],
     });
     return data;
   }
 
   async findById(id: number): Promise<EmailTemplate> {
-    const data = await this.emailTemplateRepository.findOne(id);
+    const data = await this.emailTemplateRepository.findOne({
+      where: { id },
+      relations: ['category', 'region'],
+    });
     return data;
   }
 
@@ -57,7 +58,10 @@ export class EmailTemplatesService {
     return data;
   }
 
-  async findByTemplateAndRegion(template: string, regionId: number): Promise<EmailTemplate> {
+  async findByTemplateAndRegion(
+    template: string,
+    regionId: number,
+  ): Promise<EmailTemplate> {
     const data = await this.emailTemplateRepository.findOne({
       where: { template_name: template, region_id: regionId },
     });
@@ -88,22 +92,34 @@ export class EmailTemplatesService {
     createEmailTemplateInput: CreateEmailTemplateInput,
   ): Promise<EmailTemplate> {
     const { emailTemplate, category } = createEmailTemplateInput;
-    const reminders = emailTemplate?.reminders
+    const reminders = emailTemplate?.reminders;
     const template = await this.findById(emailTemplate.id);
     delete emailTemplate.reminders;
+
+    const deadline = emailTemplate?.deadline;
+    delete emailTemplate.deadline;
+
     await this.emailTemplateRepository.update(template, emailTemplate);
 
-    if(reminders && reminders.length > 0) {
-      reminders.forEach(async remind => {
-       if(!remind.id) {
-        const payload = { ...remind, email_template_id: emailTemplate.id}
-        await this.emailReminderService.create(payload)
-       } else {
-        const { id } = remind
-        delete remind.id
-         await this.emailReminderService.update(id, remind);
-       }
-     })
+    if (deadline) {
+      await this.regionService.saveRegionDeadlines(
+        template.region.id,
+        deadline,
+        category,
+      );
+    }
+
+    if (reminders && reminders.length > 0) {
+      reminders.forEach(async (remind) => {
+        if (!remind.id) {
+          const payload = { ...remind, email_template_id: emailTemplate.id };
+          await this.emailReminderService.create(payload);
+        } else {
+          const { id } = remind;
+          delete remind.id;
+          await this.emailReminderService.update(id, remind);
+        }
+      });
     }
     return template;
   }

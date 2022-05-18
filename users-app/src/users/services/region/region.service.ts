@@ -3,7 +3,7 @@ import { CreateRegionInput } from '../../dto/region/create-region.input';
 import { Region } from '../../../models/region.entity';
 import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, getConnection } from 'typeorm';
 
 @Injectable()
 export class RegionService {
@@ -82,6 +82,10 @@ export class RegionService {
       county_file_path: updateRegionInput.county_file_path,
       school_district_file_name: updateRegionInput.school_district_file_name,
       school_district_file_path: updateRegionInput.school_district_file_path,
+      application_deadline_num_days:
+        updateRegionInput.application_deadline_num_days,
+      enrollment_packet_deadline_num_days:
+        updateRegionInput.enrollment_packet_deadline_num_days,
     };
     const res = await this.regionRepository.update(updateRegionInput.id, data);
     if (res.affected > 0) {
@@ -146,5 +150,31 @@ export class RegionService {
       fileId = item.fileId;
     });
     return fileId;
+  }
+
+  async saveRegionDeadlines(
+    region_id: number,
+    deadline: number,
+    category: string,
+  ): Promise<any> {
+    console.log('region: ', region_id);
+    if (category == 'Applications')
+      return await getConnection()
+        .createQueryBuilder()
+        .update(Region)
+        .set({
+          application_deadline_num_days: deadline,
+        })
+        .where('id = :id', { id: region_id })
+        .execute();
+    else
+      return await getConnection()
+        .createQueryBuilder()
+        .update(Region)
+        .set({
+          enrollment_packet_deadline_num_days: deadline,
+        })
+        .where('id = :id', { id: region_id })
+        .execute();
   }
 }

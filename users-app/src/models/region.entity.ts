@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import {
   BaseEntity,
   Column,
@@ -14,6 +14,7 @@ import { RegionProgram } from './region-program.enum';
 import { SchoolYear } from './schoolyear.entity';
 import { County } from './county.entity';
 import { SchoolDistrict } from './school-district.entity';
+import { EmailTemplate } from './email-template.entity';
 
 @ObjectType()
 @Directive('@key(fields: "id,name, program")')
@@ -52,6 +53,14 @@ export class Region extends BaseEntity {
   @Field((type) => String, { nullable: true })
   school_district_file_path: String;
 
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  application_deadline_num_days: number;
+
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  enrollment_packet_deadline_num_days: number;
+
   @OneToMany(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
   region: UserRegion;
@@ -73,4 +82,8 @@ export class Region extends BaseEntity {
   @OneToMany(() => SchoolYear, (schoolYear) => schoolYear.Region)
   @Field(() => [SchoolYear], { nullable: true })
   SchoolYears: SchoolYear[];
+
+  @OneToMany(() => EmailTemplate, (emailTemplate) => emailTemplate.region)
+  @Field(() => [EmailTemplate], { nullable: true })
+  email_templates: EmailTemplate[];
 }

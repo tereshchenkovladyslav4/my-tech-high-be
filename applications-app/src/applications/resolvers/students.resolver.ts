@@ -25,6 +25,8 @@ import { Application } from '../models/application.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
+import { Withdrawal } from '../models/withdrawal.entity';
+import { WithdrawalService } from '../services/withdrawal.service';
 @Resolver((of) => Student)
 export class StudentsResolver {
   constructor(
@@ -34,6 +36,7 @@ export class StudentsResolver {
     private studentGradeLevelsService: StudentGradeLevelsService,
     private packetsService: PacketsService,
     private applicationsService: ApplicationsService,
+    private withdrawalService: WithdrawalService,
   ) {}
 
   @ResolveField((of) => [Packet], { name: 'packets' })
@@ -54,6 +57,12 @@ export class StudentsResolver {
     student_id: number;
   }): Promise<Student> {
     return this.studentsService.findOneById(reference.student_id);
+  }
+
+  @Query((returns) => [Withdrawal], { name: 'withdrawals' })
+  //@UseGuards(new AuthGuard())
+  async getWithdrawals(): Promise<Withdrawal[]> {
+    return this.withdrawalService.findAll();
   }
 
   @Mutation((returns) => Boolean, { name: 'updateStudent' })

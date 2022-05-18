@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { EmailVerifier } from './email-verifier.entity';
 import { PersonAddress } from './person-address.entity';
+import { Student } from './student.entity';
 import { User } from './user.entity';
 
 @ObjectType()
@@ -62,4 +63,8 @@ export class Person extends BaseEntity {
   @OneToOne((type) => User, (user) => user.user_id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   user: User;
+
+  @OneToOne(() => Student, (student) => student.person)
+  @Field(() => Student, { nullable: true })
+  Student: Student;
 }
