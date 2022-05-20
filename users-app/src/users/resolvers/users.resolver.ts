@@ -68,6 +68,16 @@ export class UsersResolver {
     }
   }
 
+  @Query(() => Number)
+  async getUserIdFromEmail(@Args('email') email: string) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (user) {
+      return user.user_id;
+    } else {
+      return 0;
+    }
+  }
+
   @Mutation((of) => MePermission)
   @UseGuards(LocalAuthGuard)
   public async login(
@@ -343,14 +353,17 @@ export class UsersResolver {
     if (user) {
       const authUser = await this.usersService.findOneByEmail(user.username);
       if (!authUser) throw new UnauthorizedException();
-      if ( masqueradeInput.masquerade === true && authUser.level !== 1) throw new UnauthorizedException();
+      if (masqueradeInput.masquerade === true && authUser.level !== 1)
+        throw new UnauthorizedException();
 
-      const userToUpdate =  await this.usersService.findOneById(masqueradeInput.user_id)
+      const userToUpdate = await this.usersService.findOneById(
+        masqueradeInput.user_id,
+      );
       if (!userToUpdate) throw new BadRequestException();
 
-      if(userToUpdate.level !== 2) throw new UnauthorizedException()
+      if (userToUpdate.level !== 2) throw new UnauthorizedException();
 
-      if(userToUpdate.level === 2){
+      if (userToUpdate.level === 2) {
         return await this.usersService.toggleMasquerade(
           userToUpdate,
           masqueradeInput,
@@ -369,7 +382,8 @@ export class UsersResolver {
   ): Promise<AuthPayload | any> {
     if (user) {
       const authUser = await this.usersService.findOneByEmail(user.username);
-      if (!authUser || authUser.masquerade === 0) throw new UnauthorizedException();
+      if (!authUser || authUser.masquerade === 0)
+        throw new UnauthorizedException();
       const masquerade = await this.usersService.findOneById(userId);
       const token = await this.authService.masquerade(masquerade, authUser);
       const payload = {
@@ -379,7 +393,6 @@ export class UsersResolver {
       };
       await this.usersService.updateUser(payload);
       return token;
-
     } else {
       throw new UnauthorizedException();
     }

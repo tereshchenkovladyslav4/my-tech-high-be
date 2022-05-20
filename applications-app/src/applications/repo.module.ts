@@ -66,6 +66,8 @@ import { EmailReminderService } from './services/email-reminder.service';
 import { EmailReminder } from './models/email-reminder.entity';
 import { WithdrawalService } from './services/withdrawal.service';
 import { Withdrawal } from './models/withdrawal.entity';
+import { AnnouncementsService } from './services/announcements.service';
+import { Announcement } from './models/announcement.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -94,6 +96,7 @@ const servicesImports = [
   StudentImmunizationService,
   StudentStatusService,
   WithdrawalService,
+  AnnouncementsService,
   SettingsService,
   UserRegionService,
   EmailTemplatesService,
@@ -128,6 +131,7 @@ const servicesImports = [
       PacketEmail,
       StudentStatus,
       Withdrawal,
+      Announcement,
       Observer,
       StudentImmunization,
       Settings,

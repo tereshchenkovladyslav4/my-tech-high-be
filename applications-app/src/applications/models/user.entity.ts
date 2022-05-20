@@ -9,19 +9,22 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Announcement } from './announcement.entity';
 import { ApplicationUserRegion } from './user-region.entity';
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "user_id")')
+@Directive('@key(fields: "user_id, email")')
 @Entity({ name: 'core_users' })
 export class User extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'int', name: 'user_id' })
   @Directive('@external')
   user_id?: number;
 
   @Column()
+  @Field(() => String)
+  @Directive('@external')
   email?: string;
 
   @Column()
@@ -46,4 +49,8 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   // @Field(() => [ApplicationUserRegion], { nullable: true })
   userRegions?: ApplicationUserRegion[];
+
+  @OneToMany(() => Announcement, (announcement) => announcement.User)
+  @Field(() => [Announcement], { nullable: true })
+  Announcements: Announcement[];
 }

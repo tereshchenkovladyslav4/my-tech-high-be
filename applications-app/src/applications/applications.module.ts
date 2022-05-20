@@ -37,10 +37,13 @@ import { EnrollmentQuestionTab } from './models/enrollment-question-tab.entity';
 import { EnrollmentQuestionGroup } from './models/enrollment-question-group.entity';
 import { EnrollmentQuestions } from './models/enrollment-questions.entity';
 import { EnrollmentQuestionGroupResolver } from './resolvers/enrollment-question-groups.resolver';
+import { AnnouncementsResolver } from './resolvers/announcements.resolver';
+import { Announcement } from './models/announcement.entity';
 const graphQLImports = [
   ApplicationsResolver,
   PacketsResolver,
   StudentsResolver,
+  AnnouncementsResolver,
   ParentsResolver,
   ObserversResolver,
   StudentImmunizationResolver,
@@ -62,6 +65,7 @@ const graphQLImports = [
           Person,
           Student,
           User,
+          Announcement,
           Parent,
           Phone,
           SchoolYear,

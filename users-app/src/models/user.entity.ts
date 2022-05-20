@@ -21,7 +21,7 @@ const salt = process.env.MTH_SALT || 'asin';
 const crypto = require('crypto');
 
 @ObjectType()
-@Directive('@key(fields: "user_id")')
+@Directive('@key(fields: "user_id, email")')
 @Entity({ name: 'core_users' })
 export class User extends BaseEntity {
   @Column()
