@@ -39,6 +39,7 @@ import { EnrollmentQuestions } from './models/enrollment-questions.entity';
 import { EnrollmentQuestionGroupResolver } from './resolvers/enrollment-question-groups.resolver';
 import { AnnouncementsResolver } from './resolvers/announcements.resolver';
 import { Announcement } from './models/announcement.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 const graphQLImports = [
   ApplicationsResolver,
   PacketsResolver,
@@ -93,6 +94,7 @@ const graphQLImports = [
       context: ({ req }) => ({ headers: req.headers }),
     }),
     TypeOrmModule.forRoot(),
+    ScheduleModule.forRoot(),
     RepoModule,
     ...graphQLImports,
   ],

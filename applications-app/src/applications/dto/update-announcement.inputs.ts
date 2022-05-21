@@ -19,8 +19,26 @@ export class UpdateAnnouncementInput {
   subject?: string;
 
   @Field(() => String)
+  body?: string;
+
+  @Field(() => String)
+  sender?: string;
+
+  @Field(() => Int)
+  RegionId?: number;
+
+  @Field(() => String)
+  schedule_date?: string;
+
+  @Field(() => String)
+  schedule_time?: string;
+
+  @Field(() => String)
   filter_grades?: string;
 
   @Field(() => String)
   filter_users?: string;
+
+  @Field(() => String)
+  cronJobTime?: string;
 }

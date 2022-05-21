@@ -68,6 +68,7 @@ import { WithdrawalService } from './services/withdrawal.service';
 import { Withdrawal } from './models/withdrawal.entity';
 import { AnnouncementsService } from './services/announcements.service';
 import { Announcement } from './models/announcement.entity';
+import { CronJobService } from './services/cronJob.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -97,6 +98,7 @@ const servicesImports = [
   StudentStatusService,
   WithdrawalService,
   AnnouncementsService,
+  CronJobService,
   SettingsService,
   UserRegionService,
   EmailTemplatesService,
