@@ -3,9 +3,8 @@ import { IsIn, IsInt } from 'class-validator';
 
 @InputType()
 export class CreateAnnouncementInput {
-  @Field(() => Int)
-  @IsInt()
-  UserId?: number;
+  @Field(() => String)
+  posted_by?: string;
 
   @Field(() => String)
   @IsIn(['Published', 'Scheduled', 'Draft'])
@@ -17,24 +16,15 @@ export class CreateAnnouncementInput {
   @Field(() => String)
   body?: string;
 
-  @Field(() => String)
-  sender?: string;
-
   @Field(() => Int)
   RegionId?: number;
 
-  @Field(() => String)
-  schedule_date?: string;
-
-  @Field(() => String)
-  schedule_time?: string;
+  @Field(() => Date)
+  schedule_time?: Date;
 
   @Field(() => String)
   filter_grades?: string;
 
   @Field(() => String)
   filter_users?: string;
-
-  @Field(() => String)
-  cronJobTime?: string;
 }

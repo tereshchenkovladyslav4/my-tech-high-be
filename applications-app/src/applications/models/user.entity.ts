@@ -49,8 +49,4 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   // @Field(() => [ApplicationUserRegion], { nullable: true })
   userRegions?: ApplicationUserRegion[];
-
-  @OneToMany(() => Announcement, (announcement) => announcement.User)
-  @Field(() => [Announcement], { nullable: true })
-  Announcements: Announcement[];
 }

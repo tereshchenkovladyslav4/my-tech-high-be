@@ -1,26 +1,71 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CronJob } from 'cron';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { getConnection } from 'typeorm';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
-import { CreateAnnouncementInput } from '../dto/new-announcement.inputs';
-import { Announcement } from '../models/announcement.entity';
-import { Application } from '../models/application.entity';
-import { AnnouncementsService } from './announcements.service';
 import { EmailsService } from './emails.service';
+import * as Moment from 'moment';
 
 @Injectable()
 export class CronJobService {
-  constructor(
-    private schedulerRegistry: SchedulerRegistry,
-    private sesEmailService: EmailsService,
-  ) {}
+  private readonly logger = new Logger(CronJobService.name);
+  constructor(private sesEmailService: EmailsService) {}
 
-  async sendAnnouncementEmail(
-    announcementEmail: AnnouncementEmailArgs,
-    name: string,
-  ) {
+  @Cron(CronExpression.EVERY_MINUTE)
+  async findScheduledAnnouncements() {
+    try {
+      const queryRunner = await getConnection().createQueryRunner();
+      const announcements = await queryRunner.query(
+        `SELECT
+          announcement_id AS announcementId,
+          posted_by AS sender,
+          subject,
+          body,
+          RegionId,
+          filter_grades,
+          filter_users,
+          schedule_time AS scheduleTime
+        FROM infocenter.announcement
+        WHERE
+          status = 'Scheduled' AND
+          schedule_time > NOW()`,
+      );
+      queryRunner.release();
+      announcements.forEach(async (announcement) => {
+        const {
+          announcementId,
+          sender,
+          subject,
+          body,
+          scheduleTime,
+          RegionId,
+          filter_grades,
+          filter_users,
+        } = announcement;
+        if (
+          Moment(new Date()).format('yyyy-MM-DD HH:mm') ==
+          Moment(scheduleTime).format('yyyy-MM-DD HH:mm')
+        ) {
+          await this.sendAnnouncementEmail({
+            sender,
+            subject,
+            body,
+            RegionId,
+            filter_grades,
+            filter_users,
+          });
+          const queryRunner = await getConnection().createQueryRunner();
+          await queryRunner.query(
+            `UPDATE infocenter.announcement SET status = 'Published' WHERE announcement_id = ${announcementId}`,
+          );
+          queryRunner.release();
+        }
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  async sendAnnouncementEmail(announcementEmail: AnnouncementEmailArgs) {
     const { sender, subject, body, RegionId, filter_grades, filter_users } =
       announcementEmail;
     const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
@@ -38,15 +83,15 @@ export class CronJobService {
       const queryRunner = await getConnection().createQueryRunner();
       const users = await queryRunner.query(
         `SELECT
-            Users.email AS email,
-            Users.user_id AS userId
-          FROM (
-            SELECT user_id, email, level FROM infocenter.core_users
-          ) AS Users
-          LEFT JOIN infocenter.user_region region ON (region.user_id = Users.user_id)
-          LEFT JOIN infocenter.roles role ON (role.level = Users.level)
-          WHERE
-            region.region_id = ${RegionId} AND (${cond}) `,
+          Users.email AS email,
+          Users.user_id AS userId
+        FROM (
+          SELECT user_id, email, level FROM infocenter.core_users
+        ) AS Users
+        LEFT JOIN infocenter.user_region region ON (region.user_id = Users.user_id)
+        LEFT JOIN infocenter.roles role ON (role.level = Users.level)
+        WHERE
+          region.region_id = ${RegionId} AND (${cond}) `,
       );
       queryRunner.release();
       users.forEach(async (user) => {
@@ -60,58 +105,5 @@ export class CronJobService {
         }
       });
     });
-    this.deleteTimeout(name);
-  }
-
-  // addCronJob(name: string, announcement: CreateAnnouncementInput) {
-  //   const { cronJobTime } = announcement;
-  //   console.log(
-  //     `0 ${cronJobTime} *`,
-  //     'cronJobTime---------------------------------------------',
-  //     new Date(),
-  //   );
-  //   const job = new CronJob(`0 ${cronJobTime} *`, async () => {
-  //     console.log('Start CronJob', announcement);
-  //     const { sender, subject, body, RegionId, filter_grades, filter_users } =
-  //       announcement;
-  //     await this.sendAnnouncementEmail({
-  //       sender,
-  //       subject,
-  //       body,
-  //       RegionId,
-  //       filter_grades,
-  //       filter_users,
-  //     });
-  //   });
-
-  //   this.schedulerRegistry.addCronJob(`${name} ${cronJobTime}`, job);
-  //   job.start();
-  //   console.log('job Start');
-  // }
-
-  addTimeout(name: string, announcement: CreateAnnouncementInput) {
-    const { cronJobTime } = announcement;
-    const callback = async () => {
-      const { sender, subject, body, RegionId, filter_grades, filter_users } =
-        announcement;
-      await this.sendAnnouncementEmail(
-        {
-          sender,
-          subject,
-          body,
-          RegionId,
-          filter_grades,
-          filter_users,
-        },
-        name,
-      );
-    };
-
-    const timeout = setTimeout(callback, parseInt(cronJobTime));
-    this.schedulerRegistry.addTimeout(name, timeout);
-  }
-
-  deleteTimeout(name: string) {
-    this.schedulerRegistry.deleteTimeout(name);
   }
 }

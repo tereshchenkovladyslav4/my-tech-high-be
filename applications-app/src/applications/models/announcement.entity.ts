@@ -19,10 +19,6 @@ export class Announcement extends BaseEntity {
   announcement_id?: number;
 
   @Field((type) => Int, { nullable: true })
-  @Column('int', { name: 'UserId', nullable: true })
-  UserId: number | null;
-
-  @Field((type) => Int, { nullable: true })
   @Column('int', { name: 'RegionId', nullable: true })
   RegionId: number | null;
 
@@ -32,11 +28,11 @@ export class Announcement extends BaseEntity {
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
-  schedule_date?: string;
+  posted_by?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => Date, { nullable: true })
   @Column({ nullable: true })
-  schedule_time?: string;
+  schedule_time?: Date;
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
@@ -57,14 +53,6 @@ export class Announcement extends BaseEntity {
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
   date?: Date;
-
-  @ManyToOne(() => User, (user) => user.Announcements, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn({ name: 'UserId', referencedColumnName: 'user_id' })
-  @Field(() => User, { nullable: true })
-  User: User;
 
   @ManyToOne(() => ApplicationRegion, (region) => region.Announcements, {
     onDelete: 'SET NULL',

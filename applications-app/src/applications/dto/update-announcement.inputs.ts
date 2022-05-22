@@ -7,13 +7,12 @@ export class UpdateAnnouncementInput {
   @IsInt()
   announcement_id?: number;
 
-  @Field(() => Int)
-  @IsInt()
-  UserId?: number;
-
   @Field(() => String)
   @IsIn(['Published', 'Scheduled', 'Draft'])
   status?: string;
+
+  @Field(() => String)
+  posted_by?: string;
 
   @Field(() => String)
   subject?: string;
@@ -21,24 +20,15 @@ export class UpdateAnnouncementInput {
   @Field(() => String)
   body?: string;
 
-  @Field(() => String)
-  sender?: string;
-
   @Field(() => Int)
   RegionId?: number;
 
-  @Field(() => String)
-  schedule_date?: string;
-
-  @Field(() => String)
-  schedule_time?: string;
+  @Field(() => Date)
+  schedule_time?: Date;
 
   @Field(() => String)
   filter_grades?: string;
 
   @Field(() => String)
   filter_users?: string;
-
-  @Field(() => String)
-  cronJobTime?: string;
 }

@@ -20,7 +20,6 @@ export class AnnouncementsService {
     try {
       const results = await this.announcementsRepository
         .createQueryBuilder('announcement')
-        .leftJoinAndSelect('announcement.User', 'user')
         .getMany();
       return results;
     } catch (error) {
@@ -46,47 +45,58 @@ export class AnnouncementsService {
       const queryRunner = await getConnection().createQueryRunner();
       const users = await queryRunner.query(
         `SELECT
-            Users.email AS email,
-            Users.user_id AS userId
-          FROM (
-            SELECT user_id, email, level FROM infocenter.core_users
-          ) AS Users
-          LEFT JOIN infocenter.user_region region ON (region.user_id = Users.user_id)
-          LEFT JOIN infocenter.roles role ON (role.level = Users.level)
-          WHERE
-            region.region_id = ${RegionId} AND (${cond}) `,
+          Users.email AS email,
+          Users.user_id AS userId
+        FROM (
+          SELECT user_id, email, level FROM infocenter.core_users
+        ) AS Users
+        LEFT JOIN infocenter.user_region region ON (region.user_id = Users.user_id)
+        LEFT JOIN infocenter.roles role ON (role.level = Users.level)
+        WHERE
+          region.region_id = ${RegionId} AND (${cond}) `,
       );
       queryRunner.release();
       users.forEach(async (user) => {
         if (user.email) {
-          await this.sesEmailService.sendEmail({
-            email: user.email,
-            subject,
-            content: body,
-            from: sender,
-          });
+          try {
+            await this.sesEmailService.sendEmail({
+              email: user.email,
+              subject,
+              content: body,
+              from: sender,
+            });
+          } catch (error) {
+            console.log(error, 'Email Error');
+          }
         }
       });
     });
   }
 
   async create(announcement: CreateAnnouncementInput): Promise<Announcement> {
-    if (announcement.status == 'Published') {
-      const { sender, subject, body, RegionId, filter_grades, filter_users } =
-        announcement;
-      await this.sendAnnouncementEmail({
-        sender,
-        subject,
-        body,
-        RegionId,
-        filter_grades,
-        filter_users,
-      });
-    } else if (announcement.status == 'Scheduled') {
-      const now = new Date();
-      this.cronJobService.addTimeout(now.getTime().toString(), announcement);
+    try {
+      if (announcement.status == 'Published') {
+        const {
+          posted_by,
+          subject,
+          body,
+          RegionId,
+          filter_grades,
+          filter_users,
+        } = announcement;
+        await this.sendAnnouncementEmail({
+          sender: posted_by,
+          subject,
+          body,
+          RegionId,
+          filter_grades,
+          filter_users,
+        });
+      }
+      return this.announcementsRepository.save(announcement);
+    } catch (error) {
+      return error;
     }
-    return this.announcementsRepository.save(announcement);
   }
 
   async update(
@@ -94,22 +104,22 @@ export class AnnouncementsService {
   ): Promise<Announcement> {
     try {
       if (updateAnnouncementInput.status == 'Published') {
-        const { sender, subject, body, RegionId, filter_grades, filter_users } =
-          updateAnnouncementInput;
+        const {
+          posted_by,
+          subject,
+          body,
+          RegionId,
+          filter_grades,
+          filter_users,
+        } = updateAnnouncementInput;
         await this.sendAnnouncementEmail({
-          sender,
+          sender: posted_by,
           subject,
           body,
           RegionId,
           filter_grades,
           filter_users,
         });
-      } else if (updateAnnouncementInput.status == 'Scheduled') {
-        const now = new Date();
-        this.cronJobService.addTimeout(
-          now.getTime().toString(),
-          updateAnnouncementInput,
-        );
       }
       Object.keys(updateAnnouncementInput).forEach((key) => {
         if (!updateAnnouncementInput[key]) {
