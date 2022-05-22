@@ -26,7 +26,7 @@ export class ApplicationEmail extends BaseEntity {
   @Field(() => String)
   subject: string;
 
-  @Column()
+  @Column('text', { name: 'body', nullable: true })
   @Field(() => String, { nullable: true })
   body: string;
 

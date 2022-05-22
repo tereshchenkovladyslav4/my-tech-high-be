@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import { CoreSetting } from '../models/core-setting.entity';
 import { CoreSettingsService } from './core-settings.service';
 import { SESService } from './ses.service';
@@ -11,6 +11,7 @@ import { ResponseDTO } from '../dto/response.dto';
 import { EmailTemplatesService } from './email-templates.service';
 import { UserRegionService } from './user-region.service';
 import { ApplicationUserRegion } from '../models/user-region.entity';
+import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 
 var base64 = require('base-64');
 @Injectable()
@@ -89,6 +90,48 @@ export class EmailsService {
       emailTemplate?.bcc,
       emailTemplate?.from,
     );
+  }
+
+  async sendAnnouncementEmail(announcementEmail: AnnouncementEmailArgs) {
+    const { sender, subject, body, RegionId, filter_grades, filter_users } =
+      announcementEmail;
+    const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
+    const cond = userTypes
+      .join(' OR ')
+      .replace('0', 'role.name = "Admin"')
+      .replace('1', 'role.name = "Parent" OR role.name = "Observer"')
+      .replace('2', 'role.name = "Student"')
+      .replace('3', 'role.name = "Teacher" OR role.name = "Teacher Assistant"');
+    if (cond != '') {
+      const queryRunner = await getConnection().createQueryRunner();
+      const users = await queryRunner.query(
+        `SELECT
+          Users.email AS email,
+          Users.user_id AS userId
+        FROM (
+          SELECT user_id, email, level FROM infocenter.core_users
+        ) AS Users
+        LEFT JOIN infocenter.user_region region ON (region.user_id = Users.user_id)
+        LEFT JOIN infocenter.roles role ON (role.level = Users.level)
+        WHERE
+          region.region_id = ${RegionId} AND (${cond}) `,
+      );
+      queryRunner.release();
+      users.forEach(async (user) => {
+        if (user.email) {
+          try {
+            await this.sendEmail({
+              email: user.email,
+              subject,
+              content: body,
+              from: sender,
+            });
+          } catch (error) {
+            console.log(error, 'Email Error');
+          }
+        }
+      });
+    }
   }
 
   async sendEmail(emailInput: EmailInput): Promise<ResponseDTO> {
