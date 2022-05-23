@@ -59,4 +59,7 @@ export class UpdateProfileInput {
 
   @Field({ nullable: true })
   zipcode?: string;
+
+  @Field({ nullable: true })
+  county_id?: number;
 }

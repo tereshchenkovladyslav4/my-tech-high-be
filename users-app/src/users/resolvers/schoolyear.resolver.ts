@@ -36,6 +36,14 @@ export class SchoolYearResolver {
   ): Promise<SchoolYear[]> {
     return this.schoolYearsService.findActiveSchoolYears(region_id);
   }
+
+  @Query((returns) => [SchoolYear], { name: 'getSchoolYearsByRegionId' })
+  async getSchoolYearsByRegionId(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+  ): Promise<SchoolYear[]> {
+    return this.schoolYearsService.findSchoolYearsByRegionId(region_id);
+  }
+
   @Query((returns) => SchoolYear, { name: 'getCurrentSchoolYear' })
   async getCurrentSchoolYear(): Promise<SchoolYear> {
     return this.schoolYearsService.getCurrent();

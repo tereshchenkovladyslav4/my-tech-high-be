@@ -23,4 +23,7 @@ export class UpdateAddressInput {
 
   @Field(() => String, { nullable: true })
   zip?: string;
+
+  @Field(() => Number, { nullable: true })
+  county_id?: number;
 }

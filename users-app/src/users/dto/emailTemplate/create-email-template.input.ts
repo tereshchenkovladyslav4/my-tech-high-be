@@ -69,5 +69,5 @@ export class EmailTemplateReminder {
   body?: string;
 
   @Field(() => Int, { nullable: true })
-  deadline?: number;
+  reminder?: number;
 }

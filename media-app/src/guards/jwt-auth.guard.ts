@@ -12,8 +12,6 @@ import {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         
       const ctx = context.switchToHttp().getRequest();
-      //console.log(ctx);
-      //console.log(ctx.headers);
       if (!ctx.headers.authorization) {
         return false;
       }
@@ -29,6 +27,10 @@ import {
   
       try {
         const decoded = jwt.verify(token, 'info_center-v_2.0');
+        if(decoded.masquerade === true && decoded.level !== 1){
+          const message = 'Error only Super Admins can edit user data.'
+          throw new HttpException(message, HttpStatus.UNAUTHORIZED);
+        }
         return decoded;
       } catch (err) {
         const message = 'Token error: ' + (err.message || err.name);

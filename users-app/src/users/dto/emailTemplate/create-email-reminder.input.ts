@@ -13,7 +13,7 @@ export class EmailReminderInput {
   body?: string;
 
   @Field(() => Int, { nullable: true })
-  deadline?: number;
+  reminder?: number;
 
   @Field(() => Int, { nullable: true })
   email_template_id?: number;

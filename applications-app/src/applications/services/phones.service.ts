@@ -11,7 +11,13 @@ export class PhonesService {
     private phonesRepository: Repository<Phone>,
   ) {}
 
-  async create( phone: CreatePersonPhoneInput ): Promise<Phone> {
-      return this.phonesRepository.save(phone);
+  async create(phone: CreatePersonPhoneInput): Promise<Phone> {
+    return this.phonesRepository.save(phone);
+  }
+
+  findOneByPersonId(person_id: number): Promise<Phone> {
+    return this.phonesRepository.findOne({
+      where: { person_id },
+    });
   }
 }

@@ -1,6 +1,7 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { CreateStudentPersonAddressInput } from './new-student-person-address.inputs';
 import { NewParentPacketContactInput } from './new-parent-packet-contact.inputs';
+import { CreateParentPersonInput } from './new-parent-person.inputs';
 
 @InputType()
 export class EnrollmentPacketInput {
@@ -39,4 +40,13 @@ export class EnrollmentPacketInput {
 
   @Field((type) => NewParentPacketContactInput, { nullable: true })
   packet?: NewParentPacketContactInput;
+
+  @Field((type) => CreateParentPersonInput, { nullable: true })
+  parent?: CreateParentPersonInput;
+
+  @Field({ nullable: true })
+  school_year_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  student_id?: number;
 }

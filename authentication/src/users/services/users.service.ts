@@ -50,11 +50,11 @@ export class UsersService {
 
   async updateAccount(user: User, verifyInput: VerifyInput): Promise<User> {
     const { password } = verifyInput
-    let pattern = new RegExp('^(?=(.*[a-zA-Z]){1,})(?=(.*[0-9]){2,}).{8,}$') //Regex: At least 8 characters with at least 2 numericals
+    let pattern = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})');
     if (!pattern.test(password))
       throw new BadRequestException(
-        'At least 8 characters with at least 2 numericals.'
-      )
+        'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character',
+      );
 
     const updated_at = Moment().format('YYYY-MM-DD HH:mm:ss')
 

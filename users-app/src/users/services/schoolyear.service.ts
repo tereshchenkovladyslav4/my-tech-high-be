@@ -34,6 +34,14 @@ export class SchoolYearsService {
     });
   }
 
+  findSchoolYearsByRegionId(region_id: number): Promise<SchoolYear[]> {
+    return this.schoolYearsRepository.find({
+      where: {
+        RegionId: region_id,
+      },
+    });
+  }
+
   getCurrent(): Promise<SchoolYear> {
     return this.schoolYearsRepository.findOne({
       where: {

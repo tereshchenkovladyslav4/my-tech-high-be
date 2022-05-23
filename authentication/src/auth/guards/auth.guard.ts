@@ -27,7 +27,11 @@ export class AuthGuard implements CanActivate {
     const token = auth.split(' ')[1];
 
     try {
-      const decoded = jwt.verify(token, 'info_center-v_2.0');
+      const decoded = jwt.verify(token, 'info_center-v_2.0') as any
+      if(decoded.masquerade === true && decoded.level !== 1){
+        const message = 'Error only Super Admins can edit user data.'
+        throw new HttpException(message, HttpStatus.UNAUTHORIZED);
+      }
       return decoded;
     } catch (err) {
       const message = 'Token error: ' + (err.message || err.name);

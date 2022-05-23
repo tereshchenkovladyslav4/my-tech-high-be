@@ -14,6 +14,7 @@ import { EmailReminderResolver } from './resolvers/email-template/email-reminder
 import { QuickLinkResolver } from './resolvers/quick-link/quick-link.resolver';
 import { SchoolDistrictsResolver } from './resolvers/region/schoolDistricts.resolver';
 import { CountyResolver } from './resolvers/couty.resolver';
+import { QuestionResolver } from './resolvers/question.resolver';
 
 const graphQLImports = [
   UsersResolver,
@@ -27,6 +28,7 @@ const graphQLImports = [
   EmailReminderResolver,
   SchoolDistrictsResolver,
   CountyResolver,
+  QuestionResolver,
 ];
 
 @Module({

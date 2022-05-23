@@ -83,10 +83,13 @@ export class EnrollmentsService {
       exemption_form_date,
       packet,
       student,
+      parent,
       meta,
       status,
       is_age_issue,
+      school_year_id,
       missing_files,
+      student_id,
     } = enrollmentPacketInput;
 
     try {
@@ -101,6 +104,39 @@ export class EnrollmentsService {
             studentPerson,
             student.address,
           );
+        }
+
+        const { grade_level } = student;
+        if (school_year_id && grade_level && student_id) {
+          const studentGradeLevel =
+            await this.studentGradeLevelsService.createOrUpdate({
+              student_id,
+              school_year_id,
+              grade_level,
+            });
+        }
+      }
+
+      if (parent_person_id) {
+        const parentPerson = await this.personsService.update({
+          person_id: parent_person_id,
+          ...parent,
+        });
+
+        const parentPhone = await this.phonesService.findOneByPersonId(
+          parent_person_id,
+        );
+        if (!parentPhone) {
+          await this.phonesService.create({
+            person_id: parent_person_id,
+            number: parent.phone_number,
+          });
+        } else {
+          await this.phonesService.create({
+            phone_id: parentPhone.phone_id,
+            person_id: parent_person_id,
+            number: parent.phone_number,
+          });
         }
       }
 
@@ -235,6 +271,25 @@ export class EnrollmentsService {
         ...enrollmentPacketContactInput.parent,
       });
       console.log('Parent Person: ', parentPerson);
+
+      const parentPhone = await this.phonesService.findOneByPersonId(
+        parentPersonId,
+      );
+      if (!parentPhone) {
+        await this.phonesService.create({
+          person_id: parentPersonId,
+          number: enrollmentPacketContactInput.parent.phone_number,
+        });
+      } else {
+        await this.phonesService.create({
+          phone_id: parentPhone.phone_id,
+          person_id: parentPersonId,
+          number: enrollmentPacketContactInput.parent.phone_number,
+        });
+      }
+
+      if (!parentPhone)
+        throw new ServiceUnavailableException('Parent Phone Not Created');
 
       const studentPerson = await this.personsService.update({
         person_id: studentPersonId,
@@ -626,10 +681,10 @@ export class EnrollmentsService {
       );
       if (emailReminder.length > 0) {
         emailReminder.forEach(async (remind) => {
-          const deadline = remind.deadline;
-          const deadlineDate = new Date();
-          deadlineDate.setDate(deadlineDate.getDate() + deadline);
-          const emails = await this.packetsService.findReminders(deadlineDate);
+          const reminder = remind.reminder;
+          const reminderDate = new Date();
+          reminderDate.setDate(reminderDate.getDate() + reminder);
+          const emails = await this.packetsService.findReminders(reminderDate);
           if (emailTemplate) {
             await Promise.all(
               emails.map(async (email) => {

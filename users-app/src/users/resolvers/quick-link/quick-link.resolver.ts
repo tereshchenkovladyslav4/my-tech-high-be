@@ -24,7 +24,7 @@ export class QuickLinkResolver {
     const { quickLink } = quickLinkInput;
     const response = this.quickLinkService.createQuickLink(
       quickLink,
-    );console.log(response);
+    );
     return response;
   }
 

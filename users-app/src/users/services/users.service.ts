@@ -280,7 +280,7 @@ export class UsersService {
         password: this.saltPassword('password'),
         level: createUserInput.level,
         status: '0',
-        masquerade: createUserInput.level === 1 ? 1 :  0
+        masquerade: createUserInput.level === 1 ? 1 : 0,
       };
 
       const data = this.usersRepository.create(payload);
@@ -486,6 +486,7 @@ export class UsersService {
             city: updateProfileInput.city,
             state: updateProfileInput.state,
             zip: updateProfileInput.zipcode,
+            county_id: updateProfileInput.county_id,
           },
         ])
         .execute();
@@ -516,6 +517,7 @@ export class UsersService {
           city: updateProfileInput.city,
           state: updateProfileInput.state,
           zip: updateProfileInput.zipcode,
+          county_id: updateProfileInput.county_id,
         })
         .where('address_id = :id', { id: hasAddress.address_id })
         .execute();
@@ -529,10 +531,10 @@ export class UsersService {
     updateAccountInput: UpdateAccountInput,
   ): Promise<User> {
     const { oldpassword, password } = updateAccountInput;
-    let pattern = new RegExp('^(?=(.*[a-zA-Z]){1,})(?=(.*[0-9]){2,}).{8,}$'); //Regex: At least 8 characters with at least 2 numericals
+    let pattern = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})');
     if (!pattern.test(password))
       throw new BadRequestException(
-        'At least 8 characters with at least 2 numericals.',
+        'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character',
       );
 
     if (user.level == 1 && !user.password.match(this.saltPassword(oldpassword)))

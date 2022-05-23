@@ -36,6 +36,8 @@ import { QuickLink } from 'src/models/quick-link.entity';
 import { SchoolDistrictService } from './services/schoolDistrict.service';
 import { SchoolDistrict } from 'src/models/school-district.entity';
 import { CountyService } from './services/county.service';
+import { QuestionService } from './services/question.service';
+import { Question } from 'src/models/question.entity';
 import { County } from 'src/models/county.entity';
 
 const RepoServices = [
@@ -55,6 +57,7 @@ const RepoServices = [
   EmailVerifierService,
   SchoolYearsService,
   QuickLinkService,
+  QuestionService,
   CountyService,
 ];
 
@@ -83,6 +86,7 @@ const RepoServices = [
       EmailVerifier,
       SchoolYear,
       QuickLink,
+      Question,
       SchoolDistrict,
       County,
     ]),

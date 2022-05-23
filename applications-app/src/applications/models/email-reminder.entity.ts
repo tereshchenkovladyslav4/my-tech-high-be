@@ -32,7 +32,7 @@ export class EmailReminder extends BaseEntity {
 
   @Column()
   @Field((type) => Int, { nullable: true })
-  deadline: number;
+  reminder: number;
 
   @Column()
   @Field(type => Int, { nullable: true })

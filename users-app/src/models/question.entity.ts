@@ -6,15 +6,15 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@InputType('quickLink')
+@InputType('question')
 @ObjectType()
 @Directive('@key(fields: "id")')
-@Entity({ name: 'mth_quick_link' })
-export class QuickLink extends BaseEntity {
+@Entity({ name: 'mth_question' })
+export class Question extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
-  @PrimaryGeneratedColumn()
-  id: number;
+  @Field((type) => Int, { nullable: true })
+  @PrimaryGeneratedColumn('increment')
+  id?: number;
 
   @Column()
   @Field((type) => Int, { nullable: true })
@@ -22,15 +22,11 @@ export class QuickLink extends BaseEntity {
 
   @Column()
   @Field((type) => String, { nullable: true })
-  title: string;
+  section: string;
 
   @Column()
   @Field((type) => String, { nullable: true })
-  subtitle: string;
-
-  @Column()
-  @Field((type) => String, { nullable: true })
-  image_url: string;
+  slug: string;
 
   @Column()
   @Field(() => Int, { nullable: true })
@@ -42,9 +38,25 @@ export class QuickLink extends BaseEntity {
   
   @Column()
   @Field((type) => String, { nullable: true })
-  reserved: String;
+  question: String;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  options: String;
+
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  validation: number;
+
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  mainQuestion: number;
+
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  defaultQuestion: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  flag?: number;
+  required?: number;
 }

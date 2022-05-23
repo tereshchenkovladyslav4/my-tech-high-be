@@ -138,7 +138,14 @@ export class UsersResolver {
   getUserByRegions(
     @Args() userRegionArgs: UserRegionArgs,
   ): Promise<Pagination<User>> {
-    return this.usersService.findUsersByRegions(userRegionArgs);
+    if(userRegionArgs.filters.includes('Admin')){
+      return this.usersService.findUsersByRegions({
+        ...userRegionArgs,
+        filters: [...userRegionArgs.filters, 'Super Admin']
+      });
+    }else{
+      return this.usersService.findUsersByRegions(userRegionArgs)
+    }
   }
 
   @UseGuards(new AuthGuard())
