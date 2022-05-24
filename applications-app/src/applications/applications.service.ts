@@ -101,7 +101,7 @@ export class ApplicationsService {
     await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
       recipients: newApplication.parent.email,
     });
-      
+
     const emailTemplate =
       await this.emailTemplateService.findByTemplateAndRegion(
         'Application Received',
@@ -274,12 +274,6 @@ export class ApplicationsService {
       throw new ServiceUnavailableException('Student Grade Level Not Created');
     console.log('Student Grade Level: ', student);
 
-    const statudUpdated = this.studentStatusService.update({
-      student_id: student_id,
-      school_year_id: school_year_id,
-      status: 0,
-    });
-
     const application = await this.studentApplicationsService.create({
       student_id,
       school_year_id,
@@ -289,6 +283,12 @@ export class ApplicationsService {
     if (!application)
       throw new ServiceUnavailableException('Application Not Created');
     console.log('Application: ', student);
+
+    const statudUpdated = this.studentStatusService.update({
+      student_id: student_id,
+      school_year_id: school_year_id,
+      status: 5,
+    });
 
     return { ...student, person: person, status: statudUpdated };
   }

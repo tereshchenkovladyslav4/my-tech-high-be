@@ -14,6 +14,7 @@ import { ApplicationEmailsService } from './application-emails.service';
 import { ApplicationEmail } from '../models/application-email.entity';
 import { SchoolYearService } from './schoolyear.service';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
+import { StudentStatusService } from './student-status.service';
 import { SchoolYear } from '../models/schoolyear.entity';
 import { UpdateApplicationInput } from '../dto/update-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
@@ -36,6 +37,7 @@ export class ApplicationsService {
     private emailTemplateService: EmailTemplatesService,
     private studentService: StudentsService,
     private userRegionService: UserRegionService,
+    private studentStatusService: StudentStatusService,
   ) {}
 
   async getSubmittedApplicationCount(regionId: number): Promise<ResponseDTO> {
@@ -130,6 +132,7 @@ export class ApplicationsService {
           }
           if (item === 'Kindergarten') {
             grades.push('K');
+            grades.push('Kin');
           }
         });
       // qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
@@ -354,6 +357,12 @@ export class ApplicationsService {
         const gradeLevels = await this.studentGradeLevelsService.forStudents(
           student.student_id,
         );
+
+        const statudUpdated = this.studentStatusService.update({
+          student_id: student_id,
+          school_year_id: gradeLevels[0].school_year_id,
+          status: 0,
+        });
 
         const regions: ApplicationUserRegion[] =
           await this.userRegionService.findUserRegionByUserId(

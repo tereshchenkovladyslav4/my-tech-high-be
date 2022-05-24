@@ -57,6 +57,10 @@ export class Question extends BaseEntity {
   defaultQuestion: number;
 
   @Column()
+  @Field((type) => String, { nullable: true })
+  additionalQuestion: String;
+
+  @Column()
   @Field(() => Int, { nullable: true })
   required?: number;
 }

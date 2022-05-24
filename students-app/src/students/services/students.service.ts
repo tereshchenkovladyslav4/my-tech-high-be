@@ -20,6 +20,7 @@ import { UsersService } from './users.service';
 import { PersonsService } from './persons.service';
 import { UserRegion } from '../models/user-region.entity';
 import * as Moment from 'moment';
+import { StudentGradeLevelsService } from './student-grade-levels.service';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -30,6 +31,7 @@ export class StudentsService {
     private studentStatusHistoryService: StudentStatusHistoryService,
     private usersService: UsersService,
     private personsService: PersonsService,
+    private studentGradeLevelService: StudentGradeLevelsService,
   ) {}
 
   protected user: User;
@@ -119,7 +121,10 @@ export class StudentsService {
     if (!region_id) {
       return defaultResponse;
     }
-    const schoolYear = await this.schoolYearsService.getCurrent(region_id);
+    // const schoolYear = await this.schoolYearsService.getCurrent(region_id);
+    const schoolYear = await this.studentGradeLevelService.findByStudentID(
+      studentData.student_id,
+    );
 
     if (!schoolYear) {
       return defaultResponse;

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Question } from 'src/models/question.entity';
-import { QuestionInput } from '../dto/question.input';
 
 @Injectable()
 export class QuestionService {

@@ -32,7 +32,7 @@ export class QuestionResolver {
 
 	@Mutation(() => Int, { name: 'deleteQuestion' })
 	async deleteQuestion(
-		@Args('id', { type: () => Int }) id: number,
+		@Args('question_id', { type: () => Int }) id: number,
 	): Promise<number> {
 		return await this.service.delete(id);
 	}
