@@ -87,6 +87,11 @@ export class RegionService {
       enrollment_packet_deadline_num_days:
         updateRegionInput.enrollment_packet_deadline_num_days,
     };
+    Object.keys(data).forEach((key) => {
+      if (!data[key]) {
+        delete data[key];
+      }
+    });
     const res = await this.regionRepository.update(updateRegionInput.id, data);
     if (res.affected > 0) {
       return this.findRegionById(updateRegionInput.id);
