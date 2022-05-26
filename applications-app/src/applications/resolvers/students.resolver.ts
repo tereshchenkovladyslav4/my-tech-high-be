@@ -1,19 +1,13 @@
 import {
   Args,
-  ID,
   Query,
   Resolver,
   ResolveReference,
-  Int,
   ResolveField,
   Parent as TypeParent,
   Mutation,
 } from '@nestjs/graphql';
 import { Student } from '../models/student.entity';
-import { StudentStatus } from '../models/student-status.entity';
-import { Person } from '../models/person.entity';
-import { Parent } from '../models/parent.entity';
-import { StudentGradeLevel } from '../models/student-grade-level.entity';
 import { StudentGradeLevelsService } from '../services/student-grade-levels.service';
 import { StudentsService } from '../services/students.service';
 import { PersonsService } from '../services/persons.service';
@@ -25,15 +19,12 @@ import { Application } from '../models/application.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
-import { Withdrawal } from '../models/withdrawal.entity';
 import { WithdrawalService } from '../services/withdrawal.service';
+import { WithdrawalResponse } from '../models/withdrawal-response.entity';
 @Resolver((of) => Student)
 export class StudentsResolver {
   constructor(
     private studentsService: StudentsService,
-    private personsService: PersonsService,
-    private parentsService: ParentsService,
-    private studentGradeLevelsService: StudentGradeLevelsService,
     private packetsService: PacketsService,
     private applicationsService: ApplicationsService,
     private withdrawalService: WithdrawalService,
@@ -59,10 +50,12 @@ export class StudentsResolver {
     return this.studentsService.findOneById(reference.student_id);
   }
 
-  @Query((returns) => [Withdrawal], { name: 'withdrawals' })
+  @Query((returns) => [WithdrawalResponse], { name: 'withdrawals' })
   //@UseGuards(new AuthGuard())
-  async getWithdrawals(): Promise<Withdrawal[]> {
-    return this.withdrawalService.findAll();
+  async getWithdrawals(
+    @Args('region_id') region_id: number,
+  ): Promise<WithdrawalResponse[]> {
+    return this.withdrawalService.findAll(region_id);
   }
 
   @Mutation((returns) => Boolean, { name: 'updateStudent' })
