@@ -130,9 +130,12 @@ export class ApplicationsService {
           if (!grades.includes(item)) {
             grades.push(item);
           }
+          if (item == 'K') {
+            if (!grades.includes('Kin')) grades.push('Kin');
+          }
           if (item === 'Kindergarten') {
-            grades.push('K');
-            grades.push('Kin');
+            if (!grades.includes('Kin')) grades.push('Kin');
+            if (!grades.includes('K')) grades.push('K');
           }
         });
       // qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
