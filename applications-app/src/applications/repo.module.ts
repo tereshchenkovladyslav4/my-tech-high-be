@@ -42,6 +42,7 @@ import { PacketEmailsService } from './services/packet-emails.service';
 import { ApplicationEmail } from './models/application-email.entity';
 import { PacketEmail } from './models/packet-email.entity';
 import { StudentStatus } from './models/student-status.entity';
+import { StudentReenrollmentStatus } from './models/student-reenrollment-status.entity';
 import { Observer } from './models/observer.entity';
 import { ObserversService } from './services/observers.service';
 import { StudentImmunizationService } from './services/student-immunization.service';
@@ -69,6 +70,8 @@ import { Withdrawal } from './models/withdrawal.entity';
 import { AnnouncementsService } from './services/announcements.service';
 import { Announcement } from './models/announcement.entity';
 import { CronJobService } from './services/cronJob.service';
+import { UserAnnouncementsService } from './services/user-announcements.service';
+import { UserAnnouncement } from './models/user-announcement.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -98,6 +101,7 @@ const servicesImports = [
   StudentStatusService,
   WithdrawalService,
   AnnouncementsService,
+  UserAnnouncementsService,
   CronJobService,
   SettingsService,
   UserRegionService,
@@ -132,8 +136,10 @@ const servicesImports = [
       ApplicationEmail,
       PacketEmail,
       StudentStatus,
+      StudentReenrollmentStatus,
       Withdrawal,
       Announcement,
+      UserAnnouncement,
       Observer,
       StudentImmunization,
       Settings,

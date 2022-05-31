@@ -41,6 +41,7 @@ export class CronJobService {
           filter_users,
         } = announcement;
         await this.sesEmailService.sendAnnouncementEmail({
+          announcement_id: announcementId,
           sender,
           subject,
           body,

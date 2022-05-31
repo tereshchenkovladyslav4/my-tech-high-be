@@ -16,6 +16,7 @@ import { StudentCurrentStatus } from './student-current-status.entity';
 import { StudentStatus } from './student-status.entity';
 import { Packet } from './packet.entity';
 import { StudentStatusHistory } from './student-status-history.entity';
+import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
 
 @ObjectType()
 @Directive(
@@ -98,4 +99,10 @@ export class Student extends BaseEntity {
     (studentStatusHistory) => studentStatusHistory.student_id,
   )
   status_history?: StudentStatusHistory[];
+
+  @OneToMany(
+    (type) => StudentReenrollmentStatus,
+    (studentReenrollmentStatus) => studentReenrollmentStatus.student_id,
+  )
+  reenrollment_status?: StudentReenrollmentStatus[];
 }

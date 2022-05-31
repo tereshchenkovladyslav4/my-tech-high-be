@@ -15,6 +15,7 @@ import { Person } from './person.entity';
 import { StudentGradeLevel } from './student-grade-level.entity';
 import { StudentStatus } from './student-status.entity';
 import { Withdrawal } from './withdrawal.entity';
+import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
@@ -75,6 +76,13 @@ export class Student extends BaseEntity {
   @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status?: StudentStatus[];
+
+  @OneToMany(
+    (type) => StudentReenrollmentStatus,
+    (studentReenrollmentStatus) => studentReenrollmentStatus.student,
+  )
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  reenrollment_status?: StudentReenrollmentStatus[];
 
   @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.Student)
   @Field(() => [Withdrawal], { nullable: true })

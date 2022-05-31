@@ -7,8 +7,10 @@ import {
   JoinColumn,
   BaseEntity,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApplicationRegion } from './region.entity';
+import { UserAnnouncement } from './user-announcement.entity';
 import { User } from './user.entity';
 
 @ObjectType()
@@ -53,6 +55,13 @@ export class Announcement extends BaseEntity {
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
   date?: Date;
+
+  @OneToMany(
+    () => UserAnnouncement,
+    (userAnnouncement) => userAnnouncement.Announcement,
+  )
+  @Field(() => [UserAnnouncement], { nullable: true })
+  UserAnnouncements: UserAnnouncement[];
 
   @ManyToOne(() => ApplicationRegion, (region) => region.Announcements, {
     onDelete: 'SET NULL',

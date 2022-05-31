@@ -29,6 +29,7 @@ import { StudentStatusService } from './services/student-status.service';
 import { StudentStatus } from './models/student-status.entity';
 import { StudentStatusHistoryService } from './services/student-status-history.service';
 import { StudentStatusHistory } from './models/student-status-history.entity';
+import { StudentReenrollmentStatus } from './models/student-reenrollment-status.entity';
 import { UserRegion } from './models/user-region.entity';
 const servicesImports = [
   UsersService,
@@ -64,6 +65,7 @@ const servicesImports = [
       EmailVerifier,
       StudentStatus,
       StudentStatusHistory,
+      StudentReenrollmentStatus,
       UserRegion,
     ]),
   ],

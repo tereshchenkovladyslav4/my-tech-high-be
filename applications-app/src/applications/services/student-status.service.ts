@@ -45,7 +45,7 @@ export class StudentStatusService {
         await this.withdrawalService.update(updateWithdrawalInput);
       }
 
-      if (status == 1 && activeOption == 1) {
+      if ((status == 1 || status == 0) && activeOption == 1) {
         await this.withdrawalService.delete(student_id);
       }
 

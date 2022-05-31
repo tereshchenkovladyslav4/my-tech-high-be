@@ -10,7 +10,7 @@ import { SaveStudentPacketInput } from '../dto/save-student-packet.inputs';
 import { Pagination, PaginationOptionsInterface } from '../../paginate';
 import { ResponseDTO } from '../dto/response.dto';
 import { EmailsService } from './emails.service';
-import { PacketEmailsService } from './packet-emails.service'
+import { PacketEmailsService } from './packet-emails.service';
 import { DeleteApplicationInput } from '../dto/delete-application.inputs';
 import { ApplicationsService } from './applications.service';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
@@ -44,7 +44,6 @@ export class PacketsService {
 
     const userEmails = this.packetEmailsService.findByOrder();
 
-
     let qb = this.packetsRepository
       .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.student', 'student')
@@ -53,13 +52,11 @@ export class PacketsService {
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('student.status', 'status')
+      .leftJoinAndSelect('student.reenrollment_status', 'r_status')
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('student.grade_levels', 'grade_levels')
       .leftJoinAndSelect('packet.packet_emails', 'packet_emails')
-      .leftJoinAndSelect(
-        'packet.packet_emails',
-        '(' + userEmails + ')',
-      )
+      .leftJoinAndSelect('packet.packet_emails', '(' + userEmails + ')')
 
       .where('packet.status IN (:status)', { status: filters })
       .andWhere(`school_year.RegionId = ${region_id}`);
@@ -120,9 +117,9 @@ export class PacketsService {
           qb.orderBy('packet.deadline', 'DESC');
         } else if (_sortBy[0] === 'status') {
           qb.orderBy('packet.status', 'DESC');
-        }  else if(_sortBy[0] === 'studentStatus') {
+        } else if (_sortBy[0] === 'studentStatus') {
           qb.orderBy('status.status', 'DESC');
-        }  else if (_sortBy[0] === 'emailed') {
+        } else if (_sortBy[0] === 'emailed') {
           qb.orderBy(`(${userEmails}).created_at`, 'DESC');
         } else if (_sortBy[0] === 'parent') {
           qb.addSelect(
@@ -144,7 +141,7 @@ export class PacketsService {
           qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
           qb.orderBy('packet.deadline', 'ASC');
-        } else if(_sortBy[0] === 'studentStatus') {
+        } else if (_sortBy[0] === 'studentStatus') {
           qb.orderBy('status.status', 'ASC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy(`(${userEmails}).created_at`, 'ASC');
@@ -162,20 +159,20 @@ export class PacketsService {
       }
     }
 
-    let result = []
-    const [results, total] = await qb.getManyAndCount()
-    if(take) {
-      if(total < ((skip || 0) + take)) {
-        result = results.slice(skip || 0, results.length)
+    let result = [];
+    const [results, total] = await qb.getManyAndCount();
+    if (take) {
+      if (total < (skip || 0) + take) {
+        result = results.slice(skip || 0, results.length);
       } else {
-        result = results.slice(skip || 0, take)
+        result = results.slice(skip || 0, take);
       }
     }
     return new Pagination<Packet>({
       results: result,
       total,
     });
-    
+
     // const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
     // return new Pagination<Packet>({
     //   results,
@@ -242,7 +239,9 @@ export class PacketsService {
       results: statusArray,
     };
   }
-  async sendEmail(emailPacketInput: EmailApplicationInput): Promise<PacketEmail[]> {
+  async sendEmail(
+    emailPacketInput: EmailApplicationInput,
+  ): Promise<PacketEmail[]> {
     const { application_ids, subject, body } = emailPacketInput;
     const [results, total] = await this.packetsRepository
       .createQueryBuilder('packet')

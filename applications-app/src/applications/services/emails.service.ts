@@ -12,6 +12,7 @@ import { EmailTemplatesService } from './email-templates.service';
 import { UserRegionService } from './user-region.service';
 import { ApplicationUserRegion } from '../models/user-region.entity';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
+import { UserAnnouncementsService } from './user-announcements.service';
 
 var base64 = require('base-64');
 @Injectable()
@@ -21,6 +22,7 @@ export class EmailsService {
     private SESService: SESService,
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
+    private userAnnouncementService: UserAnnouncementsService,
   ) {}
 
   async sendAccountVerificationEmail(
@@ -93,8 +95,15 @@ export class EmailsService {
   }
 
   async sendAnnouncementEmail(announcementEmail: AnnouncementEmailArgs) {
-    const { sender, subject, body, RegionId, filter_grades, filter_users } =
-      announcementEmail;
+    const {
+      announcement_id,
+      sender,
+      subject,
+      body,
+      RegionId,
+      filter_grades,
+      filter_users,
+    } = announcementEmail;
     const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
     const grades = filter_grades
       .replace('[', '(')
@@ -109,7 +118,8 @@ export class EmailsService {
       .replace(
         'adminQuery',
         `SELECT
-          Users.email AS email
+          Users.email AS email,
+          Users.user_id AS UserId
         FROM (
           SELECT user_id, email, level FROM infocenter.core_users
         ) AS Users
@@ -121,7 +131,8 @@ export class EmailsService {
       .replace(
         'parentQuery',
         `SELECT
-          person.email AS email
+          person.email AS email,
+          person.user_id AS UserId
         FROM (
           SELECT student_id, school_year_id FROM infocenter.mth_application
         ) AS applications
@@ -137,7 +148,8 @@ export class EmailsService {
         GROUP BY person.email 
         UNION 
         SELECT
-          person.email AS email
+          person.email AS email,
+          person.user_id AS UserId
         FROM (
           SELECT student_id, school_year_id FROM infocenter.mth_application
         ) AS applications
@@ -155,7 +167,8 @@ export class EmailsService {
       .replace(
         'studentQuery',
         `SELECT
-          person.email AS email
+          person.email AS email,
+          person.user_id AS UserId
         FROM (
           SELECT student_id, school_year_id FROM infocenter.mth_application
         ) AS applications
@@ -172,7 +185,8 @@ export class EmailsService {
       .replace(
         'teacherQuery',
         `SELECT
-          Users.email AS email
+          Users.email AS email,
+          Users.user_id AS UserId
         FROM (
           SELECT user_id, email, level FROM infocenter.core_users
         ) AS Users
@@ -186,7 +200,7 @@ export class EmailsService {
       const queryRunner = await getConnection().createQueryRunner();
       const users = await queryRunner.query(query);
       queryRunner.release();
-      users.forEach(async (user) => {
+      users.map(async (user) => {
         if (user.email) {
           try {
             await this.sendEmail({
@@ -198,6 +212,13 @@ export class EmailsService {
           } catch (error) {
             console.log(error, 'Email Error');
           }
+        }
+        if (user.UserId) {
+          await this.userAnnouncementService.save({
+            AnnouncementId: announcement_id,
+            user_id: user.UserId,
+            status: 'Unread',
+          });
         }
       });
     }
