@@ -12,7 +12,7 @@ import { Region } from './region.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id , date_begin, date_end, date_reg_open, date_reg_close, RegionId")',
+  '@key(fields: "school_year_id , date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, birth_date_cut")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -103,14 +103,17 @@ export class SchoolYear extends BaseEntity {
 
   @Column()
   @Field((type) => Date, { nullable: true })
+  @Directive('@external')
   birth_date_cut: Date;
 
   @Column()
   @Field((type) => Boolean, { nullable: true })
+  @Directive('@external')
   special_ed: boolean;
 
   @Column()
   @Field((type) => String, { nullable: true })
+  @Directive('@external')
   grades: string;
 
   @ManyToOne(() => Region, (region) => region.SchoolYears, {

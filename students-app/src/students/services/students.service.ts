@@ -21,6 +21,7 @@ import { PersonsService } from './persons.service';
 import { UserRegion } from '../models/user-region.entity';
 import * as Moment from 'moment';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
+import { Region } from '../models/region.entity';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -97,6 +98,9 @@ export class StudentsService {
       application_date_accepted: null,
       packet_id: null,
       packet_status: null,
+      application_deadline_num_days: 0,
+      enrollment_packet_deadline_num_days: 0,
+      enrollment_packet_date_deadline: null,
     };
 
     const parent = await createQueryBuilder(Parent)
@@ -111,11 +115,14 @@ export class StudentsService {
         'userRegion',
         'userRegion.user_id = user.user_id',
       )
+      .innerJoinAndSelect(Region, 'region', 'region.id = userRegion.region_id')
       .where('`Parent`.parent_id = :parentId', {
         parentId: studentData.parent_id,
       })
       .printSql()
       .getRawOne();
+
+    console.log('ParentData: ', parent);
 
     const region_id = (parent && parent.userRegion_region_id) || null;
     if (!region_id) {
@@ -177,6 +184,16 @@ export class StudentsService {
         null,
       packet_id: (student && student.packet_packet_id) || null,
       packet_status: (student && student.packet_status) || null,
+      application_deadline_num_days:
+        parent.region_application_deadline_num_days,
+      enrollment_packet_deadline_num_days:
+        parent.region_enrollment_packet_deadline_num_days,
+      enrollment_packet_date_deadline:
+        (student &&
+          Moment(student.application_date_accepted)
+            .add(parent.region_application_deadline_num_days, 'd')
+            .format('MM.DD')) ||
+        null,
     };
   }
 

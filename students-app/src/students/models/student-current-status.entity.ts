@@ -37,4 +37,13 @@ export class StudentCurrentStatus {
 
   @Field((type) => String, { nullable: true })
   packet_status?: string;
+
+  @Field((type) => Int, { nullable: true })
+  application_deadline_num_days?: number;
+
+  @Field((type) => Int, { nullable: true })
+  enrollment_packet_deadline_num_days?: number;
+
+  @Field(() => String, { nullable: true })
+  enrollment_packet_date_deadline?: String;
 }

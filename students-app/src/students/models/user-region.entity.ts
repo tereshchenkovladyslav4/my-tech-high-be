@@ -1,5 +1,14 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
+
+import { Region } from './region.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -17,4 +26,8 @@ export class UserRegion extends BaseEntity {
 
   @Column()
   user_id: number;
+
+  @ManyToOne(() => Region, (region) => region.region, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'region_id' })
+  regionDetail: Region;
 }

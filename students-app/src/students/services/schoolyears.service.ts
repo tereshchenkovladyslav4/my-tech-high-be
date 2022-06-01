@@ -20,9 +20,9 @@ export class SchoolYearsService {
   getCurrent(region_id: number): Promise<SchoolYear> {
     return this.schoolYearsRepository.findOne({
       where: {
+        RegionId: region_id,
         date_begin: LessThanOrEqual(new Date()),
         date_end: MoreThanOrEqual(new Date()),
-        RegionId: region_id,
       },
     });
   }

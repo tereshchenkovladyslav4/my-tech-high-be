@@ -31,6 +31,7 @@ import { StudentStatusHistoryService } from './services/student-status-history.s
 import { StudentStatusHistory } from './models/student-status-history.entity';
 import { StudentReenrollmentStatus } from './models/student-reenrollment-status.entity';
 import { UserRegion } from './models/user-region.entity';
+import { Region } from './models/region.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -67,6 +68,7 @@ const servicesImports = [
       StudentStatusHistory,
       StudentReenrollmentStatus,
       UserRegion,
+      Region,
     ]),
   ],
   providers: [...servicesImports],

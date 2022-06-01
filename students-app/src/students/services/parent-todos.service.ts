@@ -62,22 +62,27 @@ export class ParentToDosService {
   async submitEnrollmentPacket(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
     const parent = await this.getParent(user.user_id);
-
+    const defaultResponse = {
+      phrase: 'Submit Enrollment Packet',
+      button: 'Submit Now',
+      icon: '',
+      dashboard: 1, // yes
+      homeroom: 1, // yes
+      students: [],
+    };
     if (!parent) {
-      return {
-        phrase: 'Submit Enrollment Packet',
-        button: 'Submit Now',
-        icon: '',
-        dashboard: 1, // yes
-        homeroom: 1, // yes
-        students: [],
-      };
+      return defaultResponse;
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
     const schoolYear = await this.schoolYearsService.getCurrent(
       userRegion_region_id,
     );
+
+    if (!schoolYear) {
+      return defaultResponse;
+    }
+
     const students = await createQueryBuilder(Student)
       .innerJoin(
         Application,
@@ -109,22 +114,28 @@ export class ParentToDosService {
   async resubmitEnrollmentPacket(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
     const parent = await this.getParent(user.user_id);
+    const defaultResponse = {
+      phrase: 'Resubmit Enrollment Packet',
+      button: 'Resubmit Now',
+      icon: '',
+      dashboard: 1, // yes
+      homeroom: 1, // yes
+      students: [],
+    };
 
     if (!parent) {
-      return {
-        phrase: 'Resubmit Enrollment Packet',
-        button: 'Resubmit Now',
-        icon: '',
-        dashboard: 1, // yes
-        homeroom: 1, // yes
-        students: [],
-      };
+      return defaultResponse;
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
     const schoolYear = await this.schoolYearsService.getCurrent(
       userRegion_region_id,
     );
+
+    if (!schoolYear) {
+      return defaultResponse;
+    }
+
     const students = await createQueryBuilder(Student)
       .innerJoin(
         Application,
