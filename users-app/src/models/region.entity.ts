@@ -61,6 +61,10 @@ export class Region extends BaseEntity {
   @Field((type) => Int, { nullable: true })
   enrollment_packet_deadline_num_days: number;
 
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  withdraw_deadline_num_days: number;
+
   @OneToMany(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
   region: UserRegion;

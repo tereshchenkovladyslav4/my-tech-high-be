@@ -86,6 +86,7 @@ export class RegionService {
         updateRegionInput.application_deadline_num_days,
       enrollment_packet_deadline_num_days:
         updateRegionInput.enrollment_packet_deadline_num_days,
+      withdraw_deadline_num_days: updateRegionInput.withdraw_deadline_num_days,
     };
     Object.keys(data).forEach((key) => {
       if (!data[key]) {
@@ -113,19 +114,23 @@ export class RegionService {
     await this.regionRepository.query(
       `DELETE FROM infocenter.county WHERE Region_id = ${region_id};`,
     );
+
+    let attachmentId = '';
+    let fileId = '';
+    const getRegionNameResponse = await this.regionRepository.query(
+      `SELECT county_file_path AS filePath FROM infocenter.region WHERE id = ${region_id}`,
+    );
+
     await this.regionRepository.query(
       `UPDATE infocenter.region SET county_file_name = '', county_file_path = '' WHERE id = ${region_id};`,
     );
-    let regionName = '';
-    let fileId = '';
-    const getRegionNameResponse = await this.regionRepository.query(
-      `SELECT name FROM infocenter.region WHERE id = ${region_id}`,
-    );
+
     getRegionNameResponse.map((item) => {
-      regionName = item.name;
+      attachmentId = item.filePath.substr(53);
     });
+
     const getFileIdResponse = await this.regionRepository.query(
-      `SELECT MAX(file_id) AS fileId FROM infocenter.mth_file WHERE item1 LIKE '%${regionName}/county%'`,
+      `SELECT MAX(file_id) AS fileId FROM infocenter.mth_file WHERE item1 = '${attachmentId}'`,
     );
     getFileIdResponse.map((item) => {
       fileId = item.fileId;
@@ -137,19 +142,23 @@ export class RegionService {
     await this.regionRepository.query(
       `DELETE FROM infocenter.school_district WHERE Region_id = ${region_id};`,
     );
+
+    let attachmentId = '';
+    let fileId = '';
+    const getRegionNameResponse = await this.regionRepository.query(
+      `SELECT school_district_file_path AS filePath FROM infocenter.region WHERE id = ${region_id}`,
+    );
+
     await this.regionRepository.query(
       `UPDATE infocenter.region SET school_district_file_name = '', school_district_file_path = '' WHERE id = ${region_id};`,
     );
-    let regionName = '';
-    let fileId = '';
-    const getRegionNameResponse = await this.regionRepository.query(
-      `SELECT name FROM infocenter.region WHERE id = ${region_id}`,
-    );
+
     getRegionNameResponse.map((item) => {
-      regionName = item.name;
+      attachmentId = item.filePath.substr(53);
     });
+
     const getFileIdResponse = await this.regionRepository.query(
-      `SELECT MAX(file_id) AS fileId FROM infocenter.mth_file WHERE item1 LIKE '%${regionName}/schoolDistrict/%'`,
+      `SELECT MAX(file_id) AS fileId FROM infocenter.mth_file WHERE item1 = '${attachmentId}'`,
     );
     getFileIdResponse.map((item) => {
       fileId = item.fileId;
@@ -169,6 +178,15 @@ export class RegionService {
         .update(Region)
         .set({
           application_deadline_num_days: deadline,
+        })
+        .where('id = :id', { id: region_id })
+        .execute();
+    else if (category == 'Withdraw')
+      return await getConnection()
+        .createQueryBuilder()
+        .update(Region)
+        .set({
+          withdraw_deadline_num_days: deadline,
         })
         .where('id = :id', { id: region_id })
         .execute();

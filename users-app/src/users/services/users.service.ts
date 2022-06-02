@@ -40,7 +40,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     private emailService: EmailsService,
     private emailVerifierService: EmailVerifierService,
-    private userRegionService: UserRegionService,
+    private userRegionService: UserRegionService
   ) {}
 
   saltPassword(password: string) {
@@ -248,6 +248,29 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: {
+        email: email,
+        status: 1
+      }
+    });
+
+    if( !user )
+      return user;
+
+    const queryRunner = await getConnection().createQueryRunner();
+    const response = (await queryRunner.query(
+      `SELECT person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id FROM infocenter.mth_person WHERE user_id = ${user.user_id}`,
+    )) as Person[];
+
+    if(response.length == 0) {
+      await queryRunner.query(
+        `INSERT INTO infocenter.mth_person (person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id)
+        VALUES (0, '${user.first_name}', '${user.last_name}', '', '', '', 'Male', '${user.email}', NOW(), ${user.user_id});`
+      );
+    }
+    await queryRunner.release();
+    
     return await this.usersRepository.findOne({
       where: {
         email: email,
@@ -415,6 +438,10 @@ export class UsersService {
 
     // update email
     if (person.email !== updateProfileInput.email) {
+      await this.emailVerifierService.delete({
+        user_id: user.user_id,
+        email: updateProfileInput.email,
+      });
       const emailVerifier = await this.emailVerifierService.create({
         user_id: user.user_id,
         email: updateProfileInput.email,

@@ -115,11 +115,9 @@ export class AppController {
 
       let extension = false;
       this.allowed_files.map((item, i) => {
-        //console.log("Item: ", item, " = ", i, " = ", mimetype);
         if (typeof item[mimetype] !== 'undefined') extension = item[mimetype];
       });
 
-      //console.log("Allowed: ", extension);
       if (!extension)
         throw new HttpException(
           'Filetype ' + mimetype + ' is not allowed!',
@@ -128,13 +126,9 @@ export class AppController {
       let file_name = '';
       if (body.directory) {
         file_name =
-          body.region +
-          '/' +
           body.directory +
           '/' +
           this.encryptFileName(originalname) +
-          '/' +
-          originalname +
           '.' +
           extension;
       } else {
@@ -147,7 +141,7 @@ export class AppController {
           '.' +
           extension;
       }
-      console.log(file_name, 'file_Name');
+
       const upload = await this.s3Service.s3_upload(
         buffer,
         null,

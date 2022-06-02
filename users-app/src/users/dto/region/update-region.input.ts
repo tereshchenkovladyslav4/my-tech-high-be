@@ -40,4 +40,7 @@ export class UpdateRegionInput {
 
   @Field((type) => Int, { nullable: true })
   enrollment_packet_deadline_num_days: number;
+
+  @Field((type) => Int, { nullable: true })
+  withdraw_deadline_num_days: number;
 }

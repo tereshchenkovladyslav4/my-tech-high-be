@@ -96,7 +96,7 @@ export class EmailsService {
     content +=
       '<p><a href="' +
       webAppUrl +
-      '/confirm/?token=' +
+      '/email-verification/?token=' +
       token +
       '">Click here</a><br></p>';
     content +=
@@ -107,7 +107,7 @@ export class EmailsService {
       content +=
         '<p><a href="' +
         webAppUrl +
-        '/confirm/?token=' +
+        '/email-verification/?token=' +
         token +
         '">Click here to verify</a><br></p>';
       subject = template.subject;

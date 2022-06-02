@@ -110,6 +110,42 @@ export class UsersResolver {
     }
   }
 
+  @Mutation((returns) => MeConfirmation)
+  async verifyEmail(
+    @Args('verifyInput') verifyInput: VerifyInput
+  ): Promise<MeConfirmation> {
+    const { token } = verifyInput
+    const decodedToken = base64.decode(token)
+    const [user_id, email] = decodedToken.split('-')
+
+    const emailVerifier = await this.emailVerifierService.findOneByUser(
+      user_id,
+      email
+    )
+    if (!emailVerifier) {
+      throw new UnauthorizedException()
+    }
+
+    const user = await this.usersService.findOneById(user_id)
+    console.log(user.password, verifyInput.password, this.usersService.encryptPassword(verifyInput.password));
+    if (!user || user.password != this.usersService.encryptPassword(verifyInput.password)) {
+      throw new UnauthorizedException()
+    }
+
+    const currentDate = new Date(Moment().format('YYYY-MM-DD HH:mm:ss'))
+    const result = await this.emailVerifierService.update({
+      ...emailVerifier,
+      date_verified: currentDate,
+      verified: 1
+    })
+
+    return {
+      token: token,
+      email: emailVerifier.email,
+      status: result.verified ? 'verified' : 'unverified'
+    }
+  }
+
   // @Mutation((returns) => MePermission)
   // @UseGuards(LocalAuthGuard)
   // public async login(@Args('loginInput') loginInput: LoginInput): Promise<AuthPayload> {

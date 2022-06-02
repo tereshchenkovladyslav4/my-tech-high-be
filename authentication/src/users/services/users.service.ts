@@ -31,7 +31,7 @@ export class UsersService {
     const emailVerifier =
       await this.emailVerifierService.getEmailVerificationStatus(email)
     if (emailVerifier) {
-      return await this.emailService.sendAccountVerificationEmail(emailVerifier)
+      return await this.emailService.sendEmailUpdateVerificationEmail(emailVerifier)
     } else {
       return null
     }
@@ -66,7 +66,7 @@ export class UsersService {
     })
   }
 
-  private encryptPassword(password: string) {
+  public encryptPassword(password: string) {
     return crypto.createHash('md5').update(`${password}${salt}`).digest('hex')
   }
 }
