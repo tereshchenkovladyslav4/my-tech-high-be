@@ -439,7 +439,6 @@ export class UsersService {
     // update email
     if (person.email !== updateProfileInput.email) {
       await this.emailVerifierService.delete({
-        user_id: user.user_id,
         email: updateProfileInput.email,
       });
       const emailVerifier = await this.emailVerifierService.create({

@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { getConnection, Repository } from 'typeorm'
 import { SESService } from './ses.service'
 import { EmailVerifier } from 'src/users/models/email-verifier.entity'
 import { EmailTemplatesService } from './email-templates.service'
 import { UserRegionService } from './user-region.service'
 import { UserRegion } from './../models/user-region.entity'
+import { User } from '../models/user.entity'
 
 var base64 = require('base-64')
 import * as Moment from 'moment'
@@ -122,7 +123,12 @@ export class EmailsService {
 			await this.userRegionService.findUserRegionByUserId(
 				emailVerifier.user_id,
 			);
-
+			const queryRunner = await getConnection().createQueryRunner();
+			const response = (await queryRunner.query(
+				`SELECT level FROM infocenter.core_users WHERE user_id = ${emailVerifier.user_id}`,
+			)) as User[];
+			queryRunner.release();
+		
 		var region_id = 0;
 		if (regions.length != 0) {
 			region_id = regions[0].region_id;
@@ -144,7 +150,21 @@ export class EmailsService {
 		content +=
 			'<p>*This is just a test, please disregard if you receive this email* - MTH</p>';
 		content += ' <p>Â </p>';
-		if (template) {
+		if(response[0].level <= 2) {
+			//	For Administrators, we send generic email
+			content =
+				'<p>Please click on the link below to verify your new email address.</p>';
+			content +=
+				'<p><a href="' +
+				webAppUrl +
+				'/email-verification/?token=' +
+				token +
+				'">Click here</a><br></p>';
+			content +=
+				'<p>*This is just a test for administrators, please disregard if you receive this email* - MTH</p>';
+			content += ' <p>Â </p>';
+		}
+		else if (template) {
 			content = template.body;
 			content +=
 				'<p><a href="' +

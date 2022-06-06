@@ -18,7 +18,6 @@ export class EmailVerifierService {
 
 	async delete(emailVerifier: CreateEmailVerifierInput): Promise<void> {
 		this.emailVerifiersRepository.delete({
-			user_id: emailVerifier.user_id,
       email: emailVerifier.email
 		});
 	}

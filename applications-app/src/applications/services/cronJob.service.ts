@@ -3,12 +3,16 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { getConnection } from 'typeorm';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { EmailsService } from './emails.service';
+import { EnrollmentsService } from '../enrollments.service';
 import * as Moment from 'moment';
 
 @Injectable()
 export class CronJobService {
   private readonly logger = new Logger(CronJobService.name);
-  constructor(private sesEmailService: EmailsService) {}
+  constructor(
+    private sesEmailService: EmailsService,
+    private enrollmentsService: EnrollmentsService,
+  ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
   async findScheduledAnnouncements() {
@@ -55,6 +59,23 @@ export class CronJobService {
         );
         queryRunner.release();
       });
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  //@Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron('0 0 0 * * *') // Runs Every day at Midnight
+  async schedulePacketReminders() {
+    try {
+      const data = await this.enrollmentsService.runScheduleReminders();
+      this.logger.log('scheduledPacketReminders: ', data);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: data,
+        }),
+      };
     } catch (error) {
       this.logger.error(error);
     }

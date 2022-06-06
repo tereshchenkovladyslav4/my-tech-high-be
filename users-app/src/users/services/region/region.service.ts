@@ -126,7 +126,7 @@ export class RegionService {
     );
 
     getRegionNameResponse.map((item) => {
-      attachmentId = item.filePath.substr(53);
+      attachmentId = decodeURI(item.filePath.substr(53));
     });
 
     const getFileIdResponse = await this.regionRepository.query(
@@ -154,7 +154,7 @@ export class RegionService {
     );
 
     getRegionNameResponse.map((item) => {
-      attachmentId = item.filePath.substr(53);
+      attachmentId = decodeURI(item.filePath.substr(53));
     });
 
     const getFileIdResponse = await this.regionRepository.query(
