@@ -52,4 +52,7 @@ export class CreateStudentPersonInput {
   @Field({ nullable: true })
   @MaxLength(3)
   grade_level?: string;
+
+  @Field({ nullable: true })
+  meta?: string;
 }

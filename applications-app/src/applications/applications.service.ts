@@ -248,8 +248,16 @@ export class ApplicationsService {
     referred_by?: string,
     meta?: string,
   ): Promise<any> {
-    const { first_name, last_name, grade_level } = studentApplication;
-    const studentApplicationInput = omit(studentApplication, ['grade_level']);
+    const {
+      first_name,
+      last_name,
+      grade_level,
+      meta: studentMeta,
+    } = studentApplication;
+    const studentApplicationInput = omit(studentApplication, [
+      'grade_level',
+      'meta',
+    ]);
     const person = await this.personsService.create(studentApplicationInput);
     if (!person) throw new ServiceUnavailableException('Person Not Created');
     console.log('Person: ', person);
@@ -273,12 +281,15 @@ export class ApplicationsService {
     if (!student_grade_level)
       throw new ServiceUnavailableException('Student Grade Level Not Created');
     console.log('Student Grade Level: ', student);
-
+    const application_meta = JSON.stringify({
+      ...JSON.parse(meta),
+      ...JSON.parse(studentMeta),
+    });
     const application = await this.studentApplicationsService.create({
       student_id,
       school_year_id,
       referred_by,
-      meta,
+      meta: application_meta,
     });
     if (!application)
       throw new ServiceUnavailableException('Application Not Created');
