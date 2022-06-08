@@ -42,10 +42,6 @@ export class EnrollmentQuestions extends BaseEntity {
   required: boolean;
 
   @Column()
-  @Field(() => Boolean, { defaultValue: true })
-  removable: boolean;
-
-  @Column()
   @Field(() => Boolean, { defaultValue: false })
   default_question: boolean;
 

@@ -30,9 +30,6 @@ export class NewEnrollmentQuestionsInput {
   @Field(() => Boolean, { defaultValue: false })
   required?: boolean;
 
-  @Field(() => Boolean, { defaultValue: false })
-  removable?: boolean;
-
   @Field(() => Int, { defaultValue: 0 })
   validation?: number;
 

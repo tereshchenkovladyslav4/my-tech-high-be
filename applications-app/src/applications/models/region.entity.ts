@@ -2,15 +2,14 @@ import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import {
   BaseEntity,
   Column,
-  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
   JoinColumn,
   OneToMany,
 } from 'typeorm';
 import { Announcement } from './announcement.entity';
+import { EventType } from './event-type.entity';
 import { ApplicationUserRegion } from './user-region.entity';
 
 @ObjectType()
@@ -37,4 +36,8 @@ export class ApplicationRegion extends BaseEntity {
   @OneToMany(() => Announcement, (announcement) => announcement.Region)
   @Field(() => [Announcement], { nullable: true })
   Announcements: Announcement[];
+
+  @OneToMany(() => EventType, (eventType) => eventType.Region)
+  @Field(() => [EventType], { nullable: true })
+  EventTypes: EventType[];
 }
