@@ -142,6 +142,16 @@ export class ApplicationsResolver {
     }
   }
 
+  @Mutation((returns) => Boolean, {
+    name: 'sendApplicationReceiveEmail',
+  })
+  async sendApplicationReceiveEmail(
+    @Args({ name: 'email', type: () => String })
+    email: string,
+  ): Promise<boolean> {
+    return await this.studentApplicationsService.sendApplicationRecieveEmail(email);
+  }
+
   @Mutation((returns) => [Application], { name: 'acceptApplication' })
   async acceptApplication(
     @Args('acceptApplicationInput')

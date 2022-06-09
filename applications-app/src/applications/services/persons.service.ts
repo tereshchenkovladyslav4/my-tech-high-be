@@ -16,6 +16,10 @@ export class PersonsService {
   findOneById(person_id: number): Promise<Person> {
     return this.personsRepository.findOne(person_id);
   }
+  
+  findOneByUserId(user_id: number): Promise<Person> {
+    return this.personsRepository.findOne({ user_id });
+  }
 
   async create(person: CreatePersonInput): Promise<Person> {
     return this.personsRepository.save(person);

@@ -26,4 +26,13 @@ export class SchoolYearsService {
       },
     });
   }
+
+  getAllActive(region_id: number): Promise<SchoolYear[]> {
+    return this.schoolYearsRepository.find({
+      where: {
+        RegionId: region_id,
+        date_end: MoreThanOrEqual(new Date()),
+      },
+    });
+  }
 }

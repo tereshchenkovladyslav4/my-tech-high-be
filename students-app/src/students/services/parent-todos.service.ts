@@ -13,6 +13,7 @@ import { Packet } from '../models/packet.entity';
 import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
+import { SchoolYear } from '../models/schoolyear.entity';
 
 @Injectable()
 export class ParentToDosService {
@@ -59,6 +60,23 @@ export class ParentToDosService {
       .getRawOne();
   }
 
+  async getActiveSchoolYears(region_id: number): Promise<any> {
+    const activeSchoolYears = await this.schoolYearsService.getAllActive(
+      region_id,
+    );
+
+    //console.log('activeSchoolYears: ', activeSchoolYears);
+    let _activeSchoolYears = [];
+    if (activeSchoolYears) {
+      _activeSchoolYears = activeSchoolYears.map(function (a) {
+        return a.school_year_id;
+      });
+    }
+    console.log('ActiveSchoolYears: ', _activeSchoolYears);
+
+    return _activeSchoolYears;
+  }
+
   async submitEnrollmentPacket(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
     const parent = await this.getParent(user.user_id);
@@ -75,11 +93,11 @@ export class ParentToDosService {
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
-    const schoolYear = await this.schoolYearsService.getCurrent(
+    const activeSchoolYears = await this.getActiveSchoolYears(
       userRegion_region_id,
     );
 
-    if (!schoolYear) {
+    if (activeSchoolYears.length == 0) {
       return defaultResponse;
     }
 
@@ -87,8 +105,8 @@ export class ParentToDosService {
       .innerJoin(
         Application,
         'application',
-        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND application.school_year_id = :schoolYear",
-        { schoolYear: schoolYear.school_year_id },
+        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND application.school_year_id IN (:schoolYears)",
+        { schoolYears: activeSchoolYears },
       )
       .innerJoin(
         Packet,
@@ -128,11 +146,11 @@ export class ParentToDosService {
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
-    const schoolYear = await this.schoolYearsService.getCurrent(
+    const activeSchoolYears = await this.getActiveSchoolYears(
       userRegion_region_id,
     );
 
-    if (!schoolYear) {
+    if (activeSchoolYears.length == 0) {
       return defaultResponse;
     }
 
@@ -140,8 +158,8 @@ export class ParentToDosService {
       .innerJoin(
         Application,
         'application',
-        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND application.school_year_id = :schoolYear",
-        { schoolYear: schoolYear.school_year_id },
+        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND application.school_year_id IN (:schoolYears)",
+        { schoolYears: activeSchoolYears },
       )
       .innerJoin(
         Packet,

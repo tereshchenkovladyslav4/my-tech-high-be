@@ -52,7 +52,7 @@ export class StudentsService {
   }
 
   findOneByPersonId(person_id: number): Promise<Student> {
-    return this.studentsRepository.findOne(person_id);
+    return this.studentsRepository.findOne({ person_id });
   }
 
   async create(student: CreateStudentInput): Promise<Student> {

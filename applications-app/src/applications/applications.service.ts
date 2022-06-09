@@ -29,6 +29,7 @@ import { EmailTemplatesService } from '../applications/services/email-templates.
 import { Application } from './models/application.entity';
 import { StudentStatusService } from './services/student-status.service';
 import { ApplicationUserRegion } from './models/user-region.entity';
+import { SchoolYearService } from './services/schoolyear.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -42,6 +43,7 @@ export class ApplicationsService {
     private studentGradeLevelsService: StudentGradeLevelsService,
     private SESService: SESService,
     private emailsService: EmailsService,
+    private schoolYearService: SchoolYearService,
     private emailVerifierService: EmailVerifierService,
     private userRegionService: UserRegionService,
     private emailTemplateService: EmailTemplatesService,
@@ -102,25 +104,79 @@ export class ApplicationsService {
       recipients: newApplication.parent.email,
     });
 
-    const emailTemplate =
-      await this.emailTemplateService.findByTemplateAndRegion(
-        'Application Received',
-        Number(newApplication.state),
-      );
-    if (emailTemplate) {
-      await this.emailsService.sendEmail({
-        email: newApplication.parent.email,
-        subject: emailTemplate.subject,
-        content: emailTemplate.body,
-        bcc: emailTemplate.bcc,
-        from: emailTemplate.from,
-      });
-    }
     return {
       parent,
       students,
     };
   }
+
+  async sendApplicationRecieveEmail(
+    email: string,
+  ): Promise<boolean> {
+    const user = await this.usersService.findOneByEmail(email);
+    const regions = await this.userRegionService.findUserRegionByUserId(user.user_id);
+
+    var region_id = 0;
+    if (regions.length != 0) {
+      region_id = regions[0].region_id;
+    }
+
+    const emailTemplate =
+    await this.emailTemplateService.findByTemplateAndRegion(
+      'Application Received',
+      region_id,
+    );
+
+    const person = await this.personsService.findOneByUserId(user.user_id);
+
+
+    if (emailTemplate) {
+      const setEmailBodyInfo = (parentPerson, school_year) => {
+        const yearbegin = new Date(school_year.date_begin)
+          .getFullYear()
+          .toString();
+        const yearend = new Date(school_year.date_end)
+          .getFullYear()
+          .toString();
+        return emailTemplate.body
+          .toString()
+          .replace(/\[STUDENT\]/g, person.first_name)
+          .replace(/\[PARENT\]/g, parentPerson.first_name)
+          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+          .replace(
+            /\[APPLICATION_YEAR\]/g,
+            `${yearbegin}-${yearend.substring(2, 4)}`,
+          )
+      };
+
+      const student = await this.studentsService.findOneByPersonId(person.person_id);
+
+      const parent = await this.parentsService.findOneById(student.parent_id)
+      const parentPerson = await this.personsService.findOneById(parent.person_id);
+
+      const gradeLevels = await this.studentGradeLevelsService.forStudents(
+        student.student_id,
+      );
+
+      const school_year = await this.schoolYearService.findOneById(
+        gradeLevels[0]?.school_year_id,
+      );
+
+      const emailBody = setEmailBodyInfo(parentPerson, school_year);
+
+      await this.emailsService.sendEmail({
+        email: email,
+        subject: emailTemplate.subject,
+        content: emailBody,
+        bcc: emailTemplate.bcc,
+        from: emailTemplate.from,
+    });
+    return true
+  } else {
+    return false
+  }
+}
+  
 
   async createNewStudentApplications(
     user: User,
@@ -165,14 +221,14 @@ export class ApplicationsService {
         'Application Received',
         region_id,
       );
-    if (emailTemplate) {
-      await this.emailsService.sendEmail({
-        email: person?.email,
-        subject: emailTemplate.subject,
-        content: emailTemplate.body,
-        bcc: emailTemplate.bcc,
-        from: emailTemplate.from,
-      });
+      if (emailTemplate) {
+        await this.emailsService.sendEmail({
+          email: person?.email,
+          subject: emailTemplate.subject,
+          content: emailTemplate.body,
+          bcc: emailTemplate.bcc,
+          from: emailTemplate.from,
+      })
     }
 
     return {
