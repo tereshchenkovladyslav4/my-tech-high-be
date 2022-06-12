@@ -370,18 +370,21 @@ export class PacketsService {
     return true;
   }
 
-  async findReminders(date: Date): Promise<string[]> {
+  async findReminders(date: Date, region_id: Number): Promise<string[]> {
     try {
       const toDate = new Date(date);
       toDate.setDate(date.getDate() + 1);
       const packets = await this.packetsRepository
         .createQueryBuilder('packet')
         .innerJoinAndSelect('packet.student', 'student')
+        .leftJoinAndSelect('student.applications', 'applications')
+        .leftJoinAndSelect('applications.school_year', 'school_year')
         .innerJoinAndSelect('student.parent', 'parent')
         .innerJoinAndSelect('parent.person', 'person')
         .where('packet.status IN (:status)', {
           status: ['Started', 'Not Started'],
         })
+        .andWhere(`school_year.RegionId = ${region_id}`)
         .andWhere('packet.deadline >= :startDate', { startDate: date })
         .andWhere('packet.deadline < :toDate', { toDate: toDate })
         .getMany();

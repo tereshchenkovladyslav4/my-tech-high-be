@@ -31,11 +31,7 @@ export class EnrollmentQuestions extends BaseEntity {
 
   @Column()
   @Field(() => String, { nullable: true })
-  additional?: string;
-
-  @Column()
-  @Field(() => String, { nullable: true })
-  additional2?: string;
+  additional_question?: string;
 
   @Column()
   @Field(() => Boolean, { defaultValue: true })

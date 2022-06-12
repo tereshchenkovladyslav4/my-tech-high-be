@@ -181,10 +181,42 @@ export class EnrollmentsService {
           );
 
         if (emailTemplate) {
+
+          const setEmailBodyInfo = (student, school_year) => {
+            const yearbegin = new Date(school_year.date_begin)
+              .getFullYear()
+              .toString();
+            const yearend = new Date(school_year.date_end)
+              .getFullYear()
+              .toString();
+
+            return emailTemplate.body
+              .toString()
+              .replace(/\[STUDENT\]/g, student.person.first_name)
+              .replace(/\[PARENT\]/g, student.parent.person.first_name)
+              .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+              .replace(
+                /\[APPLICATION_YEAR\]/g,
+                `${yearbegin}-${yearend.substring(2, 4)}`,
+              )
+              .replace(
+                /\[DEADLINE\]/g,
+                `${Moment().format('MM/DD/yy')}`,
+              );
+          };
+          const gradeLevels = await this.studentGradeLevelsService.forStudents(
+            tmp.student_id,
+          );
+          const school_year = await this.schoolYearService.findOneById(
+            school_year_id || gradeLevels[0].school_year_id,
+          );
+          const body = setEmailBodyInfo(studentPerson, school_year);
+
+
           await this.sesEmailService.sendEmail({
             email: studentPerson.parent?.person?.email,
             subject: emailTemplate.subject,
-            content: emailTemplate.body,
+            content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
           });
@@ -673,32 +705,37 @@ export class EnrollmentsService {
 
   async runScheduleReminders(): Promise<String> {
     try {
-      const emailTemplate = await this.emailTemplateService.findByTemplate(
+      const emailTemplates = await this.emailTemplateService.findAllByTemplate(
         'Packet Reminders',
       );
-      const emailReminder = await this.emailReminderService.findByTemplateId(
-        emailTemplate.id,
-      );
-      if (emailReminder.length > 0) {
-        emailReminder.forEach(async (remind) => {
-          const reminder = remind.reminder;
-          const reminderDate = new Date();
-          reminderDate.setDate(reminderDate.getDate() + reminder);
-          const emails = await this.packetsService.findReminders(reminderDate);
-          if (emailTemplate) {
-            await Promise.all(
-              emails.map(async (email) => {
-                await this.sesEmailService.sendEmail({
-                  email: email,
-                  subject: remind.subject || emailTemplate.subject,
-                  content: remind.body || emailTemplate.body,
-                  bcc: emailTemplate.bcc,
-                  from: emailTemplate.from,
-                });
-              }),
-            );
+
+      if (emailTemplates.length > 0) {
+        emailTemplates.forEach(async (emailTemplate) => {
+          const emailReminder = await this.emailReminderService.findByTemplateId(
+            emailTemplate.id,
+          );
+          if (emailReminder.length > 0) {
+            emailReminder.forEach(async (remind) => {
+              const reminder = remind.reminder;
+              const reminderDate = new Date();
+              reminderDate.setDate(reminderDate.getDate() + reminder);
+              const emails = await this.packetsService.findReminders(reminderDate, emailTemplate.region_id);
+              if (emailTemplate) {
+                await Promise.all(
+                  emails.map(async (email) => {
+                    await this.sesEmailService.sendEmail({
+                      email: email,
+                      subject: remind.subject || emailTemplate.subject,
+                      content: remind.body || emailTemplate.body,
+                      bcc: emailTemplate.bcc,
+                      from: emailTemplate.from,
+                    });
+                  }),
+                );
+              }
+            });
           }
-        });
+        })
       }
       return 'Successfully run schedule reminders.';
     } catch (error) {

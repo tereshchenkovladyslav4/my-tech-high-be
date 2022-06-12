@@ -24,6 +24,13 @@ export class EmailTemplatesService {
     return data;
   }
 
+  async findAllByTemplate(template: string): Promise<ApplicationEmailTemplate[]> {
+    const data = await this.emailTemplateRepository.find({
+      where: { template_name: template },
+    });
+    return data;
+  }
+
   async findByTemplateAndRegion(
     template: string,
     regionId: number,

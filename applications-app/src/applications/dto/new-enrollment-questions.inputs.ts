@@ -22,10 +22,7 @@ export class NewEnrollmentQuestionsInput {
   options?: string;
 
   @Field(() => String, { nullable: true })
-  additional?: string;
-
-  @Field(() => String, { nullable: true })
-  additional2?: string;
+  additional_question?: string;
 
   @Field(() => Boolean, { defaultValue: false })
   required?: boolean;
