@@ -24,6 +24,8 @@ import { StudentStatusResolver } from './resolvers/student-status.resolver';
 import { Student } from './models/student.entity';
 import { StudentStatus } from './models/student-status.entity';
 import { StudentStatusHistory } from './models/student-status-history.entity';
+import { SchoolPartnerResolver } from './resolvers/school-partner.resolver';
+import { SchoolPartner } from './models/school-partner.entity';
 
 const graphQLImports = [
   StudentsResolver, 
@@ -33,7 +35,8 @@ const graphQLImports = [
   StudentGradeLevelsResolver,
   ParentToDosResolver,
   SchoolYearResolver,
-  StudentStatusResolver
+  StudentStatusResolver,
+  SchoolPartnerResolver
 ];
 @Module({
   imports: [
@@ -44,7 +47,7 @@ const graphQLImports = [
       introspection: true,
       buildSchemaOptions: {
         dateScalarMode: 'isoDate',
-        orphanedTypes: [Person, Parent, StudentGradeLevel, Phone, Address, PersonAddress, SchoolYear, ParentToDo, ToDoItem, StudentCurrentStatus, StudentStatus, StudentStatusHistory],
+        orphanedTypes: [Person, Parent, StudentGradeLevel, Phone, Address, PersonAddress, SchoolYear, ParentToDo, ToDoItem, StudentCurrentStatus, StudentStatus, StudentStatusHistory, SchoolPartner],
       },
       context: ({ req }) => ({ headers: req.headers }),
     }),

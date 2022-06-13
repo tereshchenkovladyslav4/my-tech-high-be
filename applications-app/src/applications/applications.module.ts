@@ -41,12 +41,14 @@ import { AnnouncementsResolver } from './resolvers/announcements.resolver';
 import { Announcement } from './models/announcement.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventTypesResolver } from './resolvers/event-types.resolver';
+import { EventsResolver } from './resolvers/event.resolver';
 const graphQLImports = [
   ApplicationsResolver,
   PacketsResolver,
   StudentsResolver,
   AnnouncementsResolver,
   EventTypesResolver,
+  EventsResolver,
   ParentsResolver,
   ObserversResolver,
   StudentImmunizationResolver,

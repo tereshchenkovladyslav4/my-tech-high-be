@@ -7,7 +7,9 @@ import {
   BaseEntity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { ApplicationEvent } from './event.entity';
 import { ApplicationRegion } from './region.entity';
 
 @ObjectType()
@@ -44,6 +46,10 @@ export class EventType extends BaseEntity {
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
   updated_date?: Date;
+
+  @OneToMany(() => ApplicationEvent, (eventType) => eventType.EventType)
+  @Field(() => [ApplicationEvent], { nullable: true })
+  Events: ApplicationEvent[];
 
   @ManyToOne(() => ApplicationRegion, (region) => region.EventTypes, {
     onDelete: 'SET NULL',

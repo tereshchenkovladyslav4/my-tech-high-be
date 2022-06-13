@@ -54,7 +54,6 @@ export class Student extends BaseEntity {
   hidden: number;
 
   @Column()
-  @Field(() => String, { nullable: true })
   school_of_enrollment: string;
 
   @Column()

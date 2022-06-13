@@ -74,6 +74,8 @@ import { UserAnnouncementsService } from './services/user-announcements.service'
 import { UserAnnouncement } from './models/user-announcement.entity';
 import { EventTypesService } from './services/event-types.service';
 import { EventType } from './models/event-type.entity';
+import { EventsService } from './services/event.service';
+import { ApplicationEvent } from './models/event.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -104,6 +106,7 @@ const servicesImports = [
   WithdrawalService,
   AnnouncementsService,
   EventTypesService,
+  EventsService,
   UserAnnouncementsService,
   CronJobService,
   SettingsService,
@@ -143,6 +146,7 @@ const servicesImports = [
       Withdrawal,
       Announcement,
       EventType,
+      ApplicationEvent,
       UserAnnouncement,
       Observer,
       StudentImmunization,
