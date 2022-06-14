@@ -34,6 +34,9 @@ export class UpdateSchoolYearInput {
   @Field(() => Boolean, { nullable: true })
   special_ed?: boolean;
 
+  @Field(() => Boolean, { nullable: true })
+  enrollment_packet?: boolean;
+
   @Field(() => String, { nullable: true })
   grades?: string;
 }

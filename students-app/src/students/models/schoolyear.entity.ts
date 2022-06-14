@@ -4,7 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id ,date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, birth_date_cut")',
+  '@key(fields: "school_year_id ,date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, birth_date_cut, enrollment_packet")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -120,6 +120,11 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => Boolean, { nullable: true })
   @Directive('@external')
   special_ed: boolean;
+
+  @Column()
+  @Field((type) => Boolean, { nullable: true })
+  @Directive('@external')
+  enrollment_packet: boolean;
 
   @Column()
   @Field((type) => String, { nullable: true })
