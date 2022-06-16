@@ -5,49 +5,23 @@ import { StudentStatus } from '../models/student-status.entity';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { SchoolYearDataInput } from '../dto/school-year-data.Input';
 import { SchoolYearData } from '../models/school-year-data.entity';
-import { WithdrawalService } from './withdrawal.service';
-import { UpdateWithdrawalInput } from '../dto/update-withdrawal.inputs';
 
 @Injectable()
 export class StudentStatusService {
   constructor(
     @InjectRepository(StudentStatus)
     private readonly studentStatussRepository: Repository<StudentStatus>,
-    private withdrawalService: WithdrawalService,
   ) {}
 
   async update(updateStudentInput: UpdateStudentInput): Promise<boolean> {
     try {
-      const {
-        student_id,
-        status,
-        school_year_id,
-        withdrawOption,
-        activeOption,
-      } = updateStudentInput;
+      const { student_id, status, school_year_id } = updateStudentInput;
       await this.studentStatussRepository.save({
         student_id,
         school_year_id,
         status,
         date_updated: new Date(),
       });
-
-      if (status == 2 && withdrawOption > 0) {
-        const updateWithdrawalInput: UpdateWithdrawalInput = {
-          StudentId: student_id,
-          status:
-            withdrawOption == 1
-              ? 'Notified'
-              : withdrawOption < 5
-              ? 'Withdrawn'
-              : '',
-        };
-        await this.withdrawalService.update(updateWithdrawalInput);
-      }
-
-      if ((status == 1 || status == 0) && activeOption == 1) {
-        await this.withdrawalService.delete(student_id);
-      }
 
       if (status == 0 || status == 5) {
         const queryRunner = await getConnection().createQueryRunner();

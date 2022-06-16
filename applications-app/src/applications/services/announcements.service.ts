@@ -31,7 +31,7 @@ export class AnnouncementsService {
   async create(announcement: CreateAnnouncementInput): Promise<Announcement> {
     try {
       const result = await this.announcementsRepository.save(announcement);
-      if (announcement.status == 'Published') {
+      if (announcement.status == 'Published' && !announcement.isArchived) {
         const {
           posted_by,
           subject,
@@ -60,12 +60,10 @@ export class AnnouncementsService {
     updateAnnouncementInput: UpdateAnnouncementInput,
   ): Promise<Announcement> {
     try {
-      Object.keys(updateAnnouncementInput).forEach((key) => {
-        if (!updateAnnouncementInput[key]) {
-          delete updateAnnouncementInput[key];
-        }
-      });
-      if (updateAnnouncementInput.status == 'Published') {
+      if (
+        updateAnnouncementInput.status == 'Published' &&
+        !updateAnnouncementInput.isArchived
+      ) {
         const {
           announcement_id,
           posted_by,

@@ -22,12 +22,6 @@ export class UpdateStudentInput {
   @Field(() => Int, { nullable: true })
   school_year_id?: number;
 
-  @Field(() => Int, { nullable: true })
-  withdrawOption?: number;
-
-  @Field(() => Int, { nullable: true })
-  activeOption?: number;
-
   @Field(() => String, { nullable: true })
   testing_preference?: string;
 

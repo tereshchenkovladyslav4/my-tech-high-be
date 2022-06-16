@@ -5,6 +5,7 @@ import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { EmailsService } from './emails.service';
 import { EnrollmentsService } from '../enrollments.service';
 import * as Moment from 'moment';
+import { WithdrawalService } from './withdrawal.service';
 
 @Injectable()
 export class CronJobService {
@@ -12,6 +13,7 @@ export class CronJobService {
   constructor(
     private sesEmailService: EmailsService,
     private enrollmentsService: EnrollmentsService,
+    private withdrawalsService: WithdrawalService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -31,6 +33,7 @@ export class CronJobService {
         FROM infocenter.announcement
         WHERE
           status = 'Scheduled' AND
+          isArchived <> 1 AND
           SUBSTR(schedule_time, 1, 16) = SUBSTR(NOW(), 1, 16)`,
       );
       queryRunner.release();
@@ -70,6 +73,23 @@ export class CronJobService {
     try {
       const data = await this.enrollmentsService.runScheduleReminders();
       this.logger.log('scheduledPacketReminders: ', data);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: data,
+        }),
+      };
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  @Cron('0 0 0 * * *') // Runs Every day at Midnight
+  //@Cron(CronExpression.EVERY_30_SECONDS)
+  async scheduleWithdrawalReminders() {
+    try {
+      const data = await this.withdrawalsService.runScheduleReminders();
+      this.logger.log('scheduledWithdrawalReminders: ', data);
       return {
         statusCode: 200,
         body: JSON.stringify({

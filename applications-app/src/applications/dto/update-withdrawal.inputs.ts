@@ -3,7 +3,7 @@ import { IsIn, IsInt } from 'class-validator';
 
 @InputType()
 export class UpdateWithdrawalInput {
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   @IsInt()
   withdrawal_id?: number;
 

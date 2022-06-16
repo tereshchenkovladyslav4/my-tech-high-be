@@ -17,7 +17,7 @@ export class AnnouncementsResolver {
   ) {}
 
   @Query((returns) => [Announcement], { name: 'announcements' })
-  //@UseGuards(new AuthGuard())
+  @UseGuards(new AuthGuard())
   async getAnnouncements(
     @Args('region_id') region_id: number,
   ): Promise<Announcement[]> {
@@ -25,7 +25,7 @@ export class AnnouncementsResolver {
   }
 
   @Query((returns) => [UserAnnouncementResponse], { name: 'userAnnouncements' })
-  //@UseGuards(new AuthGuard())
+  @UseGuards(new AuthGuard())
   async getUserAnnouncements(
     @Args('request') request: UserAnnouncementRequestParams,
   ): Promise<UserAnnouncementResponse[]> {

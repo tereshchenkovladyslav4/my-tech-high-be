@@ -11,8 +11,6 @@ import {
 } from 'typeorm';
 import { ApplicationRegion } from './region.entity';
 import { UserAnnouncement } from './user-announcement.entity';
-import { User } from './user.entity';
-
 @ObjectType()
 @Entity('announcement')
 export class Announcement extends BaseEntity {
@@ -47,6 +45,10 @@ export class Announcement extends BaseEntity {
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   filter_grades?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @Column('tinyint', { name: 'isArchived', nullable: true })
+  isArchived?: boolean;
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })

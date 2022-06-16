@@ -1,15 +1,16 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
-  PrimaryColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
   BaseEntity,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
 import { Student } from './student.entity';
+import { WithdrawalEmail } from './withdrawal-email.entity';
 
 @ObjectType()
 @Entity('withdrawal')
@@ -53,4 +54,11 @@ export class Withdrawal extends BaseEntity {
   @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
   @Field(() => Student, { nullable: true })
   Student: Student;
+
+  @OneToMany(
+    () => WithdrawalEmail,
+    (withdrawalEmail) => withdrawalEmail.Withdrawal,
+  )
+  @Field(() => [WithdrawalEmail], { nullable: true })
+  WithdrawalEmails: WithdrawalEmail[];
 }

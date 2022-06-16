@@ -74,6 +74,8 @@ import { UserAnnouncementsService } from './services/user-announcements.service'
 import { UserAnnouncement } from './models/user-announcement.entity';
 import { EventTypesService } from './services/event-types.service';
 import { EventType } from './models/event-type.entity';
+import { WithdrawalEmailsService } from './services/withdrawal-emails.service';
+import { WithdrawalEmail } from './models/withdrawal-email.entity';
 import { EventsService } from './services/event.service';
 import { ApplicationEvent } from './models/event.entity';
 const servicesImports = [
@@ -104,6 +106,7 @@ const servicesImports = [
   StudentImmunizationService,
   StudentStatusService,
   WithdrawalService,
+  WithdrawalEmailsService,
   AnnouncementsService,
   EventTypesService,
   EventsService,
@@ -144,6 +147,7 @@ const servicesImports = [
       StudentStatus,
       StudentReenrollmentStatus,
       Withdrawal,
+      WithdrawalEmail,
       Announcement,
       EventType,
       ApplicationEvent,

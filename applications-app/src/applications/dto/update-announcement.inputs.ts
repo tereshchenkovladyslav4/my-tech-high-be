@@ -7,28 +7,31 @@ export class UpdateAnnouncementInput {
   @IsInt()
   announcement_id?: number;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsIn(['Published', 'Scheduled', 'Draft'])
   status?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   posted_by?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   subject?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   body?: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   RegionId?: number;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   schedule_time?: Date;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   filter_grades?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   filter_users?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  isArchived?: boolean;
 }
