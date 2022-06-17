@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -16,10 +16,12 @@ import { StudentGradeLevel } from './student-grade-level.entity';
 import { StudentStatus } from './student-status.entity';
 import { Withdrawal } from './withdrawal.entity';
 import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
+
+@InputType('student')
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking, testing_preference")',
+  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference")',
 )
 @Entity('mth_student')
 export class Student extends BaseEntity {
@@ -84,11 +86,11 @@ export class Student extends BaseEntity {
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   reenrollment_status?: StudentReenrollmentStatus[];
 
-  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.Student)
+  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.student)
   @Field(() => [Withdrawal], { nullable: true })
-  Withdrawals: Withdrawal[];
+  withdrawals: Withdrawal[];
 
-  @OneToOne(() => Person, (person) => person.Student, {
+	@OneToOne(() => Person, (person) => person.Student, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })

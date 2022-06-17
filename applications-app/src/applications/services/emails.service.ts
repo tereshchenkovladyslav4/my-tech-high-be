@@ -13,6 +13,11 @@ import { UserRegionService } from './user-region.service';
 import { ApplicationUserRegion } from '../models/user-region.entity';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { UserAnnouncementsService } from './user-announcements.service';
+import { StudentGradeLevelsService } from './student-grade-levels.service';
+import { PersonsService } from './persons.service';
+import { StudentsService } from './students.service';
+import { UsersService } from './users.service';
+import { SchoolYearService } from './schoolyear.service';
 
 var base64 = require('base-64');
 @Injectable()
@@ -23,6 +28,12 @@ export class EmailsService {
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
     private userAnnouncementService: UserAnnouncementsService,
+    private usersService: UsersService,
+    private studentsService: StudentsService,
+    private personsService: PersonsService,
+    private studentGradeLevelsService: StudentGradeLevelsService,
+    private schoolYearService: SchoolYearService,
+
   ) {}
 
   async sendAccountVerificationEmail(
@@ -85,6 +96,40 @@ export class EmailsService {
         token +
         '">Click here</a><br></p>';
     }
+
+    const user = await this.usersService.findOneByEmail(emailVerifier.email);
+    const person = await this.personsService.findOneByUserId(user.user_id);
+
+    const setEmailBodyInfo = (parentPerson, school_year) => {
+      const yearbegin = new Date(school_year.date_begin)
+        .getFullYear()
+        .toString();
+      const yearend = new Date(school_year.date_end)
+        .getFullYear()
+        .toString();
+      return content
+        .toString()
+        .replace(/\[STUDENT\]/g, person.first_name)
+        .replace(/\[PARENT\]/g, parentPerson.first_name)
+        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+        .replace(
+          /\[APPLICATION_YEAR\]/g,
+          `${yearbegin}-${yearend.substring(2, 4)}`,
+        )
+    };
+    const student = await this.studentsService.findOneByPersonId(person.person_id);
+
+      const parentPerson = await this.personsService.findOneById(student.parent.person_id);
+
+      const gradeLevels = await this.studentGradeLevelsService.forStudents(
+        student.student_id,
+      );
+
+      const school_year = await this.schoolYearService.findOneById(
+        gradeLevels[0]?.school_year_id,
+      );
+      content = setEmailBodyInfo(parentPerson, school_year);
+
     return this.SESService.sendEmail(
       recipientEmail,
       subject,

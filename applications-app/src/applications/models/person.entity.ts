@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -12,6 +12,7 @@ import { PersonAddress } from './person-address.entity';
 import { Student } from './student.entity';
 import { User } from './user.entity';
 
+@InputType('person')
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "person_id, user_id")')

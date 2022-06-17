@@ -43,6 +43,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventTypesResolver } from './resolvers/event-types.resolver';
 import { WithdrawalResolver } from './resolvers/withdrawal.resolver';
 import { EventsResolver } from './resolvers/event.resolver';
+
 const graphQLImports = [
   ApplicationsResolver,
   PacketsResolver,
@@ -58,6 +59,7 @@ const graphQLImports = [
   ApplicationQuestionsResolver,
   EnrollmentQuestionTabResolver,
   EnrollmentQuestionGroupResolver,
+  WithdrawalResolver,
 ];
 @Module({
   imports: [

@@ -270,7 +270,7 @@ export class UsersService {
       );
     }
     await queryRunner.release();
-    
+		
     return await this.usersRepository.findOne({
       where: {
         email: email,

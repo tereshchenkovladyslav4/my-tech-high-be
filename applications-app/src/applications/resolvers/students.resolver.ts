@@ -15,6 +15,7 @@ import { Application } from '../models/application.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
+
 @Resolver((of) => Student)
 export class StudentsResolver {
   constructor(

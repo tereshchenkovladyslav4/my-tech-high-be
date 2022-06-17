@@ -5,6 +5,7 @@ import { User } from '../models/user.entity';
 import { CreateParentUserInput } from '../dto/new-parent-user.inputs';
 const crypto = require('crypto');
 const salt = process.env.MTH_SALT || 'asin';
+
 @Injectable()
 export class UsersService {
   constructor(

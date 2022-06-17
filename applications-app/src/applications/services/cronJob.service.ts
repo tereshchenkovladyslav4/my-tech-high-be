@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron, CronExpression, Interval, Timeout } from '@nestjs/schedule';
 import { getConnection } from 'typeorm';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { EmailsService } from './emails.service';
 import { EnrollmentsService } from '../enrollments.service';
 import * as Moment from 'moment';
 import { WithdrawalService } from './withdrawal.service';
+import { CronJobsLogsService } from './cron-jobs-logs.services';
 
 @Injectable()
 export class CronJobService {
@@ -14,6 +15,7 @@ export class CronJobService {
     private sesEmailService: EmailsService,
     private enrollmentsService: EnrollmentsService,
     private withdrawalsService: WithdrawalService,
+    private cronJobsLogsSevice: CronJobsLogsService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -62,8 +64,21 @@ export class CronJobService {
         );
         queryRunner.release();
       });
+      this.logger.log('announcements: ', announcements);
+      if (announcements.length > 0) {
+        this.cronJobsLogsSevice.save({
+          function_name: 'findScheduledAnnouncements',
+          log: JSON.stringify({ result: announcements }),
+          type: 'success',
+        });
+      }
     } catch (error) {
       this.logger.error(error);
+      this.cronJobsLogsSevice.save({
+        function_name: 'findScheduledAnnouncements',
+        log: JSON.stringify({ result: error }),
+        type: 'error',
+      });
     }
   }
 
@@ -73,6 +88,11 @@ export class CronJobService {
     try {
       const data = await this.enrollmentsService.runScheduleReminders();
       this.logger.log('scheduledPacketReminders: ', data);
+      this.cronJobsLogsSevice.save({
+        function_name: 'schedulePacketReminders',
+        log: JSON.stringify({ result: data }),
+        type: 'success',
+      });
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -81,6 +101,11 @@ export class CronJobService {
       };
     } catch (error) {
       this.logger.error(error);
+      this.cronJobsLogsSevice.save({
+        function_name: 'schedulePacketReminders',
+        log: JSON.stringify({ result: error }),
+        type: 'error',
+      });
     }
   }
 
@@ -90,6 +115,11 @@ export class CronJobService {
     try {
       const data = await this.withdrawalsService.runScheduleReminders();
       this.logger.log('scheduledWithdrawalReminders: ', data);
+      this.cronJobsLogsSevice.save({
+        function_name: 'scheduleWithdrawalReminders',
+        log: JSON.stringify({ result: data }),
+        type: 'success',
+      });
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -98,6 +128,11 @@ export class CronJobService {
       };
     } catch (error) {
       this.logger.error(error);
+      this.cronJobsLogsSevice.save({
+        function_name: 'scheduleWithdrawalReminders',
+        log: JSON.stringify({ result: error }),
+        type: 'error',
+      });
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -23,6 +23,7 @@ export enum StatusEnum {
   accepted = 'Accepted',
 }
 
+@InputType('packet')
 @ObjectType()
 @Directive('@key(fields: "packet_id")')
 @Entity('mth_packet')

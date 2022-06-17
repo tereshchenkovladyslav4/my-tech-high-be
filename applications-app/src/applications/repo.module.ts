@@ -78,6 +78,9 @@ import { WithdrawalEmailsService } from './services/withdrawal-emails.service';
 import { WithdrawalEmail } from './models/withdrawal-email.entity';
 import { EventsService } from './services/event.service';
 import { ApplicationEvent } from './models/event.entity';
+import { CronJobsLog } from './models/cron-jobs-log.entity';
+import { CronJobsLogsService } from './services/cron-jobs-logs.services';
+
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -120,6 +123,7 @@ const servicesImports = [
   EnrollmentQuestionTabService,
   EnrollmentQuestionGroupService,
   EnrollmentQuestionsService,
+  CronJobsLogsService,
 ];
 
 @Global()
@@ -163,6 +167,7 @@ const servicesImports = [
       EnrollmentQuestionGroup,
       EnrollmentQuestions,
       EmailReminder,
+      CronJobsLog,
     ]),
   ],
   providers: [...servicesImports],

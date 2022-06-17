@@ -1,64 +1,95 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { IsIn, IsInt } from 'class-validator';
 import {
-  Column,
-  Entity,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  OneToMany,
+	Column,
+	Entity,
+	PrimaryColumn,
+	UpdateDateColumn,
+	ManyToOne,
+	JoinColumn,
+	BaseEntity,
+	PrimaryGeneratedColumn,
+	OneToMany,
 } from 'typeorm';
 import { Student } from './student.entity';
 import { WithdrawalEmail } from './withdrawal-email.entity';
 
+export const WITHDRAWAL_TABLE_NAME = 'withdrawal';
+
+@InputType('withdrawal')
 @ObjectType()
-@Entity('withdrawal')
+@Directive('@key(fields: "withdrawal_id")')
+@Entity({name: 'withdrawal'})
 export class Withdrawal extends BaseEntity {
-  @Field(() => ID, { nullable: true })
-  @PrimaryGeneratedColumn({ type: 'int', name: 'withdrawal_id' })
-  withdrawal_id?: number;
+	//	Auto increment withdrawal ID
+	@Column()
+	@Field(() => ID, { nullable: true })
+	@IsInt()
+	@PrimaryGeneratedColumn({ type: 'int', name: 'withdrawal_id' })
+	withdrawal_id?: number;
 
-  @Field((type) => Int, { nullable: true })
+	//	student id
   @Column('int', { name: 'StudentId', nullable: true })
-  StudentId: number | null;
+	@Field(() => Int, { nullable: true })
+	StudentId?: number;
 
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  status?: string;
+	@Column()
+	@Field(() => String, { nullable: true })
+	@IsIn(['Notified', 'Withdrawn', 'Requested'])
+	status?: string;
 
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  soe?: string;
+	@Column()
+	@Field(() => String, { nullable: true })
+	soe?: string;
 
-  @Field(() => Boolean, { nullable: true })
-  @Column({ nullable: true })
-  funding?: boolean;
+	@Column()
+	@Field(() => Boolean, { nullable: true })
+	funding?: boolean;
 
-  @Field(() => Date, { nullable: true })
-  @UpdateDateColumn()
-  date?: Date;
+	@Column()
+	@Field(() => Date, { nullable: true })
+	date?: Date;
 
-  @Field(() => Date, { nullable: true })
-  @Column({ nullable: true })
-  date_effective?: Date;
+	@Column()
+	@Field(() => Date, { nullable: true })
+	date_effective?: Date;
 
-  @Field(() => Date, { nullable: true })
-  @Column({ nullable: true })
-  date_emailed?: Date;
+	@Column()
+	@Field(() => Date, { nullable: true })
+	date_emailed?: Date;
 
-  @ManyToOne(() => Student, (student) => student.Withdrawals, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
-  @Field(() => Student, { nullable: true })
-  Student: Student;
+	//////////////	For response	//////////////
+	@Field(() => String, { nullable: true })
+	grade_level: string;
 
-  @OneToMany(
-    () => WithdrawalEmail,
-    (withdrawalEmail) => withdrawalEmail.Withdrawal,
-  )
-  @Field(() => [WithdrawalEmail], { nullable: true })
-  WithdrawalEmails: WithdrawalEmail[];
+	@Field(() => String, { nullable: true })
+	student_name: string;
+	//
+	
+	@ManyToOne(() => Student, (student) => student.withdrawals, {
+		onDelete: 'SET NULL',
+		onUpdate: 'CASCADE',
+	})
+	@JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
+	@Field(() => Student, { nullable: true })
+	student: Student;
+
+	@OneToMany(
+		() => WithdrawalEmail,
+		(withdrawalEmail) => withdrawalEmail.Withdrawal,
+	)
+	@Field(() => [WithdrawalEmail], { nullable: true })
+	withdrawalEmails: WithdrawalEmail[];
+}
+
+@ObjectType()
+export class WithdrawalPagination {
+	@Field((type) => [Withdrawal])
+	results?: Withdrawal[]
+
+	@Field((type) => Int)
+	page_total?: number
+
+	@Field((type) => Int)
+	total?: number
 }

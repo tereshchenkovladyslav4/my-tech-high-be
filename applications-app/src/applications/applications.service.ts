@@ -222,10 +222,39 @@ export class ApplicationsService {
         region_id,
       );
       if (emailTemplate) {
+
+        const setEmailBodyInfo = (school_year) => {
+          const yearbegin = new Date(school_year.date_begin)
+            .getFullYear()
+            .toString();
+          const yearend = new Date(school_year.date_end)
+            .getFullYear()
+            .toString();
+          return emailTemplate.body
+            .toString()
+            .replace(/\[STUDENT\]/g, newApplication?.students[0]?.first_name)
+            .replace(/\[PARENT\]/g, person.first_name)
+            .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+            .replace(
+              /\[APPLICATION_YEAR\]/g,
+              `${yearbegin}-${yearend.substring(2, 4)}`,
+            )
+        };
+
+
+      const gradeLevels = await this.studentGradeLevelsService.forStudents(
+        students[0].student_id,
+      );
+
+      const school_year = await this.schoolYearService.findOneById(
+        gradeLevels[0]?.school_year_id,
+      );
+        const emailBody = setEmailBodyInfo(school_year);
+
         await this.emailsService.sendEmail({
           email: person?.email,
           subject: emailTemplate.subject,
-          content: emailTemplate.body,
+          content: emailBody,
           bcc: emailTemplate.bcc,
           from: emailTemplate.from,
       })

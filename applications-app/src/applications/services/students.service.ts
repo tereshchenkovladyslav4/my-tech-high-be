@@ -8,6 +8,7 @@ import { StudentGradeLevel } from '../models/student-grade-level.entity';
 import { StudentStatus } from '../models/student-status.entity';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { StudentStatusService } from './student-status.service';
+
 @Injectable()
 export class StudentsService {
   constructor(

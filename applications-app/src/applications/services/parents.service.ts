@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, createQueryBuilder } from 'typeorm';
+import { Repository, createQueryBuilder, In } from 'typeorm';
 import { Parent } from '../models/parent.entity';
 import { CreateParentInput } from '../dto/new-parent.inputs';
 import { UpdatePersonAddressInput } from '../dto/update-person-address.inputs';
@@ -40,6 +40,17 @@ export class ParentsService {
       //   'person.user.userRegion.regionDetail',
       // ],
     });
+  }
+
+  //  Find Parents by person ids
+  async findByPersonId(person_ids: number | number[]) : Promise<Parent[]> {
+    return this.parentsRepository.find(
+      {
+        where: {
+          person_id: In(typeof(person_ids) == 'number' ? [person_ids] : person_ids)
+        }
+      }
+    );
   }
 
   async findOneByEmail(parent_email: string): Promise<Parent> {

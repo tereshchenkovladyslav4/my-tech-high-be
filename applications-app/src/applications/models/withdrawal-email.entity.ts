@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Withdrawal } from './withdrawal.entity';
 
+@InputType('withdrawal_email')
 @ObjectType()
 @Directive('@key(fields: "withdrawal_email_id")')
 @Entity('mth_withdrawal_email')
@@ -38,7 +39,7 @@ export class WithdrawalEmail extends BaseEntity {
   @Field(() => Date, { nullable: true })
   created_at?: Date;
 
-  @ManyToOne(() => Withdrawal, (withdrawal) => withdrawal.WithdrawalEmails, {
+  @ManyToOne(() => Withdrawal, (withdrawal) => withdrawal.withdrawalEmails, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
