@@ -1,0 +1,99 @@
+version: '3'
+services:
+  users:
+    build:
+      context: ./users-app
+      target: production
+      dockerfile: ./Dockerfile
+    #command: npm run start:dev
+    ports:
+      - 3000:3000
+    expose:
+      - 3000
+    restart: unless-stopped
+    networks:
+      - infocenter-v2-network
+    env_file:
+      - .staging.env
+  students:
+    build:
+      context: ./students-app
+      target: production
+      dockerfile: ./Dockerfile
+    #command: npm run start:dev
+    ports:
+      - 3001:3001
+    expose:
+      - 3001
+    restart: unless-stopped
+    networks:
+      - infocenter-v2-network
+    env_file:
+      - .staging.env
+  auth:
+    build:
+      context: ./authentication
+      target: production
+      dockerfile: ./Dockerfile
+    #command: npm run start:dev
+    ports:
+      - 3003:3003
+    expose:
+      - 3003
+    restart: unless-stopped
+    networks:
+      - infocenter-v2-network
+    env_file:
+      - .staging.env
+  media:
+    build:
+      context: ./media-app
+      target: production
+      dockerfile: ./Dockerfile
+    #command: npm run start:dev
+    ports:
+      - 3005:3005
+    expose:
+      - 3005
+    restart: unless-stopped
+    networks:
+      - infocenter-v2-network
+    env_file:
+      - .staging.env
+  applications:
+    build:
+      context: ./applications-app
+      target: production
+      dockerfile: ./Dockerfile
+    #command: npm run start:dev
+    ports:
+      - 3004:3004
+    expose:
+      - 3004
+    restart: unless-stopped
+    networks:
+      - infocenter-v2-network
+    env_file:
+      - .staging.env
+  gateway:
+    build:
+      context: ./gateway
+      target: production
+      dockerfile: ./Dockerfile
+    #command: npm run start:dev
+    ports:
+      - 3002:3002
+    expose:
+      - 3002
+    restart: always
+    networks:
+      - infocenter-v2-network
+    depends_on:
+      - users
+      - students
+      - auth
+      - applications
+    env_file:
+      - .staging.env
+networks:
+  infocenter-v2-network:

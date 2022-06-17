@@ -35,10 +35,30 @@ class BuildServiceModule {}
       useFactory: async () => ({
         gateway: {
           serviceList: [
-            { name: 'auth', url: 'http://localhost:3003/graphql' },
-            { name: 'users', url: 'http://localhost:3000/graphql' },
-            { name: 'students', url: 'http://localhost:3001/graphql' },
-            { name: 'applications', url: 'http://localhost:3004/graphql' },
+            {
+              name: 'auth',
+              url: `http://${
+                process.env.AUTH_HOST || 'localhost'
+              }:3003/graphql`,
+            },
+            {
+              name: 'users',
+              url: `http://${
+                process.env.USERS_HOST || 'localhost'
+              }:3000/graphql`,
+            },
+            {
+              name: 'students',
+              url: `http://${
+                process.env.STUDENTS_HOST || 'localhost'
+              }:3001/graphql`,
+            },
+            {
+              name: 'applications',
+              url: `http://${
+                process.env.APPLICATIONS_HOST || 'localhost'
+              }:3004/graphql`,
+            },
           ],
         },
         server: {
