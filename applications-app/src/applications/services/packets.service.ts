@@ -370,7 +370,11 @@ export class PacketsService {
     return true;
   }
 
-  async findReminders(date: Date, region_id: Number): Promise<string[]> {
+  async findReminders(
+    date: Date,
+    reminder: Number,
+    region_id: Number,
+  ): Promise<string[]> {
     try {
       const toDate = new Date(date);
       toDate.setDate(date.getDate() + 1);
@@ -379,14 +383,19 @@ export class PacketsService {
         .innerJoinAndSelect('packet.student', 'student')
         .leftJoinAndSelect('student.applications', 'applications')
         .leftJoinAndSelect('applications.school_year', 'school_year')
+        .leftJoinAndSelect('school_year.region', 'region')
         .innerJoinAndSelect('student.parent', 'parent')
         .innerJoinAndSelect('parent.person', 'person')
         .where('packet.status IN (:status)', {
           status: ['Started', 'Not Started'],
         })
         .andWhere(`school_year.RegionId = ${region_id}`)
-        .andWhere('packet.deadline >= :startDate', { startDate: date })
-        .andWhere('packet.deadline < :toDate', { toDate: toDate })
+        .andWhere(
+          `DATE( DATE_ADD(applications.date_accepted, INTERVAL GREATEST( ( region.application_deadline_num_days - :reminderDate ), 0 ) DAY) ) = CURDATE()`,
+          { reminderDate: reminder },
+        )
+        //.andWhere('packet.deadline >= :startDate', { startDate: date })
+        //.andWhere('packet.deadline < :toDate', { toDate: toDate })
         .getMany();
       console.log(date, toDate, 'reminders data ---------------');
 

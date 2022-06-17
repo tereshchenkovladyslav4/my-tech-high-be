@@ -1,5 +1,6 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
+import { ApplicationRegion } from './region.entity';
 
 @ObjectType()
 @Directive(
@@ -101,4 +102,8 @@ export class SchoolYear extends BaseEntity {
   @Column()
   @Field((type) => String, { nullable: true })
   grades: string;
+
+  @ManyToOne(() => ApplicationRegion, (region) => region.schoolYears)
+  @JoinColumn([{ name: 'RegionId', referencedColumnName: 'id' }])
+  region: ApplicationRegion;
 }

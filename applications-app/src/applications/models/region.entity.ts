@@ -11,6 +11,7 @@ import {
 import { Announcement } from './announcement.entity';
 import { EventType } from './event-type.entity';
 import { ApplicationUserRegion } from './user-region.entity';
+import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
 @Directive('@key(fields: "id")')
@@ -40,4 +41,7 @@ export class ApplicationRegion extends BaseEntity {
   @OneToMany(() => EventType, (eventType) => eventType.Region)
   @Field(() => [EventType], { nullable: true })
   EventTypes: EventType[];
+
+  @OneToMany(() => SchoolYear, (schoolYear) => schoolYear.region)
+  schoolYears: SchoolYear[];
 }

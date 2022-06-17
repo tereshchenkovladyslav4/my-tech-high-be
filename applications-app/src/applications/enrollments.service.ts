@@ -181,7 +181,6 @@ export class EnrollmentsService {
           );
 
         if (emailTemplate) {
-
           const setEmailBodyInfo = (student, school_year) => {
             const yearbegin = new Date(school_year.date_begin)
               .getFullYear()
@@ -199,10 +198,7 @@ export class EnrollmentsService {
                 /\[APPLICATION_YEAR\]/g,
                 `${yearbegin}-${yearend.substring(2, 4)}`,
               )
-              .replace(
-                /\[DEADLINE\]/g,
-                `${Moment().format('MM/DD/yy')}`,
-              );
+              .replace(/\[DEADLINE\]/g, `${Moment().format('MM/DD/yy')}`);
           };
           const gradeLevels = await this.studentGradeLevelsService.forStudents(
             tmp.student_id,
@@ -211,7 +207,6 @@ export class EnrollmentsService {
             school_year_id || gradeLevels[0].school_year_id,
           );
           const body = setEmailBodyInfo(studentPerson, school_year);
-
 
           await this.sesEmailService.sendEmail({
             email: studentPerson.parent?.person?.email,
@@ -711,15 +706,18 @@ export class EnrollmentsService {
 
       if (emailTemplates.length > 0) {
         emailTemplates.forEach(async (emailTemplate) => {
-          const emailReminder = await this.emailReminderService.findByTemplateId(
-            emailTemplate.id,
-          );
+          const emailReminder =
+            await this.emailReminderService.findByTemplateId(emailTemplate.id);
           if (emailReminder.length > 0) {
             emailReminder.forEach(async (remind) => {
               const reminder = remind.reminder;
               const reminderDate = new Date();
               reminderDate.setDate(reminderDate.getDate() + reminder);
-              const emails = await this.packetsService.findReminders(reminderDate, emailTemplate.region_id);
+              const emails = await this.packetsService.findReminders(
+                reminderDate,
+                reminder,
+                emailTemplate.region_id,
+              );
               if (emailTemplate) {
                 await Promise.all(
                   emails.map(async (email) => {
@@ -735,7 +733,7 @@ export class EnrollmentsService {
               }
             });
           }
-        })
+        });
       }
       return 'Successfully run schedule reminders.';
     } catch (error) {
