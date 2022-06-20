@@ -137,7 +137,8 @@ export class WithdrawalService {
 				status: withdrawal.status,
 				date_emailed: withdrawal.status == 'Notified' ? new Date() : null,
 				date_effective: withdrawal.date_effective,
-			});console.log(result);
+				response: withdrawal.response
+			});
 			return result;
 		} catch (error) {
 			return null;
@@ -284,6 +285,7 @@ export class WithdrawalService {
 		//	Pagination
 		main_query += ` LIMIT ${skip}, ${take}`;console.log(`${select_query}${main_query}`)
 		const results = await queryRunner.query(`${select_query}${main_query}`);
+		queryRunner.release();
 		
 		return new Pagination<Withdrawal>({
 			results, total: res[0].cnt

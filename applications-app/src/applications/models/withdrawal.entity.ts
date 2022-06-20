@@ -58,6 +58,10 @@ export class Withdrawal extends BaseEntity {
 	@Field(() => Date, { nullable: true })
 	date_emailed?: Date;
 
+	@Column()
+	@Field(() => String, { nullable: true })
+	response?: string;
+
 	//////////////	For response	//////////////
 	@Field(() => String, { nullable: true })
 	grade_level: string;

@@ -33,7 +33,6 @@ export class EmailsService {
     private personsService: PersonsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearService,
-
   ) {}
 
   async sendAccountVerificationEmail(
@@ -104,9 +103,7 @@ export class EmailsService {
       const yearbegin = new Date(school_year.date_begin)
         .getFullYear()
         .toString();
-      const yearend = new Date(school_year.date_end)
-        .getFullYear()
-        .toString();
+      const yearend = new Date(school_year.date_end).getFullYear().toString();
       return content
         .toString()
         .replace(/\[STUDENT\]/g, person.first_name)
@@ -115,11 +112,16 @@ export class EmailsService {
         .replace(
           /\[APPLICATION_YEAR\]/g,
           `${yearbegin}-${yearend.substring(2, 4)}`,
-        )
+        );
     };
-    const student = await this.studentsService.findOneByPersonId(person.person_id);
+    const student = await this.studentsService.findOneByPersonId(
+      person.person_id,
+    );
 
-      const parentPerson = await this.personsService.findOneById(student.parent.person_id);
+    if (typeof student !== 'undefined') {
+      const parentPerson = await this.personsService.findOneById(
+        student.parent.person_id,
+      );
 
       const gradeLevels = await this.studentGradeLevelsService.forStudents(
         student.student_id,
@@ -129,6 +131,7 @@ export class EmailsService {
         gradeLevels[0]?.school_year_id,
       );
       content = setEmailBodyInfo(parentPerson, school_year);
+    }
 
     return this.SESService.sendEmail(
       recipientEmail,

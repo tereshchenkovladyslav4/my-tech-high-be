@@ -87,6 +87,7 @@ export class ApplicationsService {
           studentApplication,
           newApplication.referred_by,
           newApplication.meta,
+          newApplication.midyear_application,
         ),
     );
 
@@ -110,11 +111,11 @@ export class ApplicationsService {
     };
   }
 
-  async sendApplicationRecieveEmail(
-    email: string,
-  ): Promise<boolean> {
+  async sendApplicationRecieveEmail(email: string): Promise<boolean> {
     const user = await this.usersService.findOneByEmail(email);
-    const regions = await this.userRegionService.findUserRegionByUserId(user.user_id);
+    const regions = await this.userRegionService.findUserRegionByUserId(
+      user.user_id,
+    );
 
     var region_id = 0;
     if (regions.length != 0) {
@@ -122,22 +123,19 @@ export class ApplicationsService {
     }
 
     const emailTemplate =
-    await this.emailTemplateService.findByTemplateAndRegion(
-      'Application Received',
-      region_id,
-    );
+      await this.emailTemplateService.findByTemplateAndRegion(
+        'Application Received',
+        region_id,
+      );
 
     const person = await this.personsService.findOneByUserId(user.user_id);
-
 
     if (emailTemplate) {
       const setEmailBodyInfo = (parentPerson, school_year) => {
         const yearbegin = new Date(school_year.date_begin)
           .getFullYear()
           .toString();
-        const yearend = new Date(school_year.date_end)
-          .getFullYear()
-          .toString();
+        const yearend = new Date(school_year.date_end).getFullYear().toString();
         return emailTemplate.body
           .toString()
           .replace(/\[STUDENT\]/g, person.first_name)
@@ -146,13 +144,17 @@ export class ApplicationsService {
           .replace(
             /\[APPLICATION_YEAR\]/g,
             `${yearbegin}-${yearend.substring(2, 4)}`,
-          )
+          );
       };
 
-      const student = await this.studentsService.findOneByPersonId(person.person_id);
+      const student = await this.studentsService.findOneByPersonId(
+        person.person_id,
+      );
 
-      const parent = await this.parentsService.findOneById(student.parent_id)
-      const parentPerson = await this.personsService.findOneById(parent.person_id);
+      const parent = await this.parentsService.findOneById(student.parent_id);
+      const parentPerson = await this.personsService.findOneById(
+        parent.person_id,
+      );
 
       const gradeLevels = await this.studentGradeLevelsService.forStudents(
         student.student_id,
@@ -170,13 +172,12 @@ export class ApplicationsService {
         content: emailBody,
         bcc: emailTemplate.bcc,
         from: emailTemplate.from,
-    });
-    return true
-  } else {
-    return false
+      });
+      return true;
+    } else {
+      return false;
+    }
   }
-}
-  
 
   async createNewStudentApplications(
     user: User,
@@ -221,26 +222,22 @@ export class ApplicationsService {
         'Application Received',
         region_id,
       );
-      if (emailTemplate) {
-
-        const setEmailBodyInfo = (school_year) => {
-          const yearbegin = new Date(school_year.date_begin)
-            .getFullYear()
-            .toString();
-          const yearend = new Date(school_year.date_end)
-            .getFullYear()
-            .toString();
-          return emailTemplate.body
-            .toString()
-            .replace(/\[STUDENT\]/g, newApplication?.students[0]?.first_name)
-            .replace(/\[PARENT\]/g, person.first_name)
-            .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-            .replace(
-              /\[APPLICATION_YEAR\]/g,
-              `${yearbegin}-${yearend.substring(2, 4)}`,
-            )
-        };
-
+    if (emailTemplate) {
+      const setEmailBodyInfo = (school_year) => {
+        const yearbegin = new Date(school_year.date_begin)
+          .getFullYear()
+          .toString();
+        const yearend = new Date(school_year.date_end).getFullYear().toString();
+        return emailTemplate.body
+          .toString()
+          .replace(/\[STUDENT\]/g, newApplication?.students[0]?.first_name)
+          .replace(/\[PARENT\]/g, person.first_name)
+          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+          .replace(
+            /\[APPLICATION_YEAR\]/g,
+            `${yearbegin}-${yearend.substring(2, 4)}`,
+          );
+      };
 
       const gradeLevels = await this.studentGradeLevelsService.forStudents(
         students[0].student_id,
@@ -249,15 +246,15 @@ export class ApplicationsService {
       const school_year = await this.schoolYearService.findOneById(
         gradeLevels[0]?.school_year_id,
       );
-        const emailBody = setEmailBodyInfo(school_year);
+      const emailBody = setEmailBodyInfo(school_year);
 
-        await this.emailsService.sendEmail({
-          email: person?.email,
-          subject: emailTemplate.subject,
-          content: emailBody,
-          bcc: emailTemplate.bcc,
-          from: emailTemplate.from,
-      })
+      await this.emailsService.sendEmail({
+        email: person?.email,
+        subject: emailTemplate.subject,
+        content: emailBody,
+        bcc: emailTemplate.bcc,
+        from: emailTemplate.from,
+      });
     }
 
     return {
@@ -332,6 +329,7 @@ export class ApplicationsService {
     studentApplication: CreateStudentPersonInput,
     referred_by?: string,
     meta?: string,
+    midyear_application?: boolean,
   ): Promise<any> {
     const {
       first_name,
@@ -375,6 +373,7 @@ export class ApplicationsService {
       school_year_id,
       referred_by,
       meta: application_meta,
+      midyear_application: midyear_application,
     });
     if (!application)
       throw new ServiceUnavailableException('Application Not Created');

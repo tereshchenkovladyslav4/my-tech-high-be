@@ -21,4 +21,7 @@ export class CreateApplicationInput {
 
   @Field({ nullable: true })
   meta?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  midyear_application: boolean;
 }
