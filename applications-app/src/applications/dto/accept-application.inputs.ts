@@ -6,7 +6,4 @@ export class AcceptApplicationInput {
   @Field(() => [String])
   @IsInt()
   application_ids?: string[];
-
-  @Field(() => Boolean)
-  midyear_application?: boolean;
 }

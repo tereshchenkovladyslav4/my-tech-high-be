@@ -323,7 +323,7 @@ export class ApplicationsService {
   async acceptApplication(
     acceptApplicationInput: AcceptApplicationInput,
   ): Promise<Application[]> {
-    const { application_ids, midyear_application } = acceptApplicationInput;
+    const { application_ids } = acceptApplicationInput;
 
     const promise = Promise.all(
       application_ids.map(async (id) => {
@@ -332,7 +332,6 @@ export class ApplicationsService {
           application_id,
           status: 'Accepted',
           date_accepted: new Date(),
-          midyear_application: midyear_application,
         });
 
         const application = await this.applicationsRepository.findOne(
