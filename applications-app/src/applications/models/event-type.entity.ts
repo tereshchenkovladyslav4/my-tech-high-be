@@ -41,11 +41,11 @@ export class EventType extends BaseEntity {
 
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
-  created_date?: Date;
+  created_at?: Date;
 
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
-  updated_date?: Date;
+  updated_at?: Date;
 
   @OneToMany(() => ApplicationEvent, (eventType) => eventType.EventType)
   @Field(() => [ApplicationEvent], { nullable: true })

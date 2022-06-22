@@ -1,10 +1,17 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ApplicationRegion } from './region.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, birth_date_cut, enrollment_packet")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -94,6 +101,10 @@ export class SchoolYear extends BaseEntity {
   @Column()
   @Field((type) => Boolean, { nullable: true })
   special_ed: boolean;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  special_ed_options: string;
 
   @Column()
   @Field((type) => Boolean, { nullable: true })

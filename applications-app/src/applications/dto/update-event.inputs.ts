@@ -12,14 +12,11 @@ export class UpdateEventInput {
   @Field(() => Int, { nullable: true })
   TypeId?: number;
 
-  @Field((type) => String, { nullable: true })
-  start_date?: string;
+  @Field((type) => Date, { nullable: true })
+  start_date?: Date;
 
-  @Field((type) => String, { nullable: true })
-  end_date?: string;
-
-  @Field((type) => String, { nullable: true })
-  time?: string;
+  @Field((type) => Date, { nullable: true })
+  end_date?: Date;
 
   @Field((type) => String, { nullable: true })
   description?: string;

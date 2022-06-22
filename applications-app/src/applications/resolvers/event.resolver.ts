@@ -34,4 +34,9 @@ export class EventsResolver {
   ): Promise<ApplicationEvent> {
     return this.eventsService.update(updateEventInput);
   }
+
+  @Mutation((of) => Boolean, { name: 'removeEventById' })
+  async removeWithdrawal(@Args('event_id') event_id: number): Promise<boolean> {
+    return await this.eventsService.deleteById(event_id);
+  }
 }

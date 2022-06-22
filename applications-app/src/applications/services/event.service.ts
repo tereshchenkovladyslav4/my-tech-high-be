@@ -40,4 +40,13 @@ export class EventsService {
       return error;
     }
   }
+
+  async deleteById(event_id: number): Promise<boolean> {
+    try {
+      await this.eventsRepository.delete({ event_id: event_id });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }
