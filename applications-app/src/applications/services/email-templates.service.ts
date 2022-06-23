@@ -48,4 +48,11 @@ export class EmailTemplatesService {
   ): Promise<ApplicationEmailTemplate> {
     return await this.emailTemplateRepository.save({ id, subject, body });
   }
+
+  async updateStandardResponses(
+    id: number,
+    standard_responses: string,
+  ): Promise<ApplicationEmailTemplate> {
+    return await this.emailTemplateRepository.save({ id, standard_responses });
+  }
 }

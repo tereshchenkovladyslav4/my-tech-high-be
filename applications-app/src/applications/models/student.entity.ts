@@ -1,4 +1,11 @@
-import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import {
+  Directive,
+  Field,
+  ID,
+  ObjectType,
+  Int,
+  InputType,
+} from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -86,11 +93,11 @@ export class Student extends BaseEntity {
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   reenrollment_status?: StudentReenrollmentStatus[];
 
-  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.student)
+  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.Student)
   @Field(() => [Withdrawal], { nullable: true })
   withdrawals: Withdrawal[];
 
-	@OneToOne(() => Person, (person) => person.Student, {
+  @OneToOne(() => Person, (person) => person.Student, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })

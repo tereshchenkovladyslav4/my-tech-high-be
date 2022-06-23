@@ -1,4 +1,4 @@
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Withdrawal, WithdrawalPagination } from '../models/withdrawal.entity';
 import { WithdrawalInput } from '../dto/withdrawal.input';
 import { WithdrawalService } from '../services/withdrawal.service';
@@ -6,45 +6,54 @@ import { Pagination } from 'src/paginate';
 import { PaginationInput } from '../dto/pagination.input';
 import { FilterInput } from '../dto/filter.input';
 import { ResponseDTO } from '../dto/response.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../guards/auth.guard';
+import { WithdrawalEmail } from '../models/withdrawal-email.entity';
+import { User } from 'aws-sdk/clients/budgets';
+import { EmailWithdrawalInput } from '../dto/email-withdrawal.inputs';
 
 @Resolver((of) => Withdrawal)
 export class WithdrawalResolver {
-	constructor(private service: WithdrawalService) {}
+  constructor(private service: WithdrawalService) {}
 
-	@Query((returns) => WithdrawalPagination, { name: 'withdrawals' })
-	get(
-		@Args() pagination: PaginationInput,
-		@Args() filter: FilterInput
-	): Promise<Pagination<Withdrawal>> {
-		return this.service.find(pagination, filter);
-	}
+  @Query((returns) => WithdrawalPagination, { name: 'withdrawals' })
+  @UseGuards(new AuthGuard())
+  get(
+    @Args() pagination: PaginationInput,
+    @Args() filter: FilterInput,
+  ): Promise<Pagination<Withdrawal>> {
+    return this.service.find(pagination, filter);
+  }
 
-	@Query((returns) => ResponseDTO, { name: 'withdrawalCountsByStatus' })
-	getCountsByStatus(
-		@Args() filter: FilterInput
-	): Promise<ResponseDTO> {
-		return this.service.getCountsByStatus(filter);
-	}
+  @Query((returns) => ResponseDTO, { name: 'withdrawalCountsByStatus' })
+  @UseGuards(new AuthGuard())
+  getCountsByStatus(@Args() filter: FilterInput): Promise<ResponseDTO> {
+    return this.service.getCountsByStatus(filter);
+  }
 
-	@Mutation((returns) => Boolean, { name: 'saveWithdrawal' })
-	async save(
-		@Args('withdrawalInput')
-		withdrawalInput: WithdrawalInput,
-	): Promise<boolean> {
-		const { withdrawal } = withdrawalInput;
-		const response = await this.service.save(
-			withdrawal,
-		);
-		return true;
-	}
+  @Mutation((returns) => Boolean, { name: 'saveWithdrawal' })
+  async save(
+    @Args('withdrawalInput')
+    withdrawalInput: WithdrawalInput,
+  ): Promise<boolean> {
+    const { withdrawal } = withdrawalInput;
+    return await this.service.save(withdrawal);
+  }
 
-	/*@Mutation((of) => Withdrawal, { name: 'removeWithdrawal' })
-	async removeWithdrawal(
-		@Args({ name: 'id', type: () => ID }) id: number,
-	): Promise<boolean> {
-		const withdrawal = await this.service.findById(id);
-		if (!withdrawal) throw new BadRequestException();
+  @Mutation((returns) => [WithdrawalEmail], { name: 'emailWithdrawal' })
+  @UseGuards(new AuthGuard())
+  async emailWithdrawal(
+    @Args('emailWithdrawalInput') emailWithdrawalInput: EmailWithdrawalInput,
+  ): Promise<WithdrawalEmail[]> {
+    return await this.service.sendEmail(emailWithdrawalInput);
+  }
 
-		return await this.service.delete(id);
-	}*/
+  @Mutation((returns) => Boolean, { name: 'deleteWithdrawal' })
+  @UseGuards(new AuthGuard())
+  async deleteWithdrawal(
+    @Args('student_id')
+    student_id: number,
+  ): Promise<Boolean> {
+    return this.service.delete(student_id);
+  }
 }

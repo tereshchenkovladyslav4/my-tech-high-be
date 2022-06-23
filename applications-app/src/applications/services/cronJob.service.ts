@@ -83,7 +83,10 @@ export class CronJobService {
   }
 
   //@Cron(CronExpression.EVERY_30_SECONDS)
-  @Cron('0 0 0 * * *') // Runs Every day at Midnight
+  @Cron('0 0 5 * * *', {
+    name: 'emailreminders',
+    timeZone: 'America/Phoenix',
+  }) // Runs Every 5am Everyday MST
   async schedulePacketReminders() {
     try {
       const data = await this.enrollmentsService.runScheduleReminders();

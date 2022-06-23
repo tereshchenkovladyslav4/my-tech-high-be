@@ -5,12 +5,15 @@ import { EnrollmentQuestionTab } from '../models/enrollment-question-tab.entity'
 import { EnrollmentQuestionsInput } from '../dto/enrollment-question.input';
 import { NewEnrollmentQuestionTabInput } from '../dto/new-enrollment-question-tab.inputs';
 import { EnrollmentQuestionGroupService } from './enrollment-question-group.service';
+import { EmailTemplatesService } from './email-templates.service';
+
 @Injectable()
 export class EnrollmentQuestionTabService {
   constructor(
     @InjectRepository(EnrollmentQuestionTab)
     private readonly repo: Repository<EnrollmentQuestionTab>,
     private enrollmentQuestionGroupService: EnrollmentQuestionGroupService,
+    private emailTemplateService: EmailTemplatesService
   ) {}
 
   async find(
@@ -73,6 +76,27 @@ export class EnrollmentQuestionTabService {
           }),
       ),
     );
+
+    //  Update the standard responses of Missing Info email template
+    if(tab_name == 'Documents') {
+      const template = await this.emailTemplateService.findByTemplateAndRegion('Missing Information', region_id);
+      if(template.standard_responses != '') {
+        const oldresponses = JSON.parse(template.standard_responses);
+
+        let newresponses = [];
+        groups[0].questions.forEach(group => {
+          let response = oldresponses.find(x => x.id == group.id);
+          if(response != null) {
+            newresponses.push(response);
+          }
+        });
+        const tmp = JSON.stringify(newresponses);
+        if(tmp != template.standard_responses) {
+          await this.emailTemplateService.updateStandardResponses(template.id, tmp);
+        }
+      }
+    }
+
     return tabData;
   }
   async deleteEnrollment(id: number): Promise<number> {
