@@ -267,11 +267,12 @@ export class PacketsService {
     };
 
     const emailBody = [];
-    results.forEach(async (item) => {
+    results.map(async (item) => {
       const school_year = await this.schoolYearService.findOneById(
         results[0].student.grade_levels[0].school_year_id,
       );
       const temp = {
+        packet_id: item.packet_id,
         email: item.student.parent.person.email,
         body: setEmailBodyInfo(item.student, school_year),
       };
@@ -287,7 +288,7 @@ export class PacketsService {
         body,
       );
     }
-    emailBody.forEach(async (emailData) => {
+    emailBody.map(async (emailData) => {
       const result = await this.sesEmailService.sendEmail({
         email: emailData.email,
         subject,
@@ -297,11 +298,11 @@ export class PacketsService {
       });
     });
     const packetEmails = Promise.all(
-      application_ids.map(async (id) => {
+      emailBody.map(async (item) => {
         return await this.packetEmailsService.create({
-          packet_id: id,
+          packet_id: item?.packet_id,
           subject: subject,
-          body: body,
+          body: item?.body,
           from_email: emailTemplate.from,
         });
       }),

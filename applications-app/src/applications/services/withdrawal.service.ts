@@ -387,7 +387,7 @@ export class WithdrawalService {
     };
 
     const emailBody = [];
-    results.forEach(async (item) => {
+    results.map(async (item) => {
       const school_year = await this.schoolYearService.findOneById(
         item.Student.grade_levels[0].school_year_id,
       );
@@ -410,7 +410,7 @@ export class WithdrawalService {
         body,
       );
     }
-    emailBody.forEach(async (emailData) => {
+    emailBody.map(async (emailData) => {
       const result = await this.emailService.sendEmail({
         email: emailData.email,
         subject,
