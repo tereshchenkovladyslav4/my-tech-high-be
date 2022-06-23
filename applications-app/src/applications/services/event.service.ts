@@ -16,6 +16,7 @@ export class EventsService {
       const results = await this.eventsRepository
         .createQueryBuilder('mth_event')
         .leftJoinAndSelect('mth_event.EventType', 'eventType')
+        .orderBy('eventType.priority', 'ASC')
         .where(`eventType.RegionId = ${region_id}`)
         .getMany();
       return results;
