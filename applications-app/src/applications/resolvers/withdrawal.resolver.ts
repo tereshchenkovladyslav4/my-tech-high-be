@@ -1,4 +1,4 @@
-import { Args, Context, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Withdrawal, WithdrawalPagination } from '../models/withdrawal.entity';
 import { WithdrawalInput } from '../dto/withdrawal.input';
 import { WithdrawalService } from '../services/withdrawal.service';
@@ -31,6 +31,12 @@ export class WithdrawalResolver {
     return this.service.getCountsByStatus(filter);
   }
 
+  @Query((returns) => ResponseDTO, { name: 'withdrawalStatus' })
+  @UseGuards(new AuthGuard())
+  getWithdrawalStatus(@Args() filter: FilterInput): Promise<ResponseDTO> {
+    return this.service.getStatus(filter);
+  }
+
   @Mutation((returns) => Boolean, { name: 'saveWithdrawal' })
   async save(
     @Args('withdrawalInput')
@@ -51,7 +57,7 @@ export class WithdrawalResolver {
   @Mutation((returns) => Boolean, { name: 'deleteWithdrawal' })
   @UseGuards(new AuthGuard())
   async deleteWithdrawal(
-    @Args('student_id')
+    @Args('student_id', {type: () => Int})
     student_id: number,
   ): Promise<Boolean> {
     return this.service.delete(student_id);

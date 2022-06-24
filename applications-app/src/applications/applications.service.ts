@@ -16,6 +16,7 @@ import { CreateApplicationInput } from './dto/new-application.inputs';
 import { CreateParentPersonInput } from './dto/new-parent-person.inputs';
 import { omit } from 'lodash';
 import { CreateStudentPersonInput } from './dto/new-student-person.inputs';
+import { CreateStudentPacketInput } from './dto/new-student-packet.inputs';
 import { Student } from './models/student.entity';
 import { StudentGradeLevelsService } from './services/student-grade-levels.service';
 import { CreateStudentApplicationsInput } from './dto/new-student-applications.inputs';
@@ -30,6 +31,9 @@ import { Application } from './models/application.entity';
 import { StudentStatusService } from './services/student-status.service';
 import { ApplicationUserRegion } from './models/user-region.entity';
 import { SchoolYearService } from './services/schoolyear.service';
+import { NewParentPacketContactInput } from './dto/new-parent-packet-contact.inputs';
+import { CreateAddressInput } from './dto/new-address.inputs';
+import { PersonAddressService } from './services/person-address.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -48,6 +52,7 @@ export class ApplicationsService {
     private userRegionService: UserRegionService,
     private emailTemplateService: EmailTemplatesService,
     private studentStatusService: StudentStatusService,
+    private personAddressService: PersonAddressService,
   ) {}
 
   protected user: User;
@@ -87,6 +92,8 @@ export class ApplicationsService {
           studentApplication,
           newApplication.referred_by,
           newApplication.meta,
+          newApplication.address,
+          newApplication.packet,
           newApplication.midyear_application,
         ),
     );
@@ -103,7 +110,7 @@ export class ApplicationsService {
 
     await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
       recipients: newApplication.parent.email,
-    });
+    }, parent_id);
 
     return {
       parent,
@@ -326,9 +333,11 @@ export class ApplicationsService {
   async createStudentApplication(
     parent_id: number,
     school_year_id: number,
-    studentApplication: CreateStudentPersonInput,
+    studentApplication: CreateStudentPacketInput,
     referred_by?: string,
     meta?: string,
+    address?: CreateAddressInput,
+    packet?: NewParentPacketContactInput,
     midyear_application?: boolean,
   ): Promise<any> {
     const {
@@ -340,10 +349,20 @@ export class ApplicationsService {
     const studentApplicationInput = omit(studentApplication, [
       'grade_level',
       'meta',
+      'address',
+      'packet',
     ]);
     const person = await this.personsService.create(studentApplicationInput);
     if (!person) throw new ServiceUnavailableException('Person Not Created');
     console.log('Person: ', person);
+
+    const personAddress = await this.personAddressService.createOrUpdate(
+      person,
+      { ...address, ...studentApplication.address },
+    );
+    if (!personAddress)
+      throw new ServiceUnavailableException('PersonAddress Not Created');
+    console.log('PersonAddress: ', personAddress);
 
     const { person_id } = person;
     const student = await this.studentsService.create({
@@ -373,6 +392,14 @@ export class ApplicationsService {
       school_year_id,
       referred_by,
       meta: application_meta,
+      secondary_contact_first:
+        studentApplication?.packet?.secondary_contact_first ||
+        packet?.secondary_contact_first ||
+        null,
+      secondary_contact_last:
+        studentApplication?.packet?.secondary_contact_last ||
+        packet?.secondary_contact_last ||
+        null,
       midyear_application: midyear_application,
     });
     if (!application)

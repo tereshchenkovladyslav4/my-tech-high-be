@@ -9,7 +9,7 @@ export class CountyResolver {
   constructor(private countyService: CountyService) {}
 
   @Query(() => [County], { name: 'getCounties', nullable: true })
-  @UseGuards(new AuthGuard())
+  // @UseGuards(new AuthGuard())
   getCounties(
     @Args({ name: 'id', type: () => ID }) id: number,
   ): Promise<County[]> {

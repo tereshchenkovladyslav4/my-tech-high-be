@@ -70,6 +70,14 @@ export class Application extends BaseEntity {
   @Field(() => String, { nullable: true })
   meta?: string;
 
+  @Column()
+  @Field(() => String, { nullable: true })
+  secondary_contact_first?: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  secondary_contact_last?: string;
+
   @ManyToOne((type) => Student, { nullable: true })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   student?: Student;

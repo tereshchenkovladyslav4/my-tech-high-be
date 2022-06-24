@@ -163,6 +163,30 @@ export class WithdrawalService {
     }
   }
 
+  async getStatus(filterInput: FilterInput): Promise<ResponseDTO> {
+    const { filter } = filterInput;
+    const values = [];
+
+    let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
+			WHERE ${WITHDRAWAL_TABLE_NAME}.withdrawal_id > 0`;
+
+    if (filter.StudentId) {
+      main_query += ` AND ${WITHDRAWAL_TABLE_NAME}.StudentId = ${filter.StudentId}`;
+    }
+
+    //	Get total count
+    let query = `SELECT ${WITHDRAWAL_TABLE_NAME}.status ${main_query} ORDER BY date DESC LIMIT 0, 1`;
+    let qb = await this.repo.query(query);
+    qb.map((item) => {
+      values.push(item);
+    });
+
+    return <ResponseDTO>{
+      error: false,
+      results: values,
+    };
+  }
+
   async getCountsByStatus(filterInput: FilterInput): Promise<ResponseDTO> {
     const { filter } = filterInput;
     const values = {};

@@ -56,6 +56,7 @@ export class PersonAddressService {
             state: addressInputs.state,
             zip: addressInputs.zip,
             county_id: addressInputs.county_id || null,
+            school_district: addressInputs.school_district || null,
           },
         ])
         .execute();
@@ -87,13 +88,14 @@ export class PersonAddressService {
           state: addressInputs.state,
           zip: addressInputs.zip,
           county_id: addressInputs.county_id || null,
+          school_district: addressInputs.school_district || null,
         })
         .where('address_id = :id', { id: hasAddress.address_id })
         .execute();
     }
 
     return this.personAddressRepository.findOne({
-      where: { person_id: person.person_id, address_id: hasAddress.address_id },
+      where: { person_id: person.person_id },
     });
   }
 }

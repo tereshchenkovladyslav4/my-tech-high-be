@@ -40,6 +40,11 @@ export class CreateStudentApplicationInput {
   @Field(() => String, { nullable: true })
   meta?: string;
 
+  @Field(() => String, { nullable: true })
+  secondary_contact_first?: string;
+
+  @Field(() => String, { nullable: true })
+  secondary_contact_last?: string;
   @Field(() => Boolean, { nullable: true })
   midyear_application?: boolean;
 }

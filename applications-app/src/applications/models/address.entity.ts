@@ -30,4 +30,7 @@ export class Address extends BaseEntity {
 
   @Column()
   county_id?: number;
+
+  @Column()
+  school_district?: string;
 }

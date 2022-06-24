@@ -1,6 +1,9 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { CreateParentPersonInput } from './new-parent-person.inputs';
 import { CreateStudentPersonInput } from './new-student-person.inputs';
+import { CreateAddressInput } from './new-address.inputs';
+import { NewParentPacketContactInput } from './new-parent-packet-contact.inputs';
+import { CreateStudentPacketInput } from './new-student-packet.inputs';
 
 @InputType()
 export class CreateApplicationInput {
@@ -13,8 +16,8 @@ export class CreateApplicationInput {
   @Field((type) => CreateParentPersonInput)
   parent?: CreateParentPersonInput;
 
-  @Field((type) => [CreateStudentPersonInput], { nullable: true })
-  students?: CreateStudentPersonInput[];
+  @Field((type) => [CreateStudentPacketInput], { nullable: true })
+  students?: CreateStudentPacketInput[];
 
   @Field({ nullable: true })
   referred_by?: string;
@@ -22,6 +25,11 @@ export class CreateApplicationInput {
   @Field({ nullable: true })
   meta?: string;
 
+  @Field({ nullable: true })
+  packet?: NewParentPacketContactInput;
+
+  @Field({ nullable: true })
+  address?: CreateAddressInput;
   @Field(() => Boolean, { nullable: true })
   midyear_application: boolean;
 }

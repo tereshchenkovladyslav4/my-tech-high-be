@@ -22,6 +22,8 @@ import { StudentsService } from './students.service';
 import { ResponseDTO } from '../dto/response.dto';
 import { ApplicationUserRegion } from '../models/user-region.entity';
 import { UserRegionService } from './user-region.service';
+import { PersonAddressService } from './person-address.service';
+import { AddressService } from './address.service';
 import * as Moment from 'moment';
 
 @Injectable()
@@ -38,6 +40,8 @@ export class ApplicationsService {
     private studentService: StudentsService,
     private userRegionService: UserRegionService,
     private studentStatusService: StudentStatusService,
+    private personAddressService: PersonAddressService,
+    private addressService: AddressService,
   ) {}
 
   async getSubmittedApplicationCount(regionId: number): Promise<ResponseDTO> {
@@ -342,6 +346,21 @@ export class ApplicationsService {
         const existingPacket = await this.packetsService.findOneByStudentId(
           student_id,
         );
+
+        const existingPerson = await this.studentService.findOneById(
+          student_id,
+        );
+        const { person_id } = existingPerson;
+
+        const existingPersonAddress =
+          await this.personAddressService.findOneById(person_id);
+        const { address_id } = existingPersonAddress;
+
+        const existingAddress = await this.addressService.findOneById(
+          address_id,
+        );
+        const { school_district: existingSchoolDistrict } = existingAddress;
+
         const packet_id = existingPacket && existingPacket.packet_id;
         const deadline = new Date();
         const studentPacket = await this.packetsService.createOrUpdate({
@@ -353,6 +372,9 @@ export class ApplicationsService {
           date_submitted: null,
           date_last_submitted: null,
           is_age_issue: false,
+          secondary_contact_first: application?.secondary_contact_first,
+          secondary_contact_last: application?.secondary_contact_last,
+          school_district: existingSchoolDistrict,
         });
 
         const student = await this.studentService.findOneById(student_id);

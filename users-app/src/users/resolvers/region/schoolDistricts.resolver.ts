@@ -9,7 +9,7 @@ export class SchoolDistrictsResolver {
   constructor(private schoolDistrictService: SchoolDistrictService) {}
 
   @Query(() => [SchoolDistrict], { name: 'schoolDistrict', nullable: true })
-  @UseGuards(new AuthGuard())
+  // @UseGuards(new AuthGuard())
   getSchoolDistricts(
     @Args({ name: 'id', type: () => ID }) id: number,
   ): Promise<SchoolDistrict[]> {

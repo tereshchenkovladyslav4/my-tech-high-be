@@ -14,7 +14,6 @@ import { Parent } from './models/parent.entity';
 import { CreateApplicationInput } from './dto/new-application.inputs';
 import { CreateParentPersonInput } from './dto/new-parent-person.inputs';
 import { omit } from 'lodash';
-import { CreateStudentPersonInput } from './dto/new-student-person.inputs';
 import { Student } from './models/student.entity';
 import { StudentGradeLevelsService } from './services/student-grade-levels.service';
 import { PacketsService } from './services/packets.service';

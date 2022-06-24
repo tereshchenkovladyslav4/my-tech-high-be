@@ -1,6 +1,4 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsOptional, MaxLength, IsInt, Min } from 'class-validator';
-import { CreateStudentPersonInput } from '../dto/new-student-person.inputs';
 
 @InputType()
 export class CreateAddressInput {
@@ -27,4 +25,7 @@ export class CreateAddressInput {
 
   @Field(() => Number, { nullable: true })
   county_id?: number;
+
+  @Field(() => String, { nullable: true })
+  school_district?: string;
 }
