@@ -19,9 +19,9 @@ export class WithdrawalEmail extends BaseEntity {
   @PrimaryGeneratedColumn()
   withdrawal_email_id?: number;
 
-  @Column('int', { name: 'WithdrawalId', nullable: true })
+  @Column('int', { name: 'withdrawal_id', nullable: true })
   @Field(() => Int, { nullable: true })
-  WithdrawalId?: number;
+  withdrawal_id?: number;
 
   @Column()
   @Field(() => String)
@@ -44,7 +44,7 @@ export class WithdrawalEmail extends BaseEntity {
     onUpdate: 'CASCADE',
   })
   @JoinColumn({
-    name: 'WithdrawalId',
+    name: 'withdrawal_id',
     referencedColumnName: 'withdrawal_id',
   })
   Withdrawal: Withdrawal;

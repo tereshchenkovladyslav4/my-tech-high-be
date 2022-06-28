@@ -33,10 +33,15 @@ export class Withdrawal extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'withdrawal_id' })
   withdrawal_id?: number;
 
-  //	student id
-  @Column('int', { name: 'StudentId', nullable: true })
-  @Field(() => Int, { nullable: true })
-  StudentId?: number;
+//	student id
+@Column('int', { name: 'application_id', nullable: true })
+@Field(() => Int, { nullable: true })
+application_id?: number;
+
+//	student id
+@Column('int', { name: 'StudentId', nullable: true })
+@Field(() => Int, { nullable: true })
+StudentId?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
@@ -71,9 +76,16 @@ export class Withdrawal extends BaseEntity {
   @Field(() => String, { nullable: true })
   grade_level: string;
 
-  @Field(() => String, { nullable: true })
-  student_name: string;
-  //
+	@Field(() => String, { nullable: true })
+	student_name: string;
+
+	@ManyToOne(() => Student, (student) => student.withdrawals, {
+		onDelete: 'SET NULL',
+		onUpdate: 'CASCADE',
+	})
+	@JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
+	@Field(() => Student, { nullable: true })
+	student: Student;
 
   @ManyToOne(() => Student, (student) => student.withdrawals, {
     onDelete: 'SET NULL',

@@ -6,6 +6,8 @@ import { Pagination } from 'src/paginate';
 import { PaginationInput } from '../dto/pagination.input';
 import { FilterInput } from '../dto/filter.input';
 import { ResponseDTO } from '../dto/response.dto';
+
+import { WithdrawalEmailsService } from '../services/withdrawal-emails.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { WithdrawalEmail } from '../models/withdrawal-email.entity';
@@ -14,7 +16,10 @@ import { EmailWithdrawalInput } from '../dto/email-withdrawal.inputs';
 
 @Resolver((of) => Withdrawal)
 export class WithdrawalResolver {
-  constructor(private service: WithdrawalService) {}
+	constructor(
+		private service: WithdrawalService,
+		private emailService: WithdrawalEmailsService
+	) {}
 
   @Query((returns) => WithdrawalPagination, { name: 'withdrawals' })
   @UseGuards(new AuthGuard())
@@ -30,6 +35,13 @@ export class WithdrawalResolver {
   getCountsByStatus(@Args() filter: FilterInput): Promise<ResponseDTO> {
     return this.service.getCountsByStatus(filter);
   }
+
+	@Query((returns) => [WithdrawalEmail], { name: 'getEmailsByWithdrawId' })
+	getWithdrawalEmails(
+    	@Args({ name: 'withdrawId', type: () => Int }) withdrawId: number,
+	): Promise<WithdrawalEmail[]> {
+		return this.emailService.findByApplication(withdrawId);
+	}
 
   @Query((returns) => ResponseDTO, { name: 'withdrawalStatus' })
   @UseGuards(new AuthGuard())

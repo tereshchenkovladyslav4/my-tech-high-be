@@ -6,7 +6,7 @@ export class CreateWithdrawalEmailInput {
   subject?: string;
 
   @Field(() => Int)
-  WithdrawalId?: number;
+  withdrawal_id?: number;
 
   @Field(() => String)
   body?: string;

@@ -128,7 +128,7 @@ export class WithdrawalService {
           });
           if (withdrawalResponse?.withdrawal_id) {
             await this.withdrawalEmailService.create({
-              WithdrawalId: withdrawalResponse?.withdrawal_id,
+				withdrawal_id: withdrawalResponse?.withdrawal_id,
               subject: emailTemplate.subject,
               body: body,
               from_email: emailTemplate.from,
@@ -282,34 +282,34 @@ export class WithdrawalService {
     const res = await queryRunner.query(`SELECT COUNT(*) cnt ${main_query}`);
 
     //	Order
-    switch (sort.split('|')[0]) {
-      case 'submitted':
-        main_query += ` ORDER BY date ${sort.split('|')[1]}`;
-        break;
-      case 'status':
-        main_query += ` ORDER BY status ${sort.split('|')[1]}`;
-        break;
-      case 'date_effective':
-        main_query += ` ORDER BY effective_date ${sort.split('|')[1]}`;
-        break;
-      case 'student':
-        main_query += ` ORDER BY student_name ${sort.split('|')[1]}`;
-        break;
-      case 'grade':
-        main_query += ` ORDER BY grade_level ${sort.split('|')[1]}`;
-        break;
-      case 'soe':
-        main_query += ` ORDER BY soe ${sort.split('|')[1]}`;
-        break;
-      case 'funding':
-        main_query += ` ORDER BY funding ${sort.split('|')[1]}`;
-        break;
-      case 'emailed':
-        main_query += ` ORDER BY date_emailed ${sort.split('|')[1]}`;
-        break;
-      default:
-        break;
-    }
+    switch(sort.split("|")[0]) {
+	case "submitted":
+		main_query += ` ORDER BY date ${sort.split("|")[1]}`;
+		break;
+	case "status":
+		main_query += ` ORDER BY status ${sort.split("|")[1]}`;
+		break;
+	case "effective":
+		main_query += ` ORDER BY date_effective ${sort.split("|")[1]}`;
+		break;
+	case "student":
+		main_query += ` ORDER BY student_name ${sort.split("|")[1]}`;
+		break;
+	case "grade":
+		main_query += ` ORDER BY grade_level ${sort.split("|")[1]}`;
+		break;
+	case "soe":
+		main_query += ` ORDER BY soe ${sort.split("|")[1]}`;
+		break;
+	case "funding":
+		main_query += ` ORDER BY funding ${sort.split("|")[1]}`;
+		break;
+	case "emailed":
+		main_query += ` ORDER BY date_emailed ${sort.split("|")[1]}`;
+		break;
+	default:
+		break;
+	}
     //	Pagination
     main_query += ` LIMIT ${skip}, ${take}`;
     const results = await queryRunner.query(`${select_query}${main_query}`);
@@ -446,7 +446,7 @@ export class WithdrawalService {
     const withdrawalEmails = Promise.all(
       emailBody.map(async (emailData) => {
         return await this.withdrawalEmailService.create({
-          WithdrawalId: emailData.withdrawal_id,
+          withdrawal_id: emailData.withdrawal_id,
           subject: subject,
           body: emailData.body,
           from_email: emailTemplate.from,

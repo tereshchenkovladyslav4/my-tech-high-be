@@ -12,7 +12,7 @@ export class WithdrawalEmailsService {
 
   async findByApplication(withdrawal_id: number): Promise<WithdrawalEmail[]> {
     return this.withdrawalEmailsRepository.find({
-      where: { WithdrawalId: withdrawal_id },
+      where: { withdrawal_id: withdrawal_id },
       order: { created_at: 'ASC' },
     });
   }
@@ -22,7 +22,7 @@ export class WithdrawalEmailsService {
       .createQueryBuilder('withdrawalEmail')
       .select()
       .orderBy('withdrawalEmail.created_at', 'DESC')
-      .addGroupBy('withdrawalEmail.WithdrawalId')
+      .addGroupBy('withdrawalEmail.withdrawal_id')
       .getQuery();
   }
 
