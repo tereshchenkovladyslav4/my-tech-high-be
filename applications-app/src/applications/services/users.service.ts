@@ -25,7 +25,7 @@ export class UsersService {
   }
 
   async findOneByEmail( email: string ): Promise<User> {
-    return this.usersRepository.findOne({email});
+    return this.usersRepository.findOne({ email });
   }
 
   async create( user: CreateParentUserInput ): Promise<User> {

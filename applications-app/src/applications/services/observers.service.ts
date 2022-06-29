@@ -101,8 +101,8 @@ export class ObserversService {
     console.log('EmailVerifier: ', emailVerifier);
 
     await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
-      recipients: '',
-    }, parent_id);
+      recipients: email,
+    }, parent_id, []);
     return await Promise.all(
       student_ids.map(async (student) => {
         const observer = await this.observersRepository.save({

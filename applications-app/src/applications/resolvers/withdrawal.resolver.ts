@@ -13,13 +13,14 @@ import { AuthGuard } from '../guards/auth.guard';
 import { WithdrawalEmail } from '../models/withdrawal-email.entity';
 import { User } from 'aws-sdk/clients/budgets';
 import { EmailWithdrawalInput } from '../dto/email-withdrawal.inputs';
+import { UpdateWithdrawalInput } from '../dto/withdrawal-update.inputs.';
 
 @Resolver((of) => Withdrawal)
 export class WithdrawalResolver {
-	constructor(
-		private service: WithdrawalService,
-		private emailService: WithdrawalEmailsService
-	) {}
+  constructor(
+    private service: WithdrawalService,
+    private emailService: WithdrawalEmailsService
+  ) { }
 
   @Query((returns) => WithdrawalPagination, { name: 'withdrawals' })
   @UseGuards(new AuthGuard())
@@ -36,12 +37,12 @@ export class WithdrawalResolver {
     return this.service.getCountsByStatus(filter);
   }
 
-	@Query((returns) => [WithdrawalEmail], { name: 'getEmailsByWithdrawId' })
-	getWithdrawalEmails(
-    	@Args({ name: 'withdrawId', type: () => Int }) withdrawId: number,
-	): Promise<WithdrawalEmail[]> {
-		return this.emailService.findByApplication(withdrawId);
-	}
+  @Query((returns) => [WithdrawalEmail], { name: 'getEmailsByWithdrawId' })
+  getWithdrawalEmails(
+    @Args({ name: 'withdrawId', type: () => Int }) withdrawId: number,
+  ): Promise<WithdrawalEmail[]> {
+    return this.emailService.findByApplication(withdrawId);
+  }
 
   @Query((returns) => ResponseDTO, { name: 'withdrawalStatus' })
   @UseGuards(new AuthGuard())
@@ -69,9 +70,18 @@ export class WithdrawalResolver {
   @Mutation((returns) => Boolean, { name: 'deleteWithdrawal' })
   @UseGuards(new AuthGuard())
   async deleteWithdrawal(
-    @Args('student_id', {type: () => Int})
+    @Args('student_id', { type: () => Int })
     student_id: number,
   ): Promise<Boolean> {
     return this.service.delete(student_id);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'updateWithdrawal' })
+  @UseGuards(new AuthGuard())
+  async updateWithdrawal(
+    @Args('updateWithdrawalInput')
+    updateWithdrawalInput: UpdateWithdrawalInput,
+  ): Promise<Boolean> {
+    return await this.service.update(updateWithdrawalInput);
   }
 }

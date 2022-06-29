@@ -38,7 +38,8 @@ export class EmailsService {
   async sendAccountVerificationEmail(
     emailVerifier: EmailVerifier,
     emailInput: EmailInput,
-    parent_id: number
+    parent_id: number,
+    students: any,
   ): Promise<any> {
     let settings = [];
     const webAppUrl = process.env.WEB_APP_URL;
@@ -67,7 +68,7 @@ export class EmailsService {
     // } );
     const token = this.encrypt(emailVerifier);
     // console.log( "settings: ", settings );
-    const recipientEmail = emailVerifier.email;
+    const recipientEmail =  emailInput.recipients || emailVerifier.email;
     let subject =
       'Thank you for submitting an application to the My Tech High program test';
     let content =
@@ -99,17 +100,14 @@ export class EmailsService {
 
     const user = await this.usersService.findOneByEmail(emailVerifier.email);
     const person = await this.personsService.findOneByUserId(user.user_id);
-    const students = await this.studentsService.findOneByParent(
-      parent_id,
-    );
-    const setEmailBodyInfo = (school_year) => {
+    const setEmailBodyInfo = (school_year, student) => {
       const yearbegin = new Date(school_year.date_begin)
         .getFullYear()
         .toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
       return content
         .toString()
-        .replace(/\[STUDENT\]/g, students[0].person.first_name)
+        .replace(/\[STUDENT\]/g, student.person.first_name)
         .replace(/\[PARENT\]/g, person.first_name)
         .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
         .replace(
@@ -118,17 +116,26 @@ export class EmailsService {
         );
     };
 
-    if (typeof students !== 'undefined') {
-      const gradeLevels = await this.studentGradeLevelsService.forStudents(
-        students[0].student_id,
+    if (students.length > 0) {
+        const school_year = await this.schoolYearService.findOneById(
+           students[0]?.student_grade_level?.school_year_id,
+        );
+        content = setEmailBodyInfo(school_year, students[0]);
+    } else {
+      const students = await this.studentsService.findOneByParent(
+        parent_id,
       );
-
-      const school_year = await this.schoolYearService.findOneById(
-        gradeLevels[0]?.school_year_id,
-      );
-      content = setEmailBodyInfo(school_year);
+      if(students.length > 0) {
+        const gradeLevels = await this.studentGradeLevelsService.forStudents(
+          students[0]?.student_id,
+        );
+  
+        const school_year = await this.schoolYearService.findOneById(
+          gradeLevels[0]?.school_year_id,
+        );
+        content = setEmailBodyInfo(school_year, students[0]);
+      }
     }
-
     return this.SESService.sendEmail(
       recipientEmail,
       subject,
