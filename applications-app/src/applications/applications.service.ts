@@ -53,7 +53,7 @@ export class ApplicationsService {
     private emailTemplateService: EmailTemplatesService,
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
-  ) {}
+  ) { }
 
   protected user: User;
 
@@ -78,24 +78,26 @@ export class ApplicationsService {
       newApplication.parent,
       Number(newApplication.state),
     );
-    let students;
     const parent_id = parent && (await parent).parent_id;
     const studentApplications = (await newApplication).students;
 
-    const studentData = await studentApplications.map(
-      (studentApplication) =>
-        this.createStudentApplication(
-          parent_id,
-          newApplication.program_year,
-          studentApplication,
-          newApplication.referred_by,
-          newApplication.meta,
-          newApplication.address,
-          newApplication.packet,
-          newApplication.midyear_application,
-        ),
-    );
-    students = Promise.all(studentData);
+    let students = [];
+
+    students = await Promise.all(
+      studentApplications.map(
+        async (studentApplication) =>
+          await this.createStudentApplication(
+            parent_id,
+            newApplication.program_year,
+            studentApplication,
+            newApplication.referred_by,
+            newApplication.meta,
+            newApplication.address,
+            newApplication.packet,
+            newApplication.midyear_application,
+          ),
+      )
+    )
 
     const emailVerifier = await this.emailVerifierService.create({
       user_id: this.user.user_id,
@@ -106,7 +108,6 @@ export class ApplicationsService {
     if (!emailVerifier) {
       throw new ServiceUnavailableException('EmailVerifier Not Created');
     }
-    console.log('students', await students)
     await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
       recipients: newApplication.parent.email,
     }, parent_id, await students);
@@ -457,5 +458,5 @@ export class ApplicationsService {
     return applications;
   }
 
-  async createObserPerson() {}
+  async createObserPerson() { }
 }
