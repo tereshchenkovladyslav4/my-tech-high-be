@@ -146,22 +146,21 @@ export class ApplicationsService {
       qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
     }
     if (filter && filter.schoolYear && filter.schoolYear.length > 0) {
-      let years = [];
-      filter.schoolYear.map((item) => {
-        if (!years.includes(item.split('-')[0])) {
-          years.push(item.split('-')[0]);
-        }
-        if (!years.includes(item.split('-')[1])) {
-          years.push(item.split('-')[1]);
-        }
-      });
-      years.sort();
-      const startDate = new Date(years[0], 1, 1);
-      const endDate = new Date(years[years.length - 1], 1, 1);
-      qb.andWhere('school_year.date_begin BETWEEN :startDate AND :endDate', {
-        startDate: startDate,
-        endDate: endDate,
-      });
+      qb.andWhere(
+        new Brackets((sub) => {
+          filter.schoolYear.map((item) => {
+            if (item.indexOf('midyear') > 0) {
+              return sub.orWhere(
+                `application.school_year_id = ${
+                  item.split('-')[0]
+                } AND application.midyear_application = 1`,
+              );
+            } else {
+              return sub.orWhere(`application.school_year_id = ${item}`);
+            }
+          });
+        }),
+      );
     }
     if (filter && filter.specialEd && filter.specialEd.length > 0) {
       qb.andWhere('student.special_ed IN (:specialEd)', {
