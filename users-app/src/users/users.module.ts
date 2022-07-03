@@ -15,6 +15,8 @@ import { QuickLinkResolver } from './resolvers/quick-link/quick-link.resolver';
 import { SchoolDistrictsResolver } from './resolvers/region/schoolDistricts.resolver';
 import { CountyResolver } from './resolvers/couty.resolver';
 import { QuestionResolver } from './resolvers/question.resolver';
+import { SchoolPartnerResolver } from './resolvers/school-partner.resolver';
+import { SchoolPartner } from '../models/school-partner.entity';
 
 const graphQLImports = [
   UsersResolver,
@@ -29,6 +31,7 @@ const graphQLImports = [
   SchoolDistrictsResolver,
   CountyResolver,
   QuestionResolver,
+  SchoolPartnerResolver
 ];
 
 @Module({

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual, MoreThanOrEqual, createQueryBuilder, getConnection } from 'typeorm';
 import { SchoolPartnerInput } from '../dto/school-partner.input';
 import { UpdateSchoolPartnerInput } from '../dto/update-school-partner.input';
-import { SchoolPartner } from '../models/school-partner.entity';
+import { SchoolPartner } from '../../models/school-partner.entity';
 
 
 @Injectable()
@@ -58,6 +58,14 @@ export class SchoolPartnerService {
 
   findOneById(school_partner_id: number): Promise<SchoolPartner> {
     return this.schoolPartnerRepository.findOne(school_partner_id)
+  }
+
+  findByRegion(region_id: number): Promise<SchoolPartner[]> {
+    return this.schoolPartnerRepository.find({
+      where: {
+        region_id
+      }
+    })
   }
 
   async toggleSchoolPartnerArchive( 

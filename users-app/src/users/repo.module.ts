@@ -39,6 +39,8 @@ import { CountyService } from './services/county.service';
 import { QuestionService } from './services/question.service';
 import { Question } from 'src/models/question.entity';
 import { County } from 'src/models/county.entity';
+import { SchoolPartnerService } from './services/school-partner.service';
+import { SchoolPartner } from '../models/school-partner.entity';
 
 const RepoServices = [
   UsersService,
@@ -59,6 +61,7 @@ const RepoServices = [
   QuickLinkService,
   QuestionService,
   CountyService,
+  SchoolPartnerService
 ];
 
 @Global()
@@ -89,6 +92,7 @@ const RepoServices = [
       Question,
       SchoolDistrict,
       County,
+      SchoolPartner
     ]),
   ],
   providers: RepoServices,

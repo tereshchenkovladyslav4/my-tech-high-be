@@ -10,4 +10,7 @@ export class SchoolPartnerInput {
 	
   @Field(() => String, {nullable: true})
   photo?: string;
+
+  @Field(() => Number, {defaultValue: 1})
+  region_id: number;
 }

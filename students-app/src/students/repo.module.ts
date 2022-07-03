@@ -10,7 +10,6 @@ import { SchoolYearsService } from './services/schoolyears.service';
 import { UsersService } from './services/users.service';
 import { PersonsService } from './services/persons.service';
 import { StudentsService } from './services/students.service';
-import { SchoolPartnerService } from './services/school-partner.service';
 import { ParentsService } from './services/parents.service';
 import { StudentGradeLevelsService } from './services/student-grade-levels.service';
 import { PhonesService } from './services/phones.service';
@@ -21,7 +20,6 @@ import { Application } from './models/application.entity';
 import { PacketsService } from './services/packets.service';
 import { Packet } from './models/packet.entity';
 import { Address } from './models/address.entity';
-import { SchoolPartner } from './models/school-partner.entity';
 import { AddressService } from './services/address.service';
 import { EmailVerifier } from './models/email-verifier.entity';
 import { EmailVerifiersService } from './services/email-verifiers.service';
@@ -47,7 +45,6 @@ const servicesImports = [
   EmailVerifiersService,
   StudentStatusService,
   StudentStatusHistoryService,
-  SchoolPartnerService,
 ];
 
 @Global()
@@ -70,7 +67,6 @@ const servicesImports = [
       StudentReenrollmentStatus,
       UserRegion,
       Region,
-      SchoolPartner,
     ]),
   ],
   providers: [...servicesImports],

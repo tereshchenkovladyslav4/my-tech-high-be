@@ -13,7 +13,7 @@ import {
 import { SchoolPartnerInput } from '../dto/school-partner.input';
 import { UpdateSchoolPartnerInput } from '../dto/update-school-partner.input';
 import { AuthGuard } from '../guards/auth.guard';
-import { SchoolPartner } from '../models/school-partner.entity';
+import { SchoolPartner } from '../../models/school-partner.entity';
 import { SchoolPartnerService } from '../services/school-partner.service';
 
 @Resolver((of) => SchoolPartner)
@@ -23,6 +23,13 @@ export class SchoolPartnerResolver {
   @Query((returns) => [SchoolPartner])
   async getSchoolsOfEnrollment(): Promise<SchoolPartner[]> {
     return this.schoolYearsService.findAll();
+  }
+
+  @Query((returns) => [SchoolPartner])
+  async getSchoolsOfEnrollmentByRegion(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+  ): Promise<SchoolPartner[]> {
+    return this.schoolYearsService.findByRegion(region_id);
   }
 
 	@Mutation(() => SchoolPartner, { name: 'createSchoolPartner' })
