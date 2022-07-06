@@ -361,12 +361,15 @@ export class ApplicationsService {
         const { school_district: existingSchoolDistrict } = existingAddress;
 
         const packet_id = existingPacket && existingPacket.packet_id;
-        const deadline = new Date();
+        // const deadline = new Date();
+        const region = await this.userRegionService.userRegionByRegionId(region_id);
+        const deadlineDays = region[0].regionDetail.enrollment_packet_deadline_num_days;
+        const deadline = new Date().setDate(new Date().getDate() + deadlineDays);
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
           student_id,
           status: 'Not Started',
-          deadline: deadline,
+          deadline: new Date(deadline),
           date_accepted: null,
           date_submitted: null,
           date_last_submitted: null,
@@ -423,7 +426,7 @@ export class ApplicationsService {
               )
               .replace(
                 /\[DEADLINE\]/g,
-                `${Moment(deadline).format('MM/DD/yy')}`,
+                `${Moment(deadline).format('DD/MM/yy')}`,
               );
           };
 
@@ -471,6 +474,7 @@ export class ApplicationsService {
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(
         emailTemplate.id,
+        emailTemplate.from,
         subject,
         body,
       );

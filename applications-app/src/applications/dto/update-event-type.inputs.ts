@@ -1,11 +1,11 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import { IsInt } from 'class-validator';
 
 @InputType()
 export class UpdateEventTypeInput {
   @Field(() => Int, { nullable: true })
   @IsInt()
-  event_type_id?: number;
+  event_type_id: number;
 
   @Field((type) => Int, { nullable: true })
   @IsInt()

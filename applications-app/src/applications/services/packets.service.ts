@@ -284,6 +284,7 @@ export class PacketsService {
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(
         emailTemplate.id,
+        emailTemplate.from,
         subject,
         body,
       );
@@ -392,7 +393,7 @@ export class PacketsService {
         })
         .andWhere(`school_year.RegionId = ${region_id}`)
         .andWhere(
-          `DATE( DATE_ADD(applications.date_accepted, INTERVAL GREATEST( ( region.application_deadline_num_days - :reminderDate ), 0 ) DAY) ) = CURDATE()`,
+          `DATE( DATE_ADD(applications.date_accepted, INTERVAL GREATEST( ( region.enrollment_packet_deadline_num_days - :reminderDate ), 0 ) DAY) ) = CURDATE()`,
           { reminderDate: reminder },
         )
         //.andWhere('packet.deadline >= :startDate', { startDate: date })

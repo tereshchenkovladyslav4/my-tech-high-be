@@ -6,6 +6,7 @@ import {
   ResolveReference,
   ResolveField,
   Parent,
+  Int,
 } from '@nestjs/graphql';
 import { SchoolYear } from '../models/schoolyear.entity';
 import { SchoolYearsService } from '../services/schoolyears.service';
@@ -26,7 +27,9 @@ export class SchoolYearResolver {
   }
 
   @Query((returns) => SchoolYear, { name: 'schoolyear_getcurrent' })
-  async getCurrent(@Args('region_id') region_id: number): Promise<SchoolYear> {
+  async getCurrent(
+    @Args('region_id', { type: () => Int }) region_id: number,
+  ): Promise<SchoolYear> {
     return this.schoolYearsService.getCurrent(region_id);
   }
 

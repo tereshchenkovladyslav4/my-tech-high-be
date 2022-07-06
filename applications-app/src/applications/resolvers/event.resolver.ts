@@ -1,10 +1,9 @@
-import { Args, Query, Resolver, Mutation } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { EventsService } from '../services/event.service';
 import { ApplicationEvent } from '../models/event.entity';
-import { CreateEventInput } from '../dto/new-event.inputs';
-import { UpdateEventInput } from '../dto/update-event.inputs';
+import { CreateOrUpdateEventInput } from '../dto/create-or-update-event.inputs';
 @Resolver((of) => ApplicationEvent)
 export class EventsResolver {
   constructor(private eventsService: EventsService) {}
@@ -12,31 +11,24 @@ export class EventsResolver {
   @Query((returns) => [ApplicationEvent], { name: 'eventsByRegionId' })
   @UseGuards(new AuthGuard())
   async getEvents(
-    @Args('region_id') region_id: number,
+    @Args('region_id', { type: () => Int }) region_id: number,
   ): Promise<ApplicationEvent[]> {
     return this.eventsService.findAll(region_id);
   }
 
-  @Mutation((returns) => ApplicationEvent, { name: 'createEvent' })
+  @Mutation((returns) => ApplicationEvent, { name: 'createOrUpdateEvent' })
   @UseGuards(new AuthGuard())
   async createEvent(
     @Args('createEventInput')
-    createEventInput: CreateEventInput,
+    createEventInput: CreateOrUpdateEventInput,
   ): Promise<ApplicationEvent> {
-    return this.eventsService.create(createEventInput);
-  }
-
-  @Mutation((returns) => ApplicationEvent, { name: 'updateEvent' })
-  @UseGuards(new AuthGuard())
-  async updateEventType(
-    @Args('updateEventInput')
-    updateEventInput: UpdateEventInput,
-  ): Promise<ApplicationEvent> {
-    return this.eventsService.update(updateEventInput);
+    return this.eventsService.save(createEventInput);
   }
 
   @Mutation((of) => Boolean, { name: 'removeEventById' })
-  async removeWithdrawal(@Args('event_id') event_id: number): Promise<boolean> {
+  async removeWithdrawal(
+    @Args('event_id', { type: () => Int }) event_id: number,
+  ): Promise<boolean> {
     return await this.eventsService.deleteById(event_id);
   }
 }

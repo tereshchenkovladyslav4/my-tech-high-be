@@ -1,8 +1,8 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, ID, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
-export class CreateEventInput {
-  @Field(() => Int, { nullable: true })
+export class CreateOrUpdateEventInput {
+  @Field(() => ID, { nullable: true })
   event_id?: number;
 
   @Field(() => String, { nullable: true })
@@ -19,6 +19,9 @@ export class CreateEventInput {
 
   @Field((type) => String, { nullable: true })
   description?: string;
+
+  @Field((type) => Boolean, { nullable: true })
+  all_day?: boolean;
 
   @Field((type) => String, { nullable: true })
   filter_grades?: string;

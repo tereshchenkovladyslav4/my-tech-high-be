@@ -1,4 +1,4 @@
-import { Args, Query, Resolver, Mutation } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { CreateAnnouncementInput } from '../dto/new-announcement.inputs';
@@ -19,7 +19,7 @@ export class AnnouncementsResolver {
   @Query((returns) => [Announcement], { name: 'announcements' })
   @UseGuards(new AuthGuard())
   async getAnnouncements(
-    @Args('region_id') region_id: number,
+    @Args('region_id', { type: () => Int }) region_id: number,
   ): Promise<Announcement[]> {
     return this.announcementsService.findAll(region_id);
   }
@@ -34,13 +34,15 @@ export class AnnouncementsResolver {
 
   @Mutation((returns) => ResponseDTO)
   deleteUserAnnouncementsByUserId(
-    @Args('user_id') user_id: number,
+    @Args('user_id', { type: () => Int }) user_id: number,
   ): Promise<ResponseDTO> {
     return this.userAnnouncementService.deleteAll(user_id);
   }
 
   @Mutation((returns) => ResponseDTO)
-  deleteUserAnnouncementById(@Args('id') id: number): Promise<ResponseDTO> {
+  deleteUserAnnouncementById(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<ResponseDTO> {
     return this.userAnnouncementService.deleteById(id);
   }
 

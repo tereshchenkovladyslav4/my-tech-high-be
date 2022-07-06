@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -13,7 +13,7 @@ import { EventType } from './event-type.entity';
 @ObjectType()
 @Entity('mth_event')
 export class ApplicationEvent extends BaseEntity {
-  @Field(() => Int, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn({ type: 'int', name: 'event_id' })
   event_id?: number;
 
@@ -24,6 +24,10 @@ export class ApplicationEvent extends BaseEntity {
   @Field(() => Int, { nullable: true })
   @Column({ type: 'int', name: 'TypeId', nullable: true })
   TypeId?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  @Column({ type: 'tinyint', name: 'all_day', nullable: true })
+  all_day?: boolean;
 
   @Field((type) => Date, { nullable: true })
   @Column({ type: 'datetime', name: 'start_date', nullable: true })

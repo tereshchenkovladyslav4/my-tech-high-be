@@ -1,4 +1,4 @@
-import { Args, Query, Resolver, Mutation } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { EventType } from '../models/event-type.entity';
@@ -15,7 +15,7 @@ export class EventTypesResolver {
   @Query((returns) => [EventType], { name: 'eventTypes' })
   @UseGuards(new AuthGuard())
   async getEventTypes(
-    @Args('region_id') region_id: number,
+    @Args('region_id', { type: () => Int }) region_id: number,
   ): Promise<EventType[]> {
     return this.eventTypesService.findAll(region_id);
   }

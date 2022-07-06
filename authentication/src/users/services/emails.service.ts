@@ -17,7 +17,7 @@ export class EmailsService {
 		private SESService: SESService,
 		private emailTemplateService: EmailTemplatesService,
 		private userRegionService: UserRegionService
-	) {}
+	) { }
 
 	async sendAccountResetPasswordEmail(
 		user_id: number,
@@ -123,18 +123,18 @@ export class EmailsService {
 			await this.userRegionService.findUserRegionByUserId(
 				emailVerifier.user_id,
 			);
-			const queryRunner = await getConnection().createQueryRunner();
-			const response = (await queryRunner.query(
-				`SELECT level FROM infocenter.core_users WHERE user_id = ${emailVerifier.user_id}`,
-			)) as User[];
-			queryRunner.release();
-		
+		const queryRunner = await getConnection().createQueryRunner();
+		const response = (await queryRunner.query(
+			`SELECT level FROM infocenter.core_users WHERE user_id = ${emailVerifier.user_id}`,
+		)) as User[];
+		queryRunner.release();
+
 		var region_id = 0;
 		if (regions.length != 0) {
 			region_id = regions[0].region_id;
 		}
 		const template = await this.emailTemplateService.findByTemplateAndRegion(
-			'Email Changed',
+			'Email Verification',
 			region_id,
 		);
 
@@ -150,7 +150,8 @@ export class EmailsService {
 		content +=
 			'<p>*This is just a test, please disregard if you receive this email* - MTH</p>';
 		content += ' <p>Â </p>';
-		if(response[0].level <= 2) {
+
+		if (response[0].level <= 2) {
 			//	For Administrators, we send generic email
 			content =
 				'<p>Please click on the link below to verify your new email address.</p>';
@@ -166,12 +167,9 @@ export class EmailsService {
 		}
 		else if (template) {
 			content = template.body;
-			content +=
-				'<p><a href="' +
-				webAppUrl +
-				'/email-verification/?token=' +
-				token +
-				'">Click here to verify</a><br></p>';
+
+			content = content.replace("[LINK]", `<p><a href="${webAppUrl}/confirm/?token=${token}">Click here</a><br></p>`)
+
 			subject = template.subject;
 		}
 		return this.SESService.sendEmail(

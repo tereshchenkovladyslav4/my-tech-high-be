@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApplicationEvent } from '../models/event.entity';
-import { CreateEventInput } from '../dto/new-event.inputs';
-import { UpdateEventInput } from '../dto/update-event.inputs';
+import { CreateOrUpdateEventInput } from '../dto/create-or-update-event.inputs';
 @Injectable()
 export class EventsService {
   constructor(
@@ -25,18 +24,12 @@ export class EventsService {
     }
   }
 
-  async create(createEventInput: CreateEventInput): Promise<ApplicationEvent> {
+  async save(
+    createEventInput: CreateOrUpdateEventInput,
+  ): Promise<ApplicationEvent> {
     try {
       const result = await this.eventsRepository.save(createEventInput);
       return result;
-    } catch (error) {
-      return error;
-    }
-  }
-
-  async update(updateEventInput: UpdateEventInput): Promise<ApplicationEvent> {
-    try {
-      return await this.eventsRepository.save(updateEventInput);
     } catch (error) {
       return error;
     }

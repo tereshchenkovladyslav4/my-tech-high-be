@@ -24,7 +24,9 @@ export class EmailTemplatesService {
     return data;
   }
 
-  async findAllByTemplate(template: string): Promise<ApplicationEmailTemplate[]> {
+  async findAllByTemplate(
+    template: string,
+  ): Promise<ApplicationEmailTemplate[]> {
     const data = await this.emailTemplateRepository.find({
       where: { template_name: template },
     });
@@ -43,10 +45,11 @@ export class EmailTemplatesService {
 
   async updateEmailTemplate(
     id: number,
+    from: string,
     subject: string,
     body: string,
   ): Promise<ApplicationEmailTemplate> {
-    return await this.emailTemplateRepository.save({ id, subject, body });
+    return await this.emailTemplateRepository.save({ id, from, subject, body });
   }
 
   async updateStandardResponses(

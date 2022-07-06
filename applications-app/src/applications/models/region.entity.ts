@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
 import {
   BaseEntity,
   Column,
@@ -25,6 +25,10 @@ export class ApplicationRegion extends BaseEntity {
   @Column()
   @Field((type) => String, { nullable: true })
   name: string;
+
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  enrollment_packet_deadline_num_days: number;
 
   @ManyToOne(
     () => ApplicationUserRegion,

@@ -33,7 +33,7 @@ export class WithdrawalService {
     private emailTemplateService: EmailTemplatesService,
     private schoolYearService: SchoolYearService,
     private withdrawalEmailService: WithdrawalEmailsService,
-  ) { }
+  ) {}
 
   async save(withdrawal: Withdrawal): Promise<boolean> {
     try {
@@ -245,7 +245,7 @@ export class WithdrawalService {
     const { skip, take, sort } = paginationInput;
     const { filter } = filterInput;
 
-    let where: any = (qb) => { };
+    let where: any = (qb) => {};
 
     let select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
     ${WITHDRAWAL_TABLE_NAME}.date_effective, ${WITHDRAWAL_TABLE_NAME}.response,${WITHDRAWAL_TABLE_NAME}.date,
@@ -298,30 +298,32 @@ export class WithdrawalService {
     const res = await queryRunner.query(`SELECT COUNT(*) cnt ${main_query}`);
 
     //	Order
-    switch (sort.split("|")[0]) {
-      case "submitted":
-        main_query += ` ORDER BY date ${sort.split("|")[1]}`;
+    switch (sort.split('|')[0]) {
+      case 'submitted':
+        main_query += ` ORDER BY date ${sort.split('|')[1]}`;
         break;
-      case "status":
-        main_query += ` ORDER BY status ${sort.split("|")[1]}`;
+      case 'status':
+        main_query += ` ORDER BY status ${sort.split('|')[1]}`;
         break;
-      case "effective":
-        main_query += ` ORDER BY date_effective ${sort.split("|")[1]}`;
+      case 'effective':
+        main_query += ` ORDER BY date_effective ${sort.split('|')[1]}`;
         break;
-      case "student":
-        main_query += ` ORDER BY student_name ${sort.split("|")[1]}`;
+      case 'student':
+        main_query += ` ORDER BY student_name ${sort.split('|')[1]}`;
         break;
-      case "grade":
-        main_query += ` ORDER BY gradeLevel.grade_level+0 ${sort.split("|")[1]}`;
+      case 'grade':
+        main_query += ` ORDER BY gradeLevel.grade_level+0 ${
+          sort.split('|')[1]
+        }`;
         break;
-      case "soe":
-        main_query += ` ORDER BY soe ${sort.split("|")[1]}`;
+      case 'soe':
+        main_query += ` ORDER BY soe ${sort.split('|')[1]}`;
         break;
-      case "funding":
-        main_query += ` ORDER BY funding ${sort.split("|")[1]}`;
+      case 'funding':
+        main_query += ` ORDER BY funding ${sort.split('|')[1]}`;
         break;
-      case "emailed":
-        main_query += ` ORDER BY date_emailed ${sort.split("|")[1]}`;
+      case 'emailed':
+        main_query += ` ORDER BY date_emailed ${sort.split('|')[1]}`;
         break;
       default:
         break;
@@ -360,10 +362,11 @@ export class WithdrawalService {
 				LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
 				LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Notify of Withdraw' AND templates.region_id = schoolYear.RegionId)
 				WHERE 
-					${remind_date > 0
-          ? 'withdrawal.diff_date = 0'
-          : 'region.withdraw_deadline_num_days > withdrawal.diff_date'
-        } AND 
+					${
+            remind_date > 0
+              ? 'withdrawal.diff_date = 0'
+              : 'region.withdraw_deadline_num_days > withdrawal.diff_date'
+          } AND 
 					templates.id IS NOT NULL
 			`);
       reminders.map(async (reminder) => {
@@ -400,9 +403,9 @@ export class WithdrawalService {
   async sendEmail(
     emailWithdrawalInput: EmailWithdrawalInput,
   ): Promise<WithdrawalEmail[]> {
-    const webAppUrl = process.env.WEB_APP_URL;
-    const { withdrawal_ids, subject, body, region_id } = emailWithdrawalInput;
-    const [results, total] = await this.repo
+    const { withdrawal_ids, subject, from, body, region_id } =
+      emailWithdrawalInput;
+    const [results] = await this.repo
       .createQueryBuilder('withdrawal')
       .leftJoinAndSelect('withdrawal.Student', 'student')
       .leftJoinAndSelect('student.person', 's_person')
@@ -422,13 +425,20 @@ export class WithdrawalService {
         .toString()
         .replace(/\[STUDENT\]/g, student.person.first_name)
         .replace(/\[PARENT\]/g, student.parent.person.first_name)
-        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
+        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+        .replace(/\[Student\]/g, student.person.first_name)
+        .replace(/\[Parent\]/g, student.parent.person.first_name)
+        .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
     };
 
     const emailBody = [];
     results.map(async (item) => {
       const school_year = await this.schoolYearService.findOneById(
         item.Student.grade_levels[0].school_year_id,
+      );
+      console.log(
+        setEmailBodyInfo(item.Student, school_year),
+        '--------------------------------------',
       );
       const temp = {
         withdrawal_id: item.withdrawal_id,
@@ -445,6 +455,7 @@ export class WithdrawalService {
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(
         emailTemplate.id,
+        from,
         subject,
         body,
       );
@@ -454,7 +465,7 @@ export class WithdrawalService {
         email: emailData.email,
         subject,
         content: emailData.body,
-        from: emailTemplate.from,
+        from: from,
         bcc: emailTemplate.bcc,
       });
     });
@@ -464,7 +475,7 @@ export class WithdrawalService {
           withdrawal_id: emailData.withdrawal_id,
           subject: subject,
           body: emailData.body,
-          from_email: emailTemplate.from,
+          from_email: from,
           created_at: new Date(),
         });
       }),
@@ -474,12 +485,11 @@ export class WithdrawalService {
 
   async update(updateWithdrawalInput: UpdateWithdrawalInput): Promise<Boolean> {
     try {
-      const withdrawal = await this.repo.findOne(updateWithdrawalInput.withdrawal_id);
-      console.log('re', { withdrawal })
+      const withdrawal = await this.repo.findOne(
+        updateWithdrawalInput.withdrawal_id,
+      );
       withdrawal[updateWithdrawalInput.field] = updateWithdrawalInput.value;
-      console.log('after', { withdrawal })
       await withdrawal.save();
-      console.log('lplplp')
       return true;
     } catch (error) {
       return false;
