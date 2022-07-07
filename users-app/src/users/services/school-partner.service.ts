@@ -4,6 +4,7 @@ import { Repository, LessThanOrEqual, MoreThanOrEqual, createQueryBuilder, getCo
 import { SchoolPartnerInput } from '../dto/school-partner.input';
 import { UpdateSchoolPartnerInput } from '../dto/update-school-partner.input';
 import { SchoolPartner } from '../../models/school-partner.entity';
+import { SchoolPartnerArgs } from '../dto/school-partner-args';
 
 
 @Injectable()
@@ -60,12 +61,25 @@ export class SchoolPartnerService {
     return this.schoolPartnerRepository.findOne(school_partner_id)
   }
 
-  findByRegion(region_id: number): Promise<SchoolPartner[]> {
-    return this.schoolPartnerRepository.find({
-      where: {
-        region_id
-      }
-    })
+  findByRegion(schoolPartnerArgs: SchoolPartnerArgs): Promise<SchoolPartner[]> {
+    const {region_id, sort} = schoolPartnerArgs
+    if(sort !== null){
+      const { column, direction } = sort
+      return this.schoolPartnerRepository.find({
+        order: {
+          [column] : direction
+        },
+        where: {
+          region_id
+        },
+      })
+    } else {
+      return this.schoolPartnerRepository.find({
+        where: {
+          region_id
+        }
+      })
+    }
   }
 
   async toggleSchoolPartnerArchive( 
