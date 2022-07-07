@@ -243,7 +243,7 @@ export class PacketsService {
     emailPacketInput: EmailApplicationInput,
   ): Promise<PacketEmail[]> {
     const { application_ids, subject, body } = emailPacketInput;
-    const [results, total] = await this.packetsRepository
+    const [results] = await this.packetsRepository
       .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.student', 'student')
       .leftJoinAndSelect('student.person', 's_person')
@@ -263,7 +263,10 @@ export class PacketsService {
         .toString()
         .replace(/\[STUDENT\]/g, student.person.first_name)
         .replace(/\[PARENT\]/g, student.parent.person.first_name)
-        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
+        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+        .replace(/\[Student\]/g, student.person.first_name)
+        .replace(/\[Parent\]/g, student.parent.person.first_name)
+        .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
     };
 
     const emailBody = [];

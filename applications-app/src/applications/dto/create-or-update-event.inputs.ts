@@ -2,7 +2,7 @@ import { Field, ID, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateOrUpdateEventInput {
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   event_id?: number;
 
   @Field(() => String, { nullable: true })

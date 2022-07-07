@@ -7,6 +7,9 @@ export class EmailApplicationInput {
   application_ids: number[];
 
   @Field(() => String)
+  from: string;
+
+  @Field(() => String)
   subject: string;
 
   @Field(() => String)
