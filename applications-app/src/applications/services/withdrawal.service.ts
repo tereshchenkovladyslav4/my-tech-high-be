@@ -6,6 +6,8 @@ import { Repository, getConnection } from 'typeorm';
 import { EmailWithdrawalInput } from '../dto/email-withdrawal.inputs';
 import { FilterInput } from '../dto/filter.input';
 import { PaginationInput } from '../dto/pagination.input';
+import { QuickWithdrawalInput } from '../dto/quick-withdrawal.inputs';
+import { ReinstateWithdrawalInput } from '../dto/reinstate-withdrawal.inputs';
 import { ResponseDTO } from '../dto/response.dto';
 import { UpdateWithdrawalInput } from '../dto/withdrawal-update.inputs.';
 import { ApplicationUserRegion } from '../models/user-region.entity';
@@ -33,7 +35,7 @@ export class WithdrawalService {
     private emailTemplateService: EmailTemplatesService,
     private schoolYearService: SchoolYearService,
     private withdrawalEmailService: WithdrawalEmailsService,
-  ) {}
+  ) { }
 
   async save(withdrawal: Withdrawal): Promise<boolean> {
     try {
@@ -146,7 +148,6 @@ export class WithdrawalService {
       queryRunner.release();
       return true;
     } catch (error) {
-      console.log(error, 'Withdrawal Save Error');
       return false;
     }
   }
@@ -245,7 +246,7 @@ export class WithdrawalService {
     const { skip, take, sort } = paginationInput;
     const { filter } = filterInput;
 
-    let where: any = (qb) => {};
+    let where: any = (qb) => { };
 
     let select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
     ${WITHDRAWAL_TABLE_NAME}.date_effective, ${WITHDRAWAL_TABLE_NAME}.response,${WITHDRAWAL_TABLE_NAME}.date,
@@ -362,11 +363,10 @@ export class WithdrawalService {
 				LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
 				LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Notify of Withdraw' AND templates.region_id = schoolYear.RegionId)
 				WHERE 
-					${
-            remind_date > 0
-              ? 'withdrawal.diff_date = 0'
-              : 'region.withdraw_deadline_num_days > withdrawal.diff_date'
-          } AND 
+					${remind_date > 0
+          ? 'withdrawal.diff_date = 0'
+          : 'region.withdraw_deadline_num_days > withdrawal.diff_date'
+        } AND 
 					templates.id IS NOT NULL
 			`);
       reminders.map(async (reminder) => {
@@ -395,7 +395,6 @@ export class WithdrawalService {
       queryRunner.release();
       return 'Successfully run schedule reminders.';
     } catch (error) {
-      console.log(error);
       return error;
     }
   }
@@ -436,10 +435,6 @@ export class WithdrawalService {
       const school_year = await this.schoolYearService.findOneById(
         item.Student.grade_levels[0].school_year_id,
       );
-      console.log(
-        setEmailBodyInfo(item.Student, school_year),
-        '--------------------------------------',
-      );
       const temp = {
         withdrawal_id: item.withdrawal_id,
         email: item.Student.parent.person.email,
@@ -452,14 +447,7 @@ export class WithdrawalService {
         'Withdraw Page',
         region_id,
       );
-    if (emailTemplate) {
-      await this.emailTemplateService.updateEmailTemplate(
-        emailTemplate.id,
-        from,
-        subject,
-        body,
-      );
-    }
+
     emailBody.map(async (emailData) => {
       const result = await this.emailService.sendEmail({
         email: emailData.email,
@@ -485,13 +473,76 @@ export class WithdrawalService {
 
   async update(updateWithdrawalInput: UpdateWithdrawalInput): Promise<Boolean> {
     try {
-      const withdrawal = await this.repo.findOne(
-        updateWithdrawalInput.withdrawal_id,
-      );
-      withdrawal[updateWithdrawalInput.field] = updateWithdrawalInput.value;
-      await withdrawal.save();
+      const withdrawal = await this.repo.findOne(updateWithdrawalInput.withdrawal_id);
+      const submittedDate = withdrawal.date;
+      await this.repo.update({ withdrawal_id: updateWithdrawalInput.withdrawal_id }, {
+        [updateWithdrawalInput.field]: updateWithdrawalInput.value,
+        date: submittedDate
+      });
       return true;
     } catch (error) {
+      return false;
+    }
+  }
+
+  async quickWithdrawal(param: QuickWithdrawalInput): Promise<Boolean> {
+    try {
+      const { withdrawal_ids } = param;
+      const queryRunner = await getConnection().createQueryRunner();
+      const [results] = await this.repo
+        .createQueryBuilder('withdrawal')
+        .leftJoinAndSelect('withdrawal.Student', 'student')
+        .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .leftJoinAndSelect('student.grade_levels', 'grade')
+        .whereInIds(withdrawal_ids)
+        .getManyAndCount();
+      results
+        .filter((item) => item.status == 'Requested')
+        .map(async (item) => {
+          const withdrawal_id = item.withdrawal_id;
+          const school_year_id = item.Student.grade_levels[0].school_year_id;
+          const studentId = item.Student.student_id;
+          await queryRunner.query(
+            `UPDATE infocenter.withdrawal SET status = 'Withdrawn' WHERE withdrawal_id = ${withdrawal_id}`,
+          );
+          await queryRunner.query(
+            `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
+          );
+        });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async reinstateWithdrawal(param: ReinstateWithdrawalInput): Promise<Boolean> {
+    try {
+      const { withdrawal_ids, reinstate_type } = param;
+      const queryRunner = await getConnection().createQueryRunner();
+      const [results] = await this.repo
+        .createQueryBuilder('withdrawal')
+        .leftJoinAndSelect('withdrawal.Student', 'student')
+        .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .leftJoinAndSelect('student.grade_levels', 'grade')
+        .whereInIds(withdrawal_ids)
+        .getManyAndCount();
+      results.map(async (item) => {
+        const withdrawal_id = item.withdrawal_id;
+        const school_year_id = item.Student.grade_levels[0].school_year_id;
+        const studentId = item.Student.student_id;
+        await queryRunner.query(
+          `DELETE FROM infocenter.withdrawal WHERE withdrawal_id = ${withdrawal_id}`,
+        );
+        await queryRunner.query(
+          `UPDATE infocenter.mth_student_status SET status = 1 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
+        );
+      });
+      return true;
+    } catch (e) {
       return false;
     }
   }

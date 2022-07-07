@@ -1,12 +1,4 @@
-import {
-  Args,
-  Context,
-  ID,
-  Int,
-  Mutation,
-  Query,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Withdrawal, WithdrawalPagination } from '../models/withdrawal.entity';
 import { WithdrawalInput } from '../dto/withdrawal.input';
 import { WithdrawalService } from '../services/withdrawal.service';
@@ -17,10 +9,11 @@ import { ResponseDTO } from '../dto/response.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { WithdrawalEmail } from '../models/withdrawal-email.entity';
-import { User } from 'aws-sdk/clients/budgets';
 import { EmailWithdrawalInput } from '../dto/email-withdrawal.inputs';
 import { WithdrawalEmailsService } from '../services/withdrawal-emails.service';
 import { UpdateWithdrawalInput } from '../dto/withdrawal-update.inputs.';
+import { QuickWithdrawalInput } from '../dto/quick-withdrawal.inputs';
+import { ReinstateWithdrawalInput } from '../dto/reinstate-withdrawal.inputs';
 
 @Resolver((of) => Withdrawal)
 export class WithdrawalResolver {
@@ -72,6 +65,23 @@ export class WithdrawalResolver {
     @Args('emailWithdrawalInput') emailWithdrawalInput: EmailWithdrawalInput,
   ): Promise<WithdrawalEmail[]> {
     return await this.service.sendEmail(emailWithdrawalInput);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'quickWithdrawal' })
+  @UseGuards(new AuthGuard())
+  async quickWithdrawal(
+    @Args('quickWithdrawalInput') quickWithdrawalInput: QuickWithdrawalInput,
+  ): Promise<Boolean> {
+    return await this.service.quickWithdrawal(quickWithdrawalInput);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'reinstateWithdrawal' })
+  @UseGuards(new AuthGuard())
+  async reinstateWithdrawal(
+    @Args('reinstateWithdrawalInput')
+    reinstateWithdrawalInput: ReinstateWithdrawalInput,
+  ): Promise<Boolean> {
+    return await this.service.reinstateWithdrawal(reinstateWithdrawalInput);
   }
 
   @Mutation((returns) => Boolean, { name: 'deleteWithdrawal' })

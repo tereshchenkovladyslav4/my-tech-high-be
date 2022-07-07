@@ -426,7 +426,7 @@ export class ApplicationsService {
               )
               .replace(
                 /\[DEADLINE\]/g,
-                `${Moment(deadline).format('DD/MM/yy')}`,
+                `${Moment(deadline).format('MM/DD/yy')}`,
               );
           };
 
