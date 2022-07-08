@@ -14,7 +14,7 @@ export class EmailTemplatesService {
     private categoryService: EmailCategoryService,
     private emailReminderService: EmailReminderService,
     private regionService: RegionService,
-  ) {}
+  ) { }
 
   async findAll(): Promise<EmailTemplate[]> {
     const data = await this.emailTemplateRepository.find({
@@ -109,16 +109,13 @@ export class EmailTemplatesService {
       );
     }
 
+    // remove old remider
+    await this.emailReminderService.delete(emailTemplate.id);
+
     if (reminders && reminders.length > 0) {
       reminders.forEach(async (remind) => {
-        if (!remind.id) {
-          const payload = { ...remind, email_template_id: emailTemplate.id };
-          await this.emailReminderService.create(payload);
-        } else {
-          const { id } = remind;
-          delete remind.id;
-          await this.emailReminderService.update(id, remind);
-        }
+        const payload = { ...remind, email_template_id: emailTemplate.id };
+        await this.emailReminderService.create(payload);
       });
     }
     return template;

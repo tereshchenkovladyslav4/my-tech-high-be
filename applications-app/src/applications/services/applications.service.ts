@@ -42,7 +42,7 @@ export class ApplicationsService {
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
     private addressService: AddressService,
-  ) {}
+  ) { }
 
   async getSubmittedApplicationCount(regionId: number): Promise<ResponseDTO> {
     const queryRunner = await getConnection().createQueryRunner();
@@ -151,8 +151,7 @@ export class ApplicationsService {
           filter.schoolYear.map((item) => {
             if (item.indexOf('midyear') > 0) {
               return sub.orWhere(
-                `application.school_year_id = ${
-                  item.split('-')[0]
+                `application.school_year_id = ${item.split('-')[0]
                 } AND application.midyear_application = 1`,
               );
             } else {
@@ -349,16 +348,21 @@ export class ApplicationsService {
         const existingPerson = await this.studentService.findOneById(
           student_id,
         );
-        const { person_id } = existingPerson;
+        const { parent: { person_id } } = existingPerson;
+
 
         const existingPersonAddress =
           await this.personAddressService.findOneById(person_id);
-        const { address_id } = existingPersonAddress;
 
-        const existingAddress = await this.addressService.findOneById(
-          address_id,
-        );
-        const { school_district: existingSchoolDistrict } = existingAddress;
+        let existingSchoolDistrict = '';
+        if (existingPersonAddress) {
+          const { address_id } = existingPersonAddress;
+
+          const existingAddress = await this.addressService.findOneById(
+            address_id,
+          );
+          existingSchoolDistrict = existingAddress.school_district;
+        }
 
         const packet_id = existingPacket && existingPacket.packet_id;
         // const deadline = new Date();
@@ -563,12 +567,10 @@ export class ApplicationsService {
         application_ids,
         midyear_application,
       };
-      console.log('Accept Inputs: ', acceptApplicationInput);
       const acceptApplication = await this.acceptApplication(
         acceptApplicationInput,
       );
 
-      console.log('Accepted Applications: ', acceptApplication);
     }
 
     const application = await this.applicationsRepository.save({
