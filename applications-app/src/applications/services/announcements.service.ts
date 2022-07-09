@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, Repository } from 'typeorm';
 import { Announcement } from '../models/announcement.entity';
 import { CreateAnnouncementInput } from '../dto/new-announcement.inputs';
+import { ResponseDTO } from '../dto/response.dto';
 import { UpdateAnnouncementInput } from '../dto/update-announcement.inputs';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { EmailsService } from './emails.service';
@@ -14,7 +15,7 @@ export class AnnouncementsService {
     private readonly announcementsRepository: Repository<Announcement>,
     private sesEmailService: EmailsService,
     private cronJobService: CronJobService,
-  ) {}
+  ) { }
 
   async findAll(region_id: number): Promise<Array<Announcement>> {
     try {
@@ -86,6 +87,21 @@ export class AnnouncementsService {
       return await this.announcementsRepository.save(updateAnnouncementInput);
     } catch (error) {
       return error;
+    }
+  }
+
+  async deleteById(id: number): Promise<ResponseDTO> {
+    try {
+      await this.announcementsRepository.delete({ announcement_id: id });
+      return <ResponseDTO>{
+        error: false,
+        message: 'Deleted Successfully',
+      };
+    } catch (error) {
+      return <ResponseDTO>{
+        error: true,
+        message: 'Delete Failed',
+      };
     }
   }
 }

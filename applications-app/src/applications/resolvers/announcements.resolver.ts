@@ -14,7 +14,7 @@ export class AnnouncementsResolver {
   constructor(
     private announcementsService: AnnouncementsService,
     private userAnnouncementService: UserAnnouncementsService,
-  ) {}
+  ) { }
 
   @Query((returns) => [Announcement], { name: 'announcements' })
   @UseGuards(new AuthGuard())
@@ -22,6 +22,13 @@ export class AnnouncementsResolver {
     @Args('region_id', { type: () => Int }) region_id: number,
   ): Promise<Announcement[]> {
     return this.announcementsService.findAll(region_id);
+  }
+
+  @Mutation((returns) => ResponseDTO)
+  deleteAnnouncementsById(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<ResponseDTO> {
+    return this.announcementsService.deleteById(id);
   }
 
   @Query((returns) => [UserAnnouncementResponse], { name: 'userAnnouncements' })
