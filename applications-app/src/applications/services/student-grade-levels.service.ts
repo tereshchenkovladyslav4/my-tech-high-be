@@ -23,4 +23,11 @@ export class StudentGradeLevelsService {
       await this.studentGradeLevelsRepository.delete({student_id, school_year_id})
       return 'deleted'
     } 
+
+    async update(student_id: number, school_year_id: number): Promise<string> {
+      await this.studentGradeLevelsRepository.update({student_id},{
+        school_year_id
+      })
+      return 'updated'
+    } 
 }

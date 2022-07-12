@@ -43,6 +43,7 @@ import { UsersService } from '../services/users.service';
 import { StudentStatusService } from '../services/student-status.service';
 import { SchoolYearData } from '../models/school-year-data.entity';
 import { ResponseDTO } from '../dto/response.dto';
+import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 
 @Resolver((of) => Application)
 export class ApplicationsResolver {
@@ -55,7 +56,7 @@ export class ApplicationsResolver {
     private immunizationSettingsService: ImmunizationSettingsService,
     private usersService: UsersService,
     private studentStatusService: StudentStatusService,
-  ) {}
+  ) { }
 
   @Query((returns) => ApplicationPagination, { name: 'applications' })
   //@UseGuards(new AuthGuard())
@@ -194,7 +195,7 @@ export class ApplicationsResolver {
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
   ): Promise<Application[]> {
-    const  { application_ids  } = deleteApplicationInput
+    const { application_ids } = deleteApplicationInput
     return await this.studentApplicationsService.deleteStudentApplication(
       application_ids
     );
@@ -278,5 +279,15 @@ export class ApplicationsResolver {
   ): Promise<boolean> {
     this.immunizationSettingsService.updateOrder(input.ids);
     return true;
+  }
+
+  @Mutation((returns) => Boolean, { name: 'updateApplicationSchoolYearByIds' })
+  async updateApplicationSchoolYearByIds(
+    @Args('updateApplicationSchoolYearInput')
+    updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,
+  ): Promise<Boolean> {
+    return await this.applicationsService.updateApplicationSchoolYearByIds(
+      updateApplicationSchoolYearInput,
+    );
   }
 }

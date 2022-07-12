@@ -25,6 +25,7 @@ import { UserRegionService } from './user-region.service';
 import { PersonAddressService } from './person-address.service';
 import { AddressService } from './address.service';
 import * as Moment from 'moment';
+import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 
 @Injectable()
 export class ApplicationsService {
@@ -591,5 +592,21 @@ export class ApplicationsService {
       hidden: midyear_application,
     });
     return application;
+  }
+
+  async updateApplicationSchoolYearByIds(
+    updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,
+  ): Promise<Boolean> {
+    const { application_ids, school_year_id, midyear_application } = updateApplicationSchoolYearInput;
+    Promise.all(
+      application_ids.map(async (id) => {
+        const application_id = Number(id);
+        await this.applicationsRepository.update({ application_id }, {
+          school_year_id,
+          midyear_application: midyear_application == 1 ? true : false
+        });
+      })
+    );
+    return true;
   }
 }

@@ -56,6 +56,7 @@ import { EmailApplicationInput } from '../dto/email-application.inputs';
 import { FindImunizationSettingsInput } from '../dto/find-immunization';
 import { PacketEmailsService } from '../services/packet-emails.service';
 import { EnrollmentPacketSubmitInput } from '../dto/enrollment-packet-submit.input';
+import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 
 @Resolver((of) => Packet)
 export class PacketsResolver {
@@ -71,7 +72,7 @@ export class PacketsResolver {
     private fileService: FilesService,
     private emailService: EmailsService,
     private packetEmailsService: PacketEmailsService,
-  ) {}
+  ) { }
 
   @Query((returns) => PacketPagination, { name: 'packets' })
   //@UseGuards(new AuthGuard())
@@ -315,5 +316,15 @@ export class PacketsResolver {
     @Args({ name: 'region_id', type: () => ID }) region_id: number,
   ): Promise<ResponseDTO> {
     return this.packetsService.getpacketCountByRegionId(region_id);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'updateEnrollmentSchoolYearByIds' })
+  async updateEnrollmentSchoolYearByIds(
+    @Args('updateEnrollmentSchoolYearByIdsInput')
+    updateEnrollmentSchoolYearByIdsInput: UpdateSchoolYearIdsInput,
+  ): Promise<Boolean> {
+    return await this.packetsService.updateEnrollmentSchoolYearByIdsInput(
+      updateEnrollmentSchoolYearByIdsInput,
+    );
   }
 }

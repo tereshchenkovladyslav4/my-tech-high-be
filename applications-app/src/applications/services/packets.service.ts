@@ -17,6 +17,8 @@ import { EmailApplicationInput } from '../dto/email-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
 import * as Moment from 'moment';
 import { SchoolYearService } from './schoolyear.service';
+import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
+import { StudentGradeLevelsService } from './student-grade-levels.service';
 
 @Injectable()
 export class PacketsService {
@@ -29,7 +31,8 @@ export class PacketsService {
     @Inject(forwardRef(() => ApplicationsService))
     private applicationService: ApplicationsService,
     private emailTemplateService: EmailTemplatesService,
-  ) {}
+    private studentGradeLevelService: StudentGradeLevelsService,
+  ) { }
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
     const { skip, take, sort, filters, search, region_id } = packetsArgs;
@@ -461,5 +464,19 @@ export class PacketsService {
       error: false,
       results: statusArray,
     };
+  }
+
+  async updateEnrollmentSchoolYearByIdsInput(
+    updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,
+  ): Promise<Boolean> {
+    const { application_ids, school_year_id, midyear_application } = updateApplicationSchoolYearInput;
+    Promise.all(
+      application_ids.map(async (id) => {
+        const application_id = Number(id);
+        const packet = await this.packetsRepository.findOne({ packet_id: application_id });
+        const studentGradeLevel = await this.studentGradeLevelService.update(packet.student_id, school_year_id);
+      })
+    );
+    return true;
   }
 }
