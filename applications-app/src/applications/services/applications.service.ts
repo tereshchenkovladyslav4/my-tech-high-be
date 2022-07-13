@@ -367,9 +367,26 @@ export class ApplicationsService {
 
         const packet_id = existingPacket && existingPacket.packet_id;
         // const deadline = new Date();
-        const region = await this.userRegionService.userRegionByRegionId(region_id);
-        const deadlineDays = region[0].regionDetail.enrollment_packet_deadline_num_days;
-        const deadline = new Date().setDate(new Date().getDate() + deadlineDays);
+        const student = await this.studentService.findOneById(student_id);
+
+        const regions: ApplicationUserRegion[] =
+          await this.userRegionService.findUserRegionByUserId(
+            student.parent?.person?.user_id,
+          );
+
+        var region_id = 1;
+        if (regions.length != 0) {
+          region_id = regions[0].region_id;
+        }
+
+        const region = await this.userRegionService.userRegionByRegionId(
+          region_id,
+        );
+        const deadlineDays =
+          region[0].regionDetail.enrollment_packet_deadline_num_days;
+        const deadline = new Date().setDate(
+          new Date().getDate() + deadlineDays,
+        );
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
           student_id,
@@ -384,7 +401,6 @@ export class ApplicationsService {
           school_district: existingSchoolDistrict,
         });
 
-        const student = await this.studentService.findOneById(student_id);
         const gradeLevels = await this.studentGradeLevelsService.forStudents(
           student.student_id,
         );
@@ -394,16 +410,6 @@ export class ApplicationsService {
           school_year_id: gradeLevels[0].school_year_id,
           status: 0,
         });
-
-        const regions: ApplicationUserRegion[] =
-          await this.userRegionService.findUserRegionByUserId(
-            student.parent?.person?.user_id,
-          );
-
-        var region_id = 1;
-        if (regions.length != 0) {
-          region_id = regions[0].region_id;
-        }
 
         const emailTemplate =
           await this.emailTemplateService.findByTemplateAndRegion(
