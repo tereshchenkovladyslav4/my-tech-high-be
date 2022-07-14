@@ -23,4 +23,7 @@ export class AnnouncementEmailArgs {
 
   @Field(() => String)
   filter_users?: string;
+
+  @Field(() => String)
+  status?: 'Draft' | 'Scheduled' | 'Published' | 'Republished';
 }

@@ -49,4 +49,12 @@ export class ApplicationQuestion extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   slug?: string;
+
+  @Column()
+  @Field(() => Int, { nullable: false })
+  main_question?: number;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  additional_question?: string;
 }

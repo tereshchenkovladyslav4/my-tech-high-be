@@ -53,7 +53,7 @@ export class ApplicationsService {
     private emailTemplateService: EmailTemplatesService,
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
-  ) { }
+  ) {}
 
   protected user: User;
 
@@ -96,8 +96,8 @@ export class ApplicationsService {
             newApplication.packet,
             newApplication.midyear_application,
           ),
-      )
-    )
+      ),
+    );
 
     const emailVerifier = await this.emailVerifierService.create({
       user_id: this.user.user_id,
@@ -108,9 +108,14 @@ export class ApplicationsService {
     if (!emailVerifier) {
       throw new ServiceUnavailableException('EmailVerifier Not Created');
     }
-    await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
-      recipients: newApplication.parent.email,
-    }, parent_id, await students);
+    await this.emailsService.sendAccountVerificationEmail(
+      emailVerifier,
+      {
+        recipients: newApplication.parent.email,
+      },
+      parent_id,
+      await students,
+    );
 
     return {
       parent,
@@ -133,52 +138,52 @@ export class ApplicationsService {
         'Application Received',
         region_id,
       );
-      if (emailTemplate) {
-          
-        const person = await this.personsService.findOneByUserId(user.user_id);
-        const parent = await this.parentsService.findOneByEmail(email);
+    if (emailTemplate) {
+      const person = await this.personsService.findOneByUserId(user.user_id);
+      const parent = await this.parentsService.findOneByEmail(email);
 
+      const students = await this.studentsService.findOneByParent(
+        parent.parent_id,
+      );
 
-        const students = await this.studentsService.findOneByParent(parent.parent_id)
+      const setEmailBodyInfo = (school_year, student) => {
+        const yearbegin = new Date(school_year.date_begin)
+          .getFullYear()
+          .toString();
+        const yearend = new Date(school_year.date_end).getFullYear().toString();
+        return emailTemplate.body
+          .toString()
+          .replace(/\[STUDENT\]/g, student.person.first_name)
+          .replace(/\[PARENT\]/g, person.first_name)
+          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+          .replace(
+            /\[APPLICATION_YEAR\]/g,
+            `${yearbegin}-${yearend.substring(2, 4)}`,
+          );
+      };
+      let emailBody = emailTemplate.body;
 
-        const setEmailBodyInfo = (school_year, student) => {
-          const yearbegin = new Date(school_year.date_begin)
-            .getFullYear()
-            .toString();
-          const yearend = new Date(school_year.date_end).getFullYear().toString();
-          return emailTemplate.body
-            .toString()
-            .replace(/\[STUDENT\]/g, student.person.first_name)
-            .replace(/\[PARENT\]/g, person.first_name)
-            .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-            .replace(
-              /\[APPLICATION_YEAR\]/g,
-              `${yearbegin}-${yearend.substring(2, 4)}`,
-            );
-        };
-        let emailBody = emailTemplate.body;
+      if (students.length > 0) {
+        students.forEach(async (student) => {
+          const gradeLevels = await this.studentGradeLevelsService.forStudents(
+            student.student_id,
+          );
 
-        if(students.length > 0) {
-          students.forEach(async student => {
-            const gradeLevels = await this.studentGradeLevelsService.forStudents(
-              student.student_id,
-            );
+          const school_year = await this.schoolYearService.findOneById(
+            gradeLevels[0]?.school_year_id,
+          );
 
-            const school_year = await this.schoolYearService.findOneById(
-              gradeLevels[0]?.school_year_id,
-            );
-            
-            emailBody = setEmailBodyInfo(school_year, student);
-            await this.emailsService.sendEmail({
-              email: email,
-              subject: emailTemplate.subject,
-              content: emailBody,
-              bcc: emailTemplate.bcc,
-              from: emailTemplate.from,
-            });
-          })
-        }
-        return true;
+          emailBody = setEmailBodyInfo(school_year, student);
+          await this.emailsService.sendEmail({
+            email: email,
+            subject: emailTemplate.subject,
+            content: emailBody,
+            bcc: emailTemplate.bcc,
+            from: emailTemplate.from,
+          });
+        });
+      }
+      return true;
     } else {
       return false;
     }
@@ -212,6 +217,8 @@ export class ApplicationsService {
           newApplication.meta,
         ),
     );
+
+    console.log('Get Students: ', students);
 
     const person = await this.personsService.findOneById(parent.person_id);
     const regions: ApplicationUserRegion[] =
@@ -402,7 +409,9 @@ export class ApplicationsService {
     });
     if (!application)
       throw new ServiceUnavailableException('Application Not Created');
+
     console.log('Application: ', student);
+    student.applications?.push(application);
 
     const statudUpdated = await this.studentStatusService.update({
       student_id: student_id,
@@ -410,7 +419,13 @@ export class ApplicationsService {
       status: 5,
     });
 
-    return { student, person: person, status: statudUpdated };
+    const new_student = {
+      ...student,
+      applications: [application],
+      grade_levels: [student_grade_level],
+    };
+
+    return { ...student, person: person, status: statudUpdated };
   }
 
   async deleteStudentApplication(
@@ -458,5 +473,5 @@ export class ApplicationsService {
     return applications;
   }
 
-  async createObserPerson() { }
+  async createObserPerson() {}
 }

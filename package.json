@@ -23,6 +23,10 @@
   "author": "Jerex Salingujay",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash": "^4.14.182",
     "concurrently": "^6.4.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }

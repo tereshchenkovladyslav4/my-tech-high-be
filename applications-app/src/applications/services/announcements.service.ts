@@ -8,6 +8,7 @@ import { UpdateAnnouncementInput } from '../dto/update-announcement.inputs';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { EmailsService } from './emails.service';
 import { CronJobService } from './cronJob.service';
+import { difference } from 'lodash';
 @Injectable()
 export class AnnouncementsService {
   constructor(
@@ -60,33 +61,48 @@ export class AnnouncementsService {
   async update(
     updateAnnouncementInput: UpdateAnnouncementInput,
   ): Promise<Announcement> {
-    try {
-      if (
-        updateAnnouncementInput.status == 'Published' &&
-        !updateAnnouncementInput.isArchived
-      ) {
-        const {
-          announcement_id,
-          posted_by,
-          subject,
-          body,
-          RegionId,
-          filter_grades,
-          filter_users,
-        } = updateAnnouncementInput;
-        await this.sesEmailService.sendAnnouncementEmail({
-          announcement_id: announcement_id,
-          sender: posted_by,
-          subject,
-          body,
-          RegionId,
-          filter_grades,
-          filter_users,
+    const {
+      announcement_id,
+      posted_by,
+      subject,
+      body,
+      RegionId,
+      filter_grades,
+      filter_users,
+      status,
+      isArchived
+    } = updateAnnouncementInput;
+    const announcementData = await this.announcementsRepository.findOne({announcement_id})
+    if(announcementData){
+      try {
+        if (
+          (status == 'Published' && !isArchived)
+          || (status === 'Republished')
+        ) {
+          const parsedGradeFilter: string[] = JSON.parse(filter_grades),
+            parsedUserFilter: string[] = JSON.parse(filter_users),
+            currParsedAnnouncementUserFilter = JSON.parse(announcementData.filter_users),
+            currParsedAnnouncementGradeFilter = JSON.parse(announcementData.filter_grades),
+            parsedGrades = difference(parsedGradeFilter, currParsedAnnouncementGradeFilter),
+            parsedUsers = difference(parsedUserFilter, currParsedAnnouncementUserFilter)
+
+          await this.sesEmailService.sendAnnouncementEmail({
+            announcement_id: announcement_id,
+            sender: posted_by,
+            subject,
+            body,
+            RegionId,
+            filter_grades: parsedGrades.length > 0 ? JSON.stringify(parsedGrades) : filter_grades,
+            filter_users: parsedUsers.length > 0 ? JSON.stringify(parsedUsers) : filter_users,
+          });
+        }
+        return await this.announcementsRepository.save({
+          ...updateAnnouncementInput, 
+          status: status === 'Republished' ? 'Published' : status
         });
+      } catch (error) {
+        return error;
       }
-      return await this.announcementsRepository.save(updateAnnouncementInput);
-    } catch (error) {
-      return error;
     }
   }
 
