@@ -113,10 +113,11 @@ export class EmailTemplatesService {
     await this.emailReminderService.delete(emailTemplate.id);
 
     if (reminders && reminders.length > 0) {
-      reminders.forEach(async (remind) => {
-        const payload = { ...remind, email_template_id: emailTemplate.id };
+      for (let index = 0; index < reminders.length; index++) {
+        const remind = reminders[index];
+        const payload = { ...remind, email_template_id: emailTemplate.id, id: 0 };
         await this.emailReminderService.create(payload);
-      });
+      }
     }
     return template;
   }

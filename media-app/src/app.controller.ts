@@ -33,6 +33,7 @@ export class AppController {
     { 'text/plain': 'txt' },
     { 'application/x-shockwave-flash': 'swf' },
     { 'video/x-flv': 'flv' },
+    { 'text/csv': 'csv' },
 
     // images
     { 'image/png': 'png' },
@@ -67,6 +68,10 @@ export class AppController {
     // open office
     { 'application/vnd.oasis.opendocument.text': 'odt' },
     { 'application/vnd.oasis.opendocument.spreadsheet': 'ods' },
+    {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        'xlsx',
+    },
   ];
 
   @Get()
@@ -106,8 +111,6 @@ export class AppController {
         currentSchoolYear = await this.getCurrentSchoolYear(body.year);
         console.log('CurrentSchoolYear: ', currentSchoolYear);
       }
-      if (!body.year)
-        throw new HttpException('Year is requied!', HttpStatus.CONFLICT);
 
       const { buffer, mimetype, originalname, size } = file;
 

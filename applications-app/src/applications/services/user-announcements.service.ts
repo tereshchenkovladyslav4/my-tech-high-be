@@ -103,4 +103,8 @@ export class UserAnnouncementsService {
       return error;
     }
   }
+
+  async findById(id: number): Promise<UserAnnouncement | undefined>  {
+    return await this.userAnnouncementsRepository.findOne({ AnnouncementId: id })
+  }
 }

@@ -43,12 +43,22 @@ export class ApplicationsService {
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
     private addressService: AddressService,
-  ) { }
+  ) {}
 
-  async getSubmittedApplicationCount(regionId: number): Promise<ResponseDTO> {
+  async getTodoListItems(regionId: number): Promise<ResponseDTO> {
     const queryRunner = await getConnection().createQueryRunner();
-    const result = await queryRunner.query(
+    const statusArray = {
+      application: 0,
+      packet: 0,
+      schedule: 0,
+      withdrawal: 0,
+      direct_order: 0,
+      reimbursement: 0,
+      email_errors: 0,
+    };
+    const results = await queryRunner.query(
       `SELECT
+          'application' AS status,
           COUNT(*) AS count
         FROM (
           SELECT 
@@ -57,20 +67,33 @@ export class ApplicationsService {
             WHERE status = 'Submitted'
         ) AS application
         LEFT JOIN infocenter.mth_schoolyear AS schoolYear ON (schoolYear.school_year_id=application.school_year_id)
+        WHERE schoolYear.RegionId = ${regionId}
+        UNION
+        SELECT
+          'packet' AS status,
+          COUNT(*) AS count
+        FROM (
+          SELECT * FROM infocenter.mth_packet
+        ) AS t1
+        LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
+        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+        WHERE schoolYear.RegionId = ${regionId} AND t1.status IN ('Age Issue', 'Resubmitted', 'Submitted')
+        UNION
+        SELECT
+          'withdrawal' AS status,
+            COUNT(*) AS count
+        FROM (
+          SELECT * FROM infocenter.withdrawal WHERE status = 'Requested'
+        ) AS t1
+        LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.StudentId)
+        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
         WHERE schoolYear.RegionId = ${regionId}`,
     );
+
     queryRunner.release();
-    const statusArray = {
-      'Not Started': 0,
-      'Missing Info': 0,
-      Submitted: 0,
-      Resubmitted: 0,
-      'Age Issue': 0,
-      Conditional: 0,
-      Accepted: 0,
-    };
-    result.map((item) => {
-      statusArray.Submitted = +item.count;
+
+    results.map((item) => {
+      statusArray[item.status] = +item.count;
     });
     return <ResponseDTO>{
       error: false,
@@ -152,7 +175,8 @@ export class ApplicationsService {
           filter.schoolYear.map((item) => {
             if (item.indexOf('midyear') > 0) {
               return sub.orWhere(
-                `application.school_year_id = ${item.split('-')[0]
+                `application.school_year_id = ${
+                  item.split('-')[0]
                 } AND application.midyear_application = 1`,
               );
             } else {
@@ -349,8 +373,9 @@ export class ApplicationsService {
         const existingPerson = await this.studentService.findOneById(
           student_id,
         );
-        const { parent: { person_id } } = existingPerson;
-
+        const {
+          parent: { person_id },
+        } = existingPerson;
 
         const existingPersonAddress =
           await this.personAddressService.findOneById(person_id);
@@ -577,7 +602,6 @@ export class ApplicationsService {
       const acceptApplication = await this.acceptApplication(
         acceptApplicationInput,
       );
-
     }
 
     const application = await this.applicationsRepository.save({
@@ -603,15 +627,19 @@ export class ApplicationsService {
   async updateApplicationSchoolYearByIds(
     updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,
   ): Promise<Boolean> {
-    const { application_ids, school_year_id, midyear_application } = updateApplicationSchoolYearInput;
+    const { application_ids, school_year_id, midyear_application } =
+      updateApplicationSchoolYearInput;
     Promise.all(
       application_ids.map(async (id) => {
         const application_id = Number(id);
-        await this.applicationsRepository.update({ application_id }, {
-          school_year_id,
-          midyear_application: midyear_application == 1 ? true : false
-        });
-      })
+        await this.applicationsRepository.update(
+          { application_id },
+          {
+            school_year_id,
+            midyear_application: midyear_application == 1 ? true : false,
+          },
+        );
+      }),
     );
     return true;
   }

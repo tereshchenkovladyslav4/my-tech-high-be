@@ -17,6 +17,7 @@ import { StudentStatus } from './student-status.entity';
 import { Packet } from './packet.entity';
 import { StudentStatusHistory } from './student-status-history.entity';
 import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
+import { Withdrawal } from './withdrawal.entity';
 
 @ObjectType()
 @Directive(
@@ -87,11 +88,14 @@ export class Student extends BaseEntity {
   @OneToMany((type) => Packet, (packet) => packet.student_id)
   packets?: Packet[];
 
-  @OneToMany(
-    (type) => StudentStatus,
-    (studentStatus) => studentStatus.student_id,
-  )
+  @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status?: StudentStatus[];
+
+  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.Student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'StudentId' })
+  @Field(() => [Withdrawal], { nullable: true })
+  StudentWithdrawals: Withdrawal[];
 
   @OneToMany(
     (type) => StudentStatusHistory,

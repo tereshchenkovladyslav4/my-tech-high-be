@@ -30,6 +30,8 @@ import { StudentStatusHistory } from './models/student-status-history.entity';
 import { StudentReenrollmentStatus } from './models/student-reenrollment-status.entity';
 import { UserRegion } from './models/user-region.entity';
 import { Region } from './models/region.entity';
+import { Withdrawal } from './models/withdrawal.entity';
+import { WithdrawalEmail } from './models/withdrawal-email.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -54,6 +56,8 @@ const servicesImports = [
       User,
       Person,
       Student,
+      Withdrawal,
+      WithdrawalEmail,
       Parent,
       StudentGradeLevel,
       Phone,

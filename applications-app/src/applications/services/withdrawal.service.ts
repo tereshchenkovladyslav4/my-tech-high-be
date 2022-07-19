@@ -5,10 +5,12 @@ import { Pagination } from 'src/paginate';
 import { Repository, getConnection } from 'typeorm';
 import { EmailWithdrawalInput } from '../dto/email-withdrawal.inputs';
 import { FilterInput } from '../dto/filter.input';
+import { IndividualWithdrawalInput } from '../dto/individual-withdrawal.inputs';
 import { PaginationInput } from '../dto/pagination.input';
 import { QuickWithdrawalInput } from '../dto/quick-withdrawal.inputs';
 import { ReinstateWithdrawalInput } from '../dto/reinstate-withdrawal.inputs';
 import { ResponseDTO } from '../dto/response.dto';
+import { WithdrawalStudentInfo } from '../dto/student-info-by-withdrawalId.dto';
 import { UpdateWithdrawalInput } from '../dto/withdrawal-update.inputs.';
 import { ApplicationUserRegion } from '../models/user-region.entity';
 import { WithdrawalEmail } from '../models/withdrawal-email.entity';
@@ -21,6 +23,7 @@ import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentsService } from './students.service';
 import { UserRegionService } from './user-region.service';
 import { WithdrawalEmailsService } from './withdrawal-emails.service';
+import { WithdrawalStatus } from '../enums';
 
 @Injectable()
 export class WithdrawalService {
@@ -35,7 +38,7 @@ export class WithdrawalService {
     private emailTemplateService: EmailTemplatesService,
     private schoolYearService: SchoolYearService,
     private withdrawalEmailService: WithdrawalEmailsService,
-  ) { }
+  ) {}
 
   async save(withdrawal: Withdrawal): Promise<boolean> {
     try {
@@ -56,7 +59,7 @@ export class WithdrawalService {
         });
       }
 
-      if (status == 'Notified' && students?.length == 0) {
+      if (status == WithdrawalStatus.NOTIFIED && students?.length == 0) {
         withdrawal.date_emailed = new Date();
 
         //	Send email
@@ -101,15 +104,14 @@ export class WithdrawalService {
               .getFullYear()
               .toString();
 
+            const link = `${webAppUrl}/parent-link/withdrawal/${StudentId}`;
+
             return emailTemplate.body
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
               .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-              .replace(
-                /\[LINK\]/g,
-                `<a href='${webAppUrl}/parent-link'>${webAppUrl}/parent-link</a>`,
-              )
+              .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`)
               .replace(
                 /\[DEADLINE\]/g,
                 `${Moment(deadline).format('MM/DD/yy')}`,
@@ -246,7 +248,7 @@ export class WithdrawalService {
     const { skip, take, sort } = paginationInput;
     const { filter } = filterInput;
 
-    let where: any = (qb) => { };
+    let where: any = (qb) => {};
 
     let select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
     ${WITHDRAWAL_TABLE_NAME}.date_effective, ${WITHDRAWAL_TABLE_NAME}.response,${WITHDRAWAL_TABLE_NAME}.date,
@@ -353,7 +355,9 @@ export class WithdrawalService {
 					templates.bcc AS email_bcc,
 					templates.from AS email_from
 				FROM (
-					SELECT StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal where status='Notified' and StudentId IS NOT NULL
+					SELECT StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal where status='${
+            WithdrawalStatus.NOTIFIED
+          }' and StudentId IS NOT NULL
 				) AS withdrawal
 				LEFT JOIN infocenter.mth_application application ON (application.student_id = withdrawal.student_id)
 				LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
@@ -363,10 +367,11 @@ export class WithdrawalService {
 				LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
 				LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Notify of Withdraw' AND templates.region_id = schoolYear.RegionId)
 				WHERE 
-					${remind_date > 0
-          ? 'withdrawal.diff_date = 0'
-          : 'region.withdraw_deadline_num_days > withdrawal.diff_date'
-        } AND 
+					${
+            remind_date > 0
+              ? 'withdrawal.diff_date = 0'
+              : 'region.withdraw_deadline_num_days > withdrawal.diff_date'
+          } AND 
 					templates.id IS NOT NULL
 			`);
       reminders.map(async (reminder) => {
@@ -453,7 +458,7 @@ export class WithdrawalService {
         email: emailData.email,
         subject,
         content: emailData.body,
-        from: from,
+        from: from || emailTemplate.from,
         bcc: emailTemplate.bcc,
       });
     });
@@ -463,7 +468,7 @@ export class WithdrawalService {
           withdrawal_id: emailData.withdrawal_id,
           subject: subject,
           body: emailData.body,
-          from_email: from,
+          from_email: from || emailTemplate.from,
           created_at: new Date(),
         });
       }),
@@ -473,12 +478,17 @@ export class WithdrawalService {
 
   async update(updateWithdrawalInput: UpdateWithdrawalInput): Promise<Boolean> {
     try {
-      const withdrawal = await this.repo.findOne(updateWithdrawalInput.withdrawal_id);
+      const withdrawal = await this.repo.findOne(
+        updateWithdrawalInput.withdrawal_id,
+      );
       const submittedDate = withdrawal.date;
-      await this.repo.update({ withdrawal_id: updateWithdrawalInput.withdrawal_id }, {
-        [updateWithdrawalInput.field]: updateWithdrawalInput.value,
-        date: submittedDate
-      });
+      await this.repo.update(
+        { withdrawal_id: updateWithdrawalInput.withdrawal_id },
+        {
+          [updateWithdrawalInput.field]: updateWithdrawalInput.value,
+          date: submittedDate,
+        },
+      );
       return true;
     } catch (error) {
       return false;
@@ -499,18 +509,19 @@ export class WithdrawalService {
         .whereInIds(withdrawal_ids)
         .getManyAndCount();
       results
-        .filter((item) => item.status == 'Requested')
+        .filter((item) => item.status == WithdrawalStatus.REQUESTED)
         .map(async (item) => {
           const withdrawal_id = item.withdrawal_id;
           const school_year_id = item.Student.grade_levels[0].school_year_id;
           const studentId = item.Student.student_id;
           await queryRunner.query(
-            `UPDATE infocenter.withdrawal SET status = 'Withdrawn' WHERE withdrawal_id = ${withdrawal_id}`,
+            `UPDATE infocenter.withdrawal SET status = '${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawal_id}`,
           );
           await queryRunner.query(
             `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
           );
         });
+      queryRunner.release();
       return true;
     } catch (e) {
       return false;
@@ -541,9 +552,141 @@ export class WithdrawalService {
           `UPDATE infocenter.mth_student_status SET status = 1 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
         );
       });
+      queryRunner.release();
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  async individualWithdrawal(
+    param: IndividualWithdrawalInput,
+  ): Promise<Boolean> {
+    try {
+      const { withdrawal_id, body, type, region_id } = param;
+      const queryRunner = await getConnection().createQueryRunner();
+      const [results] = await this.repo
+        .createQueryBuilder('withdrawal')
+        .leftJoinAndSelect('withdrawal.Student', 'student')
+        .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .leftJoinAndSelect('student.grade_levels', 'grade')
+        .whereInIds(withdrawal_id)
+        .getManyAndCount();
+      if (type === 1) {
+        results
+          .filter((item) => item.status == 'Requested')
+          .map(async (item) => {
+            const withdrawal_id = item.withdrawal_id;
+            const school_year_id = item.Student.grade_levels[0].school_year_id;
+            const studentId = item.Student.student_id;
+            await queryRunner.query(
+              `UPDATE infocenter.withdrawal SET status = 'Withdrawn' WHERE withdrawal_id = ${withdrawal_id}`,
+            );
+            await queryRunner.query(
+              `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
+            );
+          });
+      }
+      queryRunner.release();
+
+      const setEmailBodyInfo = (student, school_year) => {
+        const yearbegin = new Date(school_year.date_begin)
+          .getFullYear()
+          .toString();
+        const yearend = new Date(school_year.date_end).getFullYear().toString();
+
+        return body
+          .toString()
+          .replace(/\[STUDENT\]/g, student.person.first_name)
+          .replace(/\[PARENT\]/g, student.parent.person.first_name)
+          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+          .replace(/\[Student\]/g, student.person.first_name)
+          .replace(/\[Parent\]/g, student.parent.person.first_name)
+          .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
+      };
+      const emailBody = [];
+      results.map(async (item) => {
+        const school_year = await this.schoolYearService.findOneById(
+          item.Student.grade_levels[0].school_year_id,
+        );
+        const temp = {
+          withdrawal_id: item.withdrawal_id,
+          email: item.Student.parent.person.email,
+          body: setEmailBodyInfo(item.Student, school_year),
+        };
+        emailBody.push(temp);
+      });
+      const emailTemplate =
+        await this.emailTemplateService.findByTemplateAndRegion(
+          'Withdraw Page',
+          region_id,
+        );
+
+      emailBody.map(async (emailData) => {
+        await this.emailService.sendEmail({
+          email: emailData.email,
+          subject: emailTemplate.subject,
+          content: emailData.body,
+          from: emailTemplate.from,
+          bcc: emailTemplate.bcc,
+        });
+      });
+      Promise.all(
+        emailBody.map(async (emailData) => {
+          return await this.withdrawalEmailService.create({
+            withdrawal_id: emailData.withdrawal_id,
+            subject: emailTemplate.subject,
+            body: emailData.body,
+            from_email: emailTemplate.from,
+            created_at: new Date(),
+          });
+        }),
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async getStudentInfoByWithdrawalId(
+    withdrawalId: number,
+  ): Promise<WithdrawalStudentInfo> {
+    try {
+      let data: WithdrawalStudentInfo = null;
+      const queryRunner = await getConnection().createQueryRunner();
+      const results = await queryRunner.query(`
+        SELECT
+          withdrawal.withdrawal_id AS withdrawal_id,
+          student.student_id AS student_id,
+          student.parent_id AS parent_id,
+          gradeLevel.grade_level AS grade,
+          person.first_name AS first_name,
+          person.last_name AS last_name
+        FROM (
+          SELECT * FROM infocenter.withdrawal WHERE withdrawal_id = ${withdrawalId}
+        ) AS withdrawal
+        LEFT JOIN infocenter.mth_student student ON (student.student_id = withdrawal.StudentId)
+        LEFT JOIN infocenter.mth_student_grade_level gradeLevel ON (gradeLevel.student_id = student.student_id)
+        LEFT JOIN infocenter.mth_person person ON (person.person_id = student.person_id)
+      `);
+      if (results) {
+        results.map((result) => {
+          data = {
+            withdrawal_id: Number(result.withdrawal_id),
+            student_id: Number(result.student_id),
+            parent_id: Number(result.parent_id),
+            grade: result.grade,
+            first_name: result.first_name,
+            last_name: result.last_name,
+          };
+        });
+      }
+      queryRunner.release();
+      return data;
+    } catch (error) {
+      return error;
     }
   }
 }

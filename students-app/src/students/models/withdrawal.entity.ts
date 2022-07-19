@@ -21,8 +21,8 @@ import { WithdrawalEmail } from './withdrawal-email.entity';
 
 export const WITHDRAWAL_TABLE_NAME = 'withdrawal';
 
-@InputType('withdrawal')
 @ObjectType()
+@Directive('@extends')
 @Directive(
   '@key(fields: "withdrawal_id, application_id, StudentId, status, soe, funding, date, date_effective, date_emailed, response, grade_level, student_name")',
 )
@@ -31,80 +31,70 @@ export class Withdrawal extends BaseEntity {
   //	Auto increment withdrawal ID
   @Column()
   @Field(() => ID, { nullable: true })
-  @IsInt()
   @PrimaryGeneratedColumn({ type: 'int', name: 'withdrawal_id' })
+  @Directive('@external')
   withdrawal_id?: number;
 
   //	student id
   @Column('int', { name: 'application_id', nullable: true })
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   application_id?: number;
 
   //	student id
   @Column('int', { name: 'StudentId', nullable: true })
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   StudentId?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
-  @IsIn(['Notified', 'Withdrawn', 'Requested'])
+  @Directive('@external')
   status?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   soe?: string;
 
   @Column()
   @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   funding?: boolean;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   date?: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   date_effective?: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   date_emailed?: Date;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   response?: string;
 
   //////////////	For response	//////////////
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   grade_level: string;
 
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   student_name: string;
 
-  @ManyToOne(() => Student, (student) => student.Withdrawals, {
+  @ManyToOne(() => Student, (student) => student.StudentWithdrawals, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
-  @Field(() => Student, { nullable: true })
   Student: Student;
-
-  @OneToMany(
-    () => WithdrawalEmail,
-    (withdrawalEmail) => withdrawalEmail.Withdrawal,
-  )
-  @Field(() => [WithdrawalEmail], { nullable: true })
-  withdrawalEmails: WithdrawalEmail[];
-}
-
-@ObjectType()
-export class WithdrawalPagination {
-  @Field((type) => [Withdrawal])
-  results?: Withdrawal[];
-
-  @Field((type) => Int)
-  page_total?: number;
-
-  @Field((type) => Int)
-  total?: number;
 }

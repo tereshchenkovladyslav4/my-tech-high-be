@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, createQueryBuilder, Brackets } from 'typeorm';
+import { Repository, createQueryBuilder, getConnection } from 'typeorm';
 import { Student } from '../models/student.entity';
-import { ToDoItem } from '../models/todo-item.entity';
+import { ToDoCategory, ToDoItem } from '../models/todo-item.entity';
 import { User } from '../models/user.entity';
 import { ParentToDo } from '../models/parent-todo.entity';
 import { SchoolYearsService } from './schoolyears.service';
@@ -14,6 +14,7 @@ import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
 import { SchoolYear } from '../models/schoolyear.entity';
+import { WithdrawalStatus } from '../enums';
 
 @Injectable()
 export class ParentToDosService {
@@ -81,6 +82,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
+      category: ToDoCategory.SUBMIT_ENROLLMENT_PACKET,
       phrase: 'Submit Enrollment Packet',
       button: 'Submit Now',
       icon: '',
@@ -120,6 +122,7 @@ export class ParentToDosService {
       .getMany();
 
     return {
+      category: ToDoCategory.SUBMIT_ENROLLMENT_PACKET,
       phrase: 'Submit Enrollment Packet',
       button: 'Submit Now',
       icon: '',
@@ -133,6 +136,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
+      category: ToDoCategory.RESUBMIT_ENROLLMENT_PACKET,
       phrase: 'Resubmit Enrollment Packet',
       button: 'Resubmit Now',
       icon: '',
@@ -173,6 +177,7 @@ export class ParentToDosService {
       .getMany();
 
     return {
+      category: ToDoCategory.RESUBMIT_ENROLLMENT_PACKET,
       phrase: 'Resubmit Enrollment Packet',
       button: 'Resubmit Now',
       icon: '',
@@ -187,6 +192,7 @@ export class ParentToDosService {
     const students = [];
 
     return {
+      category: ToDoCategory.SUBMIT_SCHEDULE,
       phrase: 'Submit Schedule',
       button: 'Submit Now',
       icon: '',
@@ -200,6 +206,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.RESUBMIT_SCHEDULE,
       phrase: 'Resubmit Schedule',
       button: 'Resubmit Now',
       icon: '',
@@ -213,6 +220,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.RESUBMIT_REIMBURSEMENT,
       phrase: 'Resubmit Reimbursement',
       button: 'Resubmit Now',
       icon: '',
@@ -226,6 +234,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.RESUBMIT_DIRECT_ORDER,
       phrase: 'Resubmit Direct Order',
       button: 'Resubmit Now',
       icon: '',
@@ -239,6 +248,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.TESTING_PREFERNCE,
       phrase: 'Testing Prefernce',
       button: 'Submit Now',
       icon: '',
@@ -252,6 +262,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.MISSING_LEARNING_LOG,
       phrase: 'Missing Learning Log',
       button: 'Submit Now',
       icon: '',
@@ -265,6 +276,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.RESUBMIT_LEARNING_LOG,
       phrase: 'Resubmit Learning Log',
       button: 'Resubmit Now',
       icon: '',
@@ -278,6 +290,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.INTENT_TO_RE_ENROLL,
       phrase: 'Intent to Re-enroll',
       button: 'Submit Now',
       icon: '',
@@ -291,6 +304,7 @@ export class ParentToDosService {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
+      category: ToDoCategory.REQUEST_HOMEROOM_RESOURCES,
       phrase: 'Request Homeroom Resources',
       button: 'Request Now',
       icon: '',
@@ -298,5 +312,35 @@ export class ParentToDosService {
       homeroom: 0, // no
       students: students,
     };
+  }
+
+  async submitWithdraws(user: User): Promise<ToDoItem> {
+    // Fetch students to be withdrawn
+    const parent = await this.getParent(user.user_id);
+    const defaultResponse = {
+      category: ToDoCategory.SUBMIT_WITHDRAW,
+      phrase: 'Submit Withdraw',
+      button: 'Submit Now',
+      icon: '',
+      dashboard: 1, // yes
+      homeroom: 1, // yes
+      students: [],
+    };
+
+    if (!parent) {
+      return defaultResponse;
+    }
+
+    const { Parent_parent_id } = parent;
+
+    defaultResponse.students = await this.studentsRepository
+      .createQueryBuilder('student')
+      .leftJoinAndSelect('student.StudentWithdrawals', 'withdrawal')
+      .leftJoin('student.status', 'studentStatus')
+      .where(`student.parent_id=${Parent_parent_id}`)
+      .andWhere(`studentStatus.status=${2}`)
+      .andWhere(`withdrawal.status='${WithdrawalStatus.NOTIFIED}'`)
+      .getMany();
+    return defaultResponse;
   }
 }

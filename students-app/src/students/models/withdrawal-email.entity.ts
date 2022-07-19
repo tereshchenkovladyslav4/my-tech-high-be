@@ -16,8 +16,8 @@ import {
 } from 'typeorm';
 import { Withdrawal } from './withdrawal.entity';
 
-@InputType('withdrawal_email')
 @ObjectType()
+@Directive('@extends')
 @Directive(
   '@key(fields: "withdrawal_email_id, withdrawal_id, subject, body, from_email, created_at")',
 )
@@ -26,36 +26,31 @@ export class WithdrawalEmail extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
+  @Directive('@external')
   withdrawal_email_id?: number;
 
   @Column('int', { name: 'withdrawal_id', nullable: true })
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   withdrawal_id?: number;
 
   @Column()
   @Field(() => String)
+  @Directive('@external')
   subject: string;
 
   @Column('text', { name: 'body', nullable: true })
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   body: string;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   from_email: string;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   created_at?: Date;
-
-  @ManyToOne(() => Withdrawal, (withdrawal) => withdrawal.withdrawalEmails, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn({
-    name: 'withdrawal_id',
-    referencedColumnName: 'withdrawal_id',
-  })
-  @Field(() => Withdrawal, { nullable: true })
-  Withdrawal: Withdrawal;
 }

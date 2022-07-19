@@ -56,7 +56,7 @@ export class ApplicationsResolver {
     private immunizationSettingsService: ImmunizationSettingsService,
     private usersService: UsersService,
     private studentStatusService: StudentStatusService,
-  ) { }
+  ) {}
 
   @Query((returns) => ApplicationPagination, { name: 'applications' })
   //@UseGuards(new AuthGuard())
@@ -68,14 +68,12 @@ export class ApplicationsResolver {
     return results;
   }
 
-  @Query((returns) => ResponseDTO, { name: 'submittedApplicationCount' })
+  @Query((returns) => ResponseDTO, { name: 'getTodoListItems' })
   @UseGuards(new AuthGuard())
-  async getSubmittedApplicationCount(
+  async getTodoListItems(
     @Args({ name: 'regionId', type: () => ID }) regionId: number,
   ): Promise<ResponseDTO> {
-    const results = await this.applicationsService.getSubmittedApplicationCount(
-      regionId,
-    );
+    const results = await this.applicationsService.getTodoListItems(regionId);
     return results;
   }
 
@@ -150,7 +148,9 @@ export class ApplicationsResolver {
     @Args({ name: 'email', type: () => String })
     email: string,
   ): Promise<boolean> {
-    return await this.studentApplicationsService.sendApplicationRecieveEmail(email);
+    return await this.studentApplicationsService.sendApplicationRecieveEmail(
+      email,
+    );
   }
 
   @Mutation((returns) => [Application], { name: 'acceptApplication' })
@@ -195,9 +195,9 @@ export class ApplicationsResolver {
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
   ): Promise<Application[]> {
-    const { application_ids } = deleteApplicationInput
+    const { application_ids } = deleteApplicationInput;
     return await this.studentApplicationsService.deleteStudentApplication(
-      application_ids
+      application_ids,
     );
   }
 

@@ -96,7 +96,7 @@ export class Student extends BaseEntity {
   @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.Student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'StudentId' })
   @Field(() => [Withdrawal], { nullable: true })
-  withdrawals: Withdrawal[];
+  Withdrawals: Withdrawal[];
 
   @OneToOne(() => Person, (person) => person.Student, {
     onDelete: 'SET NULL',

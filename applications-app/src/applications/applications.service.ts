@@ -218,8 +218,6 @@ export class ApplicationsService {
         ),
     );
 
-    console.log('Get Students: ', students);
-
     const person = await this.personsService.findOneById(parent.person_id);
     const regions: ApplicationUserRegion[] =
       await this.userRegionService.findUserRegionByUserId(person.user_id);
@@ -235,14 +233,14 @@ export class ApplicationsService {
         region_id,
       );
     if (emailTemplate) {
-      const setEmailBodyInfo = (school_year) => {
+      const setEmailBodyInfo = (school_year, student) => {
         const yearbegin = new Date(school_year.date_begin)
           .getFullYear()
           .toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
         return emailTemplate.body
           .toString()
-          .replace(/\[STUDENT\]/g, newApplication?.students[0]?.first_name)
+          .replace(/\[STUDENT\]/g, student.person.first_name)
           .replace(/\[PARENT\]/g, person.first_name)
           .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
           .replace(
@@ -250,23 +248,44 @@ export class ApplicationsService {
             `${yearbegin}-${yearend.substring(2, 4)}`,
           );
       };
+      let emailBody = emailTemplate.body;
+      if(students.length > 0) {
+        students.forEach(async student => {
+          const gradeLevels = await this.studentGradeLevelsService.forStudents(
+            student.student_id,
+          );
 
-      const gradeLevels = await this.studentGradeLevelsService.forStudents(
-        students[0].student_id,
-      );
+          const school_year = await this.schoolYearService.findOneById(
+            gradeLevels[0]?.school_year_id,
+          );
+          
+          emailBody = setEmailBodyInfo(school_year, student);
+          await this.emailsService.sendEmail({
+            email: person?.email,
+            subject: emailTemplate.subject,
+            content: emailBody,
+            bcc: emailTemplate.bcc,
+            from: emailTemplate.from,
+          });
+        })
+      }
 
-      const school_year = await this.schoolYearService.findOneById(
-        gradeLevels[0]?.school_year_id,
-      );
-      const emailBody = setEmailBodyInfo(school_year);
+      // const gradeLevels = await this.studentGradeLevelsService.forStudents(
+      //   students[students.length -1].student_id,
+      // );
 
-      await this.emailsService.sendEmail({
-        email: person?.email,
-        subject: emailTemplate.subject,
-        content: emailBody,
-        bcc: emailTemplate.bcc,
-        from: emailTemplate.from,
-      });
+      // const school_year = await this.schoolYearService.findOneById(
+      //   gradeLevels[0]?.school_year_id,
+      // );
+      // const emailBody = setEmailBodyInfo(school_year);
+
+      // await this.emailsService.sendEmail({
+      //   email: person?.email,
+      //   subject: emailTemplate.subject,
+      //   content: emailBody,
+      //   bcc: emailTemplate.bcc,
+      //   from: emailTemplate.from,
+      // });
     }
 
     return {

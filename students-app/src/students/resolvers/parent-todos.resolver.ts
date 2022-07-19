@@ -103,4 +103,9 @@ export class ParentToDosResolver {
   ): Promise<ToDoItem> {
     return this.parentToDosService.requestHomeroomResources(user);
   }
+
+  @ResolveField((of) => ToDoItem, { name: 'submit_withdraws' })
+  public async getSubmitWithdraws(@Parent() user: User): Promise<ToDoItem> {
+    return this.parentToDosService.submitWithdraws(user);
+  }
 }

@@ -33,6 +33,7 @@ export class StudentsService {
     private usersService: UsersService,
     private personsService: PersonsService,
     private studentGradeLevelService: StudentGradeLevelsService,
+    private schoolYearService: SchoolYearsService,
   ) {}
 
   protected user: User;
@@ -101,6 +102,7 @@ export class StudentsService {
       application_deadline_num_days: 0,
       enrollment_packet_deadline_num_days: 0,
       enrollment_packet_date_deadline: null,
+      school_year_date_end: null,
     };
 
     const parent = await createQueryBuilder(Parent)
@@ -129,13 +131,18 @@ export class StudentsService {
       return defaultResponse;
     }
     // const schoolYear = await this.schoolYearsService.getCurrent(region_id);
-    const schoolYear = await this.studentGradeLevelService.findByStudentID(
-      studentData.student_id,
-    );
+    const studentGradeLevel =
+      await this.studentGradeLevelService.findByStudentID(
+        studentData.student_id,
+      );
 
-    if (!schoolYear) {
+    if (!studentGradeLevel) {
       return defaultResponse;
     }
+
+    const schoolYear = await this.schoolYearService.findOneById(
+      studentGradeLevel.school_year_id,
+    );
 
     const student = await createQueryBuilder(Student)
       .leftJoinAndSelect(
@@ -154,7 +161,8 @@ export class StudentsService {
         'gradelevel.student_id = `Student`.student_id AND gradelevel.school_year_id = application.school_year_id',
       )
       .andWhere('application.school_year_id = :schoolYear', {
-        schoolYear: (schoolYear && schoolYear.school_year_id) || null,
+        schoolYear:
+          (studentGradeLevel && studentGradeLevel.school_year_id) || null,
       })
       .andWhere('`Student`.student_id = :studentId', {
         studentId: studentData.student_id,
@@ -168,7 +176,7 @@ export class StudentsService {
     return {
       student_id:
         (student && student.Student_student_id) || studentData.student_id,
-      school_year_id: schoolYear.school_year_id || null,
+      school_year_id: studentGradeLevel.school_year_id || null,
       grade_level: (student && student.gradelevel_grade_level) || null,
       application_id: (student && student.application_application_id) || null,
       application_status: (student && student.application_status) || null,
@@ -193,6 +201,9 @@ export class StudentsService {
           Moment(student.application_date_accepted)
             .add(parent.region_application_deadline_num_days, 'd')
             .format('MM.DD')) ||
+        null,
+      school_year_date_end:
+        (schoolYear.date_end && Moment(schoolYear.date_end).format('MM.DD')) ||
         null,
     };
   }

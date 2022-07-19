@@ -14,6 +14,8 @@ import { WithdrawalEmailsService } from '../services/withdrawal-emails.service';
 import { UpdateWithdrawalInput } from '../dto/withdrawal-update.inputs.';
 import { QuickWithdrawalInput } from '../dto/quick-withdrawal.inputs';
 import { ReinstateWithdrawalInput } from '../dto/reinstate-withdrawal.inputs';
+import { WithdrawalStudentInfo } from '../dto/student-info-by-withdrawalId.dto';
+import { IndividualWithdrawalInput } from '../dto/individual-withdrawal.inputs';
 
 @Resolver((of) => Withdrawal)
 export class WithdrawalResolver {
@@ -42,6 +44,15 @@ export class WithdrawalResolver {
     @Args({ name: 'withdrawId', type: () => Int }) withdrawId: number,
   ): Promise<WithdrawalEmail[]> {
     return this.emailService.findByApplication(withdrawId);
+  }
+
+  @Query((returns) => WithdrawalStudentInfo, {
+    name: 'getStudentInfoByWithdrawalId',
+  })
+  getStudentInfoByWithdrawalId(
+    @Args({ name: 'withdrawId', type: () => Int }) withdrawId: number,
+  ): Promise<WithdrawalStudentInfo> {
+    return this.service.getStudentInfoByWithdrawalId(withdrawId);
   }
 
   @Query((returns) => ResponseDTO, { name: 'withdrawalStatus' })
@@ -82,6 +93,15 @@ export class WithdrawalResolver {
     reinstateWithdrawalInput: ReinstateWithdrawalInput,
   ): Promise<Boolean> {
     return await this.service.reinstateWithdrawal(reinstateWithdrawalInput);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'individualWithdrawal' })
+  @UseGuards(new AuthGuard())
+  async individualWithdrawal(
+    @Args('individualWithdrawalInput')
+    individualWithdrawalInput: IndividualWithdrawalInput,
+  ): Promise<Boolean> {
+    return await this.service.individualWithdrawal(individualWithdrawalInput);
   }
 
   @Mutation((returns) => Boolean, { name: 'deleteWithdrawal' })
