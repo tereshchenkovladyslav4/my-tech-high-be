@@ -46,18 +46,20 @@ export class WithdrawalService {
       const { StudentId, status, date_effective, response, withdrawal_id } =
         withdrawal;
       const students = await queryRunner.query(
-        `SELECT StudentId FROM infocenter.withdrawal WHERE StudentId=${StudentId} AND status='${status}'`,
+        `SELECT StudentId, withdrawal_id FROM infocenter.withdrawal WHERE StudentId=${StudentId} AND status='${WithdrawalStatus.NOTIFIED}'`,
       );
       let withdrawalResponse;
-      if ((!withdrawal_id && students?.length == 0) || withdrawal_id) {
-        withdrawalResponse = await this.repo.save({
-          withdrawal_id: withdrawal_id,
-          StudentId: StudentId,
-          status: status,
-          date_effective: date_effective,
-          response: response,
-        });
-      }
+      let existingWithdrawalId = 0;
+      students.map((student) => {
+        existingWithdrawalId = student.withdrawal_id;
+      });
+      withdrawalResponse = await this.repo.save({
+        withdrawal_id: withdrawal_id || existingWithdrawalId,
+        StudentId: StudentId,
+        status: status,
+        date_effective: date_effective,
+        response: response,
+      });
 
       if (status == WithdrawalStatus.NOTIFIED && students?.length == 0) {
         withdrawal.date_emailed = new Date();

@@ -4,6 +4,7 @@ import { AuthGuard } from '../guards/auth.guard';
 import { EventsService } from '../services/event.service';
 import { ApplicationEvent } from '../models/event.entity';
 import { CreateOrUpdateEventInput } from '../dto/create-or-update-event.inputs';
+import { FindEventsByRegionIdSearch } from '../dto/find-event-by-regionId-search';
 @Resolver((of) => ApplicationEvent)
 export class EventsResolver {
   constructor(private eventsService: EventsService) {}
@@ -11,9 +12,10 @@ export class EventsResolver {
   @Query((returns) => [ApplicationEvent], { name: 'eventsByRegionId' })
   @UseGuards(new AuthGuard())
   async getEvents(
-    @Args('region_id', { type: () => Int }) region_id: number,
+    @Args('findEventsByRegionIdSearch')
+    findEventsByRegionIdSearch: FindEventsByRegionIdSearch,
   ): Promise<ApplicationEvent[]> {
-    return this.eventsService.findAll(region_id);
+    return this.eventsService.findAll(findEventsByRegionIdSearch);
   }
 
   @Mutation((returns) => ApplicationEvent, { name: 'createOrUpdateEvent' })
