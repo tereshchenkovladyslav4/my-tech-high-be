@@ -347,6 +347,68 @@ export class WithdrawalService {
   async runScheduleReminders(remind_date: number = 0): Promise<String> {
     try {
       const queryRunner = await getConnection().createQueryRunner();
+      // Automatically make a student as "Undeclared" when parent does not submit withdraw form by deadline and send parents an email notification
+      const withdrawals = await queryRunner.query(`
+        SELECT
+          withdrawal.withdrawal_id AS withdrawal_id,
+          person.email AS parent_email,
+          templates.bcc AS email_bcc,
+          templates.from AS email_from,
+          templates.body AS email_body,
+          templates.subject AS email_subject,
+          studentInfo.first_name AS student_name,
+          person.first_name AS parent_name,
+          schoolYear.date_begin AS date_begin,
+          schoolYear.date_end AS date_end
+        FROM (
+          SELECT withdrawal_id, StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal WHERE status='${WithdrawalStatus.NOTIFIED}' and StudentId IS NOT NULL
+        ) AS withdrawal
+        LEFT JOIN infocenter.mth_application application ON (application.student_id = withdrawal.student_id)
+        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+        LEFT JOIN infocenter.region region ON (region.id = schoolYear.RegionId)
+        LEFT JOIN infocenter.mth_student student ON (student.student_id = withdrawal.student_id)
+        LEFT JOIN infocenter.mth_person studentInfo ON (studentInfo.person_id = student.person_id)
+        LEFT JOIN infocenter.mth_parent parent ON (parent.parent_id = student.parent_id)
+        LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
+        LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Undeclared Withdraw' AND templates.region_id = schoolYear.RegionId)
+        WHERE 
+          region.withdraw_deadline_num_days < withdrawal.diff_date AND 
+          templates.id IS NOT NULL
+      `);
+      withdrawals.map(async (withdrawal) => {
+        const {
+          withdrawal_id,
+          parent_email,
+          email_bcc,
+          email_from,
+          email_body,
+          email_subject,
+          student_name,
+          parent_name,
+          date_begin,
+          date_end,
+        } = withdrawal;
+        const yearbegin = new Date(date_begin).getFullYear().toString();
+        const yearend = new Date(date_end).getFullYear().toString();
+        const result = await this.emailService.sendEmail({
+          email: parent_email,
+          subject: email_subject,
+          content: email_body
+            .toString()
+            .replace(/\[STUDENT\]/g, student_name)
+            .replace(/\[PARENT\]/g, parent_name)
+            .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+            .replace(/\[Student\]/g, student_name)
+            .replace(/\[Parent\]/g, parent_name)
+            .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`),
+          from: email_from,
+          bcc: email_bcc,
+        });
+        await queryRunner.query(
+          `UPDATE infocenter.withdrawal SET response = 'undeclared', status='${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawal_id}`,
+        );
+      });
+      // To send remider email to parent by deadline
       const reminders = await queryRunner.query(`
 				SELECT
 					withdrawal.*,
@@ -357,7 +419,7 @@ export class WithdrawalService {
 					templates.bcc AS email_bcc,
 					templates.from AS email_from
 				FROM (
-					SELECT StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal where status='${
+					SELECT StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal WHERE status='${
             WithdrawalStatus.NOTIFIED
           }' and StudentId IS NOT NULL
 				) AS withdrawal

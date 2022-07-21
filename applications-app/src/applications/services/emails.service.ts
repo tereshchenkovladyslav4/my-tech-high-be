@@ -69,77 +69,37 @@ export class EmailsService {
     // } );
     const token = this.encrypt(emailVerifier);
     // console.log( "settings: ", settings );
-    const recipientEmail =  emailInput.recipients || emailVerifier.email;
-    let subject =
-      'Thank you for submitting an application to the My Tech High program test';
-    let content =
-      '<p>We have received your application to participate in the My Tech High program.</p>';
-    content +=
-      '<p>Please click on the link below to verify your email address and complete your account registration.</p>';
-    content +=
-      '<p><a href="' +
+    const recipientEmail = emailInput.recipients || emailVerifier.email;
+    const emailVerificationLink = webAppUrl + '/confirm/?token=' + token;
+    const link =
+      '<a href="' +
+      emailVerificationLink +
+      '">' +
       webAppUrl +
-      '/confirm/?token=' +
-      token +
-      '">Click here</a><br></p>';
-    content +=
-      '<p>*This is just a test, please disregard if you receive this email* - MTH</p>';
-    content += ' <p>Â </p>';
+      '/confirm' +
+      '</a>';
+
+    let content = '';
 
     if (emailTemplate) {
-      subject = emailTemplate.subject;
-      content = emailTemplate.body;
-      content +=
-        '<p>Please click on the link below to verify your email address and complete your account registration.</p>';
-      content +=
-        '<p><a href="' +
-        webAppUrl +
-        '/confirm/?token=' +
-        token +
-        '">Click here</a><br></p>';
-    }
+      const setEmailBodyInfo = (user) => {
+        return emailTemplate.body
+          .toString()
+          .replace(/\[USER\]/g, user.firstName)
+          .replace(/\[LINK\]/g, link);
+      };
 
-    const user = await this.usersService.findOneByEmail(emailVerifier.email);
-    const person = await this.personsService.findOneByUserId(user.user_id);
-    const setEmailBodyInfo = (school_year, student) => {
-      const yearbegin = new Date(school_year.date_begin)
-        .getFullYear()
-        .toString();
-      const yearend = new Date(school_year.date_end).getFullYear().toString();
-      return content
-        .toString()
-        .replace(/\[STUDENT\]/g, student.person.first_name)
-        .replace(/\[PARENT\]/g, person.first_name)
-        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-        .replace(
-          /\[APPLICATION_YEAR\]/g,
-          `${yearbegin}-${yearend.substring(2, 4)}`,
-        );
-    };
-
-    if (students.length > 0) {
-        const school_year = await this.schoolYearService.findOneById(
-           students[0]?.student_grade_level?.school_year_id,
-        );
-        content = setEmailBodyInfo(school_year, students[0]);
-    } else {
-      const students = await this.studentsService.findOneByParent(
-        parent_id,
+      const recipient: User = await this.usersService.findOneByEmail(
+        recipientEmail,
       );
-      if(students.length > 0) {
-        const gradeLevels = await this.studentGradeLevelsService.forStudents(
-          students[0]?.student_id,
-        );
-  
-        const school_year = await this.schoolYearService.findOneById(
-          gradeLevels[0]?.school_year_id,
-        );
-        content = setEmailBodyInfo(school_year, students[0]);
+      if (recipient) {
+        content = setEmailBodyInfo(recipient);
       }
     }
+
     return this.SESService.sendEmail(
       recipientEmail,
-      subject,
+      emailTemplate?.subject,
       content,
       emailTemplate?.bcc,
       emailTemplate?.from,
@@ -157,9 +117,10 @@ export class EmailsService {
       filter_users,
     } = announcementEmail;
 
-    let currAnnouncement: UserAnnouncement
-    this.userAnnouncementService.findById(announcement_id)
-      .then((announcement) => currAnnouncement = announcement )
+    let currAnnouncement: UserAnnouncement;
+    this.userAnnouncementService
+      .findById(announcement_id)
+      .then((announcement) => (currAnnouncement = announcement));
 
     const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
     const grades = filter_grades
@@ -269,13 +230,13 @@ export class EmailsService {
           } catch (error) {
             console.log(error, 'Email Error');
           }
-        } 
+        }
         if (user.UserId) {
           await this.userAnnouncementService.save({
             AnnouncementId: announcement_id,
             user_id: user.UserId,
             status: 'Unread',
-            id: currAnnouncement !== undefined && currAnnouncement.id 
+            id: currAnnouncement !== undefined && currAnnouncement.id,
           });
         }
       });

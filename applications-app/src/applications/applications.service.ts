@@ -129,7 +129,7 @@ export class ApplicationsService {
       user.user_id,
     );
 
-    var region_id = 0;
+    var region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
@@ -207,22 +207,24 @@ export class ApplicationsService {
       .getOne();
     const studentApplications = (await newApplication).students;
     let students = [];
-    students = await studentApplications.map(
-      async (studentApplication) =>
-        await this.createStudentApplication(
-          parent.parent_id,
-          newApplication.program_year,
-          studentApplication,
-          '',
-          newApplication.meta,
-        ),
+    students = await Promise.all(
+      studentApplications.map(
+        async (studentApplication) =>
+          await this.createStudentApplication(
+            parent.parent_id,
+            newApplication.program_year,
+            studentApplication,
+            '',
+            newApplication.meta,
+          ),
+      ),
     );
 
     const person = await this.personsService.findOneById(parent.person_id);
     const regions: ApplicationUserRegion[] =
       await this.userRegionService.findUserRegionByUserId(person.user_id);
 
-    var region_id = 0;
+    var region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
@@ -249,8 +251,8 @@ export class ApplicationsService {
           );
       };
       let emailBody = emailTemplate.body;
-      if(students.length > 0) {
-        students.forEach(async student => {
+      if (students.length > 0) {
+        students.forEach(async (student) => {
           const gradeLevels = await this.studentGradeLevelsService.forStudents(
             student.student_id,
           );
@@ -258,7 +260,7 @@ export class ApplicationsService {
           const school_year = await this.schoolYearService.findOneById(
             gradeLevels[0]?.school_year_id,
           );
-          
+
           emailBody = setEmailBodyInfo(school_year, student);
           await this.emailsService.sendEmail({
             email: person?.email,
@@ -267,7 +269,7 @@ export class ApplicationsService {
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
           });
-        })
+        });
       }
 
       // const gradeLevels = await this.studentGradeLevelsService.forStudents(
