@@ -412,11 +412,14 @@ export class ApplicationsService {
         const deadline = new Date().setDate(
           new Date().getDate() + deadlineDays,
         );
+
+        const UTCDeadline = new Date(deadline).toISOString()
+        // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
           student_id,
           status: 'Not Started',
-          deadline: new Date(deadline),
+          deadline: UTCDeadline,
           date_accepted: null,
           date_submitted: null,
           date_last_submitted: null,
@@ -462,7 +465,7 @@ export class ApplicationsService {
               )
               .replace(
                 /\[DEADLINE\]/g,
-                `${Moment(deadline).format('MM/DD/yy')}`,
+                `${Moment(UTCDeadline).format('MM/DD/yy')}`,
               );
           };
 

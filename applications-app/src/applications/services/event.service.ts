@@ -29,7 +29,7 @@ export class EventsService {
           LEFT JOIN infocenter.mth_student studentInfo ON (studentInfo.parent_id = parentInfo.parent_id)
           LEFT JOIN infocenter.mth_person student ON (student.person_id = studentInfo.person_id)
           LEFT JOIN infocenter.mth_student_grade_level grade ON (grade.student_id = studentInfo.student_id)
-          WHERE CONCAT(student.first_name, student.last_name) LIKE '%${param.search_field}%'
+          WHERE CONCAT(student.first_name, student.last_name) LIKE '%${param.search_field}%' OR CONCAT(student.preferred_first_name, student.preferred_last_name) LIKE '%${param.search_field}%'
         `);
         if (grades) {
           grades.forEach((grade) => {
@@ -50,7 +50,8 @@ export class EventsService {
           SELECT * FROM infocenter.mth_event
         ) AS events
         LEFT JOIN infocenter.mth_event_type eventType ON(eventType.event_type_id = events.TypeId)
-        WHERE eventType.RegionId = ${param.region_id} ${subCond}
+        WHERE eventType.RegionId = ${param.region_id} ${subCond} 
+        ORDER BY events.start_date, events.end_date, eventType.priority
       `);
       const results: ApplicationEvent[] = events.map((event) => ({
         EventType: {

@@ -628,7 +628,6 @@ export class WithdrawalService {
   ): Promise<Boolean> {
     try {
       const { withdrawal_id, body, type, region_id } = param;
-      const queryRunner = await getConnection().createQueryRunner();
       const [results] = await this.repo
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
@@ -638,6 +637,7 @@ export class WithdrawalService {
         .leftJoinAndSelect('student.grade_levels', 'grade')
         .whereInIds(withdrawal_id)
         .getManyAndCount();
+
       if (type === 1) {
         results
           .filter((item) => item.status == 'Requested')
@@ -645,15 +645,16 @@ export class WithdrawalService {
             const withdrawal_id = item.withdrawal_id;
             const school_year_id = item.Student.grade_levels[0].school_year_id;
             const studentId = item.Student.student_id;
+            const queryRunner = await getConnection().createQueryRunner();
             await queryRunner.query(
-              `UPDATE infocenter.withdrawal SET status = 'Withdrawn' WHERE withdrawal_id = ${withdrawal_id}`,
+              `UPDATE infocenter.withdrawal SET status = 'Withdrawn' WHERE withdrawal_id = ${withdrawal_id};`,
             );
             await queryRunner.query(
-              `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
+              `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id};`,
             );
+            queryRunner.release();
           });
       }
-      queryRunner.release();
 
       const setEmailBodyInfo = (student, school_year) => {
         const yearbegin = new Date(school_year.date_begin)

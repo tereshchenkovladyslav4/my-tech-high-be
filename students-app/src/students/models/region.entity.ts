@@ -38,6 +38,9 @@ export class Region extends BaseEntity {
   @Column()
   enrollment_packet_deadline_num_days: number;
 
+  @Column()
+  withdraw_deadline_num_days: number;
+
   @OneToMany(() => UserRegion, (userRegion) => userRegion.regionDetail)
   region: UserRegion;
 }

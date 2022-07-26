@@ -47,6 +47,6 @@ export class StudentCurrentStatus {
   @Field(() => String, { nullable: true })
   enrollment_packet_date_deadline?: String;
 
-  @Field(() => String, { nullable: true })
-  school_year_date_end?: String;
+  @Field(() => Int, { nullable: true })
+  withdraw_deadline_num_days?: number;
 }

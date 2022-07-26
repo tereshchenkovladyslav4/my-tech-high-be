@@ -102,7 +102,7 @@ export class StudentsService {
       application_deadline_num_days: 0,
       enrollment_packet_deadline_num_days: 0,
       enrollment_packet_date_deadline: null,
-      school_year_date_end: null,
+      withdraw_deadline_num_days: 0,
     };
 
     const parent = await createQueryBuilder(Parent)
@@ -202,9 +202,7 @@ export class StudentsService {
             .add(parent.region_application_deadline_num_days, 'd')
             .format('MM.DD')) ||
         null,
-      school_year_date_end:
-        (schoolYear.date_end && Moment(schoolYear.date_end).format('MM.DD')) ||
-        null,
+      withdraw_deadline_num_days: parent.region_withdraw_deadline_num_days,
     };
   }
 

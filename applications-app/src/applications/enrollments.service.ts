@@ -361,7 +361,7 @@ export class EnrollmentsService {
         packet_id,
         student_id,
         status: 'Started',
-        deadline: new Date(),
+        deadline: new Date().toISOString(),
         date_accepted: null,
         date_submitted: null,
         date_last_submitted: null,
@@ -458,7 +458,7 @@ export class EnrollmentsService {
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id: g_packet_id,
         student_id,
-        deadline: new Date(),
+        deadline: new Date().toISOString(),
         date_accepted: null,
         date_submitted: null,
         date_last_submitted: null,
