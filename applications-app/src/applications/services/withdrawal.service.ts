@@ -562,7 +562,6 @@ export class WithdrawalService {
   async quickWithdrawal(param: QuickWithdrawalInput): Promise<Boolean> {
     try {
       const { withdrawal_ids } = param;
-      const queryRunner = await getConnection().createQueryRunner();
       const [results] = await this.repo
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
@@ -575,6 +574,7 @@ export class WithdrawalService {
       results
         .filter((item) => item.status == WithdrawalStatus.REQUESTED)
         .map(async (item) => {
+          const queryRunner = await getConnection().createQueryRunner();
           const withdrawal_id = item.withdrawal_id;
           const school_year_id = item.Student.grade_levels[0].school_year_id;
           const studentId = item.Student.student_id;
@@ -584,8 +584,8 @@ export class WithdrawalService {
           await queryRunner.query(
             `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
           );
+          queryRunner.release();
         });
-      queryRunner.release();
       return true;
     } catch (e) {
       return false;
@@ -595,7 +595,6 @@ export class WithdrawalService {
   async reinstateWithdrawal(param: ReinstateWithdrawalInput): Promise<Boolean> {
     try {
       const { withdrawal_ids, reinstate_type } = param;
-      const queryRunner = await getConnection().createQueryRunner();
       const [results] = await this.repo
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
@@ -606,6 +605,7 @@ export class WithdrawalService {
         .whereInIds(withdrawal_ids)
         .getManyAndCount();
       results.map(async (item) => {
+        const queryRunner = await getConnection().createQueryRunner();
         const withdrawal_id = item.withdrawal_id;
         const school_year_id = item.Student.grade_levels[0].school_year_id;
         const studentId = item.Student.student_id;
@@ -615,8 +615,8 @@ export class WithdrawalService {
         await queryRunner.query(
           `UPDATE infocenter.mth_student_status SET status = 1 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
         );
+        queryRunner.release();
       });
-      queryRunner.release();
       return true;
     } catch (e) {
       return false;
