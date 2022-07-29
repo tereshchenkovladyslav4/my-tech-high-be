@@ -62,7 +62,7 @@ export class SchoolPartnerService {
   }
 
   findByRegion(schoolPartnerArgs: SchoolPartnerArgs): Promise<SchoolPartner[]> {
-    const {region_id, sort} = schoolPartnerArgs
+    const {region_id, sort, school_year_id} = schoolPartnerArgs
     if(sort !== null){
       const { column, direction } = sort
       return this.schoolPartnerRepository.find({
@@ -70,7 +70,8 @@ export class SchoolPartnerService {
           [column] : direction
         },
         where: {
-          region_id
+          region_id,
+          school_year_id,
         },
       })
     } else {

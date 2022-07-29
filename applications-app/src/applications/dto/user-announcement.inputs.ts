@@ -15,4 +15,7 @@ export class UserAnnouncementInput {
   @Field(() => String, { nullable: true })
   @IsIn(['Read', 'Unread'])
   status?: string;
+
+  @Field((type) => Boolean, { nullable: true })
+  emailed?: boolean;
 }

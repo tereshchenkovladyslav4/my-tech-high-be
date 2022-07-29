@@ -115,12 +115,8 @@ export class EmailsService {
       RegionId,
       filter_grades,
       filter_users,
+      
     } = announcementEmail;
-
-    let currAnnouncement: UserAnnouncement;
-    this.userAnnouncementService
-      .findById(announcement_id)
-      .then((announcement) => (currAnnouncement = announcement));
 
     const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
     const grades = filter_grades
@@ -219,25 +215,36 @@ export class EmailsService {
       const users = await queryRunner.query(query);
       queryRunner.release();
       users.map(async (user) => {
-        if (user.email) {
-          try {
-            await this.sendEmail({
-              email: user.email,
-              subject,
-              content: body,
-              from: sender,
-            });
-          } catch (error) {
-            console.log(error, 'Email Error');
-          }
-        }
         if (user.UserId) {
-          await this.userAnnouncementService.save({
-            AnnouncementId: announcement_id,
-            user_id: user.UserId,
-            status: 'Unread',
-            id: currAnnouncement !== undefined && currAnnouncement.id,
-          });
+          const currUserAnnouncement = await this.userAnnouncementService.findById({
+            announcementId: announcement_id,
+            userId: user.UserId,
+          })
+          if(currUserAnnouncement){
+            await this.userAnnouncementService.save({
+              AnnouncementId: announcement_id,
+              user_id: user.UserId,
+              status: 'Unread',
+              id: currUserAnnouncement.id
+            });
+          }else {
+              try {
+                await this.sendEmail({
+                  email: user.email,
+                  subject,
+                  content: body,
+                  from: sender,
+                });
+              } catch (error) {
+                console.log(error, 'Email Error');
+              }
+            await this.userAnnouncementService.save({
+              AnnouncementId: announcement_id,
+              user_id: user.UserId,
+              status: 'Unread',
+              emailed: true,
+            });
+          }
         }
       });
     }

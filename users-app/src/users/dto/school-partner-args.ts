@@ -13,6 +13,9 @@ export class SchoolPartnerArgs {
 
   @Field((type) => ID)
   region_id = 0;
+
+  @Field((type) => ID)
+  school_year_id = 0;
 }
 
 @InputType('Sort')

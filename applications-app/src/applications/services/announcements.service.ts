@@ -85,15 +85,14 @@ export class AnnouncementsService {
             currParsedAnnouncementGradeFilter = JSON.parse(announcementData.filter_grades),
             parsedGrades = difference(parsedGradeFilter, currParsedAnnouncementGradeFilter),
             parsedUsers = difference(parsedUserFilter, currParsedAnnouncementUserFilter)
-
           await this.sesEmailService.sendAnnouncementEmail({
             announcement_id: announcement_id,
             sender: posted_by,
             subject,
             body,
             RegionId,
-            filter_grades: parsedGrades.length > 0 ? JSON.stringify(parsedGrades) : filter_grades,
-            filter_users: parsedUsers.length > 0 ? JSON.stringify(parsedUsers) : filter_users,
+            filter_grades,
+            filter_users,
           });
         }
         return await this.announcementsRepository.save({

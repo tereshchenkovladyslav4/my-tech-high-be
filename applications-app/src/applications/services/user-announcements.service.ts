@@ -53,7 +53,7 @@ export class UserAnnouncementsService {
           announcement.filter_grades,
           announcement.date
         FROM (
-          SELECT id, AnnouncementId AS announcement_id, user_id, status FROM infocenter.user_announcement WHERE user_id = ${user_id}
+          SELECT id, AnnouncementId AS announcement_id, user_id, status FROM infocenter.user_announcement WHERE user_id = ${user_id} AND status != "Read"
         ) AS userAnnouncements
         LEFT JOIN infocenter.announcement announcement ON (announcement.announcement_id = userAnnouncements.announcement_id)
         ${condition}
@@ -96,6 +96,15 @@ export class UserAnnouncementsService {
     }
   }
 
+  async markRead(id: number): Promise<UserAnnouncement> {
+    try {
+      return this.userAnnouncementsRepository.save({ id: id, status: 'Read' });
+    } catch (error) {
+      console.error(error)
+      return error
+    }
+  }
+
   async save(announcement: UserAnnouncementInput): Promise<UserAnnouncement> {
     try {
       return await this.userAnnouncementsRepository.save(announcement);
@@ -104,7 +113,10 @@ export class UserAnnouncementsService {
     }
   }
 
-  async findById(id: number): Promise<UserAnnouncement | undefined>  {
-    return await this.userAnnouncementsRepository.findOne({ AnnouncementId: id })
+  async findById({
+    announcementId,
+    userId
+  }): Promise<UserAnnouncement | undefined>  {
+    return await this.userAnnouncementsRepository.findOne({ user_id: userId, AnnouncementId: announcementId})
   }
 }

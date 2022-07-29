@@ -9,6 +9,7 @@ import { UserAnnouncementsService } from '../services/user-announcements.service
 import { UserAnnouncementResponse } from '../dto/user-announcement.response';
 import { ResponseDTO } from '../dto/response.dto';
 import { UserAnnouncementRequestParams } from '../dto/user-announcement-request-param';
+import { UserAnnouncement } from '../models/user-announcement.entity';
 @Resolver((of) => Announcement)
 export class AnnouncementsResolver {
   constructor(
@@ -51,6 +52,13 @@ export class AnnouncementsResolver {
     @Args('id', { type: () => Int }) id: number,
   ): Promise<ResponseDTO> {
     return this.userAnnouncementService.deleteById(id);
+  }
+
+  @Mutation((returns) => UserAnnouncement)
+  markRead(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<UserAnnouncement> {
+    return this.userAnnouncementService.markRead(id);
   }
 
   @Mutation((returns) => Announcement, { name: 'createAnnoucement' })
