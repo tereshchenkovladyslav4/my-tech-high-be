@@ -80,6 +80,8 @@ import { EventsService } from './services/event.service';
 import { ApplicationEvent } from './models/event.entity';
 import { CronJobsLog } from './models/cron-jobs-log.entity';
 import { CronJobsLogsService } from './services/cron-jobs-logs.services';
+import { ResourceService } from './services/resource.service';
+import { Resource } from './models/resource.entity';
 
 const servicesImports = [
   UsersService,
@@ -124,6 +126,7 @@ const servicesImports = [
   EnrollmentQuestionGroupService,
   EnrollmentQuestionsService,
   CronJobsLogsService,
+  ResourceService,
 ];
 
 @Global()
@@ -168,6 +171,7 @@ const servicesImports = [
       EnrollmentQuestions,
       EmailReminder,
       CronJobsLog,
+      Resource,
     ]),
   ],
   providers: [...servicesImports],

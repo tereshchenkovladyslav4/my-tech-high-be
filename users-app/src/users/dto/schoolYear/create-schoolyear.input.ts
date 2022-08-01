@@ -31,4 +31,7 @@ export class CreateSchoolYearInput {
   @Field(() => Int)
   @IsNotEmpty()
   RegionId?: number;
+
+  @Field(() => Int)
+  cloneSchoolYearId?: number;
 }

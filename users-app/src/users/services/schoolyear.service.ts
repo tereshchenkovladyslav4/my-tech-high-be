@@ -1,6 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import {
+  Repository,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  getConnection,
+} from 'typeorm';
 import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
@@ -56,6 +61,40 @@ export class SchoolYearsService {
   ): Promise<SchoolYear> {
     const data = this.schoolYearsRepository.create(createSchoolYearInput);
     const updatedRecord = await this.schoolYearsRepository.save(data);
+    if (createSchoolYearInput.cloneSchoolYearId) {
+      const newSchoolYearId = updatedRecord.school_year_id;
+
+      const queryRunner = await getConnection().createQueryRunner();
+      const resources = await queryRunner.query(
+        `SELECT
+          resource.*
+        FROM infocenter.mth_resource AS resource
+        WHERE
+          SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}`,
+      );
+      queryRunner.release();
+
+      resources.map(async (resource) => {
+        const queryRunner = await getConnection().createQueryRunner();
+        const {
+          title,
+          show_cost,
+          cost,
+          image,
+          sequence,
+          website,
+          hidden,
+          allow_request,
+        } = resource;
+        await queryRunner.query(
+          `INSERT INTO infocenter.mth_resource
+            (SchoolYearId, title, show_cost, cost, image, sequence, website, hidden, allow_request)
+          VALUES
+            (${newSchoolYearId}, "${title}", ${show_cost}, ${cost}, "${image}", ${sequence}, "${website}", ${hidden}, ${allow_request});`,
+        );
+        queryRunner.release();
+      });
+    }
     return updatedRecord;
   }
 

@@ -6,8 +6,10 @@ import {
   BaseEntity,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { ApplicationRegion } from './region.entity';
+import { Resource } from './resource.entity';
 
 @ObjectType()
 @Directive(
@@ -17,8 +19,8 @@ import { ApplicationRegion } from './region.entity';
 export class SchoolYear extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
-  @PrimaryGeneratedColumn()
-  school_year_id?: number;
+  @PrimaryGeneratedColumn({ type: 'int', name: 'school_year_id' })
+  school_year_id: number;
 
   @Column()
   @Field(() => Date, { nullable: true })
@@ -117,4 +119,8 @@ export class SchoolYear extends BaseEntity {
   @ManyToOne(() => ApplicationRegion, (region) => region.schoolYears)
   @JoinColumn([{ name: 'RegionId', referencedColumnName: 'id' }])
   region: ApplicationRegion;
+
+  @OneToMany(() => Resource, (resource) => resource.SchoolYear)
+  @Field(() => [Resource], { nullable: true })
+  Resources: Resource[];
 }
