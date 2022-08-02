@@ -6,8 +6,10 @@ import {
   BaseEntity,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Region } from './region.entity';
+import { SchoolPartner } from './school-partner.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -125,6 +127,10 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => String, { nullable: true })
   @Directive('@external')
   grades: string;
+
+  @OneToMany(() => SchoolPartner, (schoolPartner) => schoolPartner.schoolYear)
+  @Field(() => [SchoolPartner], { nullable: true })
+  SchoolPartners: SchoolPartner[];
 
   @ManyToOne(() => Region, (region) => region.SchoolYears, {
     onDelete: 'SET NULL',

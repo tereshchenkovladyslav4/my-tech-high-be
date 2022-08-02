@@ -712,18 +712,46 @@ export class EnrollmentsService {
               const reminder = remind.reminder;
               const reminderDate = new Date();
               reminderDate.setDate(reminderDate.getDate() + reminder);
-              const emails = await this.packetsService.findReminders(
+              const packets = await this.packetsService.findReminders(
                 reminderDate,
                 reminder,
                 emailTemplate.region_id,
               );
               if (emailTemplate) {
                 await Promise.all(
-                  emails.map(async (email) => {
+                  packets.map(async (packet) => {
+                    const student = packet.student.person;
+                    const parent = packet.student.parent.person;
+                    const school_year = packet.student.applications[0].school_year
+                    const email = packet.student.parent.person.email
+                    const setEmailBodyInfo = () => {
+                      const yearbegin = new Date(school_year.date_begin)
+                        .getFullYear()
+                        .toString();
+                      const yearend = new Date(school_year.date_end)
+                        .getFullYear()
+                        .toString();
+                      const emailBody = remind.body || emailTemplate.body
+                      return emailBody
+                        .toString()
+                        .replace(/\[STUDENT\]/g, student.first_name)
+                        .replace(/\[PARENT\]/g, parent.first_name)
+                        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+                        .replace(
+                          /\[APPLICATION_YEAR\]/g,
+                          `${yearbegin}-${yearend.substring(2, 4)}`,
+                        )
+                        .replace(
+                          /\[DEADLINE\]/g,
+                          `${Moment(packet.deadline).format('MM/DD/yy')}`,
+                        );
+                    };
+                    const body = setEmailBodyInfo();
+
                     await this.sesEmailService.sendEmail({
                       email: email,
                       subject: remind.subject || emailTemplate.subject,
-                      content: remind.body || emailTemplate.body,
+                      content: body,
                       bcc: emailTemplate.bcc,
                       from: emailTemplate.from,
                     });

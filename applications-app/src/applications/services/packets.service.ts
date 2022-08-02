@@ -382,13 +382,14 @@ export class PacketsService {
     date: Date,
     reminder: Number,
     region_id: Number,
-  ): Promise<string[]> {
+  ): Promise<Packet[]> {
     try {
       const toDate = new Date(date);
       toDate.setDate(date.getDate() + 1);
       const packets = await this.packetsRepository
         .createQueryBuilder('packet')
         .innerJoinAndSelect('packet.student', 'student')
+        .innerJoinAndSelect('student.person', 'stuent_person')
         .leftJoinAndSelect('student.applications', 'applications')
         .leftJoinAndSelect('applications.school_year', 'school_year')
         .leftJoinAndSelect('school_year.region', 'region')
@@ -405,9 +406,9 @@ export class PacketsService {
         //.andWhere('packet.deadline >= :startDate', { startDate: date })
         //.andWhere('packet.deadline < :toDate', { toDate: toDate })
         .getMany();
-      console.log(date, toDate, 'reminders data ---------------');
-
-      return packets.map((item) => item.student.parent.person.email);
+      console.log('reminders data ---------------', packets[0].student, packets.length);
+      
+      return packets;
     } catch (error) {
       console.log(error);
       return [];

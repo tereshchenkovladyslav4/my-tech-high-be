@@ -5,6 +5,8 @@ import { SchoolPartnerInput } from '../dto/school-partner.input';
 import { UpdateSchoolPartnerInput } from '../dto/update-school-partner.input';
 import { SchoolPartner } from '../../models/school-partner.entity';
 import { SchoolPartnerArgs } from '../dto/school-partner-args';
+import { SchoolYearsService } from './schoolyear.service';
+import { SchoolYear } from 'src/models/schoolyear.entity';
 
 
 @Injectable()
@@ -18,11 +20,19 @@ export class SchoolPartnerService {
     return this.schoolPartnerRepository.find();
   }
 
-  createSchoolPartner( 
+  async createSchoolPartner( 
     schoolPartnerInput: SchoolPartnerInput
   ): Promise<SchoolPartner> {
-    return this.schoolPartnerRepository
+
+    let schoolPartner: SchoolPartner
+
+    await this.schoolPartnerRepository
       .save(schoolPartnerInput)
+      .then(schoolPartnerData => schoolPartner =  schoolPartnerData)
+
+
+
+    return schoolPartner
   }
 
   async updateSchoolPartner( 

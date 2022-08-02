@@ -3,9 +3,6 @@ import {
   ID,
   Query,
   Resolver,
-  ResolveReference,
-  ResolveField,
-  Parent,
   Mutation,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
@@ -53,9 +50,11 @@ export class SchoolYearResolver {
   @UseGuards(new AuthGuard())
   async createSchoolYear(
     @Args('createSchoolYearInput') createSchoolYearInput: CreateSchoolYearInput,
+    @Args('previousYearId') previousYearId?: number,
   ): Promise<SchoolYear> {
     const response = this.schoolYearsService.createSchoolYear(
       createSchoolYearInput,
+      previousYearId
     );
     return response;
   }

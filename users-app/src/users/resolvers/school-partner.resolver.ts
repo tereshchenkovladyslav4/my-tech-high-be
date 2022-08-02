@@ -19,11 +19,11 @@ import { SchoolPartnerArgs } from '../dto/school-partner-args';
 
 @Resolver((of) => SchoolPartner)
 export class SchoolPartnerResolver {
-  constructor(private schoolYearsService: SchoolPartnerService) {}
+  constructor(private schoolPartnerService: SchoolPartnerService) {}
 
   @Query((returns) => [SchoolPartner])
   async getSchoolsOfEnrollment(): Promise<SchoolPartner[]> {
-    return this.schoolYearsService.findAll();
+    return this.schoolPartnerService.findAll();
   }
 
   @Query((returns) => [SchoolPartner])
@@ -32,7 +32,7 @@ export class SchoolPartnerResolver {
     ('schoolPartnerArgs') 
     schoolPartnerArgs: SchoolPartnerArgs,
   ): Promise<SchoolPartner[]> {
-    return this.schoolYearsService.findByRegion(schoolPartnerArgs);
+    return this.schoolPartnerService.findByRegion(schoolPartnerArgs);
   }
 
 	@Mutation(() => SchoolPartner, { name: 'createSchoolPartner' })
@@ -41,7 +41,7 @@ export class SchoolPartnerResolver {
     @Args('schoolPartnerInput')
     schoolPartnerInput: SchoolPartnerInput,
   ): Promise<SchoolPartner> {
-    return await this.schoolYearsService.createSchoolPartner(schoolPartnerInput)
+    return await this.schoolPartnerService.createSchoolPartner(schoolPartnerInput)
   }
 
   @Mutation(() => SchoolPartner, { name: 'updateSchoolPartner' })
@@ -52,13 +52,13 @@ export class SchoolPartnerResolver {
   ): Promise<SchoolPartner> {
 
     const { school_partner_id } = updateSchoolPartnerInput;
-    const schoolPartner = await this.schoolYearsService.findOneById(school_partner_id);
+    const schoolPartner = await this.schoolPartnerService.findOneById(school_partner_id);
 
     if (!schoolPartner) {
       throw new UnauthorizedException();
     }
 
-    return await this.schoolYearsService.updateSchoolPartner(
+    return await this.schoolPartnerService.updateSchoolPartner(
       schoolPartner,
       updateSchoolPartnerInput,
     );
@@ -72,13 +72,13 @@ export class SchoolPartnerResolver {
     schoolPartnerId: number,
   ): Promise<SchoolPartner> {
 
-    const schoolPartner = await this.schoolYearsService.findOneById(schoolPartnerId);
+    const schoolPartner = await this.schoolPartnerService.findOneById(schoolPartnerId);
 
     if (!schoolPartner) {
       throw new UnauthorizedException();
     }
 
-    return await this.schoolYearsService.toggleSchoolPartnerArchive(
+    return await this.schoolPartnerService.toggleSchoolPartnerArchive(
       schoolPartner
     );
     

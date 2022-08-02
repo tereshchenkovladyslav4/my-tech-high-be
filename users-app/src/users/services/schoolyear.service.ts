@@ -1,5 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { map } from 'lodash';
+import { SchoolPartner } from 'src/models/school-partner.entity';
 import {
   Repository,
   LessThanOrEqual,
@@ -9,11 +11,13 @@ import {
 import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
+import { SchoolPartnerService } from './school-partner.service';
 @Injectable()
 export class SchoolYearsService {
   constructor(
     @InjectRepository(SchoolYear)
     private schoolYearsRepository: Repository<SchoolYear>,
+    private schoolPartnerService: SchoolPartnerService
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -58,9 +62,30 @@ export class SchoolYearsService {
 
   async createSchoolYear(
     createSchoolYearInput: CreateSchoolYearInput,
+    previousYearId?: number
   ): Promise<SchoolYear> {
     const data = this.schoolYearsRepository.create(createSchoolYearInput);
     const updatedRecord = await this.schoolYearsRepository.save(data);
+    
+    let schoolPartnerList: SchoolPartner[] = []
+    if(previousYearId){
+      const prevYear = await this.schoolYearsRepository.findOne(previousYearId)
+      map(prevYear.SchoolPartners, async (partner) => {
+        const {
+          name,
+          abbreviation,
+          photo,
+          region_id,
+          active,
+        } = partner
+        
+        if(active) await this.schoolPartnerService.createSchoolPartner({name, abbreviation, photo, region_id, school_year_id: updatedRecord.school_year_id})
+          .then(res => schoolPartnerList.push(res))
+      })
+      updatedRecord.SchoolPartners = schoolPartnerList
+    }
+
+
     if (createSchoolYearInput.cloneSchoolYearId) {
       const newSchoolYearId = updatedRecord.school_year_id;
 
