@@ -242,7 +242,6 @@ export class EmailsService {
               AnnouncementId: announcement_id,
               user_id: user.UserId,
               status: 'Unread',
-              emailed: true,
             });
           }
         }

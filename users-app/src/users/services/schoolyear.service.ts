@@ -69,8 +69,8 @@ export class SchoolYearsService {
     
     let schoolPartnerList: SchoolPartner[] = []
     if(previousYearId){
-      const prevYear = await this.schoolYearsRepository.findOne(previousYearId)
-      map(prevYear.SchoolPartners, async (partner) => {
+      const prevYearPartners = await this.schoolPartnerService.findBySchoolYear(previousYearId)
+      map(prevYearPartners, async (partner) => {
         const {
           name,
           abbreviation,

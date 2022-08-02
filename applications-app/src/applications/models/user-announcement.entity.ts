@@ -39,10 +39,6 @@ export class UserAnnouncement extends BaseEntity {
   @UpdateDateColumn()
   updated_at?: Date;
 
-  @Field(() => Boolean, { nullable: true })
-  @Column({ nullable: true })
-  emailed?: boolean;
-
   @ManyToOne(
     () => Announcement,
     (announcement) => announcement.UserAnnouncements,

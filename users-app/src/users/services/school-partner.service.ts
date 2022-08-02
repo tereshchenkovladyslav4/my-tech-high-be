@@ -16,6 +16,10 @@ export class SchoolPartnerService {
     private schoolPartnerRepository: Repository<SchoolPartner>,
   ) {}
 
+  findBySchoolYear(school_year_id){
+    return this.schoolPartnerRepository.find({ where: {school_year_id }});
+  }
+
   findAll(): Promise<SchoolPartner[]> {
     return this.schoolPartnerRepository.find();
   }
