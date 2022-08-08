@@ -376,6 +376,7 @@ export class WithdrawalService {
           templates.id IS NOT NULL
       `);
       withdrawals.map(async (withdrawal) => {
+        const queryRunner = await getConnection().createQueryRunner();
         const {
           withdrawal_id,
           parent_email,
@@ -407,6 +408,7 @@ export class WithdrawalService {
         await queryRunner.query(
           `UPDATE infocenter.withdrawal SET response = 'undeclared', status='${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawal_id}`,
         );
+        queryRunner.release();
       });
       // To send remider email to parent by deadline
       const reminders = await queryRunner.query(`

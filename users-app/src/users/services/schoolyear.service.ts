@@ -93,7 +93,7 @@ export class SchoolYearsService {
       const resources = await queryRunner.query(
         `SELECT
           resource.*
-        FROM infocenter.mth_resource AS resource
+        FROM infocenter.mth_resource_settings AS resource
         WHERE
           SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}`,
       );
@@ -103,19 +103,26 @@ export class SchoolYearsService {
         const queryRunner = await getConnection().createQueryRunner();
         const {
           title,
-          show_cost,
-          cost,
           image,
-          sequence,
+          subtitle,
+          price,
           website,
-          hidden,
-          allow_request,
+          grades,
+          std_user_name,
+          std_password,
+          detail,
+          priority,
+          is_active,
+          resource_limit,
+          add_resource_level,
+          resource_level,
+          family_resource,
         } = resource;
         await queryRunner.query(
-          `INSERT INTO infocenter.mth_resource
-            (SchoolYearId, title, show_cost, cost, image, sequence, website, hidden, allow_request)
+          `INSERT INTO infocenter.mth_resource_settings
+            (SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, resource_level, family_resource)
           VALUES
-            (${newSchoolYearId}, "${title}", ${show_cost}, ${cost}, "${image}", ${sequence}, "${website}", ${hidden}, ${allow_request});`,
+            (${newSchoolYearId}, "${title}", "${image}", "${subtitle}", ${price}, "${website}", "${grades}", "${std_user_name}", "${std_password}", "${detail}", ${priority}, ${is_active}, ${resource_limit}, ${add_resource_level}, "${resource_level}", ${family_resource});`,
         );
         queryRunner.release();
       });
