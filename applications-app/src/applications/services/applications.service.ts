@@ -11,6 +11,7 @@ import { DeleteApplicationInput } from '../dto/delete-application.inputs';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
 import { EmailsService } from './emails.service';
 import { ApplicationEmailsService } from './application-emails.service';
+import { EmailRecordsService } from './email-records.service';
 import { ApplicationEmail } from '../models/application-email.entity';
 import { SchoolYearService } from './schoolyear.service';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
@@ -20,12 +21,13 @@ import { UpdateApplicationInput } from '../dto/update-application.inputs';
 import { EmailTemplatesService } from './email-templates.service';
 import { StudentsService } from './students.service';
 import { ResponseDTO } from '../dto/response.dto';
-import { ApplicationUserRegion } from '../models/user-region.entity';
+import { UserRegion } from '../models/user-region.entity';
 import { UserRegionService } from './user-region.service';
 import { PersonAddressService } from './person-address.service';
 import { AddressService } from './address.service';
 import * as Moment from 'moment';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
+import { concatenateTypeDefs } from 'graphql-tools';
 
 @Injectable()
 export class ApplicationsService {
@@ -42,6 +44,7 @@ export class ApplicationsService {
     private userRegionService: UserRegionService,
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
+    private emailRecordsService:EmailRecordsService,
     private addressService: AddressService,
   ) {}
 
@@ -394,7 +397,7 @@ export class ApplicationsService {
         // const deadline = new Date();
         const student = await this.studentService.findOneById(student_id);
 
-        const regions: ApplicationUserRegion[] =
+        const regions: UserRegion[] =
           await this.userRegionService.findUserRegionByUserId(
             student.parent?.person?.user_id,
           );
@@ -412,8 +415,9 @@ export class ApplicationsService {
         const deadline = new Date().setDate(
           new Date().getDate() + deadlineDays,
         );
+        
+        const UTCDeadline = new Date(deadline).toISOString();
 
-        const UTCDeadline = new Date(deadline).toISOString()
         // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
@@ -465,7 +469,7 @@ export class ApplicationsService {
               )
               .replace(
                 /\[DEADLINE\]/g,
-                `${Moment(UTCDeadline).format('MM/DD/yy')}`,
+                `${Moment.utc(UTCDeadline).format('MM/DD/yy')}`,
               );
           };
 
@@ -480,6 +484,8 @@ export class ApplicationsService {
             content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
+            region_id: region_id,
+            template_name: 'Application Accepted',
           });
         }
         return application;
@@ -543,11 +549,13 @@ export class ApplicationsService {
       );
       const emailBody = setEmailBodyInfo(item.student, school_year);
       const result = await this.sesEmailService.sendEmail({
-        email: item.student.parent.person.email,
-        subject,
+        email: item.student.parent.person.email,        
+        subject: subject,
         content: emailBody,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
+        region_id: 1,
+        template_name: 'Application Page'
       });
     });
     const applicationEmails = Promise.all(

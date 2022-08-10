@@ -168,7 +168,7 @@ export class PacketsService {
       if (total < (skip || 0) + take) {
         result = results.slice(skip || 0, results.length);
       } else {
-        result = results.slice(skip || 0, take);
+        result = results.slice(skip || 0, take + (skip || 0));
       }
     }
     return new Pagination<Packet>({
@@ -302,6 +302,8 @@ export class PacketsService {
         content: emailData.body,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
+        region_id: 1,
+        template_name: 'Enrollment Packet Page',
       });
     });
     const packetEmails = Promise.all(

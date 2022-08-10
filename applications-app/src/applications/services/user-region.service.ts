@@ -1,4 +1,4 @@
-import { ApplicationUserRegion } from '../models/user-region.entity';
+import { UserRegion } from '../models/user-region.entity';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
@@ -8,11 +8,11 @@ import { getConnection, QueryRunner } from 'typeorm';
 @Injectable()
 export class UserRegionService {
   constructor(
-    @InjectRepository(ApplicationUserRegion)
-    private readonly userRegionRepository: Repository<ApplicationUserRegion>,
+    @InjectRepository(UserRegion)
+    private readonly userRegionRepository: Repository<UserRegion>,
   ) {}
 
-  async userRegionByRegionId(region_id: number): Promise<ApplicationUserRegion[]> {
+  async userRegionByRegionId(region_id: number): Promise<UserRegion[]> {
     return await this.userRegionRepository.find({
       where: {
         region_id: region_id,
@@ -21,7 +21,7 @@ export class UserRegionService {
     });
   }
 
-  async findUserRegionByUserId(user_id: number): Promise<ApplicationUserRegion[]> {
+  async findUserRegionByUserId(user_id: number): Promise<UserRegion[]> {
     return await this.userRegionRepository.find({
       where: {
         user_id: user_id,
@@ -30,7 +30,7 @@ export class UserRegionService {
     });
   }
 
-  async getAllUserRegions(): Promise<ApplicationUserRegion[]> {
+  async getAllUserRegions(): Promise<UserRegion[]> {
     return await this.userRegionRepository.find({
       relations: ['regionDetail', 'user'],
     });
@@ -38,7 +38,7 @@ export class UserRegionService {
 
   async createUserRegion(
     createUserRegionInput: CreateUserRegionInput,
-  ): Promise<ApplicationUserRegion[]> {
+  ): Promise<UserRegion[]> {
     try {
       await Promise.all(
         createUserRegionInput.region_id.map(async (id) => {
@@ -63,7 +63,7 @@ export class UserRegionService {
     let deleteCount = 0;
     await Promise.all(
       records.map(async (_) => {
-        const deletedRecord = await queryRunner.manager.delete(ApplicationUserRegion, {
+        const deletedRecord = await queryRunner.manager.delete(UserRegion, {
           user_id: id,
         });
         deleteCount += deletedRecord.affected;
@@ -75,7 +75,7 @@ export class UserRegionService {
 
   async updateUserRegion(
     updateUserRegionInput: UpdateUserRegionInput,
-  ): Promise<ApplicationUserRegion[]> {
+  ): Promise<UserRegion[]> {
     try {
       await this.removeUserRecords(
         updateUserRegionInput.region_id,

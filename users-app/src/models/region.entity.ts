@@ -17,7 +17,7 @@ import { SchoolDistrict } from './school-district.entity';
 import { EmailTemplate } from './email-template.entity';
 
 @ObjectType()
-@Directive('@key(fields: "id,name, program")')
+@Directive('@key(fields: "id,name, program, enrollment_packet_deadline_num_days, region")')
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()

@@ -10,7 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ApplicationEvent } from './event.entity';
-import { ApplicationRegion } from './region.entity';
+import { Region } from './region.entity';
 
 @ObjectType()
 @Entity('mth_event_type')
@@ -51,11 +51,11 @@ export class EventType extends BaseEntity {
   @Field(() => [ApplicationEvent], { nullable: true })
   Events: ApplicationEvent[];
 
-  @ManyToOne(() => ApplicationRegion, (region) => region.EventTypes, {
+  @ManyToOne(() => Region, (region) => region.EventTypes, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'RegionId', referencedColumnName: 'id' })
-  @Field(() => ApplicationRegion, { nullable: true })
-  Region: ApplicationRegion;
+  @Field(() => Region, { nullable: true })
+  Region: Region;
 }

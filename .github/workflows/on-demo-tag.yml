@@ -1,0 +1,59 @@
+name: Deploy To Demo
+
+on:
+  push:
+    tags:
+      - demo
+
+jobs:
+  generate-tag:
+    name: Generate Tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.tag_name.outputs.tag_name }}
+    steps:
+      - name: Generate Tag Name
+        id: tag_name
+        run: echo "::set-output name=tag_name::$(date --rfc-3339=date)_${GITHUB_SHA::7}"
+
+  build:
+    name: Build Docker Containers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker Images
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:applications-app ./applications-app/
+          docker build -t $REGISTRY/$REPOSITORY:authentication ./authentication/
+          docker build -t $REGISTRY/$REPOSITORY:gateway ./gateway/
+          docker build -t $REGISTRY/$REPOSITORY:media-app ./media-app/
+          docker build -t $REGISTRY/$REPOSITORY:students-app ./students-app/
+          docker build -t $REGISTRY/$REPOSITORY:users-app ./users-app/
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: infocenter-v2-be
+
+      - name: Push Docker Images
+        run: |
+          docker push $REGISTRY/$REPOSITORY:applications-app
+          docker push $REGISTRY/$REPOSITORY:authentication
+          docker push $REGISTRY/$REPOSITORY:gateway
+          docker push $REGISTRY/$REPOSITORY:media-app
+          docker push $REGISTRY/$REPOSITORY:students-app
+          docker push $REGISTRY/$REPOSITORY:users-app
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: infocenter-v2-be

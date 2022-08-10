@@ -8,12 +8,13 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { ApplicationRegion } from './region.entity';
+import { Region } from './region.entity';
 import { Resource } from './resource.entity';
+import { SchoolPartner } from './school-partner.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -78,9 +79,11 @@ export class SchoolYear extends BaseEntity {
   application_close: Date;
 
   @Column()
+  @Field(() => Date, { nullable: true })
   midyear_application_open: Date;
 
   @Column()
+  @Field(() => Date, { nullable: true })
   midyear_application_close: Date;
 
   @Column()
@@ -90,6 +93,7 @@ export class SchoolYear extends BaseEntity {
   re_enroll_notification?: number;
 
   @Column()
+  @Field(() => Int, { nullable: true })
   midyear_application?: number;
 
   @Column('int', { name: 'RegionId', nullable: true })
@@ -116,11 +120,15 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => String, { nullable: true })
   grades: string;
 
-  @ManyToOne(() => ApplicationRegion, (region) => region.schoolYears)
+  @ManyToOne(() => Region, (region) => region.schoolYears)
   @JoinColumn([{ name: 'RegionId', referencedColumnName: 'id' }])
-  region: ApplicationRegion;
+  region: Region;
 
   @OneToMany(() => Resource, (resource) => resource.SchoolYear)
   @Field(() => [Resource], { nullable: true })
   Resources: Resource[];
+
+  @OneToMany(() => SchoolPartner, (schoolPartner) => schoolPartner.schoolYear)
+  @Field(() => [SchoolPartner], { nullable: true })
+  SchoolPartners: SchoolPartner[];
 }

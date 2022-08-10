@@ -37,6 +37,8 @@ import { SchoolDistrictService } from './services/schoolDistrict.service';
 import { SchoolDistrict } from 'src/models/school-district.entity';
 import { CountyService } from './services/county.service';
 import { QuestionService } from './services/question.service';
+import { EmailRecordsService } from './services/email-records.service';
+import { EmailRecord } from 'src/models/email-record.entity';
 import { Question } from 'src/models/question.entity';
 import { County } from 'src/models/county.entity';
 import { SchoolPartnerService } from './services/school-partner.service';
@@ -61,7 +63,8 @@ const RepoServices = [
   QuickLinkService,
   QuestionService,
   CountyService,
-  SchoolPartnerService
+  SchoolPartnerService,
+  EmailRecordsService
 ];
 
 @Global()
@@ -92,7 +95,8 @@ const RepoServices = [
       Question,
       SchoolDistrict,
       County,
-      SchoolPartner
+      SchoolPartner,
+      EmailRecord
     ]),
   ],
   providers: RepoServices,

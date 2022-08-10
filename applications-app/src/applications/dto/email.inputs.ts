@@ -18,4 +18,10 @@ export class EmailInput {
 
   @Field(() => String, { nullable: true })
   bcc?: string;
+
+  @Field(() => String, { nullable: true })
+  template_name?: string;
+
+  @Field(() => Int, { nullable: true, defaultValue: 1 })
+  region_id?: number;
 }

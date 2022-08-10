@@ -10,33 +10,43 @@ import {
 } from 'typeorm';
 import { Announcement } from './announcement.entity';
 import { EventType } from './event-type.entity';
-import { ApplicationUserRegion } from './user-region.entity';
+import { UserRegion } from './user-region.entity';
 import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
-@Directive('@key(fields: "id")')
+@Directive('@extends')
+@Directive('@key(fields: "id, name, program, enrollment_packet_deadline_num_days, region")')
 @Entity({ name: 'region' })
-export class ApplicationRegion extends BaseEntity {
+export class Region extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
+  @Directive('@external')
   id: number;
 
   @Column()
   @Field((type) => String, { nullable: true })
+  @Directive('@external')
   name: string;
 
   @Column()
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  program: String;
+
+  @Column()
   @Field((type) => Int, { nullable: true })
+  @Directive('@external')
   enrollment_packet_deadline_num_days: number;
 
   @ManyToOne(
-    () => ApplicationUserRegion,
+    () => UserRegion,
     (userRegion) => userRegion.regionDetail,
   )
-  @Field(() => ApplicationUserRegion, { nullable: true })
+  @Field(() => UserRegion, { nullable: true })
   @JoinColumn({ name: 'id', referencedColumnName: 'region_id' })
-  region: ApplicationUserRegion;
+  @Directive('@external')
+  region: UserRegion;
 
   @OneToMany(() => Announcement, (announcement) => announcement.Region)
   @Field(() => [Announcement], { nullable: true })

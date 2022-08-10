@@ -37,7 +37,7 @@ import { PersonAddress } from './models/person-address.entity';
 import { EmailTemplatesService } from './services/email-templates.service';
 import { EmailsService } from './services/emails.service';
 import { EmailReminderService } from './services/email-reminder.service';
-import { ApplicationUserRegion } from './models/user-region.entity';
+import { UserRegion } from './models/user-region.entity';
 import { UserRegionService } from './services/user-region.service';
 import { EnrollmentPacketSubmitInput } from './dto/enrollment-packet-submit.input';
 
@@ -163,7 +163,7 @@ export class EnrollmentsService {
           tmp.student_id,
         );
 
-        const regions: ApplicationUserRegion[] =
+        const regions: UserRegion[] =
           await this.userRegionService.findUserRegionByUserId(
             studentPerson.parent?.person?.user_id,
           );
@@ -213,6 +213,8 @@ export class EnrollmentsService {
             content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
+            region_id: region_id,
+            template_name: templates[status]
           });
         }
       }
@@ -720,6 +722,7 @@ export class EnrollmentsService {
               if (emailTemplate) {
                 await Promise.all(
                   packets.map(async (packet) => {
+                    const webAppUrl = process.env.WEB_APP_URL;
                     const student = packet.student.person;
                     const parent = packet.student.parent.person;
                     const school_year = packet.student.applications[0].school_year
@@ -744,6 +747,10 @@ export class EnrollmentsService {
                         .replace(
                           /\[DEADLINE\]/g,
                           `${Moment(packet.deadline).format('MM/DD/yy')}`,
+                        )
+                        .replace(
+                          /\[LINK\]/g,
+                          `<p><a href="${webAppUrl}/homeroom/enrollment/${packet.student.student_id}</a><br></p>`,
                         );
                     };
                     const body = setEmailBodyInfo();
@@ -754,6 +761,8 @@ export class EnrollmentsService {
                       content: body,
                       bcc: emailTemplate.bcc,
                       from: emailTemplate.from,
+                      region_id: 1,
+                      template_name: 'Packet Reminders',
                     });
                   }),
                 );

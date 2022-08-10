@@ -27,8 +27,8 @@ import { StudentImmunizationResolver } from './resolvers/student-immunization.re
 import { StudentImmunization } from './models/student-immunization.entity';
 import { Settings } from './models/settings.entity';
 import { SettingsResolver } from './resolvers/settings.resolver';
-import { ApplicationRegion } from './models/region.entity';
-import { ApplicationUserRegion } from './models/user-region.entity';
+import { Region } from './models/region.entity';
+import { UserRegion } from './models/user-region.entity';
 import { ApplicationEmailTemplate } from './models/email-template.entity';
 import { ApplicationQuestionsResolver } from './resolvers/application-questions.resolver';
 import { EnrollmentQuestionTabResolver } from './resolvers/enrollment-question-tab.resolver';
@@ -44,7 +44,9 @@ import { EventTypesResolver } from './resolvers/event-types.resolver';
 import { WithdrawalResolver } from './resolvers/withdrawal.resolver';
 import { EventsResolver } from './resolvers/event.resolver';
 import { ResourceResolver } from './resolvers/resource.resolver';
+import { EmailRecordResolver } from './resolvers/email-records.resolver';
 import { Resource } from './models/resource.entity';
+import { EmailRecord } from './models/email-record.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -63,6 +65,7 @@ const graphQLImports = [
   EnrollmentQuestionGroupResolver,
   WithdrawalResolver,
   ResourceResolver,
+  EmailRecordResolver,
 ];
 @Module({
   imports: [
@@ -93,14 +96,15 @@ const graphQLImports = [
           Observer,
           StudentImmunization,
           Settings,
-          ApplicationRegion,
-          ApplicationUserRegion,
+          Region,
+          UserRegion,
           ApplicationEmailTemplate,
           ApplicationQuestion,
           EnrollmentQuestionTab,
           EnrollmentQuestionGroup,
           EnrollmentQuestions,
           Resource,
+          EmailRecord,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

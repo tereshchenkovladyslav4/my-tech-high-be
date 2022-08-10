@@ -5,6 +5,7 @@ import { EmailTemplatesService } from './email-templates/email-templates.service
 import { UserRegionService } from './region/user-region.service';
 import { UserRegion } from 'src/models/user-region.entity';
 import { User } from 'src/models/user.entity';
+import { EmailRecordsService } from './email-records.service';
 import { getConnection } from 'typeorm';
 
 var base64 = require('base-64');
@@ -14,6 +15,7 @@ export class EmailsService {
     private SESService: SESService,
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
+    private emailRecordsService:EmailRecordsService,
   ) {}
 
   async sendAccountVerificationEmail(
@@ -57,13 +59,29 @@ export class EmailsService {
       );
       subject = template.subject;
     }
-    return this.SESService.sendEmail(
+    const result = await this.SESService.sendEmail(
       recipientEmail,
       subject,
       content,
       template?.bcc,
       template?.from,
     );
+
+    const email_status = (result == false ? 'Sent' : 'Error');
+
+    // Add Email Records
+    await this.emailRecordsService.create({
+      subject: subject,
+      body: content,
+      to_email: recipientEmail,
+      from_email: template?.from,
+      template_name: 'Email Verification',
+      bcc: template?.bcc,
+      status: email_status,
+      region_id: region_id
+    });
+
+    return result;
   }
 
   async sendEmailUpdateVerificationEmail(
@@ -106,13 +124,29 @@ export class EmailsService {
       subject = template.subject;
     }
 
-    return this.SESService.sendEmail(
+    const result = await this.SESService.sendEmail(
       recipientEmail,
       subject,
       content,
       template?.bcc,
       template?.from,
     );
+    
+    const email_status = (result == false ? 'Sent' : 'Error');
+
+    // Add Email Records
+    await this.emailRecordsService.create({
+      subject: subject,
+      body: content,
+      to_email: recipientEmail,
+      from_email: template?.from,
+      template_name: 'Email Changed',
+      bcc: template?.bcc,
+      status: email_status,
+      region_id: region_id
+    });
+
+    return result;
   }
 
   encrypt(emailVerifier: EmailVerifier) {

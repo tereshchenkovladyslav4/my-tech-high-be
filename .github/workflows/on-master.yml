@@ -1,0 +1,28 @@
+name: On Push to Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create-tag:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.tag_name.outputs.tag_name }}
+    steps:
+      - name: Generate Tag Name
+        id: tag_name
+        run: echo "::set-output name=tag_name::$(date --rfc-3339=date)_${GITHUB_SHA::7}"
+
+      - name: Create Tag
+        uses: actions/github-script@master
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.tag_name.outputs.tag_name }}',
+              sha: context.sha
+            })

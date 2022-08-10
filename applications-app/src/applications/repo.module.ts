@@ -50,8 +50,8 @@ import { StudentImmunization } from './models/student-immunization.entity';
 import { StudentStatusService } from './services/student-status.service';
 import { Settings } from './models/settings.entity';
 import { SettingsService } from './services/settings.service';
-import { ApplicationRegion } from './models/region.entity';
-import { ApplicationUserRegion } from './models/user-region.entity';
+import { Region } from './models/region.entity';
+import { UserRegion } from './models/user-region.entity';
 import { UserRegionService } from './services/user-region.service';
 import { EmailTemplatesService } from './services/email-templates.service';
 import { ApplicationEmailTemplate } from './models/email-template.entity';
@@ -64,6 +64,7 @@ import { EnrollmentQuestions } from './models/enrollment-questions.entity';
 import { EnrollmentQuestionGroupService } from './services/enrollment-question-group.service';
 import { EnrollmentQuestionsService } from './services/enrollment-questions.service';
 import { EmailReminderService } from './services/email-reminder.service';
+import { EmailRecordsService } from './services/email-records.service';
 import { EmailReminder } from './models/email-reminder.entity';
 import { WithdrawalService } from './services/withdrawal.service';
 import { Withdrawal } from './models/withdrawal.entity';
@@ -82,6 +83,7 @@ import { CronJobsLog } from './models/cron-jobs-log.entity';
 import { CronJobsLogsService } from './services/cron-jobs-logs.services';
 import { ResourceService } from './services/resource.service';
 import { Resource } from './models/resource.entity';
+import { EmailRecord } from './models/email-record.entity';
 
 const servicesImports = [
   UsersService,
@@ -127,6 +129,7 @@ const servicesImports = [
   EnrollmentQuestionsService,
   CronJobsLogsService,
   ResourceService,
+  EmailRecordsService,
 ];
 
 @Global()
@@ -162,8 +165,8 @@ const servicesImports = [
       Observer,
       StudentImmunization,
       Settings,
-      ApplicationRegion,
-      ApplicationUserRegion,
+      Region,
+      UserRegion,
       ApplicationEmailTemplate,
       ApplicationQuestion,
       EnrollmentQuestionTab,
@@ -172,6 +175,7 @@ const servicesImports = [
       EmailReminder,
       CronJobsLog,
       Resource,
+      EmailRecord,
     ]),
   ],
   providers: [...servicesImports],

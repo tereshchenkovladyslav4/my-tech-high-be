@@ -5,18 +5,21 @@ import { SESService } from './ses.service'
 import { EmailVerifier } from 'src/users/models/email-verifier.entity'
 import { EmailTemplatesService } from './email-templates.service'
 import { UserRegionService } from './user-region.service'
+import { EmailRecordsService } from './email-records.service'
 import { UserRegion } from './../models/user-region.entity'
 import { User } from '../models/user.entity'
 
 var base64 = require('base-64')
 import * as Moment from 'moment'
 
+
 @Injectable()
 export class EmailsService {
   constructor(
     private SESService: SESService,
     private emailTemplateService: EmailTemplatesService,
-    private userRegionService: UserRegionService
+    private userRegionService: UserRegionService,
+    private emailRecordsService: EmailRecordsService,
   ) {}
 
   async sendAccountResetPasswordEmail(
@@ -59,13 +62,29 @@ export class EmailsService {
       )
       subject = template.subject
     }
-    return this.SESService.sendEmail(
+    const result = await this.SESService.sendEmail(
       recipientEmail,
       subject,
       content,
       template?.bcc,
       template?.from
     )
+
+    const email_status = (result == false ? 'Sent' : 'Error');
+
+    // Add Email Records
+    await this.emailRecordsService.create({
+      subject: subject,
+      body: content,
+      to_email: recipientEmail,
+      from_email: template?.from,
+      template_name: 'Forgot Password',
+      bcc: template?.bcc,
+      status: email_status,
+      region_id: region_id
+    });
+
+    return result;
   }
 
   async sendAccountVerificationEmail(
@@ -103,13 +122,29 @@ export class EmailsService {
         '">Click here</a><br></p>'
       subject = template.subject
     }
-    return this.SESService.sendEmail(
+    const result = await this.SESService.sendEmail(
       recipientEmail,
       subject,
       content,
       template.bcc,
       template.from
     )
+
+    const email_status = (result == false ? 'Sent' : 'Error');
+
+    // Add Email Records
+    await this.emailRecordsService.create({
+      subject: subject,
+      body: content,
+      to_email: recipientEmail,
+      from_email: template?.from,
+      template_name: 'Email Verification',
+      bcc: template?.bcc,
+      status: email_status,
+      region_id: 1
+    });
+
+    return result;
   }
 
   async sendEmailUpdateVerificationEmail(
@@ -149,13 +184,29 @@ export class EmailsService {
 
       subject = template.subject
     }
-    return this.SESService.sendEmail(
+    const result = await this.SESService.sendEmail(
       recipientEmail,
       subject,
       content,
       template?.bcc,
       template?.from
     )
+
+    const email_status = (result == false ? 'Sent' : 'Error');
+
+    // Add Email Records
+    await this.emailRecordsService.create({
+      subject: subject,
+      body: content,
+      to_email: recipientEmail,
+      from_email: template?.from,
+      template_name: 'Email Verification',
+      bcc: template?.bcc,
+      status: email_status,
+      region_id: region_id
+    });
+
+    return result;
   }
 
   encryptEmailVerifier(emailVerifier: EmailVerifier) {

@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Announcement } from './announcement.entity';
-import { ApplicationUserRegion } from './user-region.entity';
+import { UserRegion } from './user-region.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "user_id, email")')
@@ -45,8 +45,8 @@ export class User extends BaseEntity {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @OneToMany(() => ApplicationUserRegion, (userRegion) => userRegion.user)
+  @OneToMany(() => UserRegion, (userRegion) => userRegion.user)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
-  // @Field(() => [ApplicationUserRegion], { nullable: true })
-  userRegions?: ApplicationUserRegion[];
+  // @Field(() => [UserRegion], { nullable: true })
+  userRegions?: UserRegion[];
 }

@@ -14,7 +14,7 @@ import { SchoolPartner } from './school-partner.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id , date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -84,9 +84,13 @@ export class SchoolYear extends BaseEntity {
   application_close: Date;
 
   @Column()
+  @Field(() => Date, { nullable: true })
+  @Directive('@external')
   midyear_application_open: Date;
 
   @Column()
+  @Field(() => Date, { nullable: true })
+  @Directive('@external')
   midyear_application_close: Date;
 
   @Column()
@@ -96,6 +100,8 @@ export class SchoolYear extends BaseEntity {
   re_enroll_notification?: number;
 
   @Column()
+  @Field(() => Int, { nullable: true })
+  @Directive('@external')
   midyear_application?: number;
 
   @Column('int', { name: 'RegionId', nullable: true })
@@ -130,6 +136,7 @@ export class SchoolYear extends BaseEntity {
 
   @OneToMany(() => SchoolPartner, (schoolPartner) => schoolPartner.schoolYear)
   @Field(() => [SchoolPartner], { nullable: true })
+  @Directive('@external')
   SchoolPartners: SchoolPartner[];
 
   @ManyToOne(() => Region, (region) => region.SchoolYears, {

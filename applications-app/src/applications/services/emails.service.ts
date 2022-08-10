@@ -10,7 +10,7 @@ import { EmailVerifier } from '../models/email-verifier.entity';
 import { ResponseDTO } from '../dto/response.dto';
 import { EmailTemplatesService } from './email-templates.service';
 import { UserRegionService } from './user-region.service';
-import { ApplicationUserRegion } from '../models/user-region.entity';
+import { UserRegion } from '../models/user-region.entity';
 import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { UserAnnouncementsService } from './user-announcements.service';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
@@ -19,13 +19,14 @@ import { StudentsService } from './students.service';
 import { UsersService } from './users.service';
 import { SchoolYearService } from './schoolyear.service';
 import { UserAnnouncement } from '../models/user-announcement.entity';
+import { EmailRecordsService } from './email-records.service';
 
 var base64 = require('base-64');
 @Injectable()
 export class EmailsService {
   constructor(
     private coreSettingsService: CoreSettingsService,
-    private SESService: SESService,
+    private SESService: SESService,    
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
     private userAnnouncementService: UserAnnouncementsService,
@@ -34,6 +35,7 @@ export class EmailsService {
     private personsService: PersonsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearService,
+    private emailRecordsService: EmailRecordsService,
   ) {}
 
   async sendAccountVerificationEmail(
@@ -45,7 +47,7 @@ export class EmailsService {
     let settings = [];
     const webAppUrl = process.env.WEB_APP_URL;
 
-    const regions: ApplicationUserRegion[] =
+    const regions: UserRegion[] =
       await this.userRegionService.findUserRegionByUserId(
         emailVerifier.user_id,
       );
@@ -97,13 +99,29 @@ export class EmailsService {
       }
     }
 
-    return this.SESService.sendEmail(
+    const result =  await this.SESService.sendEmail(
       recipientEmail,
       emailTemplate?.subject,
       content,
       emailTemplate?.bcc,
       emailTemplate?.from,
     );
+
+    const email_status = (result == false ? 'Sent' : 'Error');
+
+    // Add Email Records
+    await this.emailRecordsService.create({
+      subject: emailTemplate?.subject,
+      body: content,
+      to_email: recipientEmail,
+      from_email: emailTemplate?.from,
+      template_name: 'Email Verification',
+      bcc: emailTemplate?.bcc,
+      status: email_status,
+      region_id: region_id
+    });
+
+    return result;
   }
 
   async sendAnnouncementEmail(announcementEmail: AnnouncementEmailArgs) {
@@ -115,7 +133,7 @@ export class EmailsService {
       RegionId,
       filter_grades,
       filter_users,
-      
+
     } = announcementEmail;
 
     const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
@@ -216,28 +234,29 @@ export class EmailsService {
       queryRunner.release();
       users.map(async (user) => {
         if (user.UserId) {
-          const currUserAnnouncement = await this.userAnnouncementService.findById({
-            announcementId: announcement_id,
-            userId: user.UserId,
-          })
-          if(currUserAnnouncement){
+          const currUserAnnouncement =
+            await this.userAnnouncementService.findById({
+              announcementId: announcement_id,
+              userId: user.UserId,
+            });
+          if (currUserAnnouncement) {
             await this.userAnnouncementService.save({
               AnnouncementId: announcement_id,
               user_id: user.UserId,
               status: 'Unread',
-              id: currUserAnnouncement.id
+              id: currUserAnnouncement.id,
             });
-          }else {
-              try {
-                await this.sendEmail({
-                  email: user.email,
-                  subject,
-                  content: body,
-                  from: sender,
-                });
-              } catch (error) {
-                console.log(error, 'Email Error');
-              }
+          } else {
+            try {
+              await this.sendEmail({
+                email: user.email,
+                subject,
+                content: body,
+                from: sender,
+              });
+            } catch (error) {
+              console.log(error, 'Email Error');
+            }
             await this.userAnnouncementService.save({
               AnnouncementId: announcement_id,
               user_id: user.UserId,
@@ -250,13 +269,33 @@ export class EmailsService {
   }
 
   async sendEmail(emailInput: EmailInput): Promise<ResponseDTO> {
-    const { email, subject, content, bcc, from } = emailInput;
+    const { email, subject, content, bcc, from, template_name, region_id } = emailInput;
 
-    this.SESService.sendEmail(email, subject, content, bcc, from);
+    const result = await this.SESService.sendEmail(
+      email,
+      subject,
+      content,
+      bcc,
+      from,
+    );
+
+    const email_status = (result == false ? 'Sent' : 'Error');
+
+    // Add Email Records
+    await this.emailRecordsService.create({
+      subject: subject,
+      body: content,
+      to_email: email,
+      from_email: from,
+      template_name: template_name,
+      bcc: bcc,
+      status: email_status,
+      region_id: region_id
+    });
 
     return <ResponseDTO>{
-      error: false,
-      message: 'Email Send Successfully',
+      error: result,
+      message: result == false ? 'Email Send Successfully' : 'Unexpected Error Occured',
     };
   }
 

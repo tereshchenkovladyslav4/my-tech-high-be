@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Announcement } from './announcement.entity';
-import { ApplicationRegion } from './region.entity';
+import { Region } from './region.entity';
 import { User } from './user.entity';
 
 @ObjectType()

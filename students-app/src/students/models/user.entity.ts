@@ -5,8 +5,10 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Student } from './student.entity';
+import { UserRegion } from './user-region.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -44,4 +46,8 @@ export class User extends BaseEntity {
 
   @UpdateDateColumn()
   updated_at!: Date;
+
+  @OneToMany(() => UserRegion, (userRegion) => userRegion.user)
+  // @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
+  userRegion?: UserRegion[];
 }

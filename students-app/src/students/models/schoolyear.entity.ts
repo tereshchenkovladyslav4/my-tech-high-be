@@ -1,10 +1,11 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from 'typeorm';
+import { SchoolPartner } from './school-partner.entity';
 
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id ,date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -88,10 +89,12 @@ export class SchoolYear extends BaseEntity {
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   midyear_application_open: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
+  @Directive('@external')
   midyear_application_close: Date;
 
   @Column()
@@ -104,6 +107,7 @@ export class SchoolYear extends BaseEntity {
 
   @Column()
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   midyear_application?: number;
 
   @Column('int', { name: 'RegionId', nullable: true })
@@ -135,4 +139,9 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => String, { nullable: true })
   @Directive('@external')
   grades: string;
+
+  @OneToMany(() => SchoolPartner, (schoolPartner) => schoolPartner.schoolYear)
+  @Field(() => [SchoolPartner], { nullable: true })
+  @Directive('@external')
+  SchoolPartners: SchoolPartner[];
 }

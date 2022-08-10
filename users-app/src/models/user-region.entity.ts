@@ -13,7 +13,7 @@ import { Region } from './region.entity';
 import { User } from './user.entity';
 
 @ObjectType()
-@Directive('@key(fields: "id,region_id,user_id")')
+@Directive('@key(fields: "id,region_id,user_id, regionDetail, user")')
 @Entity({ name: 'user_region' })
 export class UserRegion extends BaseEntity {
   @Column()

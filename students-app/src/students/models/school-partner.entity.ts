@@ -4,6 +4,7 @@ import { Region } from './region.entity';
 import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
+@Directive('@extends')
 @Directive(
   '@key(fields: "school_partner_id , name, abbreviation, photo, active, region_id, region, schoolYear, school_year_id")',
 )
@@ -12,34 +13,42 @@ export class SchoolPartner extends BaseEntity {
   @Column()
   @Field(() => ID)
   @PrimaryGeneratedColumn()
+  @Directive('@external')
   school_partner_id: number;
 
   @Column()
   @Field(() => String)
+  @Directive('@external')
   name: string;
 
   @Column()
 	@Field(() => String)
+  @Directive('@external')
   abbreviation: string;
 
 	@Column()
 	@Field(() => String, {nullable: true})
+  @Directive('@external')
   photo?: string;
 
   @Column()
 	@Field(() => Number)
+  @Directive('@external')
   active: number;
 
   @Column()
   @Field((type) => Int, { nullable: true })
+  @Directive('@external')
   region_id: number;
 
   @Column()
   @Field((type) => Int, { nullable: true })
+  @Directive('@external')
   school_year_id: number;
 
   @OneToOne(() => Region, (region) => region.id)
   @Field(() => Region, { nullable: true })
+  @Directive('@external')
   @JoinColumn({ name: 'region_id', referencedColumnName: 'id' })
   region: Region;
 
@@ -49,5 +58,6 @@ export class SchoolPartner extends BaseEntity {
   })
   @JoinColumn({ name: 'school_year_id', referencedColumnName: 'school_year_id' })
   @Field(() => SchoolYear, { nullable: true })
+  @Directive('@external')
   schoolYear: SchoolYear;
 }

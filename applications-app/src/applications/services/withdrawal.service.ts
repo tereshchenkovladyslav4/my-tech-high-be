@@ -12,7 +12,7 @@ import { ReinstateWithdrawalInput } from '../dto/reinstate-withdrawal.inputs';
 import { ResponseDTO } from '../dto/response.dto';
 import { WithdrawalStudentInfo } from '../dto/student-info-by-withdrawalId.dto';
 import { UpdateWithdrawalInput } from '../dto/withdrawal-update.inputs.';
-import { ApplicationUserRegion } from '../models/user-region.entity';
+import { UserRegion } from '../models/user-region.entity';
 import { WithdrawalEmail } from '../models/withdrawal-email.entity';
 import { Withdrawal, WITHDRAWAL_TABLE_NAME } from '../models/withdrawal.entity';
 import { EmailReminderService } from './email-reminder.service';
@@ -71,7 +71,7 @@ export class WithdrawalService {
           student.student_id,
         );
 
-        const regions: ApplicationUserRegion[] =
+        const regions: UserRegion[] =
           await this.userRegionService.findUserRegionByUserId(
             student.parent?.person?.user_id,
           );
@@ -132,7 +132,10 @@ export class WithdrawalService {
             content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
+            region_id: region_id,
+            template_name: 'Notify of Withdraw',
           });
+
           if (withdrawalResponse?.withdrawal_id) {
             await this.withdrawalEmailService.create({
               withdrawal_id: withdrawalResponse?.withdrawal_id,
@@ -526,6 +529,8 @@ export class WithdrawalService {
         content: emailData.body,
         from: from || emailTemplate.from,
         bcc: emailTemplate.bcc,
+        region_id: region_id,
+        template_name: 'Withdraw Page',
       });
     });
     const withdrawalEmails = Promise.all(
@@ -698,6 +703,8 @@ export class WithdrawalService {
           content: emailData.body,
           from: emailTemplate.from,
           bcc: emailTemplate.bcc,
+          region_id: region_id,
+          template_name: 'Withdraw Page',
         });
       });
       Promise.all(

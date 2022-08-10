@@ -14,7 +14,7 @@ import { User } from './user.entity'
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "id,region_id,user_id")')
+@Directive('@key(fields: "id,region_id,user_id, regionDetail, user")')
 @Entity({ name: 'user_region' })
 export class UserRegion extends BaseEntity {
   @Column()
@@ -34,12 +34,16 @@ export class UserRegion extends BaseEntity {
   user_id: number
 
   @ManyToOne(() => Region, (region) => region.region, { onDelete: 'CASCADE' })
+  @Field(() => Region, { nullable: true })
   @JoinColumn({ name: 'region_id' })
-  regionDetail: Region
+  @Directive('@external')
+  regionDetail: Region;
 
   @ManyToOne(() => User, (user) => user.userRegion, { onDelete: 'CASCADE' })
+  @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'user_id' })
-  user: User
+  @Directive('@external')
+  user: User;
 
   @CreateDateColumn()
   created_at!: Date

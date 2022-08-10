@@ -29,11 +29,12 @@ import { UserRegionService } from './services/user-region.service';
 import { EmailTemplatesService } from '../applications/services/email-templates.service';
 import { Application } from './models/application.entity';
 import { StudentStatusService } from './services/student-status.service';
-import { ApplicationUserRegion } from './models/user-region.entity';
+import { UserRegion } from './models/user-region.entity';
 import { SchoolYearService } from './services/schoolyear.service';
 import { NewParentPacketContactInput } from './dto/new-parent-packet-contact.inputs';
 import { CreateAddressInput } from './dto/new-address.inputs';
 import { PersonAddressService } from './services/person-address.service';
+import { EmailRecordsService } from './services/email-records.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -53,6 +54,7 @@ export class ApplicationsService {
     private emailTemplateService: EmailTemplatesService,
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
+    private emailRecordsService: EmailRecordsService,
   ) {}
 
   protected user: User;
@@ -174,12 +176,14 @@ export class ApplicationsService {
           );
 
           emailBody = setEmailBodyInfo(school_year, student);
-          await this.emailsService.sendEmail({
+          const result = await this.emailsService.sendEmail({
             email: email,
             subject: emailTemplate.subject,
             content: emailBody,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
+            region_id: region_id,
+            template_name: 'Application Received',
           });
         });
       }
@@ -221,7 +225,7 @@ export class ApplicationsService {
     );
 
     const person = await this.personsService.findOneById(parent.person_id);
-    const regions: ApplicationUserRegion[] =
+    const regions: UserRegion[] =
       await this.userRegionService.findUserRegionByUserId(person.user_id);
 
     var region_id = 1;
@@ -262,12 +266,14 @@ export class ApplicationsService {
           );
 
           emailBody = setEmailBodyInfo(school_year, student);
-          await this.emailsService.sendEmail({
+          const result = await this.emailsService.sendEmail({
             email: person?.email,
             subject: emailTemplate.subject,
             content: emailBody,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
+            region_id: region_id,
+            template_name: 'Application Received',
           });
         });
       }

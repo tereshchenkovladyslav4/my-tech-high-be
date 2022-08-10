@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
 } from 'typeorm';
-import { ApplicationRegion } from './region.entity';
+import { Region } from './region.entity';
 import { UserAnnouncement } from './user-announcement.entity';
 @ObjectType()
 @Entity('announcement')
@@ -65,11 +65,11 @@ export class Announcement extends BaseEntity {
   @Field(() => [UserAnnouncement], { nullable: true })
   UserAnnouncements: UserAnnouncement[];
 
-  @ManyToOne(() => ApplicationRegion, (region) => region.Announcements, {
+  @ManyToOne(() => Region, (region) => region.Announcements, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'RegionId', referencedColumnName: 'id' })
-  @Field(() => ApplicationRegion, { nullable: true })
-  Region: ApplicationRegion;
+  @Field(() => Region, { nullable: true })
+  Region: Region;
 }

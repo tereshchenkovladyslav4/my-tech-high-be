@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql'
+import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql'
 import {
   BaseEntity,
   Column,
@@ -13,7 +13,7 @@ import { UserRegion } from './user-region.entity'
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "id,name,program")')
+@Directive('@key(fields: "id, name, program, enrollment_packet_deadline_num_days, region")')
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()
@@ -32,6 +32,13 @@ export class Region extends BaseEntity {
   @Directive('@external')
   program: string
 
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  @Directive('@external')
+  enrollment_packet_deadline_num_days: number;
+
   @OneToMany(() => UserRegion, (userRegion) => userRegion.regionDetail)
-  region: UserRegion
+  @Field((type) => UserRegion, { nullable: true })
+  @Directive('@external')
+  region: UserRegion;
 }
