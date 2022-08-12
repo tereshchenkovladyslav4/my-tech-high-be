@@ -5,6 +5,7 @@ import {
   ResolveField,
   Parent as TypeParent,
   Mutation,
+  Query
 } from '@nestjs/graphql';
 import { Student } from '../models/student.entity';
 import { StudentsService } from '../services/students.service';
@@ -15,6 +16,9 @@ import { Application } from '../models/application.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
+import { StudentPagination } from '../models/student-pagination.entity';
+import { StudentsArgs } from '../dto/student.args';
+import { Pagination } from '../../paginate';
 
 @Resolver((of) => Student)
 export class StudentsResolver {
@@ -22,7 +26,8 @@ export class StudentsResolver {
     private studentsService: StudentsService,
     private packetsService: PacketsService,
     private applicationsService: ApplicationsService,
-  ) {}
+
+  ) { }
 
   @ResolveField((of) => [Packet], { name: 'packets' })
   public async getPackets(@TypeParent() student: Student): Promise<Packet[]> {
@@ -52,4 +57,5 @@ export class StudentsResolver {
   ): Promise<boolean> {
     return this.studentsService.update(updateStudentInput);
   }
+
 }

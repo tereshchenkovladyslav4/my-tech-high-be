@@ -24,6 +24,7 @@ import { StudentStatusResolver } from './resolvers/student-status.resolver';
 import { Student } from './models/student.entity';
 import { StudentStatus } from './models/student-status.entity';
 import { StudentStatusHistory } from './models/student-status-history.entity';
+import { SchoolEnrollment } from './models/school-enrollment.entity';
 import { ResourceResolver } from './resolvers/resource.resolover';
 import { Resource } from './models/resource.entity';
 
@@ -61,7 +62,7 @@ const graphQLImports = [
           StudentStatus,
           StudentStatusHistory,
           Resource,
-        ],
+          SchoolEnrollment],
       },
       context: ({ req }) => ({ headers: req.headers }),
     }),
@@ -70,4 +71,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class StudentsGraphqlModule {}
+export class StudentsGraphqlModule { }

@@ -8,7 +8,7 @@ export class SchoolYearsService {
   constructor(
     @InjectRepository(SchoolYear)
     private schoolYearsRepository: Repository<SchoolYear>,
-  ) {}
+  ) { }
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
     return this.schoolYearsRepository.findOne(school_year_id);
@@ -35,5 +35,17 @@ export class SchoolYearsService {
         date_end: MoreThanOrEqual(new Date()),
       },
     });
+  }
+  findNextYear(year : number, regionId : number): Promise<SchoolYear> {
+    const today = new Date();
+    return this.schoolYearsRepository.createQueryBuilder('year')
+    .where('RegionId = :regionId', {regionId})
+    .andWhere('date_begin BETWEEN :startDate AND :endDate', { startDate: year + '-01-01', endDate: year + '-12-31' }).getOne()
+  }
+  findPreviousYear(year: number, regionId: number): Promise<SchoolYear> {
+    const today = new Date();
+    return this.schoolYearsRepository.createQueryBuilder('year')
+      .where('RegionId = :regionId', {regionId})
+      .andWhere('date_begin BETWEEN :startDate AND :endDate', { startDate: year - 1 + '-01-01', endDate: year - 1 + '-12-31' }).getOne()
   }
 }

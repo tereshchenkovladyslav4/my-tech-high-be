@@ -1,6 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, createQueryBuilder, getConnection } from 'typeorm';
+import { Repository, createQueryBuilder, getConnection, Brackets } from 'typeorm';
 import { Student } from '../models/student.entity';
 import { StudentsArgs } from '../dto/student.args';
 import { StudentCurrentStatus } from '../models/student-current-status.entity';
@@ -19,9 +19,10 @@ import { UpdateStudentProfileInput } from '../dto/update-profile.inputs';
 import { UsersService } from './users.service';
 import { PersonsService } from './persons.service';
 import { UserRegion } from '../models/user-region.entity';
-import * as Moment from 'moment';
+import moment, * as Moment from 'moment';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { Region } from '../models/region.entity';
+import { Pagination } from 'src/paginate';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -34,7 +35,7 @@ export class StudentsService {
     private personsService: PersonsService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearsService,
-  ) {}
+  ) { }
 
   protected user: User;
   protected NewUser;
@@ -51,8 +52,135 @@ export class StudentsService {
     return password;
   }
 
-  findAll(studentsArgs: StudentsArgs): Promise<Student[]> {
-    return this.studentsRepository.find(studentsArgs);
+  async findAll(studentsArgs: StudentsArgs): Promise<Pagination<Student>> {
+    // const results = this.studentsRepository.find(studentsArgs);
+    const { skip, take, sort, filter, search } = studentsArgs;
+    const _sortBy = sort.split('|');
+    const currentYear = await this.schoolYearService.findOneById(filter.schoolYear);
+    const previousYearOb = await this.schoolYearService.findPreviousYear(parseInt(Moment(currentYear.date_begin).format('YYYY')), currentYear.RegionId);
+    const previousScholYear = previousYearOb ? previousYearOb.school_year_id : 0;
+
+
+    const qb = this.studentsRepository
+      .createQueryBuilder('student')
+      .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+      .leftJoinAndSelect('student.person', 'person')
+      .leftJoinAndSelect('student.parent', 'parent')
+      .leftJoinAndSelect('parent.person', 'p_person')
+      .leftJoinAndSelect('p_person.person_address', 'p_address')
+      .leftJoinAndSelect('p_address.address', 'address')
+      .leftJoinAndSelect('student.currentSoe', 'currentSoe', "currentSoe.school_year_id= :currentSchoolYear", {
+        currentSchoolYear: filter.schoolYear
+      })
+      .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
+      .leftJoinAndSelect('student.previousSoe', 'previousSoe', "previousSoe.school_year_id= :previousScholYear", {
+        previousScholYear: previousScholYear
+      })
+      .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+      .where(`grade_levels.school_year_id = ${filter.schoolYear}`);
+
+    if (search) {
+      qb.andWhere(
+        new Brackets((sub) => {
+          sub
+            .orWhere('person.first_name like :text', { text: `%${search}%` })
+            .orWhere('person.last_name like :text', { text: `%${search}%` })
+            .orWhere('p_person.first_name like :text', { text: `%${search}%` })
+            .orWhere('p_person.last_name like :text', { text: `%${search}%` })
+            .orWhere('address.city like :text', { text: `%${search}%` })
+            .orWhere('grade_levels.grade_level like :text', { text: `%${search}%` })
+            .orWhere('currentPartner.name like :text', { text: `%${search}%` })
+            .orWhere('previousPartner.name like :text', { text: `%${search}%` })
+        }),
+      );
+    }
+
+    if (sort) {
+      if (_sortBy[1].toLocaleLowerCase() === 'desc') {
+        if (_sortBy[0] === 'grade') {
+          qb.addSelect(
+            'ABS(grade_levels.grade_level + 0)',
+            'student_grade_level1',
+          );
+          qb.orderBy('student_grade_level1', 'DESC');
+        }
+        else if (_sortBy[0] === 'student') {
+          qb.addSelect(
+            "CONCAT(person.last_name, ' ', person.first_name)",
+            'student_name',
+          );
+          qb.orderBy('student_name', 'DESC');
+        }
+        else if (_sortBy[0] === 'parent') {
+          qb.addSelect(
+            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
+            'parent_name',
+          );
+          qb.orderBy('parent_name', 'DESC');
+        }
+        else if (_sortBy[0] === 'city') {
+          qb.orderBy('address.city', 'DESC');
+        }
+        else if (_sortBy[0] === 'currentSOE') {
+          qb.orderBy('currentPartner.name', 'DESC');
+        }
+        else if (_sortBy[0] === 'previousSOE') {
+          qb.orderBy('previousPartner.name', 'DESC');
+        }
+        else {
+          qb.addSelect(
+            "CONCAT(person.last_name, ' ', person.first_name)",
+            'student_name',
+          );
+          qb.orderBy('student_name', 'DESC');
+        }
+      } else {
+        if (_sortBy[0] === 'grade') {
+          qb.addSelect(
+            'ABS(grade_levels.grade_level + 0)',
+            'student_grade_level1',
+          );
+          qb.orderBy('student_grade_level1', 'ASC');
+        }
+        else if (_sortBy[0] === 'student') {
+          qb.addSelect(
+            "CONCAT(person.last_name, ' ', person.first_name)",
+            'student_name',
+          );
+          qb.orderBy('student_name', 'ASC');
+        }
+        else if (_sortBy[0] === 'parent') {
+          qb.addSelect(
+            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
+            'parent_name',
+          );
+          qb.orderBy('parent_name', 'ASC');
+        }
+        else if (_sortBy[0] === 'city') {
+          qb.orderBy('address.city', 'ASC');
+        }
+        else if (_sortBy[0] === 'currentSOE') {
+          qb.orderBy('currentPartner.name', 'ASC');
+        }
+        else if (_sortBy[0] === 'previousSOE') {
+          qb.orderBy('previousPartner.name', 'ASC');
+        }
+        else {
+          qb.addSelect(
+            "CONCAT(person.last_name, ' ', person.first_name)",
+            'student_name',
+          );
+          qb.orderBy('student_name', 'ASC');
+        }
+      }
+    }
+
+    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+
+    return new Pagination<Student>({
+      results,
+      total,
+    });
   }
 
   findOneById(student_id: number): Promise<Student> {

@@ -23,6 +23,7 @@ import { StudentGradeLevel } from './student-grade-level.entity';
 import { StudentStatus } from './student-status.entity';
 import { Withdrawal } from './withdrawal.entity';
 import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
+import { SchoolEnrollment } from './school-enrollment.entity';
 
 @InputType('student')
 @ObjectType()
@@ -54,6 +55,10 @@ export class Student extends BaseEntity {
   @OneToOne((type) => Parent)
   @JoinColumn({ name: 'parent_id' })
   parent: Parent;
+
+  @OneToMany((type) => SchoolEnrollment, (soes) => soes.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  schoolEnroll: SchoolEnrollment[];
 
   @OneToMany((type) => Application, (application) => application.student)
   applications?: Application[];

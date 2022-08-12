@@ -42,7 +42,7 @@ export class ParentsResolver {
     private addressService: AddressService,
     private personAddressService: PersonAddressService,
     private observersService: ObserversService,
-  ) {}
+  ) { }
 
   @ResolveReference()
   resolveReference(reference: {

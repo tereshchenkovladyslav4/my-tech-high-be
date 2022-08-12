@@ -8,6 +8,8 @@ import { StudentGradeLevel } from '../models/student-grade-level.entity';
 import { StudentStatus } from '../models/student-status.entity';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { StudentStatusService } from './student-status.service';
+import { StudentsArgs } from '../dto/student.args';
+import { Pagination, PaginationOptionsInterface } from '../../paginate';
 
 @Injectable()
 export class StudentsService {
@@ -15,7 +17,7 @@ export class StudentsService {
     @InjectRepository(Student)
     private readonly studentsRepository: Repository<Student>,
     private studentStatusService: StudentStatusService,
-  ) {}
+  ) { }
 
   async findOneById(student_id: number): Promise<Student> {
     return this.studentsRepository.findOne({

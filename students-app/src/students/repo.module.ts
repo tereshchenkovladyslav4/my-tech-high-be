@@ -34,6 +34,8 @@ import { Withdrawal } from './models/withdrawal.entity';
 import { WithdrawalEmail } from './models/withdrawal-email.entity';
 import { Resource } from './models/resource.entity';
 import { ResourceService } from './services/resource.service';
+import { SchoolEnrollment } from './models/school-enrollment.entity';
+import { SchoolEnrollmentService } from './services/school-enrollment-service.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -49,6 +51,7 @@ const servicesImports = [
   EmailVerifiersService,
   StudentStatusService,
   StudentStatusHistoryService,
+  SchoolEnrollmentService,
   ResourceService,
 ];
 
@@ -75,10 +78,11 @@ const servicesImports = [
       UserRegion,
       Region,
       Resource,
+      SchoolEnrollment
     ]),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule {}
+class RepoModule { }
 export default RepoModule;

@@ -29,6 +29,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
+import { Pagination } from 'src/paginate';
+import { StudentPagination } from '../models/student-pagination.entity';
+import { assignStudentToSOEInput } from '../dto/assign-student-soe.input';
+import { SchoolEnrollmentService } from '../services/school-enrollment-service.service';
 
 @Resolver((of) => Student)
 export class StudentsResolver {
@@ -37,7 +41,8 @@ export class StudentsResolver {
     private personsService: PersonsService,
     private parentsService: ParentsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
-  ) {}
+    private schoolEnrollmentService: SchoolEnrollmentService,
+  ) { }
 
   @Query((returns) => Student, { name: 'student' })
   async getStudent(
@@ -46,8 +51,8 @@ export class StudentsResolver {
     return this.studentsService.findOneById(student_id);
   }
 
-  @Query((returns) => [Student], { name: 'students' })
-  async getStudents(@Args() studentsArgs: StudentsArgs): Promise<Student[]> {
+  @Query((of) => StudentPagination, { name: 'studentsForSOE' })
+  public async getStudentsForSOE(@Args() studentsArgs: StudentsArgs): Promise<Pagination<Student>> {
     return this.studentsService.findAll(studentsArgs);
   }
 
@@ -107,6 +112,15 @@ export class StudentsResolver {
     });
     if (!statudUpdatedHistory) return false;
 
+    return true;
+  }
+
+  @Mutation((returns) => Boolean, { name: 'assignStudentToSOE' })
+  @UseGuards(new AuthGuard())
+  async assignStudentToSOE(
+    @Args('assignStudentToSOEInput') assignStudentToSOEInput: assignStudentToSOEInput,
+  ): Promise<Boolean> {
+    await this.schoolEnrollmentService.assignStudentToSOE(assignStudentToSOEInput);
     return true;
   }
 

@@ -735,6 +735,7 @@ export class EnrollmentsService {
                         .getFullYear()
                         .toString();
                       const emailBody = remind.body || emailTemplate.body
+                      const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`
                       return emailBody
                         .toString()
                         .replace(/\[STUDENT\]/g, student.first_name)
@@ -750,7 +751,7 @@ export class EnrollmentsService {
                         )
                         .replace(
                           /\[LINK\]/g,
-                          `<p><a href="${webAppUrl}/homeroom/enrollment/${packet.student.student_id}</a><br></p>`,
+                          `<a href='${link}'>${link}</a>`,
                         );
                     };
                     const body = setEmailBodyInfo();

@@ -19,6 +19,7 @@ import { StudentStatusHistory } from './student-status-history.entity';
 import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
 import { Withdrawal } from './withdrawal.entity';
 import { StudentHiddenResource } from './student-hidden-resource.entity';
+import { SchoolEnrollment } from './school-enrollment.entity';
 
 @ObjectType()
 @Directive(
@@ -56,6 +57,7 @@ export class Student extends BaseEntity {
   hidden: number;
 
   @Column()
+  @Field(() => String, { nullable: true })
   school_of_enrollment: string;
 
   @Column()
@@ -70,10 +72,12 @@ export class Student extends BaseEntity {
   @Field(() => String, { nullable: true })
   testing_preference: string;
 
-  @Field((type) => Parent)
+  @OneToOne((type) => Parent)
+  @JoinColumn({ name: 'parent_id' })
   parent?: Parent;
 
-  @Field((type) => [StudentGradeLevel])
+  @OneToMany((type) => StudentGradeLevel, (gradeLevels) => gradeLevels.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   grade_levels?: StudentGradeLevel[];
 
   @Field((type) => StudentCurrentStatus)
@@ -88,6 +92,16 @@ export class Student extends BaseEntity {
 
   @OneToMany((type) => Packet, (packet) => packet.student_id)
   packets?: Packet[];
+
+  @OneToMany((type) => SchoolEnrollment, (soes) => soes.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  @Field(() => [SchoolEnrollment], { nullable: true })
+  currentSoe: SchoolEnrollment[];
+
+  @OneToMany((type) => SchoolEnrollment, (soes) => soes.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  @Field(() => [SchoolEnrollment], { nullable: true })
+  previousSoe: SchoolEnrollment[];
 
   @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })

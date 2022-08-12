@@ -1,5 +1,6 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Address } from './address.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -17,4 +18,8 @@ export class PersonAddress extends BaseEntity {
   @PrimaryColumn()
   @Directive('@external')
   address_id?: number
+
+  @OneToOne((type) => Address, (address) => address.address_id)
+  @JoinColumn({ name: 'address_id', referencedColumnName: 'address_id' })
+  address: Address;
 }

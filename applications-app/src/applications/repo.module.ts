@@ -83,6 +83,7 @@ import { CronJobsLog } from './models/cron-jobs-log.entity';
 import { CronJobsLogsService } from './services/cron-jobs-logs.services';
 import { ResourceService } from './services/resource.service';
 import { Resource } from './models/resource.entity';
+import { SchoolEnrollment } from './models/school-enrollment.entity';
 import { EmailRecord } from './models/email-record.entity';
 
 const servicesImports = [
@@ -175,11 +176,12 @@ const servicesImports = [
       EmailReminder,
       CronJobsLog,
       Resource,
+      SchoolEnrollment,
       EmailRecord,
     ]),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule {}
+class RepoModule { }
 export default RepoModule;

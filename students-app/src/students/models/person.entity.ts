@@ -10,6 +10,7 @@ import {
 import { Phone } from './phone.entity';
 import { User } from './user.entity';
 import { Address } from './address.entity';
+import { PersonAddress } from './person-address.entity';
 
 @ObjectType()
 //@Directive('@extends')
@@ -67,6 +68,10 @@ export class Person extends BaseEntity {
 
   @Field((type) => Address, { nullable: true })
   address?: Address | null;
+
+  @OneToOne((type) => PersonAddress, (address) => address.person_id)
+  @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
+  person_address: PersonAddress;
 
   @OneToOne((type) => User, (user) => user.user_id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })

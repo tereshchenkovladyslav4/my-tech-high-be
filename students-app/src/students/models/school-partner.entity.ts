@@ -1,6 +1,7 @@
 import { Directive, Field, ID, Int, ObjectType, } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Region } from './region.entity';
+import { SchoolEnrollment } from './school-enrollment.entity';
 import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
@@ -60,4 +61,10 @@ export class SchoolPartner extends BaseEntity {
   @Field(() => SchoolYear, { nullable: true })
   @Directive('@external')
   schoolYear: SchoolYear;
+
+  @OneToMany(() => SchoolEnrollment, (soe) => soe.partner)
+  @JoinColumn({ name: 'school_partner_id', referencedColumnName: 'school_partner_id' })
+  @Field(() => [SchoolEnrollment], { nullable: true })
+  schoolEnrollment: SchoolEnrollment[]
+
 }

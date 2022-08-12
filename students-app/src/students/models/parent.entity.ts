@@ -1,12 +1,12 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn } from 'typeorm';
 import { Person } from './person.entity';
 import { Phone } from './phone.entity';
 
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "parent_id, person_id")')
-@Entity({ name: 'mth_parent'})
+@Entity({ name: 'mth_parent' })
 export class Parent extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
@@ -19,7 +19,8 @@ export class Parent extends BaseEntity {
   @Directive('@external')
   person_id?: number
 
-  @Field((type) => Person)
+  @OneToOne((type) => Person)
+  @JoinColumn({ name: 'person_id' })
   person?: Person
 
   @Field((type) => Phone)
