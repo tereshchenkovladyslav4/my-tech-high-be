@@ -24,17 +24,19 @@ import { StudentStatusResolver } from './resolvers/student-status.resolver';
 import { Student } from './models/student.entity';
 import { StudentStatus } from './models/student-status.entity';
 import { StudentStatusHistory } from './models/student-status-history.entity';
-
+import { ResourceResolver } from './resolvers/resource.resolover';
+import { Resource } from './models/resource.entity';
 
 const graphQLImports = [
-  StudentsResolver, 
-  PersonsResolver, 
-  UsersResolver, 
-  ParentsResolver, 
+  StudentsResolver,
+  PersonsResolver,
+  UsersResolver,
+  ParentsResolver,
   StudentGradeLevelsResolver,
   ParentToDosResolver,
   SchoolYearResolver,
   StudentStatusResolver,
+  ResourceResolver,
 ];
 @Module({
   imports: [
@@ -45,13 +47,27 @@ const graphQLImports = [
       introspection: true,
       buildSchemaOptions: {
         dateScalarMode: 'isoDate',
-        orphanedTypes: [Person, Parent, StudentGradeLevel, Phone, Address, PersonAddress, SchoolYear, ParentToDo, ToDoItem, StudentCurrentStatus, StudentStatus, StudentStatusHistory],
+        orphanedTypes: [
+          Person,
+          Parent,
+          StudentGradeLevel,
+          Phone,
+          Address,
+          PersonAddress,
+          SchoolYear,
+          ParentToDo,
+          ToDoItem,
+          StudentCurrentStatus,
+          StudentStatus,
+          StudentStatusHistory,
+          Resource,
+        ],
       },
       context: ({ req }) => ({ headers: req.headers }),
     }),
     TypeOrmModule.forRoot(),
     RepoModule,
-    ...graphQLImports
+    ...graphQLImports,
   ],
 })
 export class StudentsGraphqlModule {}

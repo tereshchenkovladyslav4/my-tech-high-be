@@ -32,6 +32,8 @@ import { UserRegion } from './models/user-region.entity';
 import { Region } from './models/region.entity';
 import { Withdrawal } from './models/withdrawal.entity';
 import { WithdrawalEmail } from './models/withdrawal-email.entity';
+import { Resource } from './models/resource.entity';
+import { ResourceService } from './services/resource.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -47,6 +49,7 @@ const servicesImports = [
   EmailVerifiersService,
   StudentStatusService,
   StudentStatusHistoryService,
+  ResourceService,
 ];
 
 @Global()
@@ -71,6 +74,7 @@ const servicesImports = [
       StudentReenrollmentStatus,
       UserRegion,
       Region,
+      Resource,
     ]),
   ],
   providers: [...servicesImports],

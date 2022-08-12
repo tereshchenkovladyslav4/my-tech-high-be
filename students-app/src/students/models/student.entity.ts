@@ -18,6 +18,7 @@ import { Packet } from './packet.entity';
 import { StudentStatusHistory } from './student-status-history.entity';
 import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
 import { Withdrawal } from './withdrawal.entity';
+import { StudentHiddenResource } from './student-hidden-resource.entity';
 
 @ObjectType()
 @Directive(
@@ -108,4 +109,11 @@ export class Student extends BaseEntity {
     (studentReenrollmentStatus) => studentReenrollmentStatus.student_id,
   )
   reenrollment_status?: StudentReenrollmentStatus[];
+
+  @OneToMany(
+    () => StudentHiddenResource,
+    (studentHiddenResource) => studentHiddenResource.Student,
+  )
+  @Field(() => [StudentHiddenResource], { nullable: true })
+  HiddenResources: StudentHiddenResource[];
 }
