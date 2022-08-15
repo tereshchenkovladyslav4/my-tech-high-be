@@ -5,49 +5,71 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   In,
+  OneToMany,
 } from 'typeorm';
+import { StudentRecordFile } from './student-record-file.entity';
 
 @ObjectType()
-@Directive('@key(fields: "file_id, name, type, item1, item2, item3, year, is_new_upload_type, uploaded_by, signedUrl")')
+@Directive('@extends')
+@Directive(
+  '@key(fields: "file_id, name, type, item1, item2, item3, year, is_new_upload_type, uploaded_by, signedUrl")',
+)
 @Entity('mth_file')
 export class File extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
-  @PrimaryGeneratedColumn()
-  file_id?: number;
+  @Directive('@external')
+  @PrimaryGeneratedColumn({ type: 'int', name: 'file_id' })
+  file_id: number;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   name?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   type?: string;
 
-  @Column('varchar', { length: 1000 })
+  @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   item1?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   item2?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   item3?: string;
 
   @Column()
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   year?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   is_new_upload_type?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   uploaded_by?: number;
 
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   signedUrl?: String;
+
+  @OneToMany(
+    () => StudentRecordFile,
+    (studentRecordFile) => studentRecordFile.File,
+  )
+  @Field(() => [StudentRecordFile], { nullable: true })
+  StudentRecordFiles: StudentRecordFile[];
 }

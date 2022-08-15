@@ -21,6 +21,7 @@ import { Withdrawal } from './withdrawal.entity';
 import { StudentHiddenResource } from './student-hidden-resource.entity';
 import { SchoolEnrollment } from './school-enrollment.entity';
 import { ResourceCart } from './resource-cart.entity';
+import { StudentRecord } from './student-record.entity';
 
 @ObjectType()
 @Directive(
@@ -30,8 +31,8 @@ import { ResourceCart } from './resource-cart.entity';
 export class Student extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
-  @PrimaryGeneratedColumn()
-  student_id?: number;
+  @PrimaryGeneratedColumn({ type: 'int', name: 'student_id' })
+  student_id: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
@@ -77,8 +78,8 @@ export class Student extends BaseEntity {
   @JoinColumn({ name: 'parent_id' })
   parent?: Parent;
 
-  @OneToMany((type) => StudentGradeLevel, (gradeLevels) => gradeLevels.student)
-  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  @OneToMany((type) => StudentGradeLevel, (gradeLevels) => gradeLevels.Student)
+  @Field((type) => [StudentGradeLevel])
   grade_levels?: StudentGradeLevel[];
 
   @Field((type) => StudentCurrentStatus)
@@ -135,4 +136,8 @@ export class Student extends BaseEntity {
   @OneToMany(() => ResourceCart, (resourceCart) => resourceCart.Student)
   @Field(() => [StudentHiddenResource], { nullable: true })
   ResourcesInCart: StudentHiddenResource[];
+
+  @OneToMany(() => StudentRecord, (record) => record.Student)
+  @Field(() => [StudentRecord], { nullable: true })
+  Records: StudentRecord[];
 }

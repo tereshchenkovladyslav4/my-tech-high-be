@@ -36,6 +36,12 @@ import { Resource } from './models/resource.entity';
 import { ResourceService } from './services/resource.service';
 import { SchoolEnrollment } from './models/school-enrollment.entity';
 import { SchoolEnrollmentService } from './services/school-enrollment-service.service';
+import { StudentRecord } from './models/student-record.entity';
+import { StudentRecordService } from './services/student-record.service';
+import { StudentRecordFile } from './models/student-record-file.entity';
+import { File } from './models/file.entity';
+import { FilesService } from './services/files.service';
+import { S3Service } from './services/s3.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -53,6 +59,9 @@ const servicesImports = [
   StudentStatusHistoryService,
   SchoolEnrollmentService,
   ResourceService,
+  StudentRecordService,
+  FilesService,
+  S3Service,
 ];
 
 @Global()
@@ -73,16 +82,19 @@ const servicesImports = [
       Packet,
       EmailVerifier,
       StudentStatus,
+      StudentRecord,
+      StudentRecordFile,
+      File,
       StudentStatusHistory,
       StudentReenrollmentStatus,
       UserRegion,
       Region,
       Resource,
-      SchoolEnrollment
+      SchoolEnrollment,
     ]),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule { }
+class RepoModule {}
 export default RepoModule;

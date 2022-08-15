@@ -21,12 +21,15 @@ import { StudentCurrentStatus } from './models/student-current-status.entity';
 import { Address } from './models/address.entity';
 import { PersonAddress } from './models/person-address.entity';
 import { StudentStatusResolver } from './resolvers/student-status.resolver';
-import { Student } from './models/student.entity';
 import { StudentStatus } from './models/student-status.entity';
 import { StudentStatusHistory } from './models/student-status-history.entity';
 import { SchoolEnrollment } from './models/school-enrollment.entity';
 import { ResourceResolver } from './resolvers/resource.resolover';
 import { Resource } from './models/resource.entity';
+import { StudentRecordResolver } from './resolvers/student-record.resolver';
+import { StudentRecord } from './models/student-record.entity';
+import { StudentRecordFile } from './models/student-record-file.entity';
+import { File } from './models/file.entity';
 
 const graphQLImports = [
   StudentsResolver,
@@ -38,6 +41,7 @@ const graphQLImports = [
   SchoolYearResolver,
   StudentStatusResolver,
   ResourceResolver,
+  StudentRecordResolver,
 ];
 @Module({
   imports: [
@@ -50,19 +54,34 @@ const graphQLImports = [
         dateScalarMode: 'isoDate',
         orphanedTypes: [
           Person,
+
           Parent,
+
           StudentGradeLevel,
+
           Phone,
+
           Address,
+
           PersonAddress,
+
           SchoolYear,
+
           ParentToDo,
+
           ToDoItem,
+
           StudentCurrentStatus,
+
           StudentStatus,
+
+          File,
+          StudentRecord,
+          StudentRecordFile,
           StudentStatusHistory,
           Resource,
-          SchoolEnrollment],
+          SchoolEnrollment,
+        ],
       },
       context: ({ req }) => ({ headers: req.headers }),
     }),
@@ -71,4 +90,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class StudentsGraphqlModule { }
+export class StudentsGraphqlModule {}

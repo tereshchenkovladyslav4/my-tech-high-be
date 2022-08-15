@@ -1,5 +1,12 @@
 import { Directive, Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import { Column, Entity, BaseEntity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  BaseEntity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
 
@@ -10,7 +17,7 @@ export class StudentGradeLevel extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryColumn()
-  student_id?: number
+  student_id?: number;
 
   @Column()
   @Field(() => ID, { nullable: true })
@@ -22,9 +29,13 @@ export class StudentGradeLevel extends BaseEntity {
   grade_level: string;
 
   @Field((type) => SchoolYear)
-  school_year?: SchoolYear
+  school_year?: SchoolYear;
 
-  @ManyToOne((type) => Student, { nullable: true })
+  @ManyToOne(() => Student, (student) => student.grade_levels, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
-  student?: Student;
+  @Field(() => Student, { nullable: true })
+  Student?: Student;
 }

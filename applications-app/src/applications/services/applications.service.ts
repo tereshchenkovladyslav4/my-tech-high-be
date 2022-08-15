@@ -457,15 +457,18 @@ export class ApplicationsService {
             const yearend = new Date(school_year.date_end)
               .getFullYear()
               .toString();
+            const yearText = application.midyear_application
+              ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
+              : `${yearbegin}-${yearend.substring(2, 4)}`
 
             return emailTemplate.body
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
-              .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+              .replace(/\[YEAR\]/g, yearText)
               .replace(
                 /\[APPLICATION_YEAR\]/g,
-                `${yearbegin}-${yearend.substring(2, 4)}`,
+                yearText,
               )
               .replace(
                 /\[DEADLINE\]/g,
@@ -530,6 +533,7 @@ export class ApplicationsService {
           .getFullYear()
           .toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
+
 
         return emailTemplate.body
           .toString()
