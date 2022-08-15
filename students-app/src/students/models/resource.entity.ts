@@ -8,6 +8,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ResourceSubtitle } from '../enums';
+import { ResourceCart } from './resource-cart.entity';
 import { StudentHiddenResource } from './student-hidden-resource.entity';
 
 @ObjectType()
@@ -126,10 +127,17 @@ export class Resource extends BaseEntity {
   @Field(() => Boolean, { nullable: true })
   HiddenByStudent: boolean;
 
+  @Field(() => Date, { nullable: true })
+  CartDate: Date;
+
   @OneToMany(
     () => StudentHiddenResource,
     (studentHiddenResource) => studentHiddenResource.Resource,
   )
   @Field(() => [StudentHiddenResource], { nullable: true })
   HiddenStudents: StudentHiddenResource[];
+
+  @OneToMany(() => ResourceCart, (resourceCart) => resourceCart.Resource)
+  @Field(() => [StudentHiddenResource], { nullable: true })
+  StudentsInCart: StudentHiddenResource[];
 }

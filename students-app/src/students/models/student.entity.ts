@@ -20,6 +20,7 @@ import { StudentReenrollmentStatus } from './student-reenrollment-status.entity'
 import { Withdrawal } from './withdrawal.entity';
 import { StudentHiddenResource } from './student-hidden-resource.entity';
 import { SchoolEnrollment } from './school-enrollment.entity';
+import { ResourceCart } from './resource-cart.entity';
 
 @ObjectType()
 @Directive(
@@ -130,4 +131,8 @@ export class Student extends BaseEntity {
   )
   @Field(() => [StudentHiddenResource], { nullable: true })
   HiddenResources: StudentHiddenResource[];
+
+  @OneToMany(() => ResourceCart, (resourceCart) => resourceCart.Student)
+  @Field(() => [StudentHiddenResource], { nullable: true })
+  ResourcesInCart: StudentHiddenResource[];
 }

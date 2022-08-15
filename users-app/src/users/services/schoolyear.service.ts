@@ -17,7 +17,7 @@ export class SchoolYearsService {
   constructor(
     @InjectRepository(SchoolYear)
     private schoolYearsRepository: Repository<SchoolYear>,
-    private schoolPartnerService: SchoolPartnerService
+    private schoolPartnerService: SchoolPartnerService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -35,11 +35,19 @@ export class SchoolYearsService {
 
   findActiveSchoolYears(region_id: number): Promise<SchoolYear[]> {
     return this.schoolYearsRepository.find({
-      where: {
-        date_reg_open: LessThanOrEqual(new Date()),
-        date_reg_close: MoreThanOrEqual(new Date()),
-        RegionId: region_id,
-      },
+      where: [
+        {
+          date_reg_open: LessThanOrEqual(new Date()),
+          date_reg_close: MoreThanOrEqual(new Date()),
+          RegionId: region_id,
+        },
+        {
+          midyear_application_open: LessThanOrEqual(new Date()),
+          midyear_application_close: MoreThanOrEqual(new Date()),
+          RegionId: region_id,
+          midyear_application: 1,
+        },
+      ],
     });
   }
 
@@ -62,29 +70,32 @@ export class SchoolYearsService {
 
   async createSchoolYear(
     createSchoolYearInput: CreateSchoolYearInput,
-    previousYearId?: number
+    previousYearId?: number,
   ): Promise<SchoolYear> {
     const data = this.schoolYearsRepository.create(createSchoolYearInput);
     const updatedRecord = await this.schoolYearsRepository.save(data);
-    
-    let schoolPartnerList: SchoolPartner[] = []
-    if(previousYearId){
-      const prevYearPartners = await this.schoolPartnerService.findBySchoolYear(previousYearId)
-      map(prevYearPartners, async (partner) => {
-        const {
-          name,
-          abbreviation,
-          photo,
-          region_id,
-          active,
-        } = partner
-        
-        if(active) await this.schoolPartnerService.createSchoolPartner({name, abbreviation, photo, region_id, school_year_id: updatedRecord.school_year_id})
-          .then(res => schoolPartnerList.push(res))
-      })
-      updatedRecord.SchoolPartners = schoolPartnerList
-    }
 
+    let schoolPartnerList: SchoolPartner[] = [];
+    if (previousYearId) {
+      const prevYearPartners = await this.schoolPartnerService.findBySchoolYear(
+        previousYearId,
+      );
+      map(prevYearPartners, async (partner) => {
+        const { name, abbreviation, photo, region_id, active } = partner;
+
+        if (active)
+          await this.schoolPartnerService
+            .createSchoolPartner({
+              name,
+              abbreviation,
+              photo,
+              region_id,
+              school_year_id: updatedRecord.school_year_id,
+            })
+            .then((res) => schoolPartnerList.push(res));
+      });
+      updatedRecord.SchoolPartners = schoolPartnerList;
+    }
 
     if (createSchoolYearInput.cloneSchoolYearId) {
       const newSchoolYearId = updatedRecord.school_year_id;

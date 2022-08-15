@@ -4,6 +4,7 @@ import { AuthGuard } from '../guards/auth.guard';
 import { Resource } from '../models/resource.entity';
 import { ResourceService } from '../services/resource.service';
 import { ToggleHiddenResourceInput } from '../dto/toggle-resource-hidden.input';
+import { ToggleResourceCartInput } from '../dto/toggle-resource-cart.input';
 
 @Resolver((of) => Resource)
 export class ResourceResolver {
@@ -22,6 +23,13 @@ export class ResourceResolver {
     @Args('toggleHiddenResourceInput')
     toggleHiddenResourceInput: ToggleHiddenResourceInput,
   ) {
-    return this.service.save(toggleHiddenResourceInput);
+    return this.service.toggleHiddenResource(toggleHiddenResourceInput);
+  }
+  @Mutation((returns) => Boolean)
+  async toggleResourceCart(
+    @Args('toggleResourceCartInput')
+    toggleResourceCartInput: ToggleResourceCartInput,
+  ) {
+    return this.service.toggleResourceCart(toggleResourceCartInput);
   }
 }
