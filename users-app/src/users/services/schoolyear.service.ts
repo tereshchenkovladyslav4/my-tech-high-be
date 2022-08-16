@@ -106,12 +106,11 @@ export class SchoolYearsService {
           resource.*
         FROM infocenter.mth_resource_settings AS resource
         WHERE
-          SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}`,
+          SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}
+        ORDER BY resource_id ASC`,
       );
-      queryRunner.release();
 
-      resources.map(async (resource) => {
-        const queryRunner = await getConnection().createQueryRunner();
+      for (let index = 0; index < resources.length; index++) {
         const {
           title,
           image,
@@ -128,15 +127,15 @@ export class SchoolYearsService {
           add_resource_level,
           resource_level,
           family_resource,
-        } = resource;
+        } = resources[index];
         await queryRunner.query(
           `INSERT INTO infocenter.mth_resource_settings
             (SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, resource_level, family_resource)
           VALUES
             (${newSchoolYearId}, "${title}", "${image}", "${subtitle}", ${price}, "${website}", "${grades}", "${std_user_name}", "${std_password}", "${detail}", ${priority}, ${is_active}, ${resource_limit}, ${add_resource_level}, "${resource_level}", ${family_resource});`,
         );
-        queryRunner.release();
-      });
+      }
+      queryRunner.release();
     }
     return updatedRecord;
   }

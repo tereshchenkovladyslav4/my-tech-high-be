@@ -43,4 +43,7 @@ export class UpdateRegionInput {
 
   @Field((type) => Int, { nullable: true })
   withdraw_deadline_num_days: number;
+
+  @Field(() => String, { nullable: true })
+  resource_confirm_details: string;
 }

@@ -14,7 +14,7 @@ export class ResourceService {
   async find(schoolYearId: number): Promise<Resource[]> {
     const data = await this.repo.find({
       where: { SchoolYearId: schoolYearId },
-      order: { is_active: 'DESC', priority: 'ASC' },
+      order: { is_active: 'DESC', priority: 'ASC', resource_id: 'ASC' },
     });
     return data;
   }

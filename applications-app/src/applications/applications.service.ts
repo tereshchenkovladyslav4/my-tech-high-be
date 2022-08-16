@@ -35,6 +35,7 @@ import { NewParentPacketContactInput } from './dto/new-parent-packet-contact.inp
 import { CreateAddressInput } from './dto/new-address.inputs';
 import { PersonAddressService } from './services/person-address.service';
 import { EmailRecordsService } from './services/email-records.service';
+import { SchoolYear } from './models/schoolyear.entity';
 
 @Injectable()
 export class ApplicationsService {
@@ -148,19 +149,22 @@ export class ApplicationsService {
         parent.parent_id,
       );
 
-      const setEmailBodyInfo = (school_year, student) => {
+      const setEmailBodyInfo = (school_year: SchoolYear, student) => {
         const yearbegin = new Date(school_year.date_begin)
           .getFullYear()
           .toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
+        const yearText = school_year.midyear_application
+        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
+        : `${yearbegin}-${yearend.substring(2, 4)}`
         return emailTemplate.body
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
           .replace(/\[PARENT\]/g, person.first_name)
-          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+          .replace(/\[YEAR\]/g, yearText)
           .replace(
             /\[APPLICATION_YEAR\]/g,
-            `${yearbegin}-${yearend.substring(2, 4)}`,
+            yearText,
           );
       };
       let emailBody = emailTemplate.body;

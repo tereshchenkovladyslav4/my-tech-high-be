@@ -87,6 +87,7 @@ export class RegionService {
       enrollment_packet_deadline_num_days:
         updateRegionInput.enrollment_packet_deadline_num_days,
       withdraw_deadline_num_days: updateRegionInput.withdraw_deadline_num_days,
+      resource_confirm_details: updateRegionInput.resource_confirm_details,
     };
     Object.keys(data).forEach((key) => {
       if (!data[key]) {

@@ -53,7 +53,7 @@ export class UserAnnouncementsService {
           announcement.filter_grades,
           announcement.date
         FROM (
-          SELECT id, AnnouncementId AS announcement_id, user_id, status FROM infocenter.user_announcement WHERE user_id = ${user_id} AND status != "Read"
+          SELECT id, AnnouncementId AS announcement_id, user_id, status FROM infocenter.user_announcement WHERE user_id = ${user_id}
         ) AS userAnnouncements
         LEFT JOIN infocenter.announcement announcement ON (announcement.announcement_id = userAnnouncements.announcement_id)
         ${condition}

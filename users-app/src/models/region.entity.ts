@@ -17,7 +17,9 @@ import { SchoolDistrict } from './school-district.entity';
 import { EmailTemplate } from './email-template.entity';
 
 @ObjectType()
-@Directive('@key(fields: "id,name, program, enrollment_packet_deadline_num_days, region")')
+@Directive(
+  '@key(fields: "id,name, program, enrollment_packet_deadline_num_days, region")',
+)
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()
@@ -64,6 +66,10 @@ export class Region extends BaseEntity {
   @Column()
   @Field((type) => Int, { nullable: true })
   withdraw_deadline_num_days: number;
+
+  @Column('text', { nullable: true })
+  @Field(() => String, { nullable: true })
+  resource_confirm_details: string;
 
   @OneToMany(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
