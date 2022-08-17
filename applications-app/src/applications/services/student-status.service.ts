@@ -96,16 +96,19 @@ export class StudentStatusService {
     const studentTotal = studentResult.reduce((accumulator, object) => {
       return accumulator + Number(object.count || 0);
     }, 0);
-    const spedTotal = studentResult.reduce((accumulator, object) => {
-      return accumulator + Number(object.sped || 0);
-    }, 0);
+    // const spedTotal = studentResult.reduce((accumulator, object) => {
+    //   return accumulator + Number(object.sped || 0);
+    // }, 0);
+    let spedTotal = 0;
     studentResult.forEach((element) => {
       if (Number(element.status) === 0) {
         students.push({ status: 'Pending', count: element.count });
         sped.push({ status: 'Pending', count: element.sped });
+        spedTotal += Number(element.sped || 0);
       } else if (Number(element.status) === 1) {
         students.push({ status: 'Active', count: element.count });
         sped.push({ status: 'Active', count: element.sped });
+        spedTotal += Number(element.sped || 0);
       } else if (Number(element.status) === 2) {
         students.push({ status: 'Withdrawn', count: element.count });
         sped.push({ status: 'Withdrawn', count: element.sped });

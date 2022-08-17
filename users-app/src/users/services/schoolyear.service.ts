@@ -73,6 +73,17 @@ export class SchoolYearsService {
     previousYearId?: number,
   ): Promise<SchoolYear> {
     const data = this.schoolYearsRepository.create(createSchoolYearInput);
+
+    if (createSchoolYearInput.cloneSchoolYearId) {
+      // Clone grades
+      const cloneSchoolYear = await this.schoolYearsRepository.findOne({
+        where: {
+          school_year_id: createSchoolYearInput.cloneSchoolYearId,
+        },
+      });
+      if (cloneSchoolYear?.grades) data.grades = cloneSchoolYear.grades;
+    }
+
     const updatedRecord = await this.schoolYearsRepository.save(data);
 
     let schoolPartnerList: SchoolPartner[] = [];
@@ -98,6 +109,7 @@ export class SchoolYearsService {
     }
 
     if (createSchoolYearInput.cloneSchoolYearId) {
+      // Clone homeroom resources
       const newSchoolYearId = updatedRecord.school_year_id;
 
       const queryRunner = await getConnection().createQueryRunner();
