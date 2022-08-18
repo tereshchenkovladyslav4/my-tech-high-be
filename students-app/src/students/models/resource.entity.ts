@@ -7,8 +7,9 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
 } from 'typeorm';
-import { ResourceSubtitle } from '../enums';
+import { ResourceRequestStatus, ResourceSubtitle } from '../enums';
 import { ResourceCart } from './resource-cart.entity';
+import { ResourceRequest } from './resource-request.entity';
 import { StudentHiddenResource } from './student-hidden-resource.entity';
 
 @ObjectType()
@@ -130,6 +131,9 @@ export class Resource extends BaseEntity {
   @Field(() => Date, { nullable: true })
   CartDate: Date;
 
+  @Field(() => String, { nullable: true })
+  RequestStatus: string;
+
   @OneToMany(
     () => StudentHiddenResource,
     (studentHiddenResource) => studentHiddenResource.Resource,
@@ -138,6 +142,13 @@ export class Resource extends BaseEntity {
   HiddenStudents: StudentHiddenResource[];
 
   @OneToMany(() => ResourceCart, (resourceCart) => resourceCart.Resource)
-  @Field(() => [StudentHiddenResource], { nullable: true })
-  StudentsInCart: StudentHiddenResource[];
+  @Field(() => [ResourceCart], { nullable: true })
+  StudentsInCart: ResourceCart[];
+
+  @OneToMany(
+    () => ResourceRequest,
+    (resourceRequest) => resourceRequest.Resource,
+  )
+  @Field(() => [ResourceRequest], { nullable: true })
+  ResourceRequests: ResourceRequest[];
 }

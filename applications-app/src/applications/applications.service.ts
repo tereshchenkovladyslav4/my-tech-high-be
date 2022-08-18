@@ -149,14 +149,20 @@ export class ApplicationsService {
         parent.parent_id,
       );
 
-      const setEmailBodyInfo = (school_year: SchoolYear, student) => {
+      const setEmailBodyInfo = async (school_year: SchoolYear, student: Student) => {
+
         const yearbegin = new Date(school_year.date_begin)
           .getFullYear()
           .toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
-        const yearText = school_year.midyear_application
+
+
+        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({school_year_id: school_year.school_year_id, student_id: student.student_id}) 
+
+        const yearText = currApplication.midyear_application
         ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
         : `${yearbegin}-${yearend.substring(2, 4)}`
+
         return emailTemplate.body
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
@@ -179,7 +185,7 @@ export class ApplicationsService {
             gradeLevels[0]?.school_year_id,
           );
 
-          emailBody = setEmailBodyInfo(school_year, student);
+          emailBody = await setEmailBodyInfo(school_year, student);
           const result = await this.emailsService.sendEmail({
             email: email,
             subject: emailTemplate.subject,

@@ -5,6 +5,7 @@ import { Resource } from '../models/resource.entity';
 import { ResourceService } from '../services/resource.service';
 import { ToggleHiddenResourceInput } from '../dto/toggle-resource-hidden.input';
 import { ToggleResourceCartInput } from '../dto/toggle-resource-cart.input';
+import { RequestResourcesInput } from '../dto/request-resources.input';
 
 @Resolver((of) => Resource)
 export class ResourceResolver {
@@ -25,11 +26,20 @@ export class ResourceResolver {
   ) {
     return this.service.toggleHiddenResource(toggleHiddenResourceInput);
   }
+
   @Mutation((returns) => Boolean)
   async toggleResourceCart(
     @Args('toggleResourceCartInput')
     toggleResourceCartInput: ToggleResourceCartInput,
   ) {
     return this.service.toggleResourceCart(toggleResourceCartInput);
+  }
+
+  @Mutation((returns) => Boolean)
+  async requestResources(
+    @Args('requestResourcesInput')
+    requestResourcesInput: RequestResourcesInput,
+  ) {
+    return this.service.requestResources(requestResourcesInput);
   }
 }

@@ -658,4 +658,14 @@ export class ApplicationsService {
     );
     return true;
   }
+
+  async findBySchoolYearAndStudent({student_id, school_year_id}): Promise<Application> {
+    const applications = await this.applicationsRepository.findOne({
+      where: {
+        student_id,
+        school_year_id
+      }
+    });
+    return applications;
+  }
 }
