@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, getConnection, Repository } from 'typeorm';
 import { StudentRecordSearchInput } from '../dto/student_record_search_input';

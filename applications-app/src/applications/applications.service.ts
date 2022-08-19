@@ -160,7 +160,7 @@ export class ApplicationsService {
         const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({school_year_id: school_year.school_year_id, student_id: student.student_id}) 
 
         const yearText = currApplication.midyear_application
-        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
+        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
         : `${yearbegin}-${yearend.substring(2, 4)}`
 
         return emailTemplate.body

@@ -378,41 +378,6 @@ export class WithdrawalService {
           region.withdraw_deadline_num_days < withdrawal.diff_date AND 
           templates.id IS NOT NULL
       `);
-      withdrawals.map(async (withdrawal) => {
-        const queryRunner = await getConnection().createQueryRunner();
-        const {
-          withdrawal_id,
-          parent_email,
-          email_bcc,
-          email_from,
-          email_body,
-          email_subject,
-          student_name,
-          parent_name,
-          date_begin,
-          date_end,
-        } = withdrawal;
-        const yearbegin = new Date(date_begin).getFullYear().toString();
-        const yearend = new Date(date_end).getFullYear().toString();
-        const result = await this.emailService.sendEmail({
-          email: parent_email,
-          subject: email_subject,
-          content: email_body
-            .toString()
-            .replace(/\[STUDENT\]/g, student_name)
-            .replace(/\[PARENT\]/g, parent_name)
-            .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-            .replace(/\[Student\]/g, student_name)
-            .replace(/\[Parent\]/g, parent_name)
-            .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`),
-          from: email_from,
-          bcc: email_bcc,
-        });
-        await queryRunner.query(
-          `UPDATE infocenter.withdrawal SET response = 'undeclared', status='${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawal_id}`,
-        );
-        queryRunner.release();
-      });
       // To send remider email to parent by deadline
       const reminders = await queryRunner.query(`
 				SELECT
@@ -443,6 +408,7 @@ export class WithdrawalService {
           } AND 
 					templates.id IS NOT NULL
 			`);
+      queryRunner.release();
       reminders.map(async (reminder) => {
         const {
           remain_date,
@@ -466,7 +432,42 @@ export class WithdrawalService {
           });
         });
       });
-      queryRunner.release();
+      withdrawals.map(async (withdrawal) => {
+        const queryRunner = await getConnection().createQueryRunner();
+        const {
+          withdrawal_id,
+          parent_email,
+          email_bcc,
+          email_from,
+          email_body,
+          email_subject,
+          student_name,
+          parent_name,
+          date_begin,
+          date_end,
+        } = withdrawal;
+        const yearbegin = new Date(date_begin).getFullYear().toString();
+        const yearend = new Date(date_end).getFullYear().toString();
+        const result = await this.emailService.sendEmail({
+          email: parent_email,
+          subject: email_subject,
+          content: email_body
+            .toString()
+            .replace(/\[STUDENT\]/g, student_name)
+            .replace(/\[PARENT\]/g, parent_name)
+            .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+            .replace(/\[Student\]/g, student_name)
+            .replace(/\[Parent\]/g, parent_name)
+            .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`),
+          from: email_from,
+          bcc: email_bcc,
+          template_name: 'Undeclared Withdraw',
+        });
+        await queryRunner.query(
+          `UPDATE infocenter.withdrawal SET response = 'undeclared', status='${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawal_id}`,
+        );
+        queryRunner.release();
+      });
       return 'Successfully run schedule reminders.';
     } catch (error) {
       return error;

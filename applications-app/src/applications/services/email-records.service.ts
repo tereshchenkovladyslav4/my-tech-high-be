@@ -147,6 +147,7 @@ export class EmailRecordsService {
   async resendRecords(deleteRecordInput: DeleteRecordInput): Promise<Boolean> {
     const { record_ids } = deleteRecordInput;
     const records = await this.emailRecordsRepository.findByIds(record_ids);
+    await this.emailRecordsRepository.delete(record_ids);
 
     for (let i = 0; i < records.length; i++) {
         const record = records[i]
