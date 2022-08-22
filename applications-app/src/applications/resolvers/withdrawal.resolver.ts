@@ -66,8 +66,7 @@ export class WithdrawalResolver {
     @Args('withdrawalInput')
     withdrawalInput: WithdrawalInput,
   ): Promise<boolean> {
-    const { withdrawal } = withdrawalInput;
-    return await this.service.save(withdrawal);
+    return await this.service.save(withdrawalInput);
   }
 
   @Mutation((returns) => [WithdrawalEmail], { name: 'emailWithdrawal' })

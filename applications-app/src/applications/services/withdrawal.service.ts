@@ -24,6 +24,8 @@ import { StudentsService } from './students.service';
 import { UserRegionService } from './user-region.service';
 import { WithdrawalEmailsService } from './withdrawal-emails.service';
 import { WithdrawalStatus } from '../enums';
+import { WithdrawalInput } from '../dto/withdrawal.input';
+import { WithdrawalOption } from '../enums/withdrawal-option.enum';
 
 @Injectable()
 export class WithdrawalService {
@@ -40,8 +42,9 @@ export class WithdrawalService {
     private withdrawalEmailService: WithdrawalEmailsService,
   ) {}
 
-  async save(withdrawal: Withdrawal): Promise<boolean> {
+  async save(withdrawalInput: WithdrawalInput): Promise<boolean> {
     try {
+      const { withdrawal, withdrawalOption } = withdrawalInput;
       const queryRunner = await getConnection().createQueryRunner();
       const { StudentId, status, date_effective, response, withdrawal_id } =
         withdrawal;
@@ -61,7 +64,12 @@ export class WithdrawalService {
         response: response,
       });
 
-      if (status == WithdrawalStatus.NOTIFIED && students?.length == 0) {
+      if (
+        (status == WithdrawalStatus.NOTIFIED && students?.length == 0) ||
+        (status == WithdrawalStatus.WITHDRAWN &&
+          withdrawalOption &&
+          withdrawalOption == WithdrawalOption.UNDECLARED_FORM_EMAIL)
+      ) {
         withdrawal.date_emailed = new Date();
 
         //	Send email
@@ -83,7 +91,9 @@ export class WithdrawalService {
 
         const emailTemplate =
           await this.emailTemplateService.findByTemplateAndRegion(
-            'Notify of Withdraw',
+            withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW
+              ? 'Notify of Withdraw'
+              : 'Undeclared Withdraw',
             region_id,
           );
 
@@ -133,7 +143,10 @@ export class WithdrawalService {
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
             region_id: region_id,
-            template_name: 'Notify of Withdraw',
+            template_name:
+              withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW
+                ? 'Notify of Withdraw'
+                : 'Undeclared Withdraw',
           });
 
           if (withdrawalResponse?.withdrawal_id) {
@@ -378,6 +391,7 @@ export class WithdrawalService {
           region.withdraw_deadline_num_days < withdrawal.diff_date AND 
           templates.id IS NOT NULL
       `);
+
       // To send remider email to parent by deadline
       const reminders = await queryRunner.query(`
 				SELECT
@@ -429,6 +443,7 @@ export class WithdrawalService {
             content: emailReminder.body,
             bcc: email_bcc,
             from: email_from,
+            template_name: 'Withdrawal Reminder',
           });
         });
       });

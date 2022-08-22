@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import {
@@ -43,5 +43,13 @@ export class StudentRecordResolver {
   ): Promise<Boolean> {
     await this.studentRecordFileServices.save(createStudentRecordFileInput);
     return true;
+  }
+
+  @Mutation((returns) => Boolean, { name: 'createStudentRecord' })
+  async createStudentRecord(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+    @Args({ name: 'student_id', type: () => ID }) student_id: number,
+  ) {
+    return await this.service.save(region_id, student_id);
   }
 }

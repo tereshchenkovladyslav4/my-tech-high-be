@@ -37,27 +37,27 @@ class BuildServiceModule {}
           serviceList: [
             {
               name: 'auth',
-              url: `http://${
+              url: `https://${
                 process.env.AUTH_HOST || 'localhost'
-              }:3003/graphql`,
+              }/graphql`,
             },
             {
               name: 'users',
-              url: `http://${
+              url: `https://${
                 process.env.USERS_HOST || 'localhost'
-              }:3000/graphql`,
+              }/graphql`,
             },
             {
               name: 'students',
-              url: `http://${
+              url: `https://${
                 process.env.STUDENTS_HOST || 'localhost'
-              }:3001/graphql`,
+              }/graphql`,
             },
             {
               name: 'applications',
-              url: `http://${
+              url: `https://${
                 process.env.APPLICATIONS_HOST || 'localhost'
-              }:3004/graphql`,
+              }/graphql`,
             },
           ],
         },

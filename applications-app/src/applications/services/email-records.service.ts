@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets } from 'typeorm';
 import { CreateEmailRecordInput } from '../dto/new-email-record.inputs';
+import { UpdateEmailRecordInput } from '../dto/update-email-record.input';
 import { EmailRecord } from '../models/email-record.entity';
 import { EmailRecordArgs } from '../dto/email-records.args';
 import { Pagination } from '../../paginate';
@@ -177,7 +178,10 @@ export class EmailRecordsService {
     return true;
   }
 
-  async resendEmail(record: CreateEmailRecordInput): Promise<Boolean> {
+  async resendEmail(record: UpdateEmailRecordInput): Promise<Boolean> {
+    const {id} = record;
+    await this.emailRecordsRepository.delete(id);
+    
     const result = await this.SESService.sendEmail(
         record.to_email,
         record.subject,

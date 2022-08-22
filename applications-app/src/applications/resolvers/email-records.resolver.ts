@@ -19,7 +19,7 @@ import { EmailRecordArgs } from '../dto/email-records.args';
 import { Pagination } from '../../paginate';
 import { ResponseDTO } from '../dto/response.dto';
 import { DeleteRecordInput } from '../dto/delete-record.input';
-import { CreateEmailRecordInput } from '../dto/new-email-record.inputs';
+import { UpdateEmailRecordInput } from '../dto/update-email-record.input';
 
 @Resolver((of) => EmailRecord)
 export class EmailRecordResolver {
@@ -50,7 +50,7 @@ export class EmailRecordResolver {
     }
 
     @Mutation((returns) => Boolean, { name: 'resendEmail' })
-    async resendEmail(@Args('resendEmailInput') resendEmailInput: CreateEmailRecordInput,): Promise<Boolean> {
+    async resendEmail(@Args('resendEmailInput') resendEmailInput: UpdateEmailRecordInput,): Promise<Boolean> {
         return await this.emailRecordsService.resendEmail(resendEmailInput);
     }
 }

@@ -1,9 +1,9 @@
-name: Deploy To Demo
+name: Deploy To Staging
 
 on:
   push:
     tags:
-      - demo
+      - staging
 
 jobs:
   generate-tag:
@@ -38,64 +38,64 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:applications-app ./applications-app/
           docker push $REGISTRY/$REPOSITORY:applications-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "demo-applications-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
+          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-applications-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
           aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
         env:
-          ECS_CLUSTER: infocenter-v2-be--demo
+          ECS_CLUSTER: infocenter-v2-be--staging
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: infocenter-v2-be-demo
+          REPOSITORY: infocenter-v2-be-staging
 
       - name: Build and Push Authentication App
         run: |
           docker build -t $REGISTRY/$REPOSITORY:authentication ./authentication/
           docker push $REGISTRY/$REPOSITORY:authentication
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "demo-authentication" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
+          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-authentication" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
           aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
         env:
-          ECS_CLUSTER: infocenter-v2-be--demo
+          ECS_CLUSTER: infocenter-v2-be--staging
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: infocenter-v2-be-demo
+          REPOSITORY: infocenter-v2-be-staging
 
       - name: Build and Push Gateway App
         run: |
           docker build -t $REGISTRY/$REPOSITORY:gateway ./gateway/
           docker push $REGISTRY/$REPOSITORY:gateway
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "demo-gateway" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
+          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-gateway" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
           aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
         env:
-          ECS_CLUSTER: infocenter-v2-be--demo
+          ECS_CLUSTER: infocenter-v2-be--staging
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: infocenter-v2-be-demo
+          REPOSITORY: infocenter-v2-be-staging
 
       - name: Build and Push Media App
         run: |
           docker build -t $REGISTRY/$REPOSITORY:media-app ./media-app/
           docker push $REGISTRY/$REPOSITORY:media-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "demo-media-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
+          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-media-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
           aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
         env:
-          ECS_CLUSTER: infocenter-v2-be--demo
+          ECS_CLUSTER: infocenter-v2-be--staging
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: infocenter-v2-be-demo
+          REPOSITORY: infocenter-v2-be-staging
 
       - name: Build and Push Students App
         run: |
           docker build -t $REGISTRY/$REPOSITORY:students-app ./students-app/
           docker push $REGISTRY/$REPOSITORY:students-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "demo-students-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
+          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-students-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
           aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
         env:
-          ECS_CLUSTER: infocenter-v2-be--demo
+          ECS_CLUSTER: infocenter-v2-be--staging
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: infocenter-v2-be-demo
+          REPOSITORY: infocenter-v2-be-staging
 
       - name: Build and Push Users App
         run: |
           docker build -t $REGISTRY/$REPOSITORY:users-app ./users-app/
           docker push $REGISTRY/$REPOSITORY:users-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "demo-users-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
+          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-users-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
           aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
         env:
-          ECS_CLUSTER: infocenter-v2-be--demo
+          ECS_CLUSTER: infocenter-v2-be--staging
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: infocenter-v2-be-demo
+          REPOSITORY: infocenter-v2-be-staging

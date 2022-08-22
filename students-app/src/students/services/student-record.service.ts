@@ -193,4 +193,25 @@ export class StudentRecordService {
       total: total,
     });
   }
+
+  async save(region_id: number, student_id: number): Promise<Boolean> {
+    try {
+      const record = await this.repo.find({
+        where: {
+          RegionId: region_id,
+          StudentId: student_id,
+        },
+      });
+      if (!record || record.length == 0) {
+        await this.repo.save({
+          RegionId: region_id,
+          StudentId: student_id,
+        });
+      }
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  }
 }
