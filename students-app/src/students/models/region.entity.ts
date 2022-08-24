@@ -11,7 +11,9 @@ import { UserRegion } from './user-region.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "id, name, program, enrollment_packet_deadline_num_days, region")')
+@Directive(
+  '@key(fields: "id, name, program, state_logo, enrollment_packet_deadline_num_days, region")',
+)
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()
@@ -29,6 +31,11 @@ export class Region extends BaseEntity {
   @Field((type) => String, { nullable: true })
   @Directive('@external')
   program: String;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  state_logo: String;
 
   @Column()
   application_deadline_num_days: number;

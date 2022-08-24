@@ -1,4 +1,11 @@
-import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import {
+  Directive,
+  Field,
+  ID,
+  ObjectType,
+  Int,
+  InputType,
+} from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -9,6 +16,7 @@ import {
 } from 'typeorm';
 import { EmailVerifier } from './email-verifier.entity';
 import { PersonAddress } from './person-address.entity';
+import { Phone } from './phone.entity';
 import { Student } from './student.entity';
 import { User } from './user.entity';
 
@@ -60,6 +68,10 @@ export class Person extends BaseEntity {
   @OneToOne((type) => PersonAddress, (address) => address.person_id)
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
   person_address: PersonAddress;
+
+  @OneToOne((type) => Phone, (phone) => phone.person_id)
+  @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
+  person_phone: Phone;
 
   @OneToOne((type) => User, (user) => user.user_id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })

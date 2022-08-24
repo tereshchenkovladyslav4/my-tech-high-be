@@ -1,0 +1,60 @@
+import { Injectable } from '@nestjs/common';
+import { getConnection } from 'typeorm';
+import { StudentRecordFileKind } from '../enums';
+
+@Injectable()
+export class StudentRecordService {
+  constructor() {}
+
+  async createStudentRecord(
+    studentId: number,
+    regionId: number,
+    fileId: number,
+    fileKind: StudentRecordFileKind,
+  ): Promise<boolean> {
+    try {
+      const queryRunner = await getConnection().createQueryRunner();
+      let recordId;
+      const records = await queryRunner.query(`
+        SElECT * FROM infocenter.mth_student_record
+        WHERE StudentId = ${studentId};
+      `);
+      if (records.length) {
+        recordId = records[0].record_id;
+      } else {
+        const record = await queryRunner.query(`
+          INSERT INTO infocenter.mth_student_record
+            (StudentId, RegionId, created_at, updated_at)
+          VALUES
+            (${studentId}, ${regionId}, NOW(), NOW());
+        `);
+        recordId = record.insertId;
+      }
+
+      const recordFiles = await queryRunner.query(`
+        SElECT * FROM infocenter.mth_student_record_file
+        WHERE RecordId = ${recordId} AND file_kind = "${fileKind}";
+      `);
+
+      if (!recordFiles.length) {
+        await queryRunner.query(`
+          INSERT INTO infocenter.mth_student_record_file
+            (RecordId, FileId, file_kind, created_at, updated_at)
+          VALUES
+            (${recordId}, ${fileId}, "${fileKind}", NOW(), NOW());
+        `);
+      } else {
+        const recordFileId = recordFiles[0].record_file_id;
+        await queryRunner.query(`
+          UPDATE infocenter.mth_student_record_file
+          SET FileId = ${fileId}, updated_at = NOW()
+          WHERE record_file_id = ${recordFileId};
+        `);
+      }
+      queryRunner.release();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}

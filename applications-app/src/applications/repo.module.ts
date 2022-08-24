@@ -85,6 +85,8 @@ import { ResourceService } from './services/resource.service';
 import { Resource } from './models/resource.entity';
 import { SchoolEnrollment } from './models/school-enrollment.entity';
 import { EmailRecord } from './models/email-record.entity';
+import { PDFModule } from '@t00nday/nestjs-pdf';
+import { StudentRecordService } from './services/student-record.service';
 
 const servicesImports = [
   UsersService,
@@ -131,6 +133,7 @@ const servicesImports = [
   CronJobsLogsService,
   ResourceService,
   EmailRecordsService,
+  StudentRecordService,
 ];
 
 @Global()
@@ -179,9 +182,15 @@ const servicesImports = [
       SchoolEnrollment,
       EmailRecord,
     ]),
+    PDFModule.register({
+      view: {
+        root: 'templates',
+        engine: 'pug',
+      },
+    }),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule { }
+class RepoModule {}
 export default RepoModule;

@@ -15,14 +15,19 @@ export class FilesService {
 
     @InjectRepository(File)
     private readonly filesRepository: Repository<File>,
-    
+
     @InjectRepository(PacketFile)
-    private readonly packetFileRepository: Repository<PacketFile>    
+    private readonly packetFileRepository: Repository<PacketFile>,
   ) {}
 
   async findByIds(file_ids: String): Promise<Pagination<File>> {
-    const qb = this.filesRepository.createQueryBuilder('file')
-    const [results, total] = await qb.where("file.file_id IN (:...file_ids)", { file_ids: file_ids.split(',').map(String) }).orderBy('file.file_id', 'ASC').getManyAndCount()
+    const qb = this.filesRepository.createQueryBuilder('file');
+    const [results, total] = await qb
+      .where('file.file_id IN (:...file_ids)', {
+        file_ids: file_ids.split(',').map(String),
+      })
+      .orderBy('file.file_id', 'ASC')
+      .getManyAndCount();
     const files = [];
     for (const file of results) {
       if (file.item1) {
@@ -30,10 +35,10 @@ export class FilesService {
       }
       files.push(file);
     }
-   
+
     return new Pagination<File>({
       results: files,
-      total
+      total,
     });
   }
 
@@ -47,11 +52,11 @@ export class FilesService {
     const { fileId } = data;
     const attachmentId = (await this.filesRepository.findOne(fileId)).item1;
     await this.packetFileRepository.delete({
-      mth_file_id: parseInt(fileId)
+      mth_file_id: parseInt(fileId),
     });
 
     await this.filesRepository.delete({
-      file_id: parseInt(fileId)
+      file_id: parseInt(fileId),
     });
 
     this.s3Service.deleteFile(attachmentId);
@@ -64,5 +69,35 @@ export class FilesService {
 
   async create(file: CreateFileInput): Promise<File> {
     return this.filesRepository.save(file);
+  }
+
+  async upload(
+    buffer: Buffer,
+    directory: string,
+    name: string,
+    mimetype: string,
+    year,
+  ): Promise<File> {
+    try {
+      const extension = mimetype.split('/').pop();
+      const upload = await this.s3Service.s3_upload(
+        buffer,
+        null,
+        `${directory}/${name}.${extension}`,
+        mimetype,
+      );
+
+      const result = await this.create({
+        name: name,
+        type: mimetype,
+        item1: upload.Key,
+        item2: upload.ServerSideEncryption,
+        item3: upload.ETag,
+        year: year,
+      });
+      return result;
+    } catch (err) {
+      return null;
+    }
   }
 }

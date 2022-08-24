@@ -10,5 +10,5 @@ export class WithdrawalInput {
 
   @Field((type) => Int)
   @IsIn([WithdrawalOption])
-  withdrawalOption?: number;
+  withdrawalOption?: number = null;
 }

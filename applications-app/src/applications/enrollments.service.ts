@@ -701,6 +701,7 @@ export class EnrollmentsService {
 
   async runScheduleReminders(): Promise<String> {
     try {
+      let MailData = [];
       const emailTemplates = await this.emailTemplateService.findAllByTemplate(
         'Packet Reminders',
       );
@@ -722,49 +723,58 @@ export class EnrollmentsService {
               if (emailTemplate) {
                 await Promise.all(
                   packets.map(async (packet) => {
-                    const webAppUrl = process.env.WEB_APP_URL;
-                    const student = packet.student.person;
-                    const parent = packet.student.parent.person;
-                    const school_year = packet.student.applications[0].school_year
-                    const email = packet.student.parent.person.email
-                    const setEmailBodyInfo = () => {
-                      const yearbegin = new Date(school_year.date_begin)
-                        .getFullYear()
-                        .toString();
-                      const yearend = new Date(school_year.date_end)
-                        .getFullYear()
-                        .toString();
-                      const emailBody = remind.body || emailTemplate.body
-                      const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`
-                      return emailBody
-                        .toString()
-                        .replace(/\[STUDENT\]/g, student.first_name)
-                        .replace(/\[PARENT\]/g, parent.first_name)
-                        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-                        .replace(
-                          /\[APPLICATION_YEAR\]/g,
-                          `${yearbegin}-${yearend.substring(2, 4)}`,
-                        )
-                        .replace(
-                          /\[DEADLINE\]/g,
-                          `${Moment(packet.deadline).format('MM/DD/yy')}`,
-                        )
-                        .replace(
-                          /\[LINK\]/g,
-                          `<a href='${link}'>${link}</a>`,
-                        );
-                    };
-                    const body = setEmailBodyInfo();
-
-                    await this.sesEmailService.sendEmail({
-                      email: email,
-                      subject: remind.subject || emailTemplate.subject,
-                      content: body,
-                      bcc: emailTemplate.bcc,
-                      from: emailTemplate.from,
-                      region_id: 1,
-                      template_name: 'Packet Reminders',
-                    });
+                    // remove sending duplicate mail
+                    const pack_ids = Object.keys(MailData);
+                    const duplicate = pack_ids.map((b) => {   
+                      if(parseInt(b) == packet.packet_id && MailData[b] == remind.reminder_id) { return true }})
+                    if(!duplicate.includes(true)) {
+                      MailData[packet.packet_id] = remind.reminder_id;
+                      // <------------------------*-------------------------------->
+                      
+                      const webAppUrl = process.env.WEB_APP_URL;
+                      const student = packet.student.person;
+                      const parent = packet.student.parent.person;
+                      const school_year = packet.student.applications[0].school_year
+                      const email = packet.student.parent.person.email
+                      const setEmailBodyInfo = () => {
+                        const yearbegin = new Date(school_year.date_begin)
+                          .getFullYear()
+                          .toString();
+                        const yearend = new Date(school_year.date_end)
+                          .getFullYear()
+                          .toString();
+                        const emailBody = remind.body || emailTemplate.body
+                        const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`
+                        return emailBody
+                          .toString()
+                          .replace(/\[STUDENT\]/g, student.first_name)
+                          .replace(/\[PARENT\]/g, parent.first_name)
+                          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+                          .replace(
+                            /\[APPLICATION_YEAR\]/g,
+                            `${yearbegin}-${yearend.substring(2, 4)}`,
+                          )
+                          .replace(
+                            /\[DEADLINE\]/g,
+                            `${Moment(packet.deadline).format('MM/DD/yy')}`,
+                          )
+                          .replace(
+                            /\[LINK\]/g,
+                            `<a href='${link}'>${link}</a>`,
+                          );
+                      };
+                      const body = setEmailBodyInfo();
+  
+                      await this.sesEmailService.sendEmail({
+                        email: email,
+                        subject: remind.subject || emailTemplate.subject,
+                        content: body,
+                        bcc: emailTemplate.bcc,
+                        from: emailTemplate.from,
+                        template_name: 'Packet Reminders',
+                        region_id: emailTemplate.region_id,
+                      });
+                    }
                   }),
                 );
               }

@@ -15,7 +15,9 @@ import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "id, name, program, enrollment_packet_deadline_num_days, region")')
+@Directive(
+  '@key(fields: "id, name, program, state_logo, enrollment_packet_deadline_num_days, region")',
+)
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()
@@ -35,14 +37,16 @@ export class Region extends BaseEntity {
   program: String;
 
   @Column()
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  state_logo: String;
+
+  @Column()
   @Field((type) => Int, { nullable: true })
   @Directive('@external')
   enrollment_packet_deadline_num_days: number;
 
-  @ManyToOne(
-    () => UserRegion,
-    (userRegion) => userRegion.regionDetail,
-  )
+  @ManyToOne(() => UserRegion, (userRegion) => userRegion.regionDetail)
   @Field(() => UserRegion, { nullable: true })
   @JoinColumn({ name: 'id', referencedColumnName: 'region_id' })
   @Directive('@external')

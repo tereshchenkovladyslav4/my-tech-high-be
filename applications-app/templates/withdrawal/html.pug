@@ -1,0 +1,136 @@
+doctype html
+html(lang='en')
+  head
+    style(type='text/css').
+      * {
+        box-sizing: border-box;
+      }
+      p {
+        margin: 0;
+      }
+      body {
+        font-family: VisbyCF;
+        margin: 16px;
+        font-size: 12px;
+      }
+
+      .header__logo img {
+        height: 64px;
+        display: block;
+      }
+
+      .main {
+        margin-top: 24px;
+      }
+
+      .content_list {
+        display: -webkit-flex;
+        -webkit-flex-wrap: wrap;
+        margin: -16px -4px;
+      }
+
+      .content_list__item {
+        display: -webkit-flex;
+        -webkit-align-items: end;
+        width: 100%;
+        padding: 8px 4px;
+        box-sizing: border-box;
+      }
+
+      .content_list__item .label {
+        margin-right: 8px;
+      }
+
+      .content_list__item .value {
+        -webkit-flex: 1;
+        border-bottom: solid 1px #A1A1A1;
+      }
+  body
+    .header
+      .header__logo
+        img(
+          src=stateLogo
+        )
+    .main
+      h1.title(style={'text-align': 'center', 'font-size': '16px', 'font-weight': 'bold'}) Student Withdrawal Report
+
+      .content_wrap(style={padding: '16px', 'font-weight': '500'})
+        .basic-content(style={padding: '16px'})
+          .content_list
+            .content_list__item(style={width: '40%'})
+              .label Student Name:
+              .value #{studentName}
+            .content_list__item(style={width: '30%'})
+              .label Birthdate:
+              .value #{birthdate}
+            .content_list__item(style={width: '30%'})
+              .label Grade:
+              .value #{grades}
+            .content_list__item(style={width: '60%'})
+              .label Address:
+              .value #{address}
+            .content_list__item(style={width: '40%'})
+              .label Phone:
+              .value #{phone}
+            .content_list__item
+              .label Effective Withdraw Date:
+              .value #{dateEffective}
+            if questions.length
+              each item in questions
+                case item.type
+                  when 3
+                    .content_list__item(style={'-webkit-align-items': 'flex-start'})
+                      .label #{item.question}:
+                      div(style={'display': 'block'})
+                        if item.options.length
+                          each option in item.options
+                            div(style={'display': '-webkit-flex', '-webkit-align-items': 'center'})
+                              if option.value == item.response
+                                input.checkbox__option__input(type="checkbox" checked onclick="return false;")
+                              else
+                                input.checkbox__option__input(type="checkbox" onclick="return false;")
+                              .v-label #{option.label}
+                    break
+                  when 4
+                    .content_list__item(style={'-webkit-align-items': 'flex-start'})
+                      if item.response
+                        input.checkbox__option__input(type="checkbox" checked onclick="return false;")
+                      else
+                        input.checkbox__option__input(type="checkbox" onclick="return false;")
+                      .label(style={'margin-left': '4px'})!=item.question
+                    break
+                  when 7
+                    .content_list__item
+                      .label!=item.question
+                      .value #{item.response}
+                    break
+                  when 9
+                    .content_list__item
+                      .label Name:
+                      .value #{item.response.name}
+                    .content_list__item
+                      .label Signature:
+                      .value 
+                        img.signature(
+                          src=item.response.signature
+                        )
+                  default
+                    .content_list__item
+                      .label #{item.question}:
+                      .value #{item.response}
+            else 
+              p(style={'width': '100%', 'padding': '24px 0'}) Undeclared
+
+            .content_list__item(style={width: '30%'})
+              .label Date:
+              .value #{date}
+
+        .for_school_use_only(style={'padding-top': '64px'})
+          .content_list(style={border: 'solid 1px #A1A1A1'})
+            .content_list__item For School Use Only
+            .content_list__item(style={width: '30%'})
+              .label Register:
+              .value
+            .content_list__item(style={width: '30%'})
+              .label Administrator:
+              .value

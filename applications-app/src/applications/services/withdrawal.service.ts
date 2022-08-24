@@ -23,9 +23,19 @@ import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentsService } from './students.service';
 import { UserRegionService } from './user-region.service';
 import { WithdrawalEmailsService } from './withdrawal-emails.service';
-import { WithdrawalStatus } from '../enums';
+import {
+  PdfTemplate,
+  StudentRecordFileKind,
+  WithdrawalStatus,
+  WithdrawalOption,
+} from '../enums';
 import { WithdrawalInput } from '../dto/withdrawal.input';
-import { WithdrawalOption } from '../enums/withdrawal-option.enum';
+import { PDFService } from '@t00nday/nestjs-pdf';
+import { FilesService } from './files.service';
+import { File } from '../models/file.entity';
+import { StudentRecordService } from './student-record.service';
+import { S3DirectoryStudentRecords } from '../utils';
+import { gradeText } from '../utils';
 
 @Injectable()
 export class WithdrawalService {
@@ -40,6 +50,10 @@ export class WithdrawalService {
     private emailTemplateService: EmailTemplatesService,
     private schoolYearService: SchoolYearService,
     private withdrawalEmailService: WithdrawalEmailsService,
+    private pdfService: PDFService,
+    private filesService: FilesService,
+    private studentRecordService: StudentRecordService,
+    private regionService: UserRegionService,
   ) {}
 
   async save(withdrawalInput: WithdrawalInput): Promise<boolean> {
@@ -48,15 +62,25 @@ export class WithdrawalService {
       const queryRunner = await getConnection().createQueryRunner();
       const { StudentId, status, date_effective, response, withdrawal_id } =
         withdrawal;
-      const students = await queryRunner.query(
-        `SELECT StudentId, withdrawal_id FROM infocenter.withdrawal WHERE StudentId=${StudentId} AND status='${WithdrawalStatus.NOTIFIED}'`,
-      );
-      let withdrawalResponse;
-      let existingWithdrawalId = 0;
-      students.map((student) => {
-        existingWithdrawalId = student.withdrawal_id;
-      });
-      withdrawalResponse = await this.repo.save({
+
+      const [notifiedWithdrawls] = await this.repo
+        .createQueryBuilder('withdrawal')
+        .leftJoinAndSelect('withdrawal.Student', 'student')
+        .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('s_person.person_address', 's_person_address')
+        .leftJoinAndSelect('s_person_address.address', 's_address')
+        .leftJoinAndSelect('s_person.person_phone', 's_person_phone')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .leftJoinAndSelect('student.grade_levels', 'grade')
+        .where({ StudentId: StudentId, status: WithdrawalStatus.NOTIFIED })
+        .getManyAndCount();
+
+      const existingWithdrawalId = notifiedWithdrawls?.length
+        ? notifiedWithdrawls[0].withdrawal_id
+        : 0;
+
+      const withdrawalResponse = await this.repo.save({
         withdrawal_id: withdrawal_id || existingWithdrawalId,
         StudentId: StudentId,
         status: status,
@@ -65,11 +89,34 @@ export class WithdrawalService {
       });
 
       if (
-        (status == WithdrawalStatus.NOTIFIED && students?.length == 0) ||
-        (status == WithdrawalStatus.WITHDRAWN &&
-          withdrawalOption &&
-          withdrawalOption == WithdrawalOption.UNDECLARED_FORM_EMAIL)
+        (status === WithdrawalStatus.WITHDRAWN && notifiedWithdrawls?.length) ||
+        withdrawalOption === WithdrawalOption.UNDECLARED_FORM_EMAIL ||
+        withdrawalOption === WithdrawalOption.UNDECLARED_FORM_NO_EMAIL
       ) {
+        // 1. Admin sent withdraw notification and parenent submitted withdraw form
+        // 2. When admin withdraw
+        const item = await this.repo
+          .createQueryBuilder('withdrawal')
+          .leftJoinAndSelect('withdrawal.Student', 'student')
+          .leftJoinAndSelect('student.person', 's_person')
+          .leftJoinAndSelect('s_person.person_address', 's_person_address')
+          .leftJoinAndSelect('s_person_address.address', 's_address')
+          .leftJoinAndSelect('s_person.person_phone', 's_person_phone')
+          .leftJoinAndSelect('student.parent', 'parent')
+          .leftJoinAndSelect('parent.person', 'p_person')
+          .leftJoinAndSelect('student.grade_levels', 'grade')
+          .where({ withdrawal_id: withdrawalResponse.withdrawal_id })
+          .getOne();
+        const isPdfGenerated = await this.generateWithdrawalFormPdf(item);
+        if (!isPdfGenerated) return false;
+      }
+
+      if (
+        (status == WithdrawalStatus.NOTIFIED && !notifiedWithdrawls?.length) ||
+        (status == WithdrawalStatus.WITHDRAWN &&
+          withdrawalOption === WithdrawalOption.UNDECLARED_FORM_EMAIL)
+      ) {
+        // Notify withdrawal flow by admin
         withdrawal.date_emailed = new Date();
 
         //	Send email
@@ -478,6 +525,19 @@ export class WithdrawalService {
           bcc: email_bcc,
           template_name: 'Undeclared Withdraw',
         });
+        const item = await this.repo
+          .createQueryBuilder('withdrawal')
+          .leftJoinAndSelect('withdrawal.Student', 'student')
+          .leftJoinAndSelect('student.person', 's_person')
+          .leftJoinAndSelect('s_person.person_address', 's_person_address')
+          .leftJoinAndSelect('s_person_address.address', 's_address')
+          .leftJoinAndSelect('s_person.person_phone', 's_person_phone')
+          .leftJoinAndSelect('student.parent', 'parent')
+          .leftJoinAndSelect('parent.person', 'p_person')
+          .leftJoinAndSelect('student.grade_levels', 'grade')
+          .where({ withdrawal_id: withdrawal.withdrawal_id })
+          .getOne();
+        this.generateWithdrawalFormPdf(item);
         await queryRunner.query(
           `UPDATE infocenter.withdrawal SET response = 'undeclared', status='${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawal_id}`,
         );
@@ -589,26 +649,35 @@ export class WithdrawalService {
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
         .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('s_person.person_address', 's_person_address')
+        .leftJoinAndSelect('s_person_address.address', 's_address')
+        .leftJoinAndSelect('s_person.person_phone', 's_person_phone')
         .leftJoinAndSelect('student.parent', 'parent')
         .leftJoinAndSelect('parent.person', 'p_person')
         .leftJoinAndSelect('student.grade_levels', 'grade')
         .whereInIds(withdrawal_ids)
+        .andWhere({ status: WithdrawalStatus.REQUESTED })
         .getManyAndCount();
-      results
-        .filter((item) => item.status == WithdrawalStatus.REQUESTED)
-        .map(async (item) => {
-          const queryRunner = await getConnection().createQueryRunner();
-          const withdrawal_id = item.withdrawal_id;
-          const school_year_id = item.Student.grade_levels[0].school_year_id;
-          const studentId = item.Student.student_id;
+
+      const queryRunner = await getConnection().createQueryRunner();
+      for (let index = 0; index < results.length; index++) {
+        const item = results[index];
+        const withdrawalId = item.withdrawal_id;
+        const schoolYearId = item.Student.grade_levels[0].school_year_id;
+        const studentId = item.Student.student_id;
+
+        const isPdfGenerated = await this.generateWithdrawalFormPdf(item);
+        if (isPdfGenerated) {
           await queryRunner.query(
-            `UPDATE infocenter.withdrawal SET status = '${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawal_id}`,
+            `UPDATE infocenter.withdrawal SET status = '${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawalId}`,
           );
           await queryRunner.query(
-            `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
+            `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${schoolYearId}`,
           );
-          queryRunner.release();
-        });
+        }
+      }
+      queryRunner.release();
+
       return true;
     } catch (e) {
       return false;
@@ -651,32 +720,37 @@ export class WithdrawalService {
   ): Promise<Boolean> {
     try {
       const { withdrawal_id, body, type, region_id } = param;
-      const [results] = await this.repo
+      const withdraw = await this.repo
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
         .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('s_person.person_address', 's_person_address')
+        .leftJoinAndSelect('s_person_address.address', 's_address')
+        .leftJoinAndSelect('s_person.person_phone', 's_person_phone')
         .leftJoinAndSelect('student.parent', 'parent')
         .leftJoinAndSelect('parent.person', 'p_person')
         .leftJoinAndSelect('student.grade_levels', 'grade')
-        .whereInIds(withdrawal_id)
-        .getManyAndCount();
+        .where({ withdrawal_id })
+        .getOne();
 
       if (type === 1) {
-        results
-          .filter((item) => item.status == 'Requested')
-          .map(async (item) => {
-            const withdrawal_id = item.withdrawal_id;
-            const school_year_id = item.Student.grade_levels[0].school_year_id;
-            const studentId = item.Student.student_id;
-            const queryRunner = await getConnection().createQueryRunner();
+        if (withdraw.status === WithdrawalStatus.REQUESTED) {
+          const queryRunner = await getConnection().createQueryRunner();
+          const withdrawalId = withdraw.withdrawal_id;
+          const schoolYearId = withdraw.Student.grade_levels[0].school_year_id;
+          const studentId = withdraw.Student.student_id;
+
+          const isPdfGenerated = await this.generateWithdrawalFormPdf(withdraw);
+          if (isPdfGenerated) {
             await queryRunner.query(
-              `UPDATE infocenter.withdrawal SET status = 'Withdrawn' WHERE withdrawal_id = ${withdrawal_id};`,
+              `UPDATE infocenter.withdrawal SET status = '${WithdrawalStatus.WITHDRAWN}' WHERE withdrawal_id = ${withdrawalId};`,
             );
             await queryRunner.query(
-              `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id};`,
+              `UPDATE infocenter.mth_student_status SET status = 2 WHERE student_id = ${studentId} AND school_year_id = ${schoolYearId};`,
             );
-            queryRunner.release();
-          });
+          }
+          queryRunner.release();
+        }
       }
 
       const setEmailBodyInfo = (student, school_year) => {
@@ -695,17 +769,15 @@ export class WithdrawalService {
           .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
       };
       const emailBody = [];
-      results.map(async (item) => {
-        const school_year = await this.schoolYearService.findOneById(
-          item.Student.grade_levels[0].school_year_id,
-        );
-        const temp = {
-          withdrawal_id: item.withdrawal_id,
-          email: item.Student.parent.person.email,
-          body: setEmailBodyInfo(item.Student, school_year),
-        };
-        emailBody.push(temp);
-      });
+      const school_year = await this.schoolYearService.findOneById(
+        withdraw.Student.grade_levels[0].school_year_id,
+      );
+      const temp = {
+        withdrawal_id: withdraw.withdrawal_id,
+        email: withdraw.Student.parent.person.email,
+        body: setEmailBodyInfo(withdraw.Student, school_year),
+      };
+      emailBody.push(temp);
       const emailTemplate =
         await this.emailTemplateService.findByTemplateAndRegion(
           'Withdraw Page',
@@ -777,6 +849,80 @@ export class WithdrawalService {
       return data;
     } catch (error) {
       return error;
+    }
+  }
+
+  async generateWithdrawalFormPdf(withdraw: Withdrawal): Promise<boolean> {
+    try {
+      const studentId = withdraw.StudentId;
+      const questions = withdraw.response ? JSON.parse(withdraw.response) : [];
+      questions.map((item) => {
+        switch (item.type) {
+          case 1: {
+            item.response = item.options.find(
+              (option) => option.value === item.response,
+            )?.label;
+            break;
+          }
+          case 6: {
+            item.response = Moment(item.response).format('MM/DD/YYYY');
+            break;
+          }
+        }
+      });
+
+      const schoolYearId = withdraw.Student.grade_levels[0].school_year_id;
+      const schoolYear = await this.schoolYearService.findOneById(schoolYearId);
+      const yearbegin = Moment(schoolYear.date_begin).format('YYYY');
+      const yearend = Moment(schoolYear.date_end).format('YYYY');
+      const address = withdraw.Student.person.person_address.address;
+
+      const pdfBuffer = await this.pdfService
+        .toBuffer(PdfTemplate.WITHDRAWAL, {
+          locals: {
+            stateLogo: schoolYear.region.state_logo,
+            studentName: `${withdraw.Student.person.first_name} ${withdraw.Student.person.last_name}`,
+            birthdate: withdraw.Student.person.date_of_birth
+              ? Moment(withdraw.Student.person.date_of_birth).format(
+                  'MM/DD/YYYY',
+                )
+              : 'NA',
+            address: address.street
+              ? `${address.street}, 
+                ${address.street2 ? address.street2 + ', ' : ''} 
+                ${address.city || ''}  ${address.zip || ''}  
+                ${address.state || ''}`
+              : 'NA',
+            phone: withdraw.Student.person.person_phone?.number || 'NA',
+            grades: gradeText(withdraw.Student),
+            dateEffective: withdraw.date_effective
+              ? Moment(withdraw.date_effective).format('MM/DD/YYYY')
+              : 'NA',
+            schoolYear: `${yearbegin}-${yearend}`,
+            date: Moment().format('MM/DD/YYYY'),
+            questions,
+          },
+        })
+        .toPromise();
+
+      const uploadFile = await this.filesService.upload(
+        pdfBuffer,
+        S3DirectoryStudentRecords(schoolYear.region.name, withdraw.StudentId),
+        'withdraw_form',
+        'application/pdf',
+        yearbegin,
+      );
+
+      await this.studentRecordService.createStudentRecord(
+        studentId,
+        schoolYear.RegionId,
+        uploadFile.file_id,
+        StudentRecordFileKind.WITHDRAWAL_FORM,
+      );
+
+      return true;
+    } catch (err) {
+      return false;
     }
   }
 }

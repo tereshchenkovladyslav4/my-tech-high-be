@@ -408,7 +408,6 @@ export class PacketsService {
         //.andWhere('packet.deadline >= :startDate', { startDate: date })
         //.andWhere('packet.deadline < :toDate', { toDate: toDate })
         .getMany();
-      console.log('reminders data ---------------', packets[0].student, packets.length);
       
       return packets;
     } catch (error) {
