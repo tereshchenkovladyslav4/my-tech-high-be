@@ -1,12 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  In,
-  ManyToOne,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In, ManyToOne, JoinColumn } from 'typeorm';
 import { Student } from '../models/student.entity';
 
 @ObjectType()
@@ -174,4 +167,8 @@ export class Packet extends BaseEntity {
   @Column()
   @Field(() => Boolean, { defaultValue: false })
   is_age_issue?: boolean;
+
+  @ManyToOne((type) => Student, (student) => student.packets)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  student?: Student;
 }

@@ -1,13 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  OneToMany,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { Person } from './person.entity';
 import { Parent } from './parent.entity';
 import { StudentGradeLevel } from './student-grade-level.entity';
@@ -25,9 +17,7 @@ import { StudentRecord } from './student-record.entity';
 import { ResourceRequest } from './resource-request.entity';
 
 @ObjectType()
-@Directive(
-  '@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking, testing_preference")',
-)
+@Directive('@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking, testing_preference")')
 @Entity('mth_student')
 export class Student extends BaseEntity {
   @Column()
@@ -93,7 +83,8 @@ export class Student extends BaseEntity {
   @OneToMany((type) => Application, (application) => application.student_id)
   applications?: Application[];
 
-  @OneToMany((type) => Packet, (packet) => packet.student_id)
+  @OneToMany(() => Packet, (packet) => packet.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   packets?: Packet[];
 
   @OneToMany((type) => SchoolEnrollment, (soes) => soes.student)
@@ -115,22 +106,13 @@ export class Student extends BaseEntity {
   @Field(() => [Withdrawal], { nullable: true })
   StudentWithdrawals: Withdrawal[];
 
-  @OneToMany(
-    (type) => StudentStatusHistory,
-    (studentStatusHistory) => studentStatusHistory.student_id,
-  )
+  @OneToMany((type) => StudentStatusHistory, (studentStatusHistory) => studentStatusHistory.student_id)
   status_history?: StudentStatusHistory[];
 
-  @OneToMany(
-    (type) => StudentReenrollmentStatus,
-    (studentReenrollmentStatus) => studentReenrollmentStatus.student_id,
-  )
+  @OneToMany((type) => StudentReenrollmentStatus, (studentReenrollmentStatus) => studentReenrollmentStatus.student_id)
   reenrollment_status?: StudentReenrollmentStatus[];
 
-  @OneToMany(
-    () => StudentHiddenResource,
-    (studentHiddenResource) => studentHiddenResource.Student,
-  )
+  @OneToMany(() => StudentHiddenResource, (studentHiddenResource) => studentHiddenResource.Student)
   @Field(() => [StudentHiddenResource], { nullable: true })
   HiddenResources: StudentHiddenResource[];
 
@@ -138,10 +120,7 @@ export class Student extends BaseEntity {
   @Field(() => [ResourceCart], { nullable: true })
   ResourcesInCart: ResourceCart[];
 
-  @OneToMany(
-    () => ResourceRequest,
-    (resourceRequest) => resourceRequest.Student,
-  )
+  @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.Student)
   @Field(() => [ResourceRequest], { nullable: true })
   ResourceRequests: ResourceRequest[];
 

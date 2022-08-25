@@ -35,7 +35,7 @@ export class StudentsService {
     private personsService: PersonsService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearsService,
-  ) { }
+  ) {}
 
   protected user: User;
   protected NewUser;
@@ -57,9 +57,11 @@ export class StudentsService {
     const { skip, take, sort, filter, search } = studentsArgs;
     const _sortBy = sort.split('|');
     const currentYear = await this.schoolYearService.findOneById(filter.schoolYear);
-    const previousYearOb = await this.schoolYearService.findPreviousYear(parseInt(Moment(currentYear.date_begin).format('YYYY')), currentYear.RegionId);
+    const previousYearOb = await this.schoolYearService.findPreviousYear(
+      parseInt(Moment(currentYear.date_begin).format('YYYY')),
+      currentYear.RegionId,
+    );
     const previousScholYear = previousYearOb ? previousYearOb.school_year_id : 0;
-
 
     const qb = this.studentsRepository
       .createQueryBuilder('student')
@@ -69,15 +71,91 @@ export class StudentsService {
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('p_person.person_address', 'p_address')
       .leftJoinAndSelect('p_address.address', 'address')
-      .leftJoinAndSelect('student.currentSoe', 'currentSoe', "currentSoe.school_year_id= :currentSchoolYear", {
-        currentSchoolYear: filter.schoolYear
+      .leftJoinAndSelect('student.currentSoe', 'currentSoe', 'currentSoe.school_year_id= :currentSchoolYear', {
+        currentSchoolYear: filter.schoolYear,
       })
       .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
-      .leftJoinAndSelect('student.previousSoe', 'previousSoe', "previousSoe.school_year_id= :previousScholYear", {
-        previousScholYear: previousScholYear
+      .leftJoinAndSelect('student.previousSoe', 'previousSoe', 'previousSoe.school_year_id= :previousScholYear', {
+        previousScholYear: previousScholYear,
       })
       .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+      .leftJoinAndSelect('student.packets', 'packets')
       .where(`grade_levels.school_year_id = ${filter.schoolYear}`);
+
+    if (filter && filter.grades && filter.grades.length > 0) {
+      let grades = [];
+
+      filter.grades
+        .filter((item) => item.indexOf('-') > -1)
+        .map((item) => {
+          for (let i = +item.split('-')[0]; i <= +item.split('-')[1]; i++) {
+            if (!grades.includes(i)) {
+              grades.push(i.toString());
+            }
+          }
+        });
+      filter.grades
+        .filter((item) => item.indexOf('-') === -1)
+        .map((item) => {
+          if (!grades.includes(item)) {
+            grades.push(item);
+          }
+          if (item == 'K') {
+            if (!grades.includes('Kin')) grades.push('Kin');
+          }
+          if (item === 'Kindergarten') {
+            if (!grades.includes('Kin')) grades.push('Kin');
+            if (!grades.includes('K')) grades.push('K');
+          }
+        });
+      qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
+    }
+
+    const studentStatus = filter?.yearStatus || [];
+    if (studentStatus.length) {
+      qb.andWhere('student.reenrolled IN (:studentStatus)', { studentStatus });
+    }
+
+    const schoolDistrict = filter?.schoolDistrict || [];
+    const hadFilterSchoolDistrict = schoolDistrict.length && !schoolDistrict.includes('all');
+
+    if (hadFilterSchoolDistrict) {
+      qb.andWhere('packets.school_district IN (:...names)', {
+        names: filter.schoolDistrict,
+      });
+    }
+
+    if (filter && filter.schoolOfEnrollments && filter.schoolOfEnrollments.length > 0) {
+      if (filter.schoolOfEnrollments.indexOf('unassigned') !== -1) {
+        qb.andWhere(
+          new Brackets((sub) => {
+            sub
+              .orWhere('currentSoe.school_partner_id IN (:currentPartners)', {
+                currentPartners: filter.schoolOfEnrollments,
+              })
+              .orWhere('currentSoe.school_partner_id IS NULL');
+          }),
+        );
+      } else {
+        qb.andWhere('currentSoe.school_partner_id IN (:currentPartners)', {
+          currentPartners: filter.schoolOfEnrollments,
+        });
+      }
+    }
+
+    if (filter && filter.previousSOE && filter.previousSOE.length > 0) {
+      if (filter.previousSOE.indexOf('unassigned') !== -1) {
+        qb.andWhere(
+          new Brackets((sub) => {
+            sub
+              .orWhere('previousSoe.school_partner_id IN (:previousPartner)', { previousPartner: filter.previousSOE })
+              .orWhere('previousSoe.school_partner_id IS NULL');
+          }),
+        );
+      } else {
+        qb.andWhere('previousSoe.school_partner_id IN (:previousPartner)', { previousPartner: filter.previousSOE });
+      }
+    }
 
     if (search) {
       qb.andWhere(
@@ -90,7 +168,7 @@ export class StudentsService {
             .orWhere('address.city like :text', { text: `%${search}%` })
             .orWhere('grade_levels.grade_level like :text', { text: `%${search}%` })
             .orWhere('currentPartner.name like :text', { text: `%${search}%` })
-            .orWhere('previousPartner.name like :text', { text: `%${search}%` })
+            .orWhere('previousPartner.name like :text', { text: `%${search}%` });
         }),
       );
     }
@@ -98,84 +176,48 @@ export class StudentsService {
     if (sort) {
       if (_sortBy[1].toLocaleLowerCase() === 'desc') {
         if (_sortBy[0] === 'grade') {
-          qb.addSelect(
-            'ABS(grade_levels.grade_level + 0)',
-            'student_grade_level1',
-          );
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level1');
           qb.orderBy('student_grade_level1', 'DESC');
-        }
-        else if (_sortBy[0] === 'student') {
-          qb.addSelect(
-            "CONCAT(person.last_name, ' ', person.first_name)",
-            'student_name',
-          );
+        } else if (_sortBy[0] === 'student') {
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
           qb.orderBy('student_name', 'DESC');
-        }
-        else if (_sortBy[0] === 'parent') {
-          qb.addSelect(
-            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
-            'parent_name',
-          );
+        } else if (_sortBy[0] === 'parent') {
+          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
           qb.orderBy('parent_name', 'DESC');
-        }
-        else if (_sortBy[0] === 'city') {
+        } else if (_sortBy[0] === 'city') {
           qb.orderBy('address.city', 'DESC');
-        }
-        else if (_sortBy[0] === 'currentSOE') {
+        } else if (_sortBy[0] === 'currentSOE') {
           qb.orderBy('currentPartner.name', 'DESC');
-        }
-        else if (_sortBy[0] === 'previousSOE') {
+        } else if (_sortBy[0] === 'previousSOE') {
           qb.orderBy('previousPartner.name', 'DESC');
-        }
-        else {
-          qb.addSelect(
-            "CONCAT(person.last_name, ' ', person.first_name)",
-            'student_name',
-          );
+        } else {
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
           qb.orderBy('student_name', 'DESC');
         }
       } else {
         if (_sortBy[0] === 'grade') {
-          qb.addSelect(
-            'ABS(grade_levels.grade_level + 0)',
-            'student_grade_level1',
-          );
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level1');
           qb.orderBy('student_grade_level1', 'ASC');
-        }
-        else if (_sortBy[0] === 'student') {
-          qb.addSelect(
-            "CONCAT(person.last_name, ' ', person.first_name)",
-            'student_name',
-          );
+        } else if (_sortBy[0] === 'student') {
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
           qb.orderBy('student_name', 'ASC');
-        }
-        else if (_sortBy[0] === 'parent') {
-          qb.addSelect(
-            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
-            'parent_name',
-          );
+        } else if (_sortBy[0] === 'parent') {
+          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
           qb.orderBy('parent_name', 'ASC');
-        }
-        else if (_sortBy[0] === 'city') {
+        } else if (_sortBy[0] === 'city') {
           qb.orderBy('address.city', 'ASC');
-        }
-        else if (_sortBy[0] === 'currentSOE') {
+        } else if (_sortBy[0] === 'currentSOE') {
           qb.orderBy('currentPartner.name', 'ASC');
-        }
-        else if (_sortBy[0] === 'previousSOE') {
+        } else if (_sortBy[0] === 'previousSOE') {
           qb.orderBy('previousPartner.name', 'ASC');
-        }
-        else {
-          qb.addSelect(
-            "CONCAT(person.last_name, ' ', person.first_name)",
-            'student_name',
-          );
+        } else {
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
           qb.orderBy('student_name', 'ASC');
         }
       }
     }
 
-    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+    const [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
 
     return new Pagination<Student>({
       results,
@@ -234,17 +276,9 @@ export class StudentsService {
     };
 
     const parent = await createQueryBuilder(Parent)
-      .innerJoinAndSelect(
-        Person,
-        'person',
-        'person.person_id = `Parent`.person_id',
-      )
+      .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
       .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
-      .innerJoinAndSelect(
-        UserRegion,
-        'userRegion',
-        'userRegion.user_id = user.user_id',
-      )
+      .innerJoinAndSelect(UserRegion, 'userRegion', 'userRegion.user_id = user.user_id')
       .innerJoinAndSelect(Region, 'region', 'region.id = userRegion.region_id')
       .where('`Parent`.parent_id = :parentId', {
         parentId: studentData.parent_id,
@@ -252,45 +286,31 @@ export class StudentsService {
       .printSql()
       .getRawOne();
 
-    console.log('ParentData: ', parent);
+    // console.log('ParentData: ', parent);
 
     const region_id = (parent && parent.userRegion_region_id) || null;
     if (!region_id) {
       return defaultResponse;
     }
     // const schoolYear = await this.schoolYearsService.getCurrent(region_id);
-    const studentGradeLevel =
-      await this.studentGradeLevelService.findByStudentID(
-        studentData.student_id,
-      );
+    const studentGradeLevel = await this.studentGradeLevelService.findByStudentID(studentData.student_id);
 
     if (!studentGradeLevel) {
       return defaultResponse;
     }
 
-    const schoolYear = await this.schoolYearService.findOneById(
-      studentGradeLevel.school_year_id,
-    );
+    const schoolYear = await this.schoolYearService.findOneById(studentGradeLevel.school_year_id);
 
     const student = await createQueryBuilder(Student)
-      .leftJoinAndSelect(
-        Application,
-        'application',
-        'application.student_id = `Student`.student_id',
-      )
-      .leftJoinAndSelect(
-        Packet,
-        'packet',
-        'packet.student_id = `Student`.student_id',
-      )
+      .leftJoinAndSelect(Application, 'application', 'application.student_id = `Student`.student_id')
+      .leftJoinAndSelect(Packet, 'packet', 'packet.student_id = `Student`.student_id')
       .leftJoinAndSelect(
         StudentGradeLevel,
         'gradelevel',
         'gradelevel.student_id = `Student`.student_id AND gradelevel.school_year_id = application.school_year_id',
       )
       .andWhere('application.school_year_id = :schoolYear', {
-        schoolYear:
-          (studentGradeLevel && studentGradeLevel.school_year_id) || null,
+        schoolYear: (studentGradeLevel && studentGradeLevel.school_year_id) || null,
       })
       .andWhere('`Student`.student_id = :studentId', {
         studentId: studentData.student_id,
@@ -302,28 +322,19 @@ export class StudentsService {
 
     //console.log('Student: ', student);
     return {
-      student_id:
-        (student && student.Student_student_id) || studentData.student_id,
+      student_id: (student && student.Student_student_id) || studentData.student_id,
       school_year_id: studentGradeLevel.school_year_id || null,
       grade_level: (student && student.gradelevel_grade_level) || null,
       application_id: (student && student.application_application_id) || null,
       application_status: (student && student.application_status) || null,
-      application_school_year_id:
-        (student && student.application_school_year_id) || null,
-      application_date_started:
-        (student && student.application_date_started) || null,
-      application_date_submitted:
-        (student && student.application_date_submitted) || null,
-      application_date_accepted:
-        (student &&
-          Moment(student.application_date_accepted).format('MMM Do, YYYY')) ||
-        null,
+      application_school_year_id: (student && student.application_school_year_id) || null,
+      application_date_started: (student && student.application_date_started) || null,
+      application_date_submitted: (student && student.application_date_submitted) || null,
+      application_date_accepted: (student && Moment(student.application_date_accepted).format('MMM Do, YYYY')) || null,
       packet_id: (student && student.packet_packet_id) || null,
       packet_status: (student && student.packet_status) || null,
-      application_deadline_num_days:
-        parent.region_application_deadline_num_days,
-      enrollment_packet_deadline_num_days:
-        parent.region_enrollment_packet_deadline_num_days,
+      application_deadline_num_days: parent.region_application_deadline_num_days,
+      enrollment_packet_deadline_num_days: parent.region_enrollment_packet_deadline_num_days,
       enrollment_packet_date_deadline:
         (student &&
           Moment(student.application_date_accepted)
@@ -346,26 +357,13 @@ export class StudentsService {
     return this.studentStatusService.updateOrCreate(studentStatus);
   }
 
-  async updateStatusHistory(
-    studentStatusHistory: StudentStatusHistory,
-  ): Promise<boolean> {
-    return this.studentStatusHistoryService.updateOrCreate(
-      studentStatusHistory,
-    );
+  async updateStatusHistory(studentStatusHistory: StudentStatusHistory): Promise<boolean> {
+    return this.studentStatusHistoryService.updateOrCreate(studentStatusHistory);
   }
 
-  async updateProfile(
-    student: Student,
-    updateProfileInput: UpdateStudentProfileInput,
-  ): Promise<Student> {
-    const {
-      preferred_first_name,
-      preferred_last_name,
-      email,
-      photo,
-      testing_preference,
-      password,
-    } = updateProfileInput;
+  async updateProfile(student: Student, updateProfileInput: UpdateStudentProfileInput): Promise<Student> {
+    const { preferred_first_name, preferred_last_name, email, photo, testing_preference, password } =
+      updateProfileInput;
 
     const person = await createQueryBuilder(Person)
       .where('`Person`.person_id = :personId', { personId: student.person_id })
@@ -420,10 +418,7 @@ export class StudentsService {
         user_id,
       });
 
-      if (!updatedPerson)
-        throw new ServiceUnavailableException(
-          'Person User ID Not been Updated',
-        );
+      if (!updatedPerson) throw new ServiceUnavailableException('Person User ID Not been Updated');
       console.log('Updated Person: ', updatedPerson);
     }
 
