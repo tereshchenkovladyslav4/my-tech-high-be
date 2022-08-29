@@ -51,7 +51,6 @@ export class EventsService {
         ) AS events
         LEFT JOIN infocenter.mth_event_type eventType ON(eventType.event_type_id = events.TypeId)
         WHERE eventType.RegionId = ${param.region_id} ${subCond} 
-        ORDER BY events.start_date, events.end_date, eventType.priority
       `);
       const results: ApplicationEvent[] = events.map((event) => ({
         EventType: {
