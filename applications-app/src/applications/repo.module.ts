@@ -87,6 +87,7 @@ import { SchoolEnrollment } from './models/school-enrollment.entity';
 import { EmailRecord } from './models/email-record.entity';
 import { PDFModule } from '@t00nday/nestjs-pdf';
 import { StudentRecordService } from './services/student-record.service';
+import { Role } from './models/role.entity';
 
 const servicesImports = [
   UsersService,
@@ -181,6 +182,7 @@ const servicesImports = [
       Resource,
       SchoolEnrollment,
       EmailRecord,
+      Role,
     ]),
     PDFModule.register({
       view: {

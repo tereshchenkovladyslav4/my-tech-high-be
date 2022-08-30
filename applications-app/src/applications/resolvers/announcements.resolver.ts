@@ -1,4 +1,4 @@
-import { Args, Query, Resolver, Mutation, Int } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation, Int, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { CreateAnnouncementInput } from '../dto/new-announcement.inputs';
@@ -15,7 +15,7 @@ export class AnnouncementsResolver {
   constructor(
     private announcementsService: AnnouncementsService,
     private userAnnouncementService: UserAnnouncementsService,
-  ) { }
+  ) {}
 
   @Query((returns) => [Announcement], { name: 'announcements' })
   @UseGuards(new AuthGuard())
@@ -23,6 +23,14 @@ export class AnnouncementsResolver {
     @Args('region_id', { type: () => Int }) region_id: number,
   ): Promise<Announcement[]> {
     return this.announcementsService.findAll(region_id);
+  }
+
+  @Query((returns) => Announcement, { name: 'announcement' })
+  @UseGuards(new AuthGuard())
+  async getAnnouncement(
+    @Args({ name: 'announcement_id', type: () => ID }) announcement_id: number,
+  ): Promise<Announcement> {
+    return this.announcementsService.findOneById(announcement_id);
   }
 
   @Mutation((returns) => ResponseDTO)

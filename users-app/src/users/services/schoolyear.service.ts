@@ -11,6 +11,7 @@ import {
 import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
+import { RegionService } from './region/region.service';
 import { SchoolPartnerService } from './school-partner.service';
 @Injectable()
 export class SchoolYearsService {
@@ -18,6 +19,7 @@ export class SchoolYearsService {
     @InjectRepository(SchoolYear)
     private schoolYearsRepository: Repository<SchoolYear>,
     private schoolPartnerService: SchoolPartnerService,
+    private regionService: RegionService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -33,22 +35,35 @@ export class SchoolYearsService {
     return this.schoolYearsRepository.find();
   }
 
-  findActiveSchoolYears(region_id: number): Promise<SchoolYear[]> {
-    return this.schoolYearsRepository.find({
+  async findActiveSchoolYears(region_id: number): Promise<SchoolYear[]> {
+    const nowDate = await this.regionService.getTimezoneDate(region_id);
+    const result = await this.schoolYearsRepository.find({
       where: [
         {
-          date_reg_open: LessThanOrEqual(new Date()),
-          date_reg_close: MoreThanOrEqual(new Date()),
+          date_reg_open: LessThanOrEqual(nowDate),
+          date_reg_close: MoreThanOrEqual(nowDate),
           RegionId: region_id,
         },
         {
-          midyear_application_open: LessThanOrEqual(new Date()),
-          midyear_application_close: MoreThanOrEqual(new Date()),
+          midyear_application_open: LessThanOrEqual(nowDate),
+          midyear_application_close: MoreThanOrEqual(nowDate),
           RegionId: region_id,
           midyear_application: 1,
         },
       ],
     });
+
+    result.map(
+      (item) => (
+        (item.MainyearApplicatable =
+          item.date_reg_open <= nowDate && item.date_reg_close >= nowDate),
+        (item.MidyearApplicatable =
+          item.midyear_application &&
+          item.midyear_application_open <= nowDate &&
+          item.midyear_application_close >= nowDate)
+      ),
+    );
+    return result;
   }
 
   findSchoolYearsByRegionId(region_id: number): Promise<SchoolYear[]> {

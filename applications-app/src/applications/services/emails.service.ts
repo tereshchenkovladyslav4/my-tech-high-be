@@ -18,15 +18,15 @@ import { PersonsService } from './persons.service';
 import { StudentsService } from './students.service';
 import { UsersService } from './users.service';
 import { SchoolYearService } from './schoolyear.service';
-import { UserAnnouncement } from '../models/user-announcement.entity';
 import { EmailRecordsService } from './email-records.service';
+//import { AnnouncementsService } from './announcements.service';
 
 var base64 = require('base-64');
 @Injectable()
 export class EmailsService {
   constructor(
     private coreSettingsService: CoreSettingsService,
-    private SESService: SESService,    
+    private SESService: SESService,
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
     private userAnnouncementService: UserAnnouncementsService,
@@ -35,7 +35,7 @@ export class EmailsService {
     private personsService: PersonsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearService,
-    private emailRecordsService: EmailRecordsService,
+    private emailRecordsService: EmailRecordsService, //private announcementsService: AnnouncementsService,
   ) {}
 
   async sendAccountVerificationEmail(
@@ -99,7 +99,7 @@ export class EmailsService {
       }
     }
 
-    const result =  await this.SESService.sendEmail(
+    const result = await this.SESService.sendEmail(
       recipientEmail,
       emailTemplate?.subject,
       content,
@@ -107,7 +107,7 @@ export class EmailsService {
       emailTemplate?.from,
     );
 
-    const email_status = (result == false ? 'Sent' : 'Error');
+    const email_status = result == false ? 'Sent' : 'Error';
 
     // Add Email Records
     await this.emailRecordsService.create({
@@ -118,158 +118,140 @@ export class EmailsService {
       template_name: 'Email Verification',
       bcc: emailTemplate?.bcc,
       status: email_status,
-      region_id: region_id
+      region_id: region_id,
     });
 
     return result;
   }
 
+  //async sendAnnouncementEmail2(
+  //  announcementEmail: AnnouncementEmailArgs,
+  //  users,
+  //) {
+  //  const { announcement_id, sender, subject, body } = announcementEmail;
+  //  users.map(async (user) => {
+
+  //    if (user.UserId) {
+  //      const currUserAnnouncement =
+  //        await this.userAnnouncementService.findById({
+  //          announcementId: announcement_id,
+  //          userId: user.UserId,
+  //        });
+  //      if (currUserAnnouncement) {
+  //        await this.userAnnouncementService.save({
+  //          AnnouncementId: announcement_id,
+  //          user_id: user.UserId,
+  //          status: 'Unread',
+  //          id: currUserAnnouncement.id,
+  //        });
+  //      } else {
+  //        try {
+  //          await this.sendEmail({
+  //            email: user.email,
+  //            subject,
+  //            content: body,
+  //            from: sender,
+  //          });
+  //        } catch (error) {
+  //          console.log(error, 'Email Error');
+  //        }
+  //        await this.userAnnouncementService.save({
+  //          AnnouncementId: announcement_id,
+  //          user_id: user.UserId,
+  //          status: 'Unread',
+  //        });
+  //      }
+  //    }
+  //  });
+  //}
+
+  // async sendAnnouncementEmail2(announcementEmail: AnnouncementEmailArgs) {
+  //   const { announcement_id, sender, subject, body } = announcementEmail;
+
+  //   const users = await this.announcementsService.getAnnouncementUsersByFilters(
+  //     announcementEmail,
+  //   );
+
+  //   users.map(async (user) => {
+  //     if (user.UserId) {
+  //       const currUserAnnouncement =
+  //         await this.userAnnouncementService.findById({
+  //           announcementId: announcement_id,
+  //           userId: user.UserId,
+  //         });
+  //       if (currUserAnnouncement) {
+  //         await this.userAnnouncementService.save({
+  //           AnnouncementId: announcement_id,
+  //           user_id: user.UserId,
+  //           status: 'Unread',
+  //           id: currUserAnnouncement.id,
+  //         });
+  //       } else {
+  //         try {
+  //           await this.sendEmail({
+  //             email: user.email,
+  //             subject,
+  //             content: body,
+  //             from: sender,
+  //           });
+  //         } catch (error) {
+  //           console.log(error, 'Email Error');
+  //         }
+  //         await this.userAnnouncementService.save({
+  //           AnnouncementId: announcement_id,
+  //           user_id: user.UserId,
+  //           status: 'Unread',
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
+
   async sendAnnouncementEmail(announcementEmail: AnnouncementEmailArgs) {
     const {
-      announcement_id,
+      user,
+      body,
       sender,
       subject,
-      body,
-      RegionId,
-      filter_grades,
-      filter_users,
-
+      announcementId,
     } = announcementEmail;
 
-    const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
-    const grades = filter_grades
-      .replace('[', '(')
-      .replace(']', ')')
-      .replace('Kindergarten', 'K", "Kin');
-    const query = userTypes
-      .join(' UNION ')
-      .replace('0', 'adminQuery')
-      .replace('1', 'parentQuery')
-      .replace('2', 'studentQuery')
-      .replace('3', 'teacherQuery')
-      .replace(
-        'adminQuery',
-        `SELECT
-          Users.email AS email,
-          Users.user_id AS UserId
-        FROM (
-          SELECT user_id, email, level FROM infocenter.core_users
-        ) AS Users
-        LEFT JOIN infocenter.user_region region ON (region.user_id = Users.user_id)
-        LEFT JOIN infocenter.roles role ON (role.level = Users.level)
-        WHERE
-          region.region_id = ${RegionId} AND role.name = "Admin" `,
-      )
-      .replace(
-        'parentQuery',
-        `SELECT
-          person.email AS email,
-          person.user_id AS UserId
-        FROM (
-          SELECT student_id, school_year_id FROM infocenter.mth_application
-        ) AS applications
-        LEFT JOIN infocenter.mth_student student ON (student.student_id = applications.student_id)
-        LEFT JOIN infocenter.mth_parent parent ON (parent.parent_id = student.parent_id)
-        LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
-        LEFT JOIN infocenter.mth_student_grade_level grade ON (grade.student_id = student.student_id)
-        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = applications.school_year_id)
-        WHERE 
-          grade.grade_level IN ${grades} AND
-          schoolYear.RegionId = ${RegionId} AND
-          person.email IS NOT NULL
-        GROUP BY person.email 
-        UNION 
-        SELECT
-          person.email AS email,
-          person.user_id AS UserId
-        FROM (
-          SELECT student_id, school_year_id FROM infocenter.mth_application
-        ) AS applications
-        LEFT JOIN infocenter.mth_student student ON (student.student_id = applications.student_id)
-        LEFT JOIN infocenter.mth_observer observer ON (observer.student_id = student.student_id)
-        LEFT JOIN infocenter.mth_person person ON (person.person_id = observer.person_id)
-        LEFT JOIN infocenter.mth_student_grade_level grade ON (grade.student_id = student.student_id)
-        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = applications.school_year_id)
-        WHERE 
-          grade.grade_level IN ${grades} AND
-          schoolYear.RegionId = ${RegionId} AND
-          person.email IS NOT NULL
-        GROUP BY person.email`,
-      )
-      .replace(
-        'studentQuery',
-        `SELECT
-          person.email AS email,
-          person.user_id AS UserId
-        FROM (
-          SELECT student_id, school_year_id FROM infocenter.mth_application
-        ) AS applications
-        LEFT JOIN infocenter.mth_student student ON (student.student_id = applications.student_id)
-        LEFT JOIN infocenter.mth_person person ON (person.person_id = student.person_id)
-        LEFT JOIN infocenter.mth_student_grade_level grade ON (grade.student_id = student.student_id)
-        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = applications.school_year_id)
-        WHERE 
-          grade.grade_level IN ${grades} AND
-          schoolYear.RegionId = ${RegionId} AND
-          person.email IS NOT NULL
-        GROUP BY person.email`,
-      )
-      .replace(
-        'teacherQuery',
-        `SELECT
-          Users.email AS email,
-          Users.user_id AS UserId
-        FROM (
-          SELECT user_id, email, level FROM infocenter.core_users
-        ) AS Users
-        LEFT JOIN infocenter.user_region region ON (region.user_id = Users.user_id)
-        LEFT JOIN infocenter.roles role ON (role.level = Users.level)
-        WHERE
-          region.region_id = ${RegionId} AND (role.name = "Teacher" OR role.name = "Teacher Assistant") `,
-      );
-
-    if (query != '') {
-      const queryRunner = await getConnection().createQueryRunner();
-      const users = await queryRunner.query(query);
-      queryRunner.release();
-      users.map(async (user) => {
-        if (user.UserId) {
-          const currUserAnnouncement =
-            await this.userAnnouncementService.findById({
-              announcementId: announcement_id,
-              userId: user.UserId,
+      if (user.user_id) {
+        const currUserAnnouncement =
+          await this.userAnnouncementService.findById({
+            announcementId,
+            userId: user.user_id,
+          });
+        if (currUserAnnouncement) {
+          await this.userAnnouncementService.save({
+            AnnouncementId: announcementId,
+            user_id: user.user_id,
+            status: 'Unread',
+            id: currUserAnnouncement.id,
+          });
+        } else {
+          try {
+            await this.sendEmail({
+              email: user.email,
+              subject,
+              content: body,
+              from: sender,
             });
-          if (currUserAnnouncement) {
-            await this.userAnnouncementService.save({
-              AnnouncementId: announcement_id,
-              user_id: user.UserId,
-              status: 'Unread',
-              id: currUserAnnouncement.id,
-            });
-          } else {
-            try {
-              await this.sendEmail({
-                email: user.email,
-                subject,
-                content: body,
-                from: sender,
-              });
-            } catch (error) {
-              console.log(error, 'Email Error');
-            }
-            await this.userAnnouncementService.save({
-              AnnouncementId: announcement_id,
-              user_id: user.UserId,
-              status: 'Unread',
-            });
+          } catch (error) {
+            console.log(error, 'Email Error');
           }
+          await this.userAnnouncementService.save({
+            AnnouncementId: announcementId,
+            user_id: user.user_id,
+            status: 'Unread',
+          });
         }
-      });
-    }
+      }
   }
 
   async sendEmail(emailInput: EmailInput): Promise<ResponseDTO> {
-    const { email, subject, content, bcc, from, template_name, region_id } = emailInput;
+    const { email, subject, content, bcc, from, template_name, region_id } =
+      emailInput;
 
     const result = await this.SESService.sendEmail(
       email,
@@ -279,7 +261,7 @@ export class EmailsService {
       from,
     );
 
-    const email_status = (result == false ? 'Sent' : 'Error');
+    const email_status = result == false ? 'Sent' : 'Error';
 
     // Add Email Records
     await this.emailRecordsService.create({
@@ -290,12 +272,15 @@ export class EmailsService {
       template_name: template_name,
       bcc: bcc,
       status: email_status,
-      region_id: region_id
+      region_id: region_id,
     });
 
     return <ResponseDTO>{
       error: result,
-      message: result == false ? 'Email Send Successfully' : 'Unexpected Error Occured',
+      message:
+        result == false
+          ? 'Email Send Successfully'
+          : 'Unexpected Error Occured',
     };
   }
 

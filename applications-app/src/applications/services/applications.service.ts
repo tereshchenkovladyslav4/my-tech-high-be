@@ -418,6 +418,11 @@ export class ApplicationsService {
         
         const UTCDeadline = new Date(deadline).toISOString();
 
+        let default_meta = {};
+        if (student.special_ed != 0) {
+          default_meta['meta_special_education'] = this.getSpeicalEdValue(student.special_ed);
+        }
+
         // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
@@ -431,6 +436,7 @@ export class ApplicationsService {
           secondary_contact_first: application?.secondary_contact_first,
           secondary_contact_last: application?.secondary_contact_last,
           school_district: existingSchoolDistrict,
+          meta: JSON.stringify(default_meta)
         });
 
         const gradeLevels = await this.studentGradeLevelsService.forStudents(
@@ -667,5 +673,15 @@ export class ApplicationsService {
       }
     });
     return applications;
+  }
+
+  getSpeicalEdValue(special_ed) {    
+    if (special_ed == 1)
+      return 'IEP';
+    if (special_ed == 2)
+      return '504';
+    if (special_ed == 3)
+      return 'Test';
+    return '';
   }
 }

@@ -271,6 +271,16 @@ export class EnrollmentsService {
     { 'application/vnd.oasis.opendocument.spreadsheet': 'ods' },
   ];
 
+  getSpeicalEdOption(special_ed) {
+    if (special_ed == 'None')
+      return 0;
+    if (special_ed == 'IEP')
+      return 1;
+    if (special_ed == '504')
+      return 2;
+    return 3;
+  }
+
   async saveContacts(
     enrollmentPacketContactInput: EnrollmentPacketContactInput,
   ): Promise<EnrollmentPacket> {
@@ -294,6 +304,16 @@ export class EnrollmentsService {
     const parentPersonId = (await parent).person_id;
 
     try {
+      let special_ed = 0;
+      const student_meta = JSON.parse(packet.meta);
+      if ('meta_special_education' in student_meta) {
+        special_ed = this.getSpeicalEdOption(student_meta['meta_special_education']);
+      }
+      await this.studentsService.update({
+        student_id,
+        special_ed
+      });
+      
       const parentPerson = await this.personsService.update({
         person_id: parentPersonId,
         ...enrollmentPacketContactInput.parent,

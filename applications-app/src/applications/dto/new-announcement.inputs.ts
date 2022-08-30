@@ -30,4 +30,10 @@ export class CreateAnnouncementInput {
 
   @Field(() => Boolean, { nullable: true })
   isArchived?: boolean;
+
+  @Field(() => String)
+  filter_program_years: string
+
+  @Field(() => String)
+  filter_school_partners: string
 }

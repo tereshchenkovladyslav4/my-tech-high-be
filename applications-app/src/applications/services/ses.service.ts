@@ -13,14 +13,23 @@ export class SESService {
     secretAccessKey: process.env.AWS_S3_KEY_SECRET,
   });
 
-  async sendEmail(recipientEmail, subject, content, bcc?, from?): Promise<boolean> {
+  async sendEmail(
+    recipientEmail,
+    subject,
+    content,
+    bcc?,
+    from?,
+  ): Promise<boolean> {
+    const BccAddresses = bcc
+      ? bcc.replace(/\s+/g, '').split(';').join(',').split(',')
+      : undefined;
     let params = {
       Source: from
         ? from
-        : this.SES_EMAIL_FROM_NAME + '<' + this.SES_EMAIL_FROM + '>',      
+        : this.SES_EMAIL_FROM_NAME + '<' + this.SES_EMAIL_FROM + '>',
       Destination: {
         ToAddresses: [recipientEmail],
-        BccAddresses: bcc ? [bcc] : undefined,
+        BccAddresses,
       },
       ReplyToAddresses: [],
       Message: {
@@ -43,8 +52,7 @@ export class SESService {
       const result = await this.ses.sendEmail(params).promise();
       email_status = false;
       console.log(result);
-    }
-    catch (err) {
+    } catch (err) {
       email_status = true;
     }
 

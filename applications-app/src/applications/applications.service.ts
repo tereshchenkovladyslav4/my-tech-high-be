@@ -74,6 +74,16 @@ export class ApplicationsService {
     return password;
   }
 
+  getSpeicalEdOption(special_ed) {
+    if (special_ed == 'None')
+      return 0;
+    if (special_ed == 'IEP')
+      return 1;
+    if (special_ed == '504')
+      return 2;
+    return 3;
+  }
+
   async createNewApplication(
     newApplication: CreateApplicationInput,
   ): Promise<ParentApplication> {
@@ -248,17 +258,23 @@ export class ApplicationsService {
         'Application Received',
         region_id,
       );
+      
     if (emailTemplate) {
-      const setEmailBodyInfo = (school_year, student) => {
+      const setEmailBodyInfo = async (school_year, student) => {
+
+        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({school_year_id: school_year.school_year_id, student_id: student.student_id}) 
         const yearbegin = new Date(school_year.date_begin)
           .getFullYear()
           .toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
+        const yearText = currApplication.midyear_application
+        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+        : `${yearbegin}-${yearend.substring(2, 4)}`
         return emailTemplate.body
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
           .replace(/\[PARENT\]/g, person.first_name)
-          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+          .replace(/\[YEAR\]/g, yearText)
           .replace(
             /\[APPLICATION_YEAR\]/g,
             `${yearbegin}-${yearend.substring(2, 4)}`,
@@ -275,8 +291,8 @@ export class ApplicationsService {
             gradeLevels[0]?.school_year_id,
           );
 
-          emailBody = setEmailBodyInfo(school_year, student);
-          const result = await this.emailsService.sendEmail({
+          emailBody = await setEmailBodyInfo(school_year, student);
+          await this.emailsService.sendEmail({
             email: person?.email,
             subject: emailTemplate.subject,
             content: emailBody,
@@ -407,10 +423,20 @@ export class ApplicationsService {
     console.log('PersonAddress: ', personAddress);
 
     const { person_id } = person;
+
+    // Get Current Speical ED
+    let special_ed = 0;
+    const student_meta = JSON.parse(studentMeta);    
+    if ('meta_special_education' in student_meta) {
+      special_ed = this.getSpeicalEdOption(student_meta['meta_special_education']);
+    }
+    console.log("Student Special Ed: ", special_ed);
+    
     const student = await this.studentsService.create({
       parent_id,
       person_id,
-      grade_level,
+      special_ed,
+      grade_level,      
     });
     if (!student) throw new ServiceUnavailableException('Student Not Created');
     console.log('Student: ', student);

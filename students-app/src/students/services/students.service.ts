@@ -226,7 +226,10 @@ export class StudentsService {
   }
 
   findOneById(student_id: number): Promise<Student> {
-    return this.studentsRepository.findOne(student_id);
+    return this.studentsRepository.findOne({
+      where: { student_id },
+      relations: ['currentSoe'],
+    });
   }
 
   findOneByPersonId(person_id: number): Promise<Student> {

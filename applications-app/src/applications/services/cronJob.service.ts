@@ -7,6 +7,8 @@ import { EnrollmentsService } from '../enrollments.service';
 import * as Moment from 'moment';
 import { WithdrawalService } from './withdrawal.service';
 import { CronJobsLogsService } from './cron-jobs-logs.services';
+import { AnnouncementsService } from './announcements.service';
+import { Announcement } from '../models/announcement.entity';
 
 @Injectable()
 export class CronJobService {
@@ -16,16 +18,94 @@ export class CronJobService {
     private enrollmentsService: EnrollmentsService,
     private withdrawalsService: WithdrawalService,
     private cronJobsLogsSevice: CronJobsLogsService,
+    private announcementsService: AnnouncementsService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
+  //async findScheduledAnnouncements2() {
+  //  try {
+  //    const queryRunner = await getConnection().createQueryRunner();
+  //    const announcements = await queryRunner.query(
+  //      `SELECT
+  //        announcement_id AS announcementId,
+  //        posted_by AS sender,
+  //        subject,
+  //        body,
+  //        RegionId,
+  //        filter_grades,
+  //        filter_users,
+  //        filter_program_years,
+  //        filter_school_partners,
+  //        schedule_time AS scheduleTime
+  //      FROM infocenter.announcement
+  //      WHERE
+  //      status = 'Scheduled' AND
+  //        isArchived <> 1 AND
+  //        SUBSTR(schedule_time, 1, 16) = SUBSTR(NOW(), 1, 16)`,
+  //    );
+  //    queryRunner.release();
+  //    announcements.map(async (announcement) => {
+  //      const {
+  //        announcementId,
+  //        sender,
+  //        subject,
+  //        body,
+  //        RegionId,
+  //        filter_grades,
+  //        filter_users,
+  //      } = announcement;
+
+  //      const users =
+  //        await this.announcementsService.getAnnouncementUsersByFilters(
+  //          announcement,
+  //        );
+
+  //      console.log('Users: ', users);
+
+  //      await this.sesEmailService.sendAnnouncementEmail2(
+  //        {
+  //          announcement_id: announcementId,
+  //          sender,
+  //          subject,
+  //          body,
+  //          RegionId,
+  //          filter_grades,
+  //          filter_users,
+  //        },
+  //        users,
+  //      );
+  //      const queryRunner = await getConnection().createQueryRunner();
+  //      await queryRunner.query(
+  //        `UPDATE infocenter.announcement SET status = 'Published' WHERE announcement_id = ${announcementId}`,
+  //      );
+  //      queryRunner.release();
+  //    });
+  //    this.logger.log('announcements: ', announcements);
+  //    if (announcements.length > 0) {
+  //      this.cronJobsLogsSevice.save({
+  //        function_name: 'findScheduledAnnouncements',
+  //        log: JSON.stringify({ result: announcements }),
+  //        type: 'success',
+  //      });
+  //    }
+  //  } catch (error) {
+  //    this.logger.error(error);
+  //    this.cronJobsLogsSevice.save({
+  //      function_name: 'findScheduledAnnouncements',
+  //      log: JSON.stringify({ result: error }),
+  //      type: 'error',
+  //    });
+  //  }
+  //}
+
+  //@Cron(CronExpression.EVERY_MINUTE)
   async findScheduledAnnouncements() {
     try {
       const queryRunner = await getConnection().createQueryRunner();
-      const announcements = await queryRunner.query(
+      const announcements: Announcement[] = await queryRunner.query(
         `SELECT
-          announcement_id AS announcementId,
-          posted_by AS sender,
+          announcement_id,
+          posted_by,
           subject,
           body,
           RegionId,
@@ -41,26 +121,36 @@ export class CronJobService {
       queryRunner.release();
       announcements.map(async (announcement) => {
         const {
-          announcementId,
-          sender,
+          announcement_id,
+          posted_by,
           subject,
           body,
           RegionId,
           filter_grades,
           filter_users,
+          filter_program_years,
+          filter_school_partners
         } = announcement;
-        await this.sesEmailService.sendAnnouncementEmail({
-          announcement_id: announcementId,
-          sender,
-          subject,
-          body,
-          RegionId,
-          filter_grades,
-          filter_users,
-        });
+
+          const userEmailList = await this.announcementsService.getAnnouncementUsersByFilters({
+            RegionId,
+            filter_grades,
+            filter_users,
+            filter_program_years,
+            filter_school_partners
+          })
+          userEmailList.map( async(user) => {
+            await this.sesEmailService.sendAnnouncementEmail({
+              body,
+              subject,
+              sender:posted_by,
+              user,
+              announcementId: announcement_id,
+            });
+          })
         const queryRunner = await getConnection().createQueryRunner();
         await queryRunner.query(
-          `UPDATE infocenter.announcement SET status = 'Published' WHERE announcement_id = ${announcementId}`,
+          `UPDATE infocenter.announcement SET status = 'Published' WHERE announcement_id = ${announcement_id}`,
         );
         queryRunner.release();
       });

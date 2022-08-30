@@ -1,29 +1,20 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsIn, IsInt } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { User } from '../models/user.entity';
 
 @InputType()
 export class AnnouncementEmailArgs {
   @Field(() => Number)
-  announcement_id?: number;
+  announcementId?: number;
 
   @Field(() => String)
-  sender?: string;
+  sender: string;
 
   @Field(() => String)
-  subject?: string;
+  subject: string;
 
   @Field(() => String)
-  body?: string;
+  body: string;
 
-  @Field(() => Int)
-  RegionId?: number;
-
-  @Field(() => String)
-  filter_grades?: string;
-
-  @Field(() => String)
-  filter_users?: string;
-
-  @Field(() => String)
-  status?: 'Draft' | 'Scheduled' | 'Published' | 'Republished';
+  @Field(() => User)
+  user: User;
 }

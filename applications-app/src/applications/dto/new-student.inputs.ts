@@ -11,6 +11,10 @@ export class CreateStudentInput {
   @IsInt()
   parent_id?: number;
 
+  @Field(() => Int)
+  @IsInt()
+  special_ed?: number;
+
   @Field(() => String)
   grade_level?: string;
 }

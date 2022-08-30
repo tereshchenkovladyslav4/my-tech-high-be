@@ -4,6 +4,8 @@ import { Region } from '../../../models/region.entity';
 import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getConnection } from 'typeorm';
+import * as Moment from 'moment';
+import { MYSQL_DATE_FORMAT } from 'src/constants';
 
 @Injectable()
 export class RegionService {
@@ -11,6 +13,18 @@ export class RegionService {
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
   ) {}
+
+  async timezoneOffset(region_id: number): Promise<number> {
+    // -420 is UTCOffset for MST timezone
+    // We will integrate timezone for every region
+    return -420;
+  }
+
+  async getTimezoneDate(region_id: number): Promise<string> {
+    const tzOffset = await this.timezoneOffset(region_id);
+    const nowDate = Moment().utcOffset(tzOffset).format(MYSQL_DATE_FORMAT);
+    return nowDate;
+  }
 
   async findRegionById(region_id: number): Promise<Region> {
     const data = await this.regionRepository.findOne({

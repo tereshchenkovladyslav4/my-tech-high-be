@@ -24,25 +24,25 @@ export class SchoolYear extends BaseEntity {
   @Directive('@external')
   school_year_id?: number;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_begin: Date;
+  date_begin: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_end: Date;
+  date_end: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_reg_open: Date;
+  date_reg_open: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_reg_close: Date;
+  date_reg_close: string;
 
   @Column()
   reimburse_open: Date;
@@ -83,15 +83,15 @@ export class SchoolYear extends BaseEntity {
   @Column()
   application_close: Date;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  midyear_application_open: Date;
+  midyear_application_open: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  midyear_application_close: Date;
+  midyear_application_close: string;
 
   @Column()
   first_sem_learning_logs_close: Date;
@@ -109,10 +109,10 @@ export class SchoolYear extends BaseEntity {
   @Directive('@external')
   RegionId: number | null;
 
-  @Column()
-  @Field((type) => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field((type) => String, { nullable: true })
   @Directive('@external')
-  birth_date_cut: Date;
+  birth_date_cut: string;
 
   @Column()
   @Field((type) => Boolean, { nullable: true })
@@ -146,4 +146,10 @@ export class SchoolYear extends BaseEntity {
   @JoinColumn([{ name: 'RegionId', referencedColumnName: 'id' }])
   @Field(() => Region, { nullable: true })
   Region: Region;
+
+  @Field(() => Boolean, { nullable: true })
+  MainyearApplicatable: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  MidyearApplicatable: boolean;
 }

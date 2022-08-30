@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -11,17 +6,17 @@ export class SchoolYear extends BaseEntity {
   @PrimaryGeneratedColumn()
   school_year_id?: number;
 
-  @Column()
-  date_begin: Date;
+  @Column({ type: 'date' })
+  date_begin: string;
 
-  @Column()
-  date_end: Date;
+  @Column({ type: 'date' })
+  date_end: string;
 
-  @Column()
-  date_reg_open: Date;
+  @Column({ type: 'date' })
+  date_reg_open: string;
 
-  @Column()
-  date_reg_close: Date;
+  @Column({ type: 'date' })
+  date_reg_close: string;
 
   @Column()
   reimburse_open: Date;
@@ -62,11 +57,11 @@ export class SchoolYear extends BaseEntity {
   @Column()
   application_close: Date;
 
-  @Column()
-  midyear_application_open: Date;
+  @Column({ type: 'date' })
+  midyear_application_open: string;
 
-  @Column()
-  midyear_application_close: Date;
+  @Column({ type: 'date' })
+  midyear_application_close: string;
 
   @Column()
   first_sem_learning_logs_close: Date;
@@ -80,8 +75,8 @@ export class SchoolYear extends BaseEntity {
   @Column('int', { name: 'RegionId', nullable: true })
   RegionId: number | null;
 
-  @Column()
-  birth_date_cut: Date;
+  @Column({ type: 'date' })
+  birth_date_cut: string;
 
   @Column()
   special_ed: boolean;

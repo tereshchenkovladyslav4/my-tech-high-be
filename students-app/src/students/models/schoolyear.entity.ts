@@ -15,25 +15,25 @@ export class SchoolYear extends BaseEntity {
   @Directive('@external')
   school_year_id?: number;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_begin: Date;
+  date_begin: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_end: Date;
+  date_end: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_reg_open: Date;
+  date_reg_open: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  date_reg_close: Date;
+  date_reg_close: string;
 
   @Column()
   @Field(() => Date, { nullable: true })
@@ -87,15 +87,15 @@ export class SchoolYear extends BaseEntity {
   @Field(() => Date, { nullable: true })
   application_close: Date;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  midyear_application_open: Date;
+  midyear_application_open: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
-  midyear_application_close: Date;
+  midyear_application_close: string;
 
   @Column()
   @Field(() => Date, { nullable: true })
@@ -115,10 +115,10 @@ export class SchoolYear extends BaseEntity {
   @Directive('@external')
   RegionId?: number;
 
-  @Column()
-  @Field((type) => Date, { nullable: true })
+  @Column({ type: 'date' })
+  @Field((type) => String, { nullable: true })
   @Directive('@external')
-  birth_date_cut: Date;
+  birth_date_cut: string;
 
   @Column()
   @Field((type) => Boolean, { nullable: true })

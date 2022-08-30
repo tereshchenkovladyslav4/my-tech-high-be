@@ -54,6 +54,14 @@ export class Announcement extends BaseEntity {
   @Column({ nullable: true })
   filter_users?: string;
 
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  filter_program_years?: string;
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  filter_school_partners?: string;
+
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
   date?: Date;

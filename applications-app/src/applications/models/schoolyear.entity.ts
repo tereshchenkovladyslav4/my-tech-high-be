@@ -23,21 +23,21 @@ export class SchoolYear extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'school_year_id' })
   school_year_id: number;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
-  date_begin: Date;
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
+  date_begin: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
-  date_end: Date;
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
+  date_end: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
-  date_reg_open: Date;
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
+  date_reg_open: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
-  date_reg_close: Date;
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
+  date_reg_close: string;
 
   @Column()
   reimburse_open: Date;
@@ -78,13 +78,13 @@ export class SchoolYear extends BaseEntity {
   @Column()
   application_close: Date;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
-  midyear_application_open: Date;
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
+  midyear_application_open: string;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
-  midyear_application_close: Date;
+  @Column({ type: 'date' })
+  @Field(() => String, { nullable: true })
+  midyear_application_close: string;
 
   @Column()
   first_sem_learning_logs_close: Date;
@@ -100,9 +100,9 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => Int, { nullable: true })
   RegionId: number | null;
 
-  @Column()
-  @Field((type) => Date, { nullable: true })
-  birth_date_cut: Date;
+  @Column({ type: 'date' })
+  @Field((type) => String, { nullable: true })
+  birth_date_cut: string;
 
   @Column()
   @Field((type) => Boolean, { nullable: true })

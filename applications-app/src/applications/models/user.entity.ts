@@ -8,9 +8,11 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Announcement } from './announcement.entity';
 import { UserRegion } from './user-region.entity';
+import { Role } from './role.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "user_id, email")')
@@ -49,4 +51,8 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   // @Field(() => [UserRegion], { nullable: true })
   userRegions?: UserRegion[];
+
+  @ManyToOne(() => Role, (role) => role.level)
+  @JoinColumn({ name: 'level', referencedColumnName: 'id' })
+  role: Role;
 }
