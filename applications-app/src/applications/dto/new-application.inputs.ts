@@ -30,6 +30,7 @@ export class CreateApplicationInput {
 
   @Field({ nullable: true })
   address?: CreateAddressInput;
+  
   @Field(() => Boolean, { nullable: true })
   midyear_application: boolean;
 }

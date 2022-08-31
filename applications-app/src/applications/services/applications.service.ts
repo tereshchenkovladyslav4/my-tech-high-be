@@ -28,6 +28,7 @@ import { AddressService } from './address.service';
 import * as Moment from 'moment';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 import { concatenateTypeDefs } from 'graphql-tools';
+import { StudentRecordService } from './student-record.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -44,8 +45,9 @@ export class ApplicationsService {
     private userRegionService: UserRegionService,
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
-    private emailRecordsService:EmailRecordsService,
+    private emailRecordsService: EmailRecordsService,
     private addressService: AddressService,
+    private studentRecordService: StudentRecordService,
   ) {}
 
   async getTodoListItems(regionId: number): Promise<ResponseDTO> {
@@ -358,6 +360,7 @@ export class ApplicationsService {
     const promise = Promise.all(
       application_ids.map(async (id) => {
         const application_id = Number(id);
+
         await this.applicationsRepository.save({
           application_id,
           status: 'Accepted',
@@ -415,7 +418,7 @@ export class ApplicationsService {
         const deadline = new Date().setDate(
           new Date().getDate() + deadlineDays,
         );
-        
+
         const UTCDeadline = new Date(deadline).toISOString();
 
         let default_meta = {};
@@ -455,6 +458,19 @@ export class ApplicationsService {
             region_id,
           );
 
+        const school_year = await this.schoolYearService.findOneById(
+          gradeLevels[0].school_year_id,
+        );
+
+        if (!school_year.enrollment_packet) {
+          await this.studentRecordService.createStudentRecord(
+            student.student_id,
+            school_year.RegionId,
+            0,
+            null,
+          );
+        }
+
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {
             const yearbegin = new Date(school_year.date_begin)
@@ -465,26 +481,19 @@ export class ApplicationsService {
               .toString();
             const yearText = application.midyear_application
               ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
-              : `${yearbegin}-${yearend.substring(2, 4)}`
+              : `${yearbegin}-${yearend.substring(2, 4)}`;
 
             return emailTemplate.body
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
               .replace(/\[YEAR\]/g, yearText)
-              .replace(
-                /\[APPLICATION_YEAR\]/g,
-                yearText,
-              )
+              .replace(/\[APPLICATION_YEAR\]/g, yearText)
               .replace(
                 /\[DEADLINE\]/g,
                 `${Moment.utc(UTCDeadline).format('MM/DD/yy')}`,
               );
           };
-
-          const school_year = await this.schoolYearService.findOneById(
-            gradeLevels[0].school_year_id,
-          );
           const body = setEmailBodyInfo(student, school_year);
 
           await this.sesEmailService.sendEmail({
@@ -540,7 +549,6 @@ export class ApplicationsService {
           .toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
 
-
         return emailTemplate.body
           .toString()
           .replace(/\[STUDENT\]/g, student.person?.first_name)
@@ -559,13 +567,13 @@ export class ApplicationsService {
       );
       const emailBody = setEmailBodyInfo(item.student, school_year);
       const result = await this.sesEmailService.sendEmail({
-        email: item.student.parent.person.email,        
+        email: item.student.parent.person.email,
         subject: subject,
         content: emailBody,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
         region_id: 1,
-        template_name: 'Application Page'
+        template_name: 'Application Page',
       });
     });
     const applicationEmails = Promise.all(
@@ -665,12 +673,15 @@ export class ApplicationsService {
     return true;
   }
 
-  async findBySchoolYearAndStudent({student_id, school_year_id}): Promise<Application> {
+  async findBySchoolYearAndStudent({
+    student_id,
+    school_year_id,
+  }): Promise<Application> {
     const applications = await this.applicationsRepository.findOne({
       where: {
         student_id,
-        school_year_id
-      }
+        school_year_id,
+      },
     });
     return applications;
   }

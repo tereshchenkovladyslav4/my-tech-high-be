@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, getConnection, Repository } from 'typeorm';
 import { StudentRecordSearchInput } from '../dto/student_record_search_input';
+import { StudentRecordFileKind } from '../enums';
 import { StudentRecord } from '../models/student-record.entity';
 import { Pagination } from '../paginate';
 @Injectable()
@@ -11,9 +12,7 @@ export class StudentRecordService {
     private readonly repo: Repository<StudentRecord>,
   ) {}
 
-  async find(
-    param: StudentRecordSearchInput,
-  ): Promise<Pagination<StudentRecord>> {
+  async find(param: StudentRecordSearchInput): Promise<Pagination<StudentRecord>> {
     const { pagination, filter, search_key } = param;
     const { skip, take } = pagination;
     const {
@@ -62,11 +61,7 @@ export class StudentRecordService {
           if (!grades.includes('K')) grades.push('K');
         }
         if (item === '1-8' || item === '9-12') {
-          for (
-            let i = Number(item.split('-')[0]);
-            i <= Number(item.split('-')[1]);
-            i++
-          ) {
+          for (let i = Number(item.split('-')[0]); i <= Number(item.split('-')[1]); i++) {
             if (!grades.includes(i.toString())) {
               grades.push(i.toString());
             }
@@ -80,15 +75,9 @@ export class StudentRecordService {
     if (program_year) {
       const programYear = JSON.parse(program_year);
       let cond = '';
-      if (
-        !programYear.includes('midYear') &&
-        programYear.includes('schoolYear')
-      ) {
+      if (!programYear.includes('midYear') && programYear.includes('schoolYear')) {
         cond = 'WHERE midyear_application <> 1';
-      } else if (
-        programYear.includes('midYear') &&
-        !programYear.includes('schoolYear')
-      ) {
+      } else if (programYear.includes('midYear') && !programYear.includes('schoolYear')) {
         cond = 'WHERE midyear_application = 1';
       }
       const queryRunner = await getConnection().createQueryRunner();
@@ -122,9 +111,7 @@ export class StudentRecordService {
       qb.andWhere(
         new Brackets((sub) => {
           return sub
-            .orWhere(
-              `CONCAT(person.last_name, ' ', person.first_name) LIKE '%${search_key}%'`,
-            )
+            .orWhere(`CONCAT(person.last_name, ' ', person.first_name) LIKE '%${search_key}%'`)
             .orWhere(`File.name LIKE '%${search_key}%'`);
         }),
       );
@@ -134,12 +121,8 @@ export class StudentRecordService {
       qb.andWhere(
         new Brackets((sub) => {
           return sub
-            .orWhere(
-              `record.created_at >= '${date_range_start}' AND record.created_at <= '${date_range_end}'`,
-            )
-            .orWhere(
-              `record.updated_at >= '${date_range_start}' AND record.updated_at <= '${date_range_end}'`,
-            );
+            .orWhere(`record.created_at >= '${date_range_start}' AND record.created_at <= '${date_range_end}'`)
+            .orWhere(`record.updated_at >= '${date_range_start}' AND record.updated_at <= '${date_range_end}'`);
         }),
       );
     }
@@ -182,16 +165,75 @@ export class StudentRecordService {
         fileKinds: fileKinds,
       });
     }
-    qb.addSelect(
-      "CONCAT(person.last_name, ' ', person.first_name)",
-      'student_name',
-    );
+    qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
     qb.orderBy('student_name', 'ASC');
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
     return new Pagination<StudentRecord>({
       results: results,
       total: total,
     });
+  }
+  async createStudentRecord(
+    studentId: number,
+    regionId: number,
+    fileId: number,
+    fileKind: StudentRecordFileKind,
+  ): Promise<boolean> {
+    try {
+      const queryRunner = await getConnection().createQueryRunner();
+      let recordId;
+      const records = await queryRunner.query(`
+        SElECT * FROM infocenter.mth_student_record
+        WHERE StudentId = ${studentId};
+      `);
+      if (records.length) {
+        recordId = records[0].record_id;
+      } else {
+        const record = await queryRunner.query(`
+          INSERT INTO infocenter.mth_student_record
+            (StudentId, RegionId, created_at, updated_at)
+          VALUES
+            (${studentId}, ${regionId}, NOW(), NOW());
+        `);
+        recordId = record.insertId;
+      }
+
+      await queryRunner.query(`
+        INSERT INTO infocenter.mth_student_record_file (RecordId, FileId, file_kind)
+        SELECT ${recordId}, mth_file_id, kind
+        FROM (
+          SELECT packet_id FROM infocenter.mth_packet WHERE student_id = ${studentId}
+        ) AS packet
+        LEFT JOIN infocenter.mth_packet_file packetFile ON (packetFile.packet_id = packet.packet_id)
+      `);
+
+      if (fileId && fileKind) {
+        const recordFiles = await queryRunner.query(`
+          SELECT * FROM infocenter.mth_student_record_file
+          WHERE RecordId = ${recordId} AND file_kind = "${fileKind}";
+        `);
+
+        if (!recordFiles.length) {
+          await queryRunner.query(`
+            INSERT INTO infocenter.mth_student_record_file
+              (RecordId, FileId, file_kind, created_at, updated_at)
+            VALUES
+              (${recordId}, ${fileId}, "${fileKind}", NOW(), NOW());
+          `);
+        } else {
+          const recordFileId = recordFiles[0].record_file_id;
+          await queryRunner.query(`
+            UPDATE infocenter.mth_student_record_file
+            SET FileId = ${fileId}, updated_at = NOW()
+            WHERE record_file_id = ${recordFileId};
+          `);
+        }
+      }
+      queryRunner.release();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async save(region_id: number, student_id: number): Promise<Boolean> {

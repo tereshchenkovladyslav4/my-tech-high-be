@@ -33,6 +33,7 @@ import { Pagination } from 'src/paginate';
 import { StudentPagination } from '../models/student-pagination.entity';
 import { assignStudentToSOEInput } from '../dto/assign-student-soe.input';
 import { SchoolEnrollmentService } from '../services/school-enrollment-service.service';
+import { StudentStatusEnum } from '../enums';
 
 @Resolver((of) => Student)
 export class StudentsResolver {
@@ -42,7 +43,7 @@ export class StudentsResolver {
     private parentsService: ParentsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private schoolEnrollmentService: SchoolEnrollmentService,
-  ) { }
+  ) {}
 
   @Query((returns) => Student, { name: 'student' })
   async getStudent(
@@ -52,7 +53,9 @@ export class StudentsResolver {
   }
 
   @Query((of) => StudentPagination, { name: 'studentsForSOE' })
-  public async getStudentsForSOE(@Args() studentsArgs: StudentsArgs): Promise<Pagination<Student>> {
+  public async getStudentsForSOE(
+    @Args() studentsArgs: StudentsArgs,
+  ): Promise<Pagination<Student>> {
     return this.studentsService.findAll(studentsArgs);
   }
 
@@ -105,6 +108,11 @@ export class StudentsResolver {
     });
     if (!statudUpdated) return false;
 
+    if (changeStatusInput.status == StudentStatusEnum.ACTIVE) {
+      const isPdfGenerated =
+        await this.studentsService.generateStudentPacketPDF(changeStatusInput);
+    }
+
     const statudUpdatedHistory = this.studentsService.updateStatusHistory({
       student_id: changeStatusInput.student_id,
       school_year_id: changeStatusInput.school_year_id,
@@ -118,9 +126,12 @@ export class StudentsResolver {
   @Mutation((returns) => Boolean, { name: 'assignStudentToSOE' })
   @UseGuards(new AuthGuard())
   async assignStudentToSOE(
-    @Args('assignStudentToSOEInput') assignStudentToSOEInput: assignStudentToSOEInput,
+    @Args('assignStudentToSOEInput')
+    assignStudentToSOEInput: assignStudentToSOEInput,
   ): Promise<Boolean> {
-    await this.schoolEnrollmentService.assignStudentToSOE(assignStudentToSOEInput);
+    await this.schoolEnrollmentService.assignStudentToSOE(
+      assignStudentToSOEInput,
+    );
     return true;
   }
 

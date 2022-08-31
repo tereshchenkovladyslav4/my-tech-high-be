@@ -10,4 +10,7 @@ export class ChangeStatusInput {
 
   @Field(() => Int)
   status?: number;
+
+  @Field(() => Int)
+  packet_id?: number;
 }

@@ -36,6 +36,7 @@ import { CreateAddressInput } from './dto/new-address.inputs';
 import { PersonAddressService } from './services/person-address.service';
 import { EmailRecordsService } from './services/email-records.service';
 import { SchoolYear } from './models/schoolyear.entity';
+import { CreateStudentApplicationInput } from './dto/create-student-application.inputs';
 
 @Injectable()
 export class ApplicationsService {
@@ -99,16 +100,16 @@ export class ApplicationsService {
     students = await Promise.all(
       studentApplications.map(
         async (studentApplication) =>
-          await this.createStudentApplication(
+          await this.createStudentApplication({
             parent_id,
-            newApplication.program_year,
+            school_year_id: newApplication.program_year,
             studentApplication,
-            newApplication.referred_by,
-            newApplication.meta,
-            newApplication.address,
-            newApplication.packet,
-            newApplication.midyear_application,
-          ),
+            referred_by:  newApplication.referred_by,
+            meta: newApplication.meta,
+            address:  newApplication.address,
+            packet: newApplication.packet,
+            midyear_application: newApplication.midyear_application,
+          }),
       ),
     );
 
@@ -231,16 +232,18 @@ export class ApplicationsService {
       .getOne();
     const studentApplications = (await newApplication).students;
     let students = [];
+
     students = await Promise.all(
       studentApplications.map(
         async (studentApplication) =>
-          await this.createStudentApplication(
-            parent.parent_id,
-            newApplication.program_year,
+          await this.createStudentApplication({
+            parent_id:  parent.parent_id,
+            school_year_id: newApplication.program_year,
             studentApplication,
-            '',
-            newApplication.meta,
-          ),
+            referred_by: '',
+            meta: newApplication.meta,
+            midyear_application: newApplication.midyear_application,
+          }),
       ),
     );
 
@@ -266,10 +269,12 @@ export class ApplicationsService {
         const yearbegin = new Date(school_year.date_begin)
           .getFullYear()
           .toString();
+
         const yearend = new Date(school_year.date_end).getFullYear().toString();
         const yearText = currApplication.midyear_application
         ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
         : `${yearbegin}-${yearend.substring(2, 4)}`
+        
         return emailTemplate.body
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
@@ -389,15 +394,18 @@ export class ApplicationsService {
   }
 
   async createStudentApplication(
-    parent_id: number,
-    school_year_id: number,
-    studentApplication: CreateStudentPacketInput,
-    referred_by?: string,
-    meta?: string,
-    address?: CreateAddressInput,
-    packet?: NewParentPacketContactInput,
-    midyear_application?: boolean,
+    createStudentApplicationInput: CreateStudentApplicationInput,
   ): Promise<any> {
+    const {
+      parent_id,
+      school_year_id,
+      studentApplication,
+      referred_by,
+      meta,
+      address,
+      packet,
+      midyear_application,
+    } = createStudentApplicationInput;
     const {
       first_name,
       last_name,

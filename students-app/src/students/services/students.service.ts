@@ -1,5 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PDFService } from '@t00nday/nestjs-pdf';
 import { Repository, createQueryBuilder, getConnection, Brackets } from 'typeorm';
 import { Student } from '../models/student.entity';
 import { StudentsArgs } from '../dto/student.args';
@@ -23,6 +24,10 @@ import moment, * as Moment from 'moment';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { Region } from '../models/region.entity';
 import { Pagination } from 'src/paginate';
+import { ChangeStatusInput } from '../dto/change-status.input';
+import { PdfTemplate, StudentRecordFileKind } from '../enums';
+import { FilesService } from './files.service';
+import { StudentRecordService } from './student-record.service';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -35,6 +40,9 @@ export class StudentsService {
     private personsService: PersonsService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearsService,
+    private pdfService: PDFService,
+    private filesService: FilesService,
+    private studentRecordService: StudentRecordService,
   ) {}
 
   protected user: User;
@@ -166,9 +174,13 @@ export class StudentsService {
             .orWhere('p_person.first_name like :text', { text: `%${search}%` })
             .orWhere('p_person.last_name like :text', { text: `%${search}%` })
             .orWhere('address.city like :text', { text: `%${search}%` })
-            .orWhere('grade_levels.grade_level like :text', { text: `%${search}%` })
+            .orWhere('grade_levels.grade_level like :text', {
+              text: `%${search}%`,
+            })
             .orWhere('currentPartner.name like :text', { text: `%${search}%` })
-            .orWhere('previousPartner.name like :text', { text: `%${search}%` });
+            .orWhere('previousPartner.name like :text', {
+              text: `%${search}%`,
+            });
         }),
       );
     }
@@ -445,5 +457,141 @@ export class StudentsService {
       .execute();
 
     return student;
+  }
+
+  async generateStudentPacketPDF(param: ChangeStatusInput): Promise<boolean> {
+    try {
+      const queryRunner = await getConnection().createQueryRunner();
+      const { student_id, packet_id } = param;
+      const studentInfoResult = await queryRunner.query(`
+        SELECT
+          region.id AS region_id,
+          region.name AS region_name,
+          schoolYear.school_year_id AS school_year_id,
+          schoolYear.date_begin AS date_begin,
+          CONCAT(person.first_name, ' ', person.last_name) AS legal_name,
+          CONCAT(person.preferred_first_name, '', preferred_last_name) AS preferred_name,
+          person.email AS email,
+          person.date_of_birth AS date_of_birth,
+          person.gender AS gender,
+          CONCAT(studentGrade.grade_level, ' (', SUBSTR(schoolYear.date_begin, 1, 4), '-', SUBSTR(schoolYear.date_end, 3, 2), ')') AS grade
+        FROM (
+          SELECT student_id, school_year_id FROM infocenter.mth_application WHERE student_id = ${student_id}
+        ) AS application
+        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+        LEFT JOIN infocenter.region region ON (region.id = schoolYear.RegionId)
+        LEFT JOIN infocenter.mth_student student ON (student.student_id = application.student_id)
+        LEFT JOIN infocenter.mth_person person ON (person.person_id = student.person_id)
+        LEFT JOIN infocenter.mth_student_grade_level studentGrade ON (studentGrade.student_id = application.student_id AND studentGrade.school_year_id = application.school_year_id)
+    
+      `);
+      let packetInfo = Object.create({
+        region_id: '',
+        region_name: '',
+        school_year_id: '',
+        date_begin: '',
+        legal_name: '',
+        preferred_name: '',
+        email: '',
+        date_of_birth: '',
+        gender: '',
+        grade: '',
+        hispanic_latino: '',
+        race: '',
+        first_language_learned_by_child: '',
+        language_used_most_often_by_adults_in_the_home: '',
+        language_used_most_often_by_child_in_the_home: '',
+        language_used_most_often_by_child_with_friends_outside_the_home: '',
+        preferred_correspondence_language_for_adults_in_the_home: '',
+        special_ed: '',
+        school_district_of_residence: '',
+        last_school_attended: '',
+        parent_guardian_name: '',
+        parent_guardian_phone1: '',
+        parent_guardian_phone2: '',
+        parent_guardian_email: '',
+        parent_guardian_address1: '',
+        parent_guardian_address2: '',
+        secondary_contact_name: '',
+        secondary_contact_phone: '',
+        secondary_contact_email: '',
+        household_size: '',
+        household_income: '',
+        other_the_student_presently_living: '',
+        other_the_student_lives_with: '',
+        signature_name: '',
+        signature_date: '',
+        signature_url: '',
+      });
+      studentInfoResult.map((item) => {
+        packetInfo.region_id = `${item.region_id}`;
+        packetInfo.region_name = `${item.region_name}`;
+        packetInfo.school_year_id = `${item.school_year_id}`;
+        packetInfo.date_begin = `${item.date_begin}`;
+        packetInfo.legal_name = `${item.legal_name}`;
+        packetInfo.preferred_name = `${item.preferred_name}`;
+        packetInfo.email = `${item.email}`;
+        packetInfo.date_of_birth = `${Moment(item.date_of_birth).format('MMMM DD, YYYY')}`;
+        packetInfo.gender = `${item.gender}`;
+        packetInfo.grade = `${item.grade}`;
+        packetInfo.hispanic_latino = 'Yes';
+        packetInfo.race = 'American Indian or Alaska Native';
+        packetInfo.first_language_learned_by_child = 'English';
+        packetInfo.language_used_most_often_by_adults_in_the_home = 'English';
+        packetInfo.language_used_most_often_by_child_in_the_home = 'English';
+        packetInfo.language_used_most_often_by_child_with_friends_outside_the_home = 'English';
+        packetInfo.preferred_correspondence_language_for_adults_in_the_home = 'English';
+        packetInfo.special_ed = '';
+        packetInfo.school_district_of_residence = 'Jordan';
+        packetInfo.last_school_attended = 'None - Student has always been homeschooled';
+        packetInfo.parent_guardian_name = 'Parent Demo2020';
+        packetInfo.parent_guardian_phone1 = '423-367-5555';
+        packetInfo.parent_guardian_phone2 = '423-367-5555';
+        packetInfo.parent_guardian_email = 'hero930604@hotmail.com';
+        packetInfo.parent_guardian_address1 = '1234 Demo Lane';
+        packetInfo.parent_guardian_address2 = 'Demo, OR 95337';
+        packetInfo.secondary_contact_name = 'Contact Parent2020';
+        packetInfo.secondary_contact_phone = '423-367-5555';
+        packetInfo.secondary_contact_email = 'hero930604@hotmail.com';
+        packetInfo.household_size = '0';
+        packetInfo.household_income = 'Not shared';
+        packetInfo.other_the_student_presently_living = 'Choices above do not apply (skip question #2)';
+        packetInfo.other_the_student_lives_with = '';
+        packetInfo.signature_name = 'Parent Demo Test';
+        packetInfo.signature_date = ' 06/23/2021';
+        packetInfo.signature_url = 'https://cdn.rtbrain.app/pp/preimages/497be9c47119846bc65c4a69c71c1368_wide.jpg';
+      });
+
+      queryRunner.release();
+
+      const region = 'Arizona';
+      const yearbegin = Moment(packetInfo.date_begin).format('YYYY');
+
+      const pdfBuffer = await this.pdfService
+        .toBuffer(PdfTemplate.STUDENT_PACKET, {
+          locals: {
+            packetInfo: packetInfo,
+          },
+        })
+        .toPromise();
+      const uploadFile = await this.filesService.upload(
+        pdfBuffer,
+        `${region}/Student Records/${student_id}`,
+        StudentRecordFileKind.STUDENT_PACKET,
+        'application/pdf',
+        yearbegin,
+      );
+
+      await this.studentRecordService.createStudentRecord(
+        student_id,
+        packetInfo.region_id,
+        uploadFile.file_id,
+        StudentRecordFileKind.STUDENT_PACKET,
+      );
+
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 }

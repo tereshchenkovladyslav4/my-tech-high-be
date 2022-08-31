@@ -6,6 +6,7 @@ import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { SchoolYearDataInput } from '../dto/school-year-data.Input';
 import { SchoolYearData } from '../models/school-year-data.entity';
 import { WithdrawalService } from './withdrawal.service';
+import { StudentStatusEnum } from '../enums';
 
 @Injectable()
 export class StudentStatusService {
@@ -25,17 +26,17 @@ export class StudentStatusService {
       });
 
       //if (status == 2 && withdrawOption > 0) {
-				//	TODO : Update Status
-        //const updateWithdrawalInput: UpdateWithdrawalInput = {
-        //  StudentId: student_id,
-        //  status:
-        //    withdrawOption == 1
-        //      ? 'Notified'
-        //      : withdrawOption < 5
-        //      ? 'Withdrawn'
-        //      : '',
-        //};
-        //await this.withdrawalService.update(updateWithdrawalInput);
+      //	TODO : Update Status
+      //const updateWithdrawalInput: UpdateWithdrawalInput = {
+      //  StudentId: student_id,
+      //  status:
+      //    withdrawOption == 1
+      //      ? 'Notified'
+      //      : withdrawOption < 5
+      //      ? 'Withdrawn'
+      //      : '',
+      //};
+      //await this.withdrawalService.update(updateWithdrawalInput);
       //}
 
       //if ((status == 1 || status == 0) && activeOption == 1) {
@@ -101,18 +102,18 @@ export class StudentStatusService {
     // }, 0);
     let spedTotal = 0;
     studentResult.forEach((element) => {
-      if (Number(element.status) === 0) {
+      if (Number(element.status) === StudentStatusEnum.PENDING) {
         students.push({ status: 'Pending', count: element.count });
         sped.push({ status: 'Pending', count: element.sped });
         spedTotal += Number(element.sped || 0);
-      } else if (Number(element.status) === 1) {
+      } else if (Number(element.status) === StudentStatusEnum.ACTIVE) {
         students.push({ status: 'Active', count: element.count });
         sped.push({ status: 'Active', count: element.sped });
         spedTotal += Number(element.sped || 0);
-      } else if (Number(element.status) === 2) {
+      } else if (Number(element.status) === StudentStatusEnum.WITHDRAWAL) {
         students.push({ status: 'Withdrawn', count: element.count });
         sped.push({ status: 'Withdrawn', count: element.sped });
-      } else if (Number(element.status) === 3) {
+      } else if (Number(element.status) === StudentStatusEnum.GRADUATED) {
         students.push({ status: 'Graduated', count: element.count });
         sped.push({ status: 'Graduated', count: element.sped });
       }
@@ -125,13 +126,13 @@ export class StudentStatusService {
       return accumulator + Number(object.count || 0);
     }, 0);
     ParentResult.forEach((element) => {
-      if (Number(element.status) === 0) {
+      if (Number(element.status) === StudentStatusEnum.PENDING) {
         parents.push({ status: 'Pending', count: element.count });
-      } else if (Number(element.status) === 1) {
+      } else if (Number(element.status) === StudentStatusEnum.ACTIVE) {
         parents.push({ status: 'Active', count: element.count });
-      } else if (Number(element.status) === 2) {
+      } else if (Number(element.status) === StudentStatusEnum.WITHDRAWAL) {
         parents.push({ status: 'Withdrawn', count: element.count });
-      } else if (Number(element.status) === 3) {
+      } else if (Number(element.status) === StudentStatusEnum.GRADUATED) {
         parents.push({ status: 'Graduated', count: element.count });
       }
     });
