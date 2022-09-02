@@ -48,7 +48,7 @@ export class CreateOrUpdateResourceInput {
   add_resource_level: boolean;
 
   @Field(() => String, { nullable: true })
-  resource_level: string;
+  resourceLevelsStr: string;
 
   @Field(() => Boolean, { nullable: true })
   family_resource: boolean;

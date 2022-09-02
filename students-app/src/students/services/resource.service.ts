@@ -26,40 +26,28 @@ export class ResourceService {
     const { school_year_id: schoolYearId, grade_level: gradeLevel } = studentGradeLevel;
 
     const queryRunner = await getConnection().createQueryRunner();
-    // student_id + resource_id is primary key in mth_student)hidden_resource and mth_resource_cart
-    // They are one to one relationship.
-    const data: Resource[] = await queryRunner.query(`
-      SELECT 
-        resource.*,
-        student_hidden_resource.student_id AS HiddenByStudent,
-        resource_cart.created_at AS CartDate,
-        resource_request.status AS RequestStatus
-      FROM 
-        infocenter.mth_resource_settings AS resource
-      LEFT JOIN 
-        infocenter.mth_student_hidden_resource student_hidden_resource 
-      ON (
-        resource.resource_id = student_hidden_resource.resource_id AND
-        student_hidden_resource.student_id = ${studentId}
-      )
-      LEFT JOIN 
-        infocenter.mth_resource_cart resource_cart
-      ON (
-        resource.resource_id = resource_cart.resource_id AND
-        resource_cart.student_id = ${studentId}
-      )
-      LEFT JOIN 
-        infocenter.mth_resource_request resource_request
-      ON (
-        resource.resource_id = resource_request.resource_id AND
-        resource_request.student_id = ${studentId}
-      )
-      WHERE
-        SchoolYearId = ${schoolYearId} AND is_active = 1 AND find_in_set('${gradeLevel}',grades) <> 0
-      ORDER BY
-        HiddenByStudent ASC, resource.priority ASC;
-    `);
-    data.map((item) => (item.HiddenByStudent = !!item.HiddenByStudent));
+
+    const data = await this.repo
+      .createQueryBuilder('resource')
+      .leftJoinAndSelect('resource.HiddenStudents', 'HiddenStudents', `HiddenStudents.student_id=${studentId}`)
+      .leftJoinAndSelect('resource.StudentsInCart', 'StudentsInCart', `StudentsInCart.student_id=${studentId}`)
+      .leftJoinAndSelect('resource.ResourceRequests', 'ResourceRequests', `ResourceRequests.student_id=${studentId}`)
+      .leftJoinAndSelect('resource.ResourceLevels', 'ResourceLevels')
+      .where({ SchoolYearId: schoolYearId, is_active: 1 })
+      .andWhere(`find_in_set('${gradeLevel}',grades) <> 0`)
+      .orderBy({
+        'HiddenStudents.resource_id': 'ASC',
+        'resource.priority': 'ASC',
+      })
+      .getMany();
+
+    data.map(
+      (item) => (
+        (item.HiddenByStudent = !!item.HiddenStudents?.length),
+        (item.CartDate = item.StudentsInCart?.[0]?.created_at),
+        (item.RequestStatus = item.ResourceRequests?.[0]?.status)
+      ),
+    );
     queryRunner.release();
     return data;
   }

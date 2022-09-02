@@ -76,6 +76,7 @@ export class EventsService {
         filter_provider: event.filter_provider,
         filter_school_of_enrollment: event.filter_school_of_enrollment,
         filter_users: event.filter_users,
+        has_rsvp: event.has_rsvp,
       }));
       queryRunner.release();
       return results;

@@ -2,35 +2,65 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOrUpdateResourceInput } from '../dto/create-or-update-resource.inputs';
+import { ResourceLevel } from '../models/resource-level.entity';
 import { Resource } from '../models/resource.entity';
+import { ResourceLevelService } from './resource-level.service';
 
 @Injectable()
 export class ResourceService {
   constructor(
     @InjectRepository(Resource)
     private readonly repo: Repository<Resource>,
+    private resourceLevelService: ResourceLevelService,
   ) {}
 
   async find(schoolYearId: number): Promise<Resource[]> {
-    const data = await this.repo.find({
-      where: { SchoolYearId: schoolYearId },
-      order: { is_active: 'DESC', priority: 'ASC', resource_id: 'ASC' },
-    });
+    const data = await this.repo
+      .createQueryBuilder('resource')
+      .leftJoinAndSelect('resource.ResourceLevels', 'ResourceLevels')
+      .where({ SchoolYearId: schoolYearId })
+      .orderBy({
+        'resource.is_active': 'DESC',
+        'resource.priority': 'ASC',
+        'resource.resource_id': 'ASC',
+        'ResourceLevels.resource_level_id': 'ASC',
+      })
+      .getMany();
     return data;
   }
 
-  async save(
-    createResourceInput: CreateOrUpdateResourceInput,
-  ): Promise<Resource> {
+  async save(resourceInput: CreateOrUpdateResourceInput): Promise<Resource> {
     try {
-      if (!createResourceInput.resource_id) {
+      let existingLevels: ResourceLevel[] = [];
+      if (!resourceInput.resource_id) {
         const totalCnt = await this.repo.count({
-          SchoolYearId: createResourceInput.SchoolYearId,
+          SchoolYearId: resourceInput.SchoolYearId,
         });
-        if (!createResourceInput.priority)
-          createResourceInput.priority = totalCnt + 1;
+        if (!resourceInput.priority) resourceInput.priority = totalCnt + 1;
+      } else {
+        existingLevels = await this.resourceLevelService.find(resourceInput.resource_id);
       }
-      const result = await this.repo.save(createResourceInput);
+
+      const result = await this.repo.save(resourceInput);
+
+      let resourceLevels = [];
+      if (resourceInput.resourceLevelsStr) {
+        resourceLevels = JSON.parse(resourceInput.resourceLevelsStr);
+      }
+
+      existingLevels.map(async (item) => {
+        if (resourceLevels.findIndex((newLevel) => newLevel.resource_level_id == item.resource_level_id) < 0) {
+          await this.resourceLevelService.delete(item.resource_level_id);
+        }
+      });
+
+      resourceLevels.map(async (item) => {
+        await this.resourceLevelService.save({
+          ...item,
+          resource_id: result.resource_id,
+        });
+      });
+
       return result;
     } catch (error) {
       return error;

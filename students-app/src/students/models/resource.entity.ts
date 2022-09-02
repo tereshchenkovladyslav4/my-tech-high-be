@@ -1,21 +1,16 @@
 import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
-import {
-  Column,
-  Entity,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, BaseEntity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { ResourceRequestStatus, ResourceSubtitle } from '../enums';
 import { ResourceCart } from './resource-cart.entity';
+import { ResourceLevel } from './resource-level.entity';
 import { ResourceRequest } from './resource-request.entity';
 import { StudentHiddenResource } from './student-hidden-resource.entity';
 
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, resource_level, family_resource, allow_request, deleted")',
+  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels")',
 )
 @Entity({ name: 'mth_resource_settings' })
 export class Resource extends BaseEntity {
@@ -43,11 +38,7 @@ export class Resource extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   @Directive('@external')
-  @IsIn([
-    ResourceSubtitle.NONE,
-    ResourceSubtitle.INCLUDED,
-    ResourceSubtitle.PRICE,
-  ])
+  @IsIn([ResourceSubtitle.NONE, ResourceSubtitle.INCLUDED, ResourceSubtitle.PRICE])
   subtitle: string;
 
   @Column('decimal', {
@@ -105,11 +96,6 @@ export class Resource extends BaseEntity {
   @Directive('@external')
   add_resource_level: boolean;
 
-  @Column({ name: 'resource_level', nullable: true })
-  @Field(() => String, { nullable: true })
-  @Directive('@external')
-  resource_level: string;
-
   @Column('tinyint', { name: 'family_resource', nullable: true })
   @Field(() => Boolean, { nullable: true })
   @Directive('@external')
@@ -134,10 +120,7 @@ export class Resource extends BaseEntity {
   @Field(() => String, { nullable: true })
   RequestStatus: string;
 
-  @OneToMany(
-    () => StudentHiddenResource,
-    (studentHiddenResource) => studentHiddenResource.Resource,
-  )
+  @OneToMany(() => StudentHiddenResource, (studentHiddenResource) => studentHiddenResource.Resource)
   @Field(() => [StudentHiddenResource], { nullable: true })
   HiddenStudents: StudentHiddenResource[];
 
@@ -145,10 +128,12 @@ export class Resource extends BaseEntity {
   @Field(() => [ResourceCart], { nullable: true })
   StudentsInCart: ResourceCart[];
 
-  @OneToMany(
-    () => ResourceRequest,
-    (resourceRequest) => resourceRequest.Resource,
-  )
+  @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.Resource)
   @Field(() => [ResourceRequest], { nullable: true })
   ResourceRequests: ResourceRequest[];
+
+  @OneToMany(() => ResourceLevel, (resourceLevel) => resourceLevel.Resource)
+  @Field(() => [ResourceLevel], { nullable: true })
+  @Directive('@external')
+  ResourceLevels: ResourceLevel[];
 }

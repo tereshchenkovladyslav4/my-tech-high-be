@@ -88,6 +88,8 @@ import { EmailRecord } from './models/email-record.entity';
 import { PDFModule } from '@t00nday/nestjs-pdf';
 import { StudentRecordService } from './services/student-record.service';
 import { Role } from './models/role.entity';
+import { ResourceLevelService } from './services/resource-level.service';
+import { ResourceLevel } from './models/resource-level.entity';
 
 const servicesImports = [
   UsersService,
@@ -135,6 +137,7 @@ const servicesImports = [
   ResourceService,
   EmailRecordsService,
   StudentRecordService,
+  ResourceLevelService,
 ];
 
 @Global()
@@ -183,6 +186,7 @@ const servicesImports = [
       SchoolEnrollment,
       EmailRecord,
       Role,
+      ResourceLevel,
     ]),
     PDFModule.register({
       view: {

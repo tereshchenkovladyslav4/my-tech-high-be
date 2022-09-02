@@ -29,6 +29,10 @@ export class ApplicationEvent extends BaseEntity {
   @Column({ type: 'tinyint', name: 'all_day', nullable: true })
   all_day?: boolean;
 
+  @Field(() => Boolean, { nullable: true })
+  @Column({ type: 'tinyint', name: 'has_rsvp', nullable: true, default: 0 })
+  has_rsvp?: boolean;
+
   @Field((type) => Date, { nullable: true })
   @Column({ type: 'datetime', name: 'start_date', nullable: true })
   start_date?: Date;

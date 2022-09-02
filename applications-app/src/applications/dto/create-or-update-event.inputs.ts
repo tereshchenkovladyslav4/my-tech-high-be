@@ -23,6 +23,9 @@ export class CreateOrUpdateEventInput {
   @Field((type) => Boolean, { nullable: true })
   all_day?: boolean;
 
+  @Field((type) => Boolean, { nullable: true })
+  has_rsvp?: boolean;
+
   @Field((type) => String, { nullable: true })
   filter_grades?: string;
 

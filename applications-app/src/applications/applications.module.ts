@@ -47,6 +47,7 @@ import { ResourceResolver } from './resolvers/resource.resolver';
 import { EmailRecordResolver } from './resolvers/email-records.resolver';
 import { Resource } from './models/resource.entity';
 import { EmailRecord } from './models/email-record.entity';
+import { ResourceLevel } from './models/resource-level.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -105,6 +106,7 @@ const graphQLImports = [
           EnrollmentQuestions,
           Resource,
           EmailRecord,
+          ResourceLevel,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),
