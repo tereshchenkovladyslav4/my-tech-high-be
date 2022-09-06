@@ -15,6 +15,10 @@ export class ResourceCart {
   @PrimaryColumn()
   resource_id?: number;
 
+  @Column({ nullable: true })
+  @Field(() => ID, { nullable: true })
+  resource_level_id?: number;
+
   @Column()
   @Field(() => Date, { nullable: true })
   created_at?: Date;

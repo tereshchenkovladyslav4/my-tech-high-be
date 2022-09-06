@@ -4,7 +4,4 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 export class RequestResourcesInput {
   @Field(() => Int)
   student_id?: number;
-
-  @Field(() => [Int])
-  resourceIds?: number[];
 }

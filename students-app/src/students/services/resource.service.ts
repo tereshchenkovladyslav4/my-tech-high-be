@@ -48,11 +48,11 @@ export class ResourceService {
         (item.RequestStatus = item.ResourceRequests?.[0]?.status)
       ),
     );
-    queryRunner.release();
+    await queryRunner.release();
     return data;
   }
 
-  async toggleHiddenResource(toggleHiddenResourceInput: ToggleHiddenResourceInput): Promise<Boolean> {
+  async toggleHiddenResource(toggleHiddenResourceInput: ToggleHiddenResourceInput): Promise<boolean> {
     try {
       const { student_id, resource_id, hidden } = toggleHiddenResourceInput;
       const queryRunner = await getConnection().createQueryRunner();
@@ -77,16 +77,16 @@ export class ResourceService {
         `);
         }
       }
-      queryRunner.release();
+      await queryRunner.release();
       return true;
     } catch (error) {
       return error;
     }
   }
 
-  async toggleResourceCart(toggleResourceCartInput: ToggleResourceCartInput): Promise<Boolean> {
+  async toggleResourceCart(toggleResourceCartInput: ToggleResourceCartInput): Promise<boolean> {
     try {
-      const { student_id, resource_id, inCart } = toggleResourceCartInput;
+      const { student_id, resource_id, resource_level_id, inCart } = toggleResourceCartInput;
       const queryRunner = await getConnection().createQueryRunner();
       const existing = await queryRunner.query(`
         SELECT * FROM infocenter.mth_resource_cart
@@ -96,9 +96,9 @@ export class ResourceService {
         if (!existing.length) {
           await queryRunner.query(`
             INSERT INTO infocenter.mth_resource_cart
-              (student_id, resource_id, created_at)
+              (student_id, resource_id, resource_level_id, created_at)
             VALUES
-              (${student_id}, ${resource_id}, NOW());
+              (${student_id}, ${resource_id}, ${resource_level_id}, NOW());
           `);
         }
       } else {
@@ -109,25 +109,32 @@ export class ResourceService {
           `);
         }
       }
-      queryRunner.release();
+      await queryRunner.release();
       return true;
     } catch (error) {
       return error;
     }
   }
 
-  async requestResources(requestResourcesInput: RequestResourcesInput): Promise<Boolean> {
+  async requestResources(requestResourcesInput: RequestResourcesInput): Promise<boolean> {
     try {
-      const { student_id: stdId, resourceIds } = requestResourcesInput;
+      const { student_id: stdId } = requestResourcesInput;
+
       const queryRunner = await getConnection().createQueryRunner();
+      const resourcesInCart = await queryRunner.query(`
+          SELECT * FROM infocenter.mth_resource_cart
+          WHERE student_id = ${stdId};
+      `);
+
       const student = await queryRunner.query(`
         SELECT * FROM infocenter.mth_student
         WHERE student_id = ${stdId};
       `);
-      queryRunner.release();
+      await queryRunner.release();
+
       const { parent_id: parentId } = student?.[0];
 
-      resourceIds.map(async (resourceId) => {
+      resourcesInCart.map(async ({ resource_id: resourceId, resource_level_id: resourceLevelId }) => {
         const queryRunner = await getConnection().createQueryRunner();
 
         const resource = await queryRunner.query(`
@@ -151,10 +158,10 @@ export class ResourceService {
                 AND FIND_IN_SET(student_grade_level.grade_level,'${grades}') <> 0;
             `);
         }
-        queryRunner.release();
+        await queryRunner.release();
 
         (eligibleSiblings || [{ student_id: stdId }]).map(async ({ student_id }) => {
-          await this.requestResource(student_id, resourceId);
+          await this.requestResource(student_id, resourceId, resourceLevelId);
         });
       });
       return true;
@@ -163,7 +170,7 @@ export class ResourceService {
     }
   }
 
-  private async requestResource(studentId: number, resourceId: number) {
+  private async requestResource(studentId: number, resourceId: number, resourceLevelId: number) {
     const queryRunner = await getConnection().createQueryRunner();
     const existing = await queryRunner.query(`
       SELECT * FROM infocenter.mth_resource_request
@@ -172,9 +179,9 @@ export class ResourceService {
     if (!existing.length) {
       await queryRunner.query(`
         INSERT INTO infocenter.mth_resource_request
-          (student_id, resource_id, status, created_at, updated_at)
+          (student_id, resource_id, resource_level_id, status, created_at, updated_at)
         VALUES
-          (${studentId}, ${resourceId}, "${ResourceRequestStatus.REQUESTED}", NOW(), NOW());
+          (${studentId}, ${resourceId}, ${resourceLevelId}, "${ResourceRequestStatus.REQUESTED}", NOW(), NOW());
       `);
     }
     // Delete from cart
@@ -182,6 +189,6 @@ export class ResourceService {
       DELETE FROM infocenter.mth_resource_cart
       WHERE student_id = ${studentId} AND resource_id = ${resourceId};
     `);
-    queryRunner.release();
+    await queryRunner.release();
   }
 }

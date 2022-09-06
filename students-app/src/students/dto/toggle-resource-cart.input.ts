@@ -10,4 +10,7 @@ export class ToggleResourceCartInput {
 
   @Field(() => Boolean)
   inCart?: boolean;
+
+  @Field(() => Int, { nullable: true })
+  resource_level_id?: number = null;
 }

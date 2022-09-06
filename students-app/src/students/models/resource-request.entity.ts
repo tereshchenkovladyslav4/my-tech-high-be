@@ -17,6 +17,10 @@ export class ResourceRequest {
   @PrimaryColumn()
   resource_id?: number;
 
+  @Column({ nullable: true })
+  @Field(() => ID, { nullable: true })
+  resource_level_id?: number;
+
   @Column()
   @Field(() => String, { nullable: true })
   @IsIn([ResourceRequestStatus.REQUESTED])

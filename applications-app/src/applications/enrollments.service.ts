@@ -477,6 +477,14 @@ export class EnrollmentsService {
           });
       }
 
+      let status = "Submitted";
+      if(packetData && packetData.missing_files
+        //  && JSON.stringify(packetData.missing_files) && JSON.parse(packetData.missing_files).length > 0
+        )
+      {
+        status = "Resubmitted";
+      }
+
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id: g_packet_id,
         student_id,
@@ -489,7 +497,7 @@ export class EnrollmentsService {
         school_district: packet.school_district,
         meta: packet.meta,
         signature_file_id,
-        status: 'Submitted',
+        status: status,
       });
       console.log('Student Packet: ', studentPacket);
 

@@ -405,7 +405,7 @@ export class ApplicationsService {
             student.parent?.person?.user_id,
           );
 
-        var region_id = 1;
+        let region_id = 1;
         if (regions.length != 0) {
           region_id = regions[0].region_id;
         }
@@ -423,7 +423,9 @@ export class ApplicationsService {
 
         let default_meta = {};
         if (student.special_ed != 0) {
-          default_meta['meta_special_education'] = this.getSpeicalEdValue(student.special_ed);
+          default_meta['meta_special_education'] = this.getSpeicalEdValue(
+            student.special_ed,
+          );
         }
 
         // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
@@ -439,7 +441,7 @@ export class ApplicationsService {
           secondary_contact_first: application?.secondary_contact_first,
           secondary_contact_last: application?.secondary_contact_last,
           school_district: existingSchoolDistrict,
-          meta: JSON.stringify(default_meta)
+          meta: JSON.stringify(default_meta),
         });
 
         const gradeLevels = await this.studentGradeLevelsService.forStudents(
@@ -531,8 +533,19 @@ export class ApplicationsService {
       .leftJoinAndSelect('parent.person', 'person')
       .whereInIds(application_ids)
       .getManyAndCount();
-    const emailTemplate = await this.emailTemplateService.findByTemplate(
+
+    const user_id = results[0].student.parent.person.user_id;
+    const regions: UserRegion[] =
+      await this.userRegionService.findUserRegionByUserId(user_id);
+
+    let region_id = 1;
+    if (regions.length != 0) {
+      region_id = regions[0].region_id;
+    }
+
+    let emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
       'Application Page',
+      region_id,
     );
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(
@@ -542,23 +555,26 @@ export class ApplicationsService {
         body,
       );
     }
-    results.forEach(async (item) => {
-      const setEmailBodyInfo = (student, school_year) => {
-        const yearbegin = new Date(school_year.date_begin)
-          .getFullYear()
-          .toString();
-        const yearend = new Date(school_year.date_end).getFullYear().toString();
 
-        return emailTemplate.body
-          .toString()
-          .replace(/\[STUDENT\]/g, student.person?.first_name)
-          .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
-          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-          .replace(
-            /\[APPLICATION_YEAR\]/g,
-            `${yearbegin}-${yearend.substring(2, 4)}`,
-          );
-      };
+    const setEmailBodyInfo = (student, school_year) => {
+      const yearbegin = new Date(school_year.date_begin)
+        .getFullYear()
+        .toString();
+      const yearend = new Date(school_year.date_end).getFullYear().toString();
+
+      return emailTemplate.body
+        .toString()
+        .replace(/\[STUDENT\]/g, student.person?.first_name)
+        .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
+        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+        .replace(
+          /\[APPLICATION_YEAR\]/g,
+          `${yearbegin}-${yearend.substring(2, 4)}`,
+        );
+    };
+
+    for (let index = 0; index < results.length; index++) {
+      const item = results[index];
       const gradeLevels = await this.studentGradeLevelsService.forStudents(
         item.student.student_id,
       );
@@ -566,16 +582,18 @@ export class ApplicationsService {
         gradeLevels[0].school_year_id,
       );
       const emailBody = setEmailBodyInfo(item.student, school_year);
+
       const result = await this.sesEmailService.sendEmail({
         email: item.student.parent.person.email,
-        subject: subject,
+        subject,
         content: emailBody,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
-        region_id: 1,
+        region_id,
         template_name: 'Application Page',
       });
-    });
+    }
+
     const applicationEmails = Promise.all(
       application_ids.map(async (id) => {
         return await this.applicationEmailsService.create({
@@ -686,13 +704,10 @@ export class ApplicationsService {
     return applications;
   }
 
-  getSpeicalEdValue(special_ed) {    
-    if (special_ed == 1)
-      return 'IEP';
-    if (special_ed == 2)
-      return '504';
-    if (special_ed == 3)
-      return 'Test';
+  getSpeicalEdValue(special_ed) {
+    if (special_ed == 1) return 'IEP';
+    if (special_ed == 2) return '504';
+    if (special_ed == 3) return 'Test';
     return '';
   }
 }
