@@ -90,6 +90,8 @@ import { StudentRecordService } from './services/student-record.service';
 import { Role } from './models/role.entity';
 import { ResourceLevelService } from './services/resource-level.service';
 import { ResourceLevel } from './models/resource-level.entity';
+import { AssessmentService } from './services/assessment.service';
+import { Assessment } from './models/assessment.entity';
 
 const servicesImports = [
   UsersService,
@@ -135,6 +137,7 @@ const servicesImports = [
   EnrollmentQuestionsService,
   CronJobsLogsService,
   ResourceService,
+  AssessmentService,
   EmailRecordsService,
   StudentRecordService,
   ResourceLevelService,
@@ -183,6 +186,7 @@ const servicesImports = [
       EmailReminder,
       CronJobsLog,
       Resource,
+      Assessment,
       SchoolEnrollment,
       EmailRecord,
       Role,

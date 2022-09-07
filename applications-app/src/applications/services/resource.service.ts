@@ -31,35 +31,35 @@ export class ResourceService {
 
   async save(resourceInput: CreateOrUpdateResourceInput): Promise<Resource> {
     try {
-      let existingLevels: ResourceLevel[] = [];
       if (!resourceInput.resource_id) {
         const totalCnt = await this.repo.count({
           SchoolYearId: resourceInput.SchoolYearId,
         });
         if (!resourceInput.priority) resourceInput.priority = totalCnt + 1;
-      } else {
-        existingLevels = await this.resourceLevelService.find(resourceInput.resource_id);
       }
 
       const result = await this.repo.save(resourceInput);
 
-      let resourceLevels = [];
       if (resourceInput.resourceLevelsStr) {
-        resourceLevels = JSON.parse(resourceInput.resourceLevelsStr);
-      }
-
-      existingLevels.map(async (item) => {
-        if (resourceLevels.findIndex((newLevel) => newLevel.resource_level_id == item.resource_level_id) < 0) {
-          await this.resourceLevelService.delete(item.resource_level_id);
+        let existingLevels: ResourceLevel[] = [];
+        if (resourceInput.resource_id) {
+          existingLevels = await this.resourceLevelService.find(resourceInput.resource_id);
         }
-      });
+        const resourceLevels = JSON.parse(resourceInput.resourceLevelsStr);
 
-      resourceLevels.map(async (item) => {
-        await this.resourceLevelService.save({
-          ...item,
-          resource_id: result.resource_id,
+        existingLevels.map(async (item) => {
+          if (resourceLevels.findIndex((newLevel) => newLevel.resource_level_id == item.resource_level_id) < 0) {
+            await this.resourceLevelService.delete(item.resource_level_id);
+          }
         });
-      });
+
+        resourceLevels.map(async (item) => {
+          await this.resourceLevelService.save({
+            ...item,
+            resource_id: result.resource_id,
+          });
+        });
+      }
 
       return result;
     } catch (error) {

@@ -2,12 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { map } from 'lodash';
 import { SchoolPartner } from 'src/models/school-partner.entity';
-import {
-  Repository,
-  LessThanOrEqual,
-  MoreThanOrEqual,
-  getConnection,
-} from 'typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual, getConnection } from 'typeorm';
 import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
@@ -55,8 +50,7 @@ export class SchoolYearsService {
 
     result.map(
       (item) => (
-        (item.MainyearApplicatable =
-          item.date_reg_open <= nowDate && item.date_reg_close >= nowDate),
+        (item.MainyearApplicatable = item.date_reg_open <= nowDate && item.date_reg_close >= nowDate),
         (item.MidyearApplicatable =
           item.midyear_application &&
           item.midyear_application_open <= nowDate &&
@@ -83,10 +77,7 @@ export class SchoolYearsService {
     });
   }
 
-  async createSchoolYear(
-    createSchoolYearInput: CreateSchoolYearInput,
-    previousYearId?: number,
-  ): Promise<SchoolYear> {
+  async createSchoolYear(createSchoolYearInput: CreateSchoolYearInput, previousYearId?: number): Promise<SchoolYear> {
     const data = this.schoolYearsRepository.create(createSchoolYearInput);
 
     if (createSchoolYearInput.cloneSchoolYearId) {
@@ -97,15 +88,14 @@ export class SchoolYearsService {
         },
       });
       if (cloneSchoolYear?.grades) data.grades = cloneSchoolYear.grades;
+      data.enrollment_packet = false;
     }
 
     const updatedRecord = await this.schoolYearsRepository.save(data);
 
     let schoolPartnerList: SchoolPartner[] = [];
     if (previousYearId) {
-      const prevYearPartners = await this.schoolPartnerService.findBySchoolYear(
-        previousYearId,
-      );
+      const prevYearPartners = await this.schoolPartnerService.findBySchoolYear(previousYearId);
       map(prevYearPartners, async (partner) => {
         const { name, abbreviation, photo, region_id, active } = partner;
 
@@ -136,6 +126,16 @@ export class SchoolYearsService {
           SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}
         ORDER BY resource_id ASC`,
       );
+      const assessments = await queryRunner.query(
+        `
+          SELECT
+            assessment.*
+          FROM infocenter.mth_assessment AS assessment
+          WHERE
+            SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}
+          ORDER BY assessment_id
+        `,
+      );
 
       for (let index = 0; index < resources.length; index++) {
         const {
@@ -161,14 +161,22 @@ export class SchoolYearsService {
             (${newSchoolYearId}, "${title}", "${image}", "${subtitle}", ${price}, "${website}", "${grades}", "${std_user_name}", "${std_password}", "${detail}", ${priority}, ${is_active}, ${resource_limit}, ${add_resource_level}, ${family_resource});`,
         );
       }
+
+      for (let index = 0; index < assessments.length; index++) {
+        const { test_name, grades, information, priority, is_archived, option1, option_list } = assessments[index];
+        await queryRunner.query(
+          `INSERT INTO infocenter.mth_assessment
+            (SchoolYearId, test_name, grades, information, priority, is_archived, option1, option_list)
+          VALUES
+            (${newSchoolYearId}, "${test_name}", "${grades}", "${information}", ${priority}, "${is_archived}", '${option1}', '${option_list}');`,
+        );
+      }
       queryRunner.release();
     }
     return updatedRecord;
   }
 
-  async updateSchoolYear(
-    updateSchoolYearInput: UpdateSchoolYearInput,
-  ): Promise<any> {
+  async updateSchoolYear(updateSchoolYearInput: UpdateSchoolYearInput): Promise<any> {
     const res = await this.schoolYearsRepository.save(updateSchoolYearInput);
 
     if (res) {

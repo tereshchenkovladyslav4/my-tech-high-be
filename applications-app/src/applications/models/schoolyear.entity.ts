@@ -8,13 +8,14 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
+import { Assessment } from './assessment.entity';
 import { Region } from './region.entity';
 import { Resource } from './resource.entity';
 import { SchoolPartner } from './school-partner.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -120,6 +121,22 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => String, { nullable: true })
   grades: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  @Field((type) => String, { nullable: true })
+  testing_preference_title: string;
+
+  @Column({ type: 'text', nullable: true })
+  @Field((type) => String, { nullable: true })
+  testing_preference_description: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  @Field((type) => String, { nullable: true })
+  opt_out_form_title: string;
+
+  @Column({ type: 'text', nullable: true })
+  @Field((type) => String, { nullable: true })
+  opt_out_form_description: string;
+
   @ManyToOne(() => Region, (region) => region.schoolYears)
   @JoinColumn([{ name: 'RegionId', referencedColumnName: 'id' }])
   region: Region;
@@ -127,6 +144,10 @@ export class SchoolYear extends BaseEntity {
   @OneToMany(() => Resource, (resource) => resource.SchoolYear)
   @Field(() => [Resource], { nullable: true })
   Resources: Resource[];
+
+  @OneToMany(() => Assessment, (assessment) => assessment.SchoolYear)
+  @Field(() => [Assessment], { nullable: true })
+  Assessments: Assessment[];
 
   @OneToMany(() => SchoolPartner, (schoolPartner) => schoolPartner.schoolYear)
   @Field(() => [SchoolPartner], { nullable: true })

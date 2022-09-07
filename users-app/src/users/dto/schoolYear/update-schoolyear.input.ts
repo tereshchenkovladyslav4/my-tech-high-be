@@ -43,4 +43,16 @@ export class UpdateSchoolYearInput {
 
   @Field(() => String, { nullable: true })
   grades?: string;
+
+  @Field(() => String, { nullable: true })
+  testing_preference_title?: string;
+
+  @Field(() => String, { nullable: true })
+  testing_preference_description?: string;
+
+  @Field(() => String, { nullable: true })
+  opt_out_form_title?: string;
+
+  @Field(() => String, { nullable: true })
+  opt_out_form_description?: string;
 }

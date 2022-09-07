@@ -48,6 +48,8 @@ import { EmailRecordResolver } from './resolvers/email-records.resolver';
 import { Resource } from './models/resource.entity';
 import { EmailRecord } from './models/email-record.entity';
 import { ResourceLevel } from './models/resource-level.entity';
+import { AssessmentResolver } from './resolvers/assessment.resolver';
+import { Assessment } from './models/assessment.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -66,6 +68,7 @@ const graphQLImports = [
   EnrollmentQuestionGroupResolver,
   WithdrawalResolver,
   ResourceResolver,
+  AssessmentResolver,
   EmailRecordResolver,
 ];
 @Module({
@@ -105,6 +108,7 @@ const graphQLImports = [
           EnrollmentQuestionGroup,
           EnrollmentQuestions,
           Resource,
+          Assessment,
           EmailRecord,
           ResourceLevel,
         ],

@@ -14,7 +14,7 @@ import { SchoolPartner } from './school-partner.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -133,6 +133,26 @@ export class SchoolYear extends BaseEntity {
   @Field((type) => String, { nullable: true })
   @Directive('@external')
   grades: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  testing_preference_title: string;
+
+  @Column({ type: 'text', nullable: true })
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  testing_preference_description: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  opt_out_form_title: string;
+
+  @Column({ type: 'text', nullable: true })
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  opt_out_form_description: string;
 
   @OneToMany(() => SchoolPartner, (schoolPartner) => schoolPartner.schoolYear)
   @Field(() => [SchoolPartner], { nullable: true })
