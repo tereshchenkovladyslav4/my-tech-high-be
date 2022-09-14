@@ -15,7 +15,7 @@ export class ResourceService {
   ) {}
 
   async find(schoolYearId: number): Promise<Resource[]> {
-    const data = await this.repo
+    return await this.repo
       .createQueryBuilder('resource')
       .leftJoinAndSelect('resource.ResourceLevels', 'ResourceLevels')
       .where({ SchoolYearId: schoolYearId })
@@ -26,7 +26,6 @@ export class ResourceService {
         'ResourceLevels.resource_level_id': 'ASC',
       })
       .getMany();
-    return data;
   }
 
   async save(resourceInput: CreateOrUpdateResourceInput): Promise<Resource> {
@@ -53,12 +52,12 @@ export class ResourceService {
           }
         });
 
-        resourceLevels.map(async (item) => {
+        for (let i = 0; i < resourceLevels?.length; i++) {
           await this.resourceLevelService.save({
-            ...item,
+            ...resourceLevels[i],
             resource_id: result.resource_id,
           });
-        });
+        }
       }
 
       return result;
@@ -67,7 +66,7 @@ export class ResourceService {
     }
   }
 
-  async delete(resource_id: number): Promise<Boolean> {
+  async delete(resource_id: number): Promise<boolean> {
     try {
       await this.repo.delete(resource_id);
       return true;

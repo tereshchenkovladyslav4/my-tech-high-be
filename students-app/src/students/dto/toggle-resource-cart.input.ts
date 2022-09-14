@@ -13,4 +13,7 @@ export class ToggleResourceCartInput {
 
   @Field(() => Int, { nullable: true })
   resource_level_id?: number = null;
+
+  @Field(() => Boolean)
+  waitlist_confirmed?: boolean = false;
 }

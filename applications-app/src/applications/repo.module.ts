@@ -92,6 +92,8 @@ import { ResourceLevelService } from './services/resource-level.service';
 import { ResourceLevel } from './models/resource-level.entity';
 import { AssessmentService } from './services/assessment.service';
 import { Assessment } from './models/assessment.entity';
+import { DiplomaQuestion } from './models/diploma-question.entity';
+import { DiplomaService } from './services/diploma.service';
 
 const servicesImports = [
   UsersService,
@@ -141,6 +143,7 @@ const servicesImports = [
   EmailRecordsService,
   StudentRecordService,
   ResourceLevelService,
+  DiplomaService
 ];
 
 @Global()
@@ -191,6 +194,7 @@ const servicesImports = [
       EmailRecord,
       Role,
       ResourceLevel,
+      DiplomaQuestion
     ]),
     PDFModule.register({
       view: {
@@ -202,5 +206,5 @@ const servicesImports = [
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule {}
+class RepoModule { }
 export default RepoModule;

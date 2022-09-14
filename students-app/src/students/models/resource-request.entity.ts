@@ -1,9 +1,10 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ResourceRequestStatus } from '../enums';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
+import { ResourceLevel } from './resource-level.entity';
 
 @ObjectType()
 @Directive('@key(fields: "student_id, resource_id")')
@@ -49,4 +50,12 @@ export class ResourceRequest {
   @JoinColumn([{ name: 'resource_id', referencedColumnName: 'resource_id' }])
   @Field(() => Resource, { nullable: true })
   Resource: Resource;
+
+  @ManyToOne(() => ResourceLevel, (resourceLevel) => resourceLevel.ResourceRequests, {
+    onDelete: 'SET NULL',
+    onUpdate: 'SET NULL',
+  })
+  @JoinColumn([{ name: 'resource_level_id', referencedColumnName: 'resource_level_id' }])
+  @Field(() => ResourceLevel, { nullable: true })
+  ResourceLevel: ResourceLevel;
 }

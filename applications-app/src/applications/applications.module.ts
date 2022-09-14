@@ -50,6 +50,8 @@ import { EmailRecord } from './models/email-record.entity';
 import { ResourceLevel } from './models/resource-level.entity';
 import { AssessmentResolver } from './resolvers/assessment.resolver';
 import { Assessment } from './models/assessment.entity';
+import { DiplomaResolver } from './resolvers/diploma.resolver';
+import { DiplomaQuestion } from './models/diploma-question.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -70,6 +72,7 @@ const graphQLImports = [
   ResourceResolver,
   AssessmentResolver,
   EmailRecordResolver,
+  DiplomaResolver
 ];
 @Module({
   imports: [
@@ -111,6 +114,7 @@ const graphQLImports = [
           Assessment,
           EmailRecord,
           ResourceLevel,
+          DiplomaQuestion
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),
@@ -121,4 +125,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class ApplicationsGraphqlModule {}
+export class ApplicationsGraphqlModule { }

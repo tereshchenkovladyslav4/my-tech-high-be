@@ -1,7 +1,7 @@
 import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
 import { Column, Entity, BaseEntity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { ResourceRequestStatus, ResourceSubtitle } from '../enums';
+import { ResourceSubtitle } from '../enums';
 import { ResourceCart } from './resource-cart.entity';
 import { ResourceLevel } from './resource-level.entity';
 import { ResourceRequest } from './resource-request.entity';
@@ -119,6 +119,15 @@ export class Resource extends BaseEntity {
 
   @Field(() => String, { nullable: true })
   RequestStatus: string;
+
+  @Field(() => Boolean, { nullable: true })
+  WaitListConfirmed: boolean;
+
+  @Field(() => Int, { nullable: true })
+  ResourceLevelId: number;
+
+  @Field(() => Int, { nullable: true })
+  TotalRequests: number;
 
   @OneToMany(() => StudentHiddenResource, (studentHiddenResource) => studentHiddenResource.Resource)
   @Field(() => [StudentHiddenResource], { nullable: true })

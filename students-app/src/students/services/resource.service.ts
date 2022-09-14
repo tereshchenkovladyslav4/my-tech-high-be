@@ -27,12 +27,15 @@ export class ResourceService {
 
     const queryRunner = await getConnection().createQueryRunner();
 
+    // TODO Total requests should be calculated for only accepted requests
     const data = await this.repo
       .createQueryBuilder('resource')
       .leftJoinAndSelect('resource.HiddenStudents', 'HiddenStudents', `HiddenStudents.student_id=${studentId}`)
       .leftJoinAndSelect('resource.StudentsInCart', 'StudentsInCart', `StudentsInCart.student_id=${studentId}`)
       .leftJoinAndSelect('resource.ResourceRequests', 'ResourceRequests', `ResourceRequests.student_id=${studentId}`)
       .leftJoinAndSelect('resource.ResourceLevels', 'ResourceLevels')
+      .loadRelationCountAndMap('resource.TotalRequests', 'resource.ResourceRequests')
+      .loadRelationCountAndMap('ResourceLevels.TotalRequests', 'ResourceLevels.ResourceRequests')
       .where({ SchoolYearId: schoolYearId, is_active: 1 })
       .andWhere(`find_in_set('${gradeLevel}',grades) <> 0`)
       .orderBy({
@@ -45,9 +48,13 @@ export class ResourceService {
       (item) => (
         (item.HiddenByStudent = !!item.HiddenStudents?.length),
         (item.CartDate = item.StudentsInCart?.[0]?.created_at),
+        (item.WaitListConfirmed = !!item.StudentsInCart?.[0]?.waitlist_confirmed),
+        (item.ResourceLevelId =
+          item.ResourceRequests?.[0]?.resource_level_id || item.StudentsInCart?.[0]?.resource_level_id),
         (item.RequestStatus = item.ResourceRequests?.[0]?.status)
       ),
     );
+
     await queryRunner.release();
     return data;
   }
@@ -86,7 +93,7 @@ export class ResourceService {
 
   async toggleResourceCart(toggleResourceCartInput: ToggleResourceCartInput): Promise<boolean> {
     try {
-      const { student_id, resource_id, resource_level_id, inCart } = toggleResourceCartInput;
+      const { student_id, resource_id, resource_level_id, waitlist_confirmed, inCart } = toggleResourceCartInput;
       const queryRunner = await getConnection().createQueryRunner();
       const existing = await queryRunner.query(`
         SELECT * FROM infocenter.mth_resource_cart
@@ -96,9 +103,15 @@ export class ResourceService {
         if (!existing.length) {
           await queryRunner.query(`
             INSERT INTO infocenter.mth_resource_cart
-              (student_id, resource_id, resource_level_id, created_at)
+              (student_id, resource_id, resource_level_id, waitlist_confirmed, created_at)
             VALUES
-              (${student_id}, ${resource_id}, ${resource_level_id}, NOW());
+              (${student_id}, ${resource_id}, ${resource_level_id}, ${waitlist_confirmed}, NOW());
+          `);
+        } else {
+          await queryRunner.query(`
+            UPDATE infocenter.mth_resource_cart
+            SET waitlist_confirmed=${waitlist_confirmed}
+            WHERE student_id = ${student_id} AND resource_id = ${resource_id};
           `);
         }
       } else {
@@ -130,65 +143,89 @@ export class ResourceService {
         SELECT * FROM infocenter.mth_student
         WHERE student_id = ${stdId};
       `);
-      await queryRunner.release();
 
       const { parent_id: parentId } = student?.[0];
 
-      resourcesInCart.map(async ({ resource_id: resourceId, resource_level_id: resourceLevelId }) => {
-        const queryRunner = await getConnection().createQueryRunner();
+      let i;
+      for (i = 0; i < resourcesInCart?.length; i++) {
+        const {
+          resource_id: resourceId,
+          resource_level_id: resourceLevelId,
+          waitlist_confirmed: waitlistConfirmed,
+        } = resourcesInCart[i];
 
-        const resource = await queryRunner.query(`
-          SELECT * FROM infocenter.mth_resource_settings
-          WHERE resource_id = ${resourceId};
-        `);
+        const resource = await this.repo
+          .createQueryBuilder('resource')
+          .leftJoinAndSelect('resource.ResourceRequests', 'ResourceRequests')
+          .leftJoinAndSelect('resource.ResourceLevels', 'ResourceLevels')
+          .loadRelationCountAndMap('resource.TotalRequests', 'resource.ResourceRequests')
+          .loadRelationCountAndMap('ResourceLevels.TotalRequests', 'ResourceLevels.ResourceRequests')
+          .where({ resource_id: resourceId })
+          .getOne();
+
+        const resourceLevel = resource.ResourceLevels?.find(
+          (resourceLevel) => resourceLevel.resource_level_id == resourceLevelId,
+        );
+        const limitSum = resource.ResourceLevels?.reduce((acc, cur) => (acc += cur?.limit || 0), 0);
+        if (
+          ((!!resource.resource_limit && resource.resource_limit <= resource.TotalRequests) ||
+            (!!limitSum && limitSum <= resource.TotalRequests) ||
+            (!!resourceLevel?.limit && resourceLevel?.limit <= resourceLevel?.TotalRequests)) &&
+          !waitlistConfirmed
+        ) {
+          break;
+        }
 
         let eligibleSiblings = null;
-        if (resource?.[0].family_resource && parentId) {
-          const { SchoolYearId: schoolYearId, grades } = resource[0];
+        if (resource?.family_resource && parentId) {
+          const { SchoolYearId: schoolYearId, grades } = resource;
 
           eligibleSiblings = await queryRunner.query(`
-              SELECT student.student_id FROM infocenter.mth_student as student
-              LEFT JOIN mth_student_status as student_status ON student_status.student_id = student.student_id
-              LEFT JOIN mth_student_grade_level as student_grade_level ON student_grade_level.student_id = student.student_id
-              WHERE 
-                parent_id = ${parentId} AND 
-                student_status.school_year_id = ${schoolYearId} AND 
-                student_status.status = ${StudentStatusEnum.ACTIVE} AND 
-                student_grade_level.school_year_id = ${schoolYearId} 
-                AND FIND_IN_SET(student_grade_level.grade_level,'${grades}') <> 0;
-            `);
+            SELECT student.student_id FROM infocenter.mth_student as student
+            LEFT JOIN mth_student_status as student_status ON student_status.student_id = student.student_id
+            LEFT JOIN mth_student_grade_level as student_grade_level ON student_grade_level.student_id = student.student_id
+            WHERE 
+              parent_id = ${parentId} AND 
+              student_status.school_year_id = ${schoolYearId} AND 
+              student_status.status = ${StudentStatusEnum.ACTIVE} AND 
+              student_grade_level.school_year_id = ${schoolYearId} 
+              AND FIND_IN_SET(student_grade_level.grade_level,'${grades}') <> 0;
+          `);
         }
-        await queryRunner.release();
 
-        (eligibleSiblings || [{ student_id: stdId }]).map(async ({ student_id }) => {
-          await this.requestResource(student_id, resourceId, resourceLevelId);
-        });
-      });
+        const students = eligibleSiblings || [{ student_id: stdId }];
+        for (let j = 0; j < students?.length; j++) {
+          const { student_id: studentId } = students[j];
+          const existing = await queryRunner.query(`
+            SELECT * FROM infocenter.mth_resource_request
+            WHERE student_id = ${studentId} AND resource_id = ${resourceId};
+          `);
+          if (!existing.length) {
+            await queryRunner.query(`
+              INSERT INTO infocenter.mth_resource_request
+                (student_id, resource_id, resource_level_id, status, created_at, updated_at)
+              VALUES
+                (${studentId}, ${resourceId}, ${resourceLevelId}, "${ResourceRequestStatus.REQUESTED}", NOW(), NOW());
+            `);
+          }
+          // Delete from cart
+          await queryRunner.query(`
+            DELETE FROM infocenter.mth_resource_cart 
+            WHERE student_id = ${studentId} AND resource_id = ${resourceId};
+          `);
+        }
+      }
+
+      if (i < resourcesInCart?.length) {
+        // Transaction failed. Have to confirm waitlist again
+        queryRunner.clearSqlMemory();
+        await queryRunner.release();
+        return false;
+      }
+      await queryRunner.release();
       return true;
     } catch (error) {
       return error;
     }
-  }
-
-  private async requestResource(studentId: number, resourceId: number, resourceLevelId: number) {
-    const queryRunner = await getConnection().createQueryRunner();
-    const existing = await queryRunner.query(`
-      SELECT * FROM infocenter.mth_resource_request
-      WHERE student_id = ${studentId} AND resource_id = ${resourceId};
-    `);
-    if (!existing.length) {
-      await queryRunner.query(`
-        INSERT INTO infocenter.mth_resource_request
-          (student_id, resource_id, resource_level_id, status, created_at, updated_at)
-        VALUES
-          (${studentId}, ${resourceId}, ${resourceLevelId}, "${ResourceRequestStatus.REQUESTED}", NOW(), NOW());
-      `);
-    }
-    // Delete from cart
-    await queryRunner.query(`
-      DELETE FROM infocenter.mth_resource_cart
-      WHERE student_id = ${studentId} AND resource_id = ${resourceId};
-    `);
-    await queryRunner.release();
   }
 }

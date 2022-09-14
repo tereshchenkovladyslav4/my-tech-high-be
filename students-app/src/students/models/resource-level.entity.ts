@@ -1,7 +1,8 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
+import { ResourceRequest } from './resource-request.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -33,6 +34,9 @@ export class ResourceLevel {
   @Directive('@external')
   created_at?: Date;
 
+  @Field(() => Int, { nullable: true })
+  TotalRequests: number;
+
   @ManyToOne(() => Resource, (resource) => resource.ResourceLevels, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -41,4 +45,8 @@ export class ResourceLevel {
   @Field(() => Student, { nullable: true })
   @Directive('@external')
   Resource: Resource;
+
+  @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.ResourceLevel)
+  @Field(() => [ResourceRequest], { nullable: true })
+  ResourceRequests: ResourceRequest[];
 }

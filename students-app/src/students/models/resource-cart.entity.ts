@@ -1,4 +1,4 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
@@ -18,6 +18,10 @@ export class ResourceCart {
   @Column({ nullable: true })
   @Field(() => ID, { nullable: true })
   resource_level_id?: number;
+
+  @Column('tinyint', { name: 'waitlist_confirmed', default: false })
+  @Field(() => Boolean, { nullable: true })
+  waitlist_confirmed: boolean;
 
   @Column()
   @Field(() => Date, { nullable: true })
