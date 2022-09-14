@@ -23,16 +23,10 @@ import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentsService } from './students.service';
 import { UserRegionService } from './user-region.service';
 import { WithdrawalEmailsService } from './withdrawal-emails.service';
-import {
-  PdfTemplate,
-  StudentRecordFileKind,
-  WithdrawalStatus,
-  WithdrawalOption,
-} from '../enums';
+import { PdfTemplate, StudentRecordFileKind, WithdrawalStatus, WithdrawalOption } from '../enums';
 import { WithdrawalInput } from '../dto/withdrawal.input';
 import { PDFService } from '@t00nday/nestjs-pdf';
 import { FilesService } from './files.service';
-import { File } from '../models/file.entity';
 import { StudentRecordService } from './student-record.service';
 import { S3DirectoryStudentRecords } from '../utils';
 import { gradeText } from '../utils';
@@ -60,8 +54,7 @@ export class WithdrawalService {
     try {
       const { withdrawal, withdrawalOption } = withdrawalInput;
       const queryRunner = await getConnection().createQueryRunner();
-      const { StudentId, status, date_effective, response, withdrawal_id } =
-        withdrawal;
+      const { StudentId, status, date_effective, response, withdrawal_id } = withdrawal;
 
       const [notifiedWithdrawls] = await this.repo
         .createQueryBuilder('withdrawal')
@@ -76,9 +69,7 @@ export class WithdrawalService {
         .where({ StudentId: StudentId, status: WithdrawalStatus.NOTIFIED })
         .getManyAndCount();
 
-      const existingWithdrawalId = notifiedWithdrawls?.length
-        ? notifiedWithdrawls[0].withdrawal_id
-        : 0;
+      const existingWithdrawalId = notifiedWithdrawls?.length ? notifiedWithdrawls[0].withdrawal_id : 0;
 
       const withdrawalResponse = await this.repo.save({
         withdrawal_id: withdrawal_id || existingWithdrawalId,
@@ -113,8 +104,7 @@ export class WithdrawalService {
 
       if (
         (status == WithdrawalStatus.NOTIFIED && !notifiedWithdrawls?.length) ||
-        (status == WithdrawalStatus.WITHDRAWN &&
-          withdrawalOption === WithdrawalOption.UNDECLARED_FORM_EMAIL)
+        (status == WithdrawalStatus.WITHDRAWN && withdrawalOption === WithdrawalOption.UNDECLARED_FORM_EMAIL)
       ) {
         // Notify withdrawal flow by admin
         withdrawal.date_emailed = new Date();
@@ -122,29 +112,23 @@ export class WithdrawalService {
         //	Send email
         const webAppUrl = process.env.WEB_APP_URL;
         const student = await this.studentService.findOneById(StudentId);
-        const gradeLevels = await this.studentGradeLevelsService.forStudents(
-          student.student_id,
-        );
+        const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
-        const regions: UserRegion[] =
-          await this.userRegionService.findUserRegionByUserId(
-            student.parent?.person?.user_id,
-          );
+        const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
+          student.parent?.person?.user_id,
+        );
 
         let region_id = 1;
         if (regions.length > 0) {
           region_id = regions[0].region_id;
         }
 
-        const emailTemplate =
-          await this.emailTemplateService.findByTemplateAndRegion(
-            withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW
-              ? 'Notify of Withdraw'
-              : 'Undeclared Withdraw',
-            region_id,
-          );
+        const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+          withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW ? 'Notify of Withdraw' : 'Undeclared Withdraw',
+          region_id,
+        );
 
-        let deadline = new Date();
+        const deadline = new Date();
         let remind_date = 0;
         const deadlineInfo = await queryRunner.query(
           `SELECT withdraw_deadline_num_days AS deadline FROM infocenter.region WHERE id = ${region_id}`,
@@ -156,12 +140,8 @@ export class WithdrawalService {
 
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {
-            const yearbegin = new Date(school_year.date_begin)
-              .getFullYear()
-              .toString();
-            const yearend = new Date(school_year.date_end)
-              .getFullYear()
-              .toString();
+            const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+            const yearend = new Date(school_year.date_end).getFullYear().toString();
 
             const link = `${webAppUrl}/parent-link/withdrawal/${StudentId}`;
 
@@ -171,15 +151,10 @@ export class WithdrawalService {
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
               .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
               .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`)
-              .replace(
-                /\[DEADLINE\]/g,
-                `${Moment(deadline).format('MM/DD/yy')}`,
-              );
+              .replace(/\[DEADLINE\]/g, `${Moment(deadline).format('MM/DD/yy')}`);
           };
 
-          const school_year = await this.schoolYearService.findOneById(
-            gradeLevels[0].school_year_id,
-          );
+          const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id);
 
           const body = setEmailBodyInfo(student, school_year);
 
@@ -222,9 +197,7 @@ export class WithdrawalService {
   async delete(student_id: number): Promise<boolean> {
     try {
       const queryRunner = await getConnection().createQueryRunner();
-      await queryRunner.query(
-        `DELETE FROM infocenter.withdrawal WHERE StudentId=${student_id}`,
-      );
+      await queryRunner.query(`DELETE FROM infocenter.withdrawal WHERE StudentId=${student_id}`);
       queryRunner.release();
       return true;
     } catch (error) {
@@ -244,8 +217,8 @@ export class WithdrawalService {
     }
 
     //	Get total count
-    let query = `SELECT ${WITHDRAWAL_TABLE_NAME}.status ${main_query} ORDER BY date DESC LIMIT 0, 1`;
-    let qb = await this.repo.query(query);
+    const query = `SELECT ${WITHDRAWAL_TABLE_NAME}.status ${main_query} ORDER BY date DESC LIMIT 0, 1`;
+    const qb = await this.repo.query(query);
     qb.map((item) => {
       values.push(item);
     });
@@ -284,7 +257,7 @@ export class WithdrawalService {
     if (filter.keyword && filter.keyword.trim() != '') {
       //	submitted, effective, student, soe, emailed
       //	TODO : grade, funding
-      let key: string = filter.keyword.trim();
+      const key: string = filter.keyword.trim();
       main_query += ` AND (
 					date LIKE "%${key}%"
 					OR date_effective LIKE "%${key}%"
@@ -294,8 +267,8 @@ export class WithdrawalService {
     }
 
     //	Get total count
-    let query = `SELECT ${WITHDRAWAL_TABLE_NAME}.status, COUNT(*) cnt ${main_query} GROUP BY status ORDER BY status`;
-    let qb = await this.repo.query(query);
+    const query = `SELECT ${WITHDRAWAL_TABLE_NAME}.status, COUNT(*) cnt ${main_query} GROUP BY status ORDER BY status`;
+    const qb = await this.repo.query(query);
     qb.map((item) => {
       values[item.status] = +item.cnt;
     });
@@ -306,16 +279,11 @@ export class WithdrawalService {
     };
   }
 
-  async find(
-    paginationInput: PaginationInput,
-    filterInput: FilterInput,
-  ): Promise<Pagination<Withdrawal>> {
+  async find(paginationInput: PaginationInput, filterInput: FilterInput): Promise<Pagination<Withdrawal>> {
     const { skip, take, sort } = paginationInput;
     const { filter } = filterInput;
 
-    let where: any = (qb) => {};
-
-    let select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
+    const select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
     ${WITHDRAWAL_TABLE_NAME}.date_effective, ${WITHDRAWAL_TABLE_NAME}.response,${WITHDRAWAL_TABLE_NAME}.date,
 		CONCAT(person.first_name, ",", person.last_name) student_name,
 		gradeLevel.grade_level, emails.email_date AS date_emailed`;
@@ -352,7 +320,7 @@ export class WithdrawalService {
     if (filter.keyword && filter.keyword.trim() != '') {
       //	submitted, effective, student, soe, emailed
       //	TODO : grade, funding
-      let key: string = filter.keyword.trim();
+      const key: string = filter.keyword.trim();
       main_query += ` AND (
 					date LIKE "%${key}%"
 					OR date_effective LIKE "%${key}%"
@@ -380,9 +348,7 @@ export class WithdrawalService {
         main_query += ` ORDER BY student_name ${sort.split('|')[1]}`;
         break;
       case 'grade':
-        main_query += ` ORDER BY gradeLevel.grade_level+0 ${
-          sort.split('|')[1]
-        }`;
+        main_query += ` ORDER BY gradeLevel.grade_level+0 ${sort.split('|')[1]}`;
         break;
       case 'soe':
         main_query += ` ORDER BY soe ${sort.split('|')[1]}`;
@@ -407,7 +373,7 @@ export class WithdrawalService {
     });
   }
 
-  async runScheduleReminders(remind_date: number = 0): Promise<String> {
+  async runScheduleReminders(remind_date = 0): Promise<string> {
     try {
       const queryRunner = await getConnection().createQueryRunner();
       // Automatically make a student as "Undeclared" when parent does not submit withdraw form by deadline and send parents an email notification
@@ -462,27 +428,16 @@ export class WithdrawalService {
 				LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
 				LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Notify of Withdraw' AND templates.region_id = schoolYear.RegionId)
 				WHERE 
-					${
-            remind_date > 0
-              ? 'withdrawal.diff_date = 0'
-              : 'region.withdraw_deadline_num_days > withdrawal.diff_date'
-          } AND 
+					${remind_date > 0 ? 'withdrawal.diff_date = 0' : 'region.withdraw_deadline_num_days > withdrawal.diff_date'} AND 
 					templates.id IS NOT NULL
 			`);
       queryRunner.release();
       reminders.map(async (reminder) => {
-        const {
-          remain_date,
-          parent_email,
+        const { remain_date, parent_email, email_templates_id, email_bcc, email_from } = reminder;
+        const emailReminders = await this.emailReminderService.findByTemplateIdAndReminder(
           email_templates_id,
-          email_bcc,
-          email_from,
-        } = reminder;
-        const emailReminders =
-          await this.emailReminderService.findByTemplateIdAndReminder(
-            email_templates_id,
-            Number(remain_date),
-          );
+          Number(remain_date),
+        );
         emailReminders.map(async (emailReminder) => {
           await this.emailService.sendEmail({
             email: parent_email,
@@ -510,7 +465,7 @@ export class WithdrawalService {
         } = withdrawal;
         const yearbegin = new Date(date_begin).getFullYear().toString();
         const yearend = new Date(date_end).getFullYear().toString();
-        const result = await this.emailService.sendEmail({
+        await this.emailService.sendEmail({
           email: parent_email,
           subject: email_subject,
           content: email_body
@@ -549,11 +504,8 @@ export class WithdrawalService {
     }
   }
 
-  async sendEmail(
-    emailWithdrawalInput: EmailWithdrawalInput,
-  ): Promise<WithdrawalEmail[]> {
-    const { withdrawal_ids, subject, from, body, region_id } =
-      emailWithdrawalInput;
+  async sendEmail(emailWithdrawalInput: EmailWithdrawalInput): Promise<WithdrawalEmail[]> {
+    const { withdrawal_ids, subject, from, body, region_id } = emailWithdrawalInput;
     const [results] = await this.repo
       .createQueryBuilder('withdrawal')
       .leftJoinAndSelect('withdrawal.Student', 'student')
@@ -565,9 +517,7 @@ export class WithdrawalService {
       .getManyAndCount();
 
     const setEmailBodyInfo = (student, school_year) => {
-      const yearbegin = new Date(school_year.date_begin)
-        .getFullYear()
-        .toString();
+      const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
 
       return body
@@ -582,9 +532,7 @@ export class WithdrawalService {
 
     const emailBody = [];
     results.map(async (item) => {
-      const school_year = await this.schoolYearService.findOneById(
-        item.Student.grade_levels[0].school_year_id,
-      );
+      const school_year = await this.schoolYearService.findOneById(item.Student.grade_levels[0].school_year_id);
       const temp = {
         withdrawal_id: item.withdrawal_id,
         email: item.Student.parent.person.email,
@@ -592,14 +540,10 @@ export class WithdrawalService {
       };
       emailBody.push(temp);
     });
-    const emailTemplate =
-      await this.emailTemplateService.findByTemplateAndRegion(
-        'Withdraw Page',
-        region_id,
-      );
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
 
     emailBody.map(async (emailData) => {
-      const result = await this.emailService.sendEmail({
+      await this.emailService.sendEmail({
         email: emailData.email,
         subject,
         content: emailData.body,
@@ -623,11 +567,9 @@ export class WithdrawalService {
     return withdrawalEmails;
   }
 
-  async update(updateWithdrawalInput: UpdateWithdrawalInput): Promise<Boolean> {
+  async update(updateWithdrawalInput: UpdateWithdrawalInput): Promise<boolean> {
     try {
-      const withdrawal = await this.repo.findOne(
-        updateWithdrawalInput.withdrawal_id,
-      );
+      const withdrawal = await this.repo.findOne(updateWithdrawalInput.withdrawal_id);
       const submittedDate = withdrawal.date;
       await this.repo.update(
         { withdrawal_id: updateWithdrawalInput.withdrawal_id },
@@ -642,7 +584,7 @@ export class WithdrawalService {
     }
   }
 
-  async quickWithdrawal(param: QuickWithdrawalInput): Promise<Boolean> {
+  async quickWithdrawal(param: QuickWithdrawalInput): Promise<boolean> {
     try {
       const { withdrawal_ids } = param;
       const [results] = await this.repo
@@ -684,9 +626,9 @@ export class WithdrawalService {
     }
   }
 
-  async reinstateWithdrawal(param: ReinstateWithdrawalInput): Promise<Boolean> {
+  async reinstateWithdrawal(param: ReinstateWithdrawalInput): Promise<boolean> {
     try {
-      const { withdrawal_ids, reinstate_type } = param;
+      const { withdrawal_ids } = param;
       const [results] = await this.repo
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
@@ -701,9 +643,7 @@ export class WithdrawalService {
         const withdrawal_id = item.withdrawal_id;
         const school_year_id = item.Student.grade_levels[0].school_year_id;
         const studentId = item.Student.student_id;
-        await queryRunner.query(
-          `DELETE FROM infocenter.withdrawal WHERE withdrawal_id = ${withdrawal_id}`,
-        );
+        await queryRunner.query(`DELETE FROM infocenter.withdrawal WHERE withdrawal_id = ${withdrawal_id}`);
         await queryRunner.query(
           `UPDATE infocenter.mth_student_status SET status = 1 WHERE student_id = ${studentId} AND school_year_id = ${school_year_id}`,
         );
@@ -715,9 +655,7 @@ export class WithdrawalService {
     }
   }
 
-  async individualWithdrawal(
-    param: IndividualWithdrawalInput,
-  ): Promise<Boolean> {
+  async individualWithdrawal(param: IndividualWithdrawalInput): Promise<boolean> {
     try {
       const { withdrawal_id, body, type, region_id } = param;
       const withdraw = await this.repo
@@ -754,9 +692,7 @@ export class WithdrawalService {
       }
 
       const setEmailBodyInfo = (student, school_year) => {
-        const yearbegin = new Date(school_year.date_begin)
-          .getFullYear()
-          .toString();
+        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
 
         return body
@@ -769,20 +705,14 @@ export class WithdrawalService {
           .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
       };
       const emailBody = [];
-      const school_year = await this.schoolYearService.findOneById(
-        withdraw.Student.grade_levels[0].school_year_id,
-      );
+      const school_year = await this.schoolYearService.findOneById(withdraw.Student.grade_levels[0].school_year_id);
       const temp = {
         withdrawal_id: withdraw.withdrawal_id,
         email: withdraw.Student.parent.person.email,
         body: setEmailBodyInfo(withdraw.Student, school_year),
       };
       emailBody.push(temp);
-      const emailTemplate =
-        await this.emailTemplateService.findByTemplateAndRegion(
-          'Withdraw Page',
-          region_id,
-        );
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
 
       emailBody.map(async (emailData) => {
         await this.emailService.sendEmail({
@@ -812,9 +742,7 @@ export class WithdrawalService {
     }
   }
 
-  async getStudentInfoByWithdrawalId(
-    withdrawalId: number,
-  ): Promise<WithdrawalStudentInfo> {
+  async getStudentInfoByWithdrawalId(withdrawalId: number): Promise<WithdrawalStudentInfo> {
     try {
       let data: WithdrawalStudentInfo = null;
       const queryRunner = await getConnection().createQueryRunner();
@@ -859,9 +787,7 @@ export class WithdrawalService {
       questions.map((item) => {
         switch (item.type) {
           case 1: {
-            item.response = item.options.find(
-              (option) => option.value === item.response,
-            )?.label;
+            item.response = item.options.find((option) => option.value === item.response)?.label;
             break;
           }
           case 6: {
@@ -883,9 +809,7 @@ export class WithdrawalService {
             stateLogo: schoolYear.region.state_logo,
             studentName: `${withdraw.Student.person.first_name} ${withdraw.Student.person.last_name}`,
             birthdate: withdraw.Student.person.date_of_birth
-              ? Moment(withdraw.Student.person.date_of_birth).format(
-                  'MM/DD/YYYY',
-                )
+              ? Moment(withdraw.Student.person.date_of_birth).format('MM/DD/YYYY')
               : 'NA',
             address: address.street
               ? `${address.street}, 
@@ -895,9 +819,7 @@ export class WithdrawalService {
               : 'NA',
             phone: withdraw.Student.person.person_phone?.number || 'NA',
             grades: gradeText(withdraw.Student),
-            dateEffective: withdraw.date_effective
-              ? Moment(withdraw.date_effective).format('MM/DD/YYYY')
-              : 'NA',
+            dateEffective: withdraw.date_effective ? Moment(withdraw.date_effective).format('MM/DD/YYYY') : 'NA',
             schoolYear: `${yearbegin}-${yearend}`,
             date: Moment().format('MM/DD/YYYY'),
             questions,

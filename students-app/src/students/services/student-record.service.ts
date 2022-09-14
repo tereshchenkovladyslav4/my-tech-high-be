@@ -39,7 +39,7 @@ export class StudentRecordService {
       .leftJoinAndSelect('Student.status', 'student_status')
       .where(`record.RegionId = ${region_id}`);
 
-    let grades = [];
+    const grades = [];
     if (grade_level_1) {
       const gradeLevels = JSON.parse(grade_level_1);
       gradeLevels.map((item) => {
@@ -70,7 +70,7 @@ export class StudentRecordService {
       });
     }
 
-    let studentIds = [];
+    const studentIds = [];
 
     if (program_year) {
       const programYear = JSON.parse(program_year);
@@ -139,7 +139,7 @@ export class StudentRecordService {
       // TO DO
     }
 
-    let fileKinds = [];
+    const fileKinds = [];
 
     if (other) {
       const fileKindList = JSON.parse(other);
@@ -236,7 +236,7 @@ export class StudentRecordService {
     }
   }
 
-  async save(region_id: number, student_id: number): Promise<Boolean> {
+  async save(region_id: number, student_id: number): Promise<boolean> {
     try {
       const record = await this.repo.find({
         where: {

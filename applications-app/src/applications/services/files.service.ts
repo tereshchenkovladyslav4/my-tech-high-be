@@ -20,7 +20,7 @@ export class FilesService {
     private readonly packetFileRepository: Repository<PacketFile>,
   ) {}
 
-  async findByIds(file_ids: String): Promise<Pagination<File>> {
+  async findByIds(file_ids: string): Promise<Pagination<File>> {
     const qb = this.filesRepository.createQueryBuilder('file');
     const [results, total] = await qb
       .where('file.file_id IN (:...file_ids)', {
@@ -71,21 +71,10 @@ export class FilesService {
     return this.filesRepository.save(file);
   }
 
-  async upload(
-    buffer: Buffer,
-    directory: string,
-    name: string,
-    mimetype: string,
-    year,
-  ): Promise<File> {
+  async upload(buffer: Buffer, directory: string, name: string, mimetype: string, year): Promise<File> {
     try {
       const extension = mimetype.split('/').pop();
-      const upload = await this.s3Service.s3_upload(
-        buffer,
-        null,
-        `${directory}/${name}.${extension}`,
-        mimetype,
-      );
+      const upload = await this.s3Service.s3_upload(buffer, null, `${directory}/${name}.${extension}`, mimetype);
 
       const result = await this.create({
         name: name,

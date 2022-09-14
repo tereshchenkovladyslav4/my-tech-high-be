@@ -17,6 +17,7 @@ import { CountyResolver } from './resolvers/couty.resolver';
 import { QuestionResolver } from './resolvers/question.resolver';
 import { SchoolPartnerResolver } from './resolvers/school-partner.resolver';
 import { SchoolPartner } from '../models/school-partner.entity';
+import { ScheduleBuilderResolver } from './resolvers/schedule-builder.resolver';
 
 const graphQLImports = [
   UsersResolver,
@@ -31,7 +32,8 @@ const graphQLImports = [
   SchoolDistrictsResolver,
   CountyResolver,
   QuestionResolver,
-  SchoolPartnerResolver
+  SchoolPartnerResolver,
+  ScheduleBuilderResolver,
 ];
 
 @Module({

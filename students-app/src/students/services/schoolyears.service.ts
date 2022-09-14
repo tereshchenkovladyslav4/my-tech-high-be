@@ -24,7 +24,7 @@ export class SchoolYearsService {
         date_begin: LessThanOrEqual(new Date()),
         date_end: MoreThanOrEqual(new Date()),
       },
-      relations:['SchoolPartners']
+      relations:['SchoolPartners', 'ScheduleBuilder']
     });
   }
 

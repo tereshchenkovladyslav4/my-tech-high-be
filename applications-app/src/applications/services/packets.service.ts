@@ -1,13 +1,13 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, Brackets } from 'typeorm';
-import { PacketsArgs, DeletePacketArgs } from '../dto/packets.args';
+import { Repository, Brackets, getConnection } from 'typeorm';
+import { PacketsArgs } from '../dto/packets.args';
 import { CreatePacketInput } from '../dto/new-packet.inputs';
 import { Packet } from '../models/packet.entity';
 import { PacketEmail } from '../models/packet-email.entity';
 import { UpdatePacketInput } from '../dto/update-packet.inputs';
 import { SaveStudentPacketInput } from '../dto/save-student-packet.inputs';
-import { Pagination, PaginationOptionsInterface } from '../../paginate';
+import { Pagination } from '../../paginate';
 import { ResponseDTO } from '../dto/response.dto';
 import { EmailsService } from './emails.service';
 import { PacketEmailsService } from './packet-emails.service';
@@ -19,7 +19,22 @@ import * as Moment from 'moment';
 import { SchoolYearService } from './schoolyear.service';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
+import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
+import { StudentsService } from './students.service';
+import { PDFService } from '@t00nday/nestjs-pdf';
+import { PdfTemplate, StudentRecordFileKind } from '../enums';
+import { FilesService } from './files.service';
+import { StudentRecordService } from './student-record.service';
+import { S3Service } from './s3.service';
 
+class Question {
+  question: string;
+  answer: string;
+}
+class QuestionItem {
+  group_name: string;
+  questions: Question[];
+}
 @Injectable()
 export class PacketsService {
   constructor(
@@ -32,7 +47,12 @@ export class PacketsService {
     private applicationService: ApplicationsService,
     private emailTemplateService: EmailTemplatesService,
     private studentGradeLevelService: StudentGradeLevelsService,
-  ) { }
+    private studentService: StudentsService,
+    private pdfService: PDFService,
+    private filesService: FilesService,
+    private studentRecordService: StudentRecordService,
+    private readonly s3Service: S3Service,
+  ) {}
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
     const { skip, take, sort, filters, search, region_id } = packetsArgs;
@@ -111,10 +131,7 @@ export class PacketsService {
         if (_sortBy[0] === 'student') {
           qb.orderBy('s_person.first_name', 'DESC');
         } else if (_sortBy[0] === 'grade') {
-          qb.addSelect(
-            'ABS(grade_levels.grade_level + 0)',
-            'student_grade_level',
-          );
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
           qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
           qb.orderBy('packet.deadline', 'DESC');
@@ -125,10 +142,7 @@ export class PacketsService {
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy(`(${userEmails}).created_at`, 'DESC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect(
-            "CONCAT(p_person.first_name, ' ', p_person.last_name)",
-            'parent_name',
-          );
+          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
           qb.orderBy('parent_name', 'DESC');
         } else {
           qb.orderBy('packet.packet_id', 'DESC');
@@ -137,10 +151,7 @@ export class PacketsService {
         if (_sortBy[0] === 'student') {
           qb.orderBy('s_person.first_name', 'ASC');
         } else if (_sortBy[0] === 'grade') {
-          qb.addSelect(
-            'ABS(grade_levels.grade_level + 0)',
-            'student_grade_level',
-          );
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
           qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
           qb.orderBy('packet.deadline', 'ASC');
@@ -151,10 +162,7 @@ export class PacketsService {
         } else if (_sortBy[0] === 'status') {
           qb.orderBy('packet.status', 'ASC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect(
-            "CONCAT(p_person.first_name, ' ', p_person.last_name)",
-            'parent_name',
-          );
+          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
           qb.orderBy('parent_name', 'ASC');
         } else {
           qb.orderBy('packet.packet_id', 'ASC');
@@ -221,9 +229,7 @@ export class PacketsService {
     return this.packetsRepository.save(updatePacketInput);
   }
 
-  async createOrUpdate(
-    saveStudentPacketInput: SaveStudentPacketInput,
-  ): Promise<Packet> {
+  async createOrUpdate(saveStudentPacketInput: SaveStudentPacketInput): Promise<Packet> {
     return this.packetsRepository.save(saveStudentPacketInput);
   }
 
@@ -242,9 +248,8 @@ export class PacketsService {
       results: statusArray,
     };
   }
-  async sendEmail(
-    emailPacketInput: EmailApplicationInput,
-  ): Promise<PacketEmail[]> {
+
+  async sendEmail(emailPacketInput: EmailApplicationInput): Promise<PacketEmail[]> {
     const { application_ids, subject, body } = emailPacketInput;
     const [results] = await this.packetsRepository
       .createQueryBuilder('packet')
@@ -257,9 +262,7 @@ export class PacketsService {
       .getManyAndCount();
 
     const setEmailBodyInfo = (student, school_year) => {
-      const yearbegin = new Date(school_year.date_begin)
-        .getFullYear()
-        .toString();
+      const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
 
       return body
@@ -274,9 +277,7 @@ export class PacketsService {
 
     const emailBody = [];
     results.map(async (item) => {
-      const school_year = await this.schoolYearService.findOneById(
-        results[0].student.grade_levels[0].school_year_id,
-      );
+      const school_year = await this.schoolYearService.findOneById(results[0].student.grade_levels[0].school_year_id);
       const temp = {
         packet_id: item.packet_id,
         email: item.student.parent.person.email,
@@ -284,16 +285,9 @@ export class PacketsService {
       };
       emailBody.push(temp);
     });
-    const emailTemplate = await this.emailTemplateService.findByTemplate(
-      'Enrollment Packet Page',
-    );
+    const emailTemplate = await this.emailTemplateService.findByTemplate('Enrollment Packet Page');
     if (emailTemplate) {
-      await this.emailTemplateService.updateEmailTemplate(
-        emailTemplate.id,
-        emailTemplate.from,
-        subject,
-        body,
-      );
+      await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
     }
     emailBody.map(async (emailData) => {
       const result = await this.sesEmailService.sendEmail({
@@ -319,20 +313,14 @@ export class PacketsService {
     return packetEmails;
   }
 
-  async deletePacket(
-    deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Packet[]> {
+  async deletePacket(deleteApplicationInput: DeleteApplicationInput): Promise<Packet[]> {
     const { application_ids } = deleteApplicationInput;
-    const applications = await this.packetsRepository.findByIds(
-      application_ids,
-    );
+    const applications = await this.packetsRepository.findByIds(application_ids);
     const result = await this.packetsRepository.delete(application_ids);
     return applications;
   }
 
-  async moveThisYearPacket(
-    deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Boolean> {
+  async moveThisYearPacket(deleteApplicationInput: DeleteApplicationInput): Promise<boolean> {
     const { application_ids } = deleteApplicationInput;
     const packets = await this.packetsRepository
       .createQueryBuilder('packet')
@@ -343,9 +331,7 @@ export class PacketsService {
     let ids = [];
     packets.map((item) => {
       if (item?.student?.applications) {
-        ids = ids.concat(
-          item?.student?.applications?.map((ele) => ele.application_id),
-        );
+        ids = ids.concat(item?.student?.applications?.map((ele) => ele.application_id));
       }
     });
     if (ids.length === 0) return false;
@@ -355,9 +341,7 @@ export class PacketsService {
     return true;
   }
 
-  async moveNextYearPacket(
-    deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Boolean> {
+  async moveNextYearPacket(deleteApplicationInput: DeleteApplicationInput): Promise<boolean> {
     const { application_ids } = deleteApplicationInput;
     const packets = await this.packetsRepository
       .createQueryBuilder('packet')
@@ -368,9 +352,7 @@ export class PacketsService {
     let ids = [];
     packets.map((item) => {
       if (item?.student?.applications) {
-        ids = ids.concat(
-          item?.student?.applications?.map((ele) => ele.application_id),
-        );
+        ids = ids.concat(item?.student?.applications?.map((ele) => ele.application_id));
       }
     });
     if (ids.length === 0) return false;
@@ -380,11 +362,7 @@ export class PacketsService {
     return true;
   }
 
-  async findReminders(
-    date: Date,
-    reminder: Number,
-    region_id: Number,
-  ): Promise<Packet[]> {
+  async findReminders(date: Date, reminder: number, region_id: number): Promise<Packet[]> {
     try {
       const toDate = new Date(date);
       toDate.setDate(date.getDate() + 1);
@@ -408,17 +386,16 @@ export class PacketsService {
         //.andWhere('packet.deadline >= :startDate', { startDate: date })
         //.andWhere('packet.deadline < :toDate', { toDate: toDate })
         .getMany();
-      
+
       return packets;
     } catch (error) {
       console.log(error);
       return [];
     }
   }
+
   async getCountGroup(): Promise<ResponseDTO> {
-    let qb = await this.packetsRepository.query(
-      'select status,COUNT(*) As count from mth_packet GROUP BY status',
-    );
+    const qb = await this.packetsRepository.query('select status,COUNT(*) As count from mth_packet GROUP BY status');
     const statusArray = {
       'Not Started': 0,
       'Missing Info': 0,
@@ -438,7 +415,7 @@ export class PacketsService {
   }
 
   async getpacketCountByRegionId(region_id: number): Promise<ResponseDTO> {
-    let qb = await this.packetsRepository.query(
+    const qb = await this.packetsRepository.query(
       `SELECT
           t1.status AS status,
           COUNT(*) AS count
@@ -470,7 +447,7 @@ export class PacketsService {
 
   async updateEnrollmentSchoolYearByIdsInput(
     updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     const { application_ids, school_year_id, midyear_application } = updateApplicationSchoolYearInput;
     Promise.all(
       application_ids.map(async (id) => {
@@ -478,13 +455,218 @@ export class PacketsService {
         const packet = await this.packetsRepository.findOne({ packet_id: application_id });
         const studentGradeLevel = await this.studentGradeLevelService.update(packet.student_id, school_year_id);
         const applications = await this.applicationService.findByStudent(packet.student_id);
-        if(applications[0]){
+        if (applications[0]) {
           applications[0].school_year_id = school_year_id;
-          applications[0].midyear_application = midyear_application === 1? true: false;
+          applications[0].midyear_application = midyear_application === 1 ? true : false;
           await applications[0].save();
         }
-      })
+      }),
     );
     return true;
+  }
+
+  async generateStudentPacketPDF(param: StudentPacketPDFInput): Promise<boolean> {
+    try {
+      const { student_id, region_id } = param;
+      const studentInfo = await this.studentService.findOneById(student_id);
+      const packets = await this.findByStudent(studentInfo?.student_id);
+      const packet = packets?.[packets?.length - 1];
+      const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
+      const yearbegin = Moment(schoolYear.date_begin).format('YYYY');
+      const yearend = Moment(schoolYear.date_end).format('YYYY');
+      const packetPdfInfo = {
+        student: {
+          ...studentInfo?.person,
+          date_of_birth: Moment(studentInfo?.person?.date_of_birth).format('MMMM D, YYYY'),
+          phone_number: studentInfo?.person?.person_phone?.number,
+          grade_levels: studentInfo?.grade_levels,
+          grade_level: `${studentInfo?.student_grade_level?.grade_level} (${yearbegin}-${yearend})`,
+          address: studentInfo?.person?.person_address?.address,
+        },
+        parent: {
+          ...studentInfo?.parent?.person,
+          date_of_birth: Moment(studentInfo?.parent?.person?.date_of_birth).format('MMMM D, YYYY'),
+          phone_number: studentInfo?.parent?.person?.person_phone?.number,
+          address: studentInfo?.parent?.person?.person_address?.address,
+        },
+        packet: { ...packet },
+        meta: packet?.meta ? { ...JSON.parse(packet?.meta) } : {},
+        address: { ...studentInfo?.person?.person_address?.address },
+        school_year_id: studentInfo?.student_grade_level?.school_year_id,
+      };
+      const contactInfo: QuestionItem[] = [];
+      const personalInfo: QuestionItem[] = [];
+      const educationInfo: QuestionItem[] = [];
+      const submissionInfo: QuestionItem[] = [];
+      const queryRunner = await getConnection().createQueryRunner();
+      const enrollmentQuestions = await queryRunner.query(`
+        SELECT
+          questionTab.tab_name,
+          questionGroup.group_name,
+          questions.*
+        FROM (
+          SELECT * FROM infocenter.mth_enrollment_questions
+        ) as questions
+        LEFT JOIN infocenter.mth_enrollment_question_group questionGroup ON (questionGroup.id = questions.group_id)
+        LEFT JOIN infocenter.mth_enrollment_question_tab questionTab ON (questionTab.id = questionGroup.tab_id)
+        WHERE questionTab.region_id = ${region_id}
+        ORDER BY questionTab.id, questionGroup.order, questions.order;
+      `);
+      queryRunner.release();
+      enrollmentQuestions?.map((question) => {
+        if (!question?.group_name.includes('Instructions')) {
+          const keyName = question.slug?.split('_')[0];
+          const fieldName = !question.slug?.includes('meta_')
+            ? question.slug?.replace(`${keyName}_`, '')
+            : question.slug;
+          const options = JSON.parse(question.options || '');
+          const answer =
+            options?.length && question?.type != 4 && question?.type != 3
+              ? options?.filter(
+                  (option) =>
+                    (typeof option.value == 'string' && option.value == `${packetPdfInfo[keyName][fieldName]}`) ||
+                    (typeof option.value != 'string' && option.value == Number(packetPdfInfo[keyName][fieldName])),
+                )?.[0]?.label || packetPdfInfo[keyName][fieldName]
+              : question?.type == 4 && packetPdfInfo[keyName][fieldName]
+              ? 'Checked'
+              : question?.type == 3 && packetPdfInfo[keyName][fieldName]
+              ? packetPdfInfo[keyName][fieldName]?.map((item) => item?.label)?.join(',')
+              : packetPdfInfo[keyName][fieldName];
+          if (
+            question?.tab_name == 'Contact' &&
+            contactInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
+            answer
+          ) {
+            contactInfo?.map((item) => {
+              if (item.group_name == question?.group_name) {
+                item.questions.push({
+                  question: question?.question,
+                  answer: answer,
+                });
+              }
+            });
+          } else if (question?.tab_name == 'Contact' && answer) {
+            contactInfo.push({
+              group_name: question?.group_name,
+              questions: [
+                {
+                  question: question?.question,
+                  answer: answer,
+                },
+              ],
+            });
+          } else if (
+            question?.tab_name == 'Personal' &&
+            personalInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
+            answer
+          ) {
+            personalInfo?.map((item) => {
+              if (item.group_name == question?.group_name) {
+                item.questions.push({
+                  question: question?.question,
+                  answer: answer,
+                });
+              }
+            });
+          } else if (question?.tab_name == 'Personal' && answer) {
+            personalInfo.push({
+              group_name: question?.group_name,
+              questions: [
+                {
+                  question: question?.question,
+                  answer: answer,
+                },
+              ],
+            });
+          } else if (
+            question?.tab_name == 'Education' &&
+            educationInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
+            answer
+          ) {
+            educationInfo?.map((item) => {
+              if (item.group_name == question?.group_name) {
+                item.questions.push({
+                  question: question?.question,
+                  answer: answer,
+                });
+              }
+            });
+          } else if (question?.tab_name == 'Education' && answer) {
+            educationInfo.push({
+              group_name: question?.group_name,
+              questions: [
+                {
+                  question: question?.question,
+                  answer: answer,
+                },
+              ],
+            });
+          } else if (
+            question?.tab_name == 'Submission' &&
+            submissionInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
+            answer
+          ) {
+            submissionInfo?.map((item) => {
+              if (item.group_name == question?.group_name) {
+                item.questions.push({
+                  question: question?.question,
+                  answer: answer,
+                });
+              }
+            });
+          } else if (question?.tab_name == 'Submission' && answer) {
+            submissionInfo.push({
+              group_name: question?.group_name,
+              questions: [
+                {
+                  question: question?.question,
+                  answer: answer,
+                },
+              ],
+            });
+          }
+        }
+      });
+      const signatureFileInfo = await this.filesService.findOneById(packet?.signature_file_id);
+      const pdfBuffer = await this.pdfService
+        .toBuffer(PdfTemplate.STUDENT_PACKET, {
+          locals: {
+            contactInfo: contactInfo,
+            personalInfo: personalInfo,
+            educationInfo: educationInfo,
+            submissionInfo: submissionInfo,
+            signature_date: Moment(packet?.date_submitted).format('MM/DD/YYYY'),
+            signature_name: `${studentInfo?.parent?.person?.first_name} ${studentInfo?.parent?.person?.last_name}`,
+            signature_url: signatureFileInfo?.signedUrl,
+          },
+          viewportSize: {
+            width: 50,
+            height: 50,
+          },
+        })
+        .toPromise();
+
+      const uploadFile = await this.filesService.upload(
+        pdfBuffer,
+        `${schoolYear?.region?.name}/Student Records/${student_id}`,
+        StudentRecordFileKind.STUDENT_PACKET,
+        'application/pdf',
+        yearbegin,
+      );
+
+      // const signedUrl = await this.s3Service.getObjectSignedUrl(uploadFile.item1);
+      // console.log(signedUrl);
+      await this.studentRecordService.createStudentRecord(
+        student_id,
+        schoolYear.RegionId,
+        uploadFile.file_id,
+        StudentRecordFileKind.STUDENT_PACKET,
+      );
+
+      return true;
+    } catch (err) {
+      console.log(err, 'err');
+      return false;
+    }
   }
 }

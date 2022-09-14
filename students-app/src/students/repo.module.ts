@@ -1,6 +1,5 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PDFModule } from '@t00nday/nestjs-pdf';
 import { User } from './models/user.entity';
 import { Person } from './models/person.entity';
 import { Student } from './models/student.entity';
@@ -97,12 +96,6 @@ const servicesImports = [
       SchoolEnrollment,
       ResourceLevel,
     ]),
-    PDFModule.register({
-      view: {
-        root: 'templates',
-        engine: 'pug',
-      },
-    }),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],

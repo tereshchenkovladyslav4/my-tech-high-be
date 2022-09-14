@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable } from '@nestjs/common';
 import { getConnection } from 'typeorm';
 import { StudentRecordFileKind } from '../enums';
@@ -30,6 +31,15 @@ export class StudentRecordService {
         `);
         recordId = record.insertId;
       }
+
+      await queryRunner.query(`
+        INSERT INTO infocenter.mth_student_record_file (RecordId, FileId, file_kind)
+        SELECT ${recordId}, mth_file_id, kind
+        FROM (
+          SELECT packet_id FROM infocenter.mth_packet WHERE student_id = ${studentId}
+        ) AS packet
+        LEFT JOIN infocenter.mth_packet_file packetFile ON (packetFile.packet_id = packet.packet_id)
+      `);
 
       if (fileId && fileKind) {
         const recordFiles = await queryRunner.query(`

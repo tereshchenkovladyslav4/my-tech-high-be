@@ -1,12 +1,4 @@
-import {
-  Args,
-  Resolver,
-  ResolveReference,
-  ResolveField,
-  Parent as TypeParent,
-  Mutation,
-  Query
-} from '@nestjs/graphql';
+import { Args, Resolver, ResolveReference, ResolveField, Parent as TypeParent, Mutation } from '@nestjs/graphql';
 import { Student } from '../models/student.entity';
 import { StudentsService } from '../services/students.service';
 import { PacketsService } from '../services/packets.service';
@@ -16,9 +8,7 @@ import { Application } from '../models/application.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
-import { StudentPagination } from '../models/student-pagination.entity';
-import { StudentsArgs } from '../dto/student.args';
-import { Pagination } from '../../paginate';
+import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 
 @Resolver((of) => Student)
 export class StudentsResolver {
@@ -26,8 +16,7 @@ export class StudentsResolver {
     private studentsService: StudentsService,
     private packetsService: PacketsService,
     private applicationsService: ApplicationsService,
-
-  ) { }
+  ) {}
 
   @ResolveField((of) => [Packet], { name: 'packets' })
   public async getPackets(@TypeParent() student: Student): Promise<Packet[]> {
@@ -35,17 +24,12 @@ export class StudentsResolver {
   }
 
   @ResolveField((of) => [Application], { name: 'applications' })
-  public async getApplications(
-    @TypeParent() student: Student,
-  ): Promise<Application[]> {
+  public async getApplications(@TypeParent() student: Student): Promise<Application[]> {
     return this.applicationsService.findByStudent(student.student_id);
   }
 
   @ResolveReference()
-  resolveReference(reference: {
-    __typename: string;
-    student_id: number;
-  }): Promise<Student> {
+  resolveReference(reference: { __typename: string; student_id: number }): Promise<Student> {
     return this.studentsService.findOneById(reference.student_id);
   }
 
@@ -57,5 +41,4 @@ export class StudentsResolver {
   ): Promise<boolean> {
     return this.studentsService.update(updateStudentInput);
   }
-
 }

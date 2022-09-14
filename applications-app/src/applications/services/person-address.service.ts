@@ -14,9 +14,7 @@ export class PersonAddressService {
     private readonly personAddressRepository: Repository<PersonAddress>,
   ) {}
 
-  async create(
-    personAddressInput: CreatePersonAddressInput,
-  ): Promise<PersonAddress> {
+  async create(personAddressInput: CreatePersonAddressInput): Promise<PersonAddress> {
     return this.personAddressRepository.save(personAddressInput);
   }
 
@@ -26,17 +24,10 @@ export class PersonAddressService {
     });
   }
 
-  async createOrUpdate(
-    person: Person,
-    addressInputs: CreateAddressInput,
-  ): Promise<PersonAddress> {
+  async createOrUpdate(person: Person, addressInputs: CreateAddressInput): Promise<PersonAddress> {
     // Update Address
     const hasAddress = await createQueryBuilder(PersonAddress)
-      .innerJoin(
-        Person,
-        'person',
-        'person.person_id = `PersonAddress`.person_id',
-      )
+      .innerJoin(Person, 'person', 'person.person_id = `PersonAddress`.person_id')
       .where('`PersonAddress`.person_id = :id', { id: person.person_id })
       .printSql()
       .getOne();

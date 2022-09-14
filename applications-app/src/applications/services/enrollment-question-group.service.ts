@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { EnrollmentQuestionsInput } from '../dto/enrollment-question.input';
 import { NewEnrollmentQuestionGroupInput } from '../dto/new-enrollment-question-group.inputs';
 import { EnrollmentQuestionGroup } from '../models/enrollment-question-group.entity';
-import { EnrollmentQuestions } from '../models/enrollment-questions.entity';
 import { EnrollmentQuestionsService } from './enrollment-questions.service';
 @Injectable()
 export class EnrollmentQuestionGroupService {
@@ -22,24 +21,21 @@ export class EnrollmentQuestionGroupService {
       .getMany();
   }
 
-  async find(
-    input?: EnrollmentQuestionsInput,
-  ): Promise<EnrollmentQuestionGroup[]> {
+  async find(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionGroup[]> {
     return await this.repo.find();
   }
 
-  async createOrUpdate(
-    input: NewEnrollmentQuestionGroupInput,
-  ): Promise<EnrollmentQuestionGroup> {
+  async createOrUpdate(input: NewEnrollmentQuestionGroupInput): Promise<EnrollmentQuestionGroup> {
     const { id, order, group_name, tab_id, questions } = input;
 
     const groupData = await this.repo.save({ id, order, group_name, tab_id });
     Promise.all(
-      questions.map(async el =>
-        await this.enrollmentQuestionsService.createOrUpdate({
-          ...el,
-          group_id: groupData.id,
-        }),
+      questions.map(
+        async (el) =>
+          await this.enrollmentQuestionsService.createOrUpdate({
+            ...el,
+            group_id: groupData.id,
+          }),
       ),
     );
     return groupData;

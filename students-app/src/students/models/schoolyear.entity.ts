@@ -1,11 +1,12 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, OneToOne } from 'typeorm';
+import { ScheduleBuilder } from './scheduler-builder.entity';
 import { SchoolPartner } from './school-partner.entity';
 
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description, ScheduleBuilder")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -164,4 +165,9 @@ export class SchoolYear extends BaseEntity {
   @Field(() => [SchoolPartner], { nullable: true })
   @Directive('@external')
   SchoolPartners: SchoolPartner[];
+
+  @OneToOne(() => ScheduleBuilder, (schedule) => schedule.schoolYear)
+  @Field(() => ScheduleBuilder, { nullable: true })
+  @Directive('@external')
+  ScheduleBuilder: ScheduleBuilder;
 }

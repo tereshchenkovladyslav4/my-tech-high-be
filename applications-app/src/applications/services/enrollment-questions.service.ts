@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EnrollmentQuestionTab } from '../models/enrollment-question-tab.entity';
 import { EnrollmentQuestionsInput } from '../dto/enrollment-question.input';
 import { NewEnrollmentQuestionsInput } from '../dto/new-enrollment-questions.inputs';
 import { EnrollmentQuestions } from '../models/enrollment-questions.entity';
-import { EnrollmentQuestionGroup } from '../models/enrollment-question-group.entity';
 @Injectable()
 export class EnrollmentQuestionsService {
   constructor(
@@ -26,9 +24,7 @@ export class EnrollmentQuestionsService {
     return await this.repo.find();
   }
 
-  async createOrUpdate(
-    input: NewEnrollmentQuestionsInput,
-  ): Promise<EnrollmentQuestions> {
+  async createOrUpdate(input: NewEnrollmentQuestionsInput): Promise<EnrollmentQuestions> {
     return this.repo.save(input);
   }
   async deleteEnrollment(id: number): Promise<number> {

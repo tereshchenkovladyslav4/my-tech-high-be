@@ -43,6 +43,8 @@ import { Question } from 'src/models/question.entity';
 import { County } from 'src/models/county.entity';
 import { SchoolPartnerService } from './services/school-partner.service';
 import { SchoolPartner } from '../models/school-partner.entity';
+import { ScheduleBuilderService } from './services/schedule-builder.service';
+import { ScheduleBuilder } from 'src/models/scheduler-builder.entity';
 
 const RepoServices = [
   UsersService,
@@ -64,7 +66,8 @@ const RepoServices = [
   QuestionService,
   CountyService,
   SchoolPartnerService,
-  EmailRecordsService
+  EmailRecordsService,
+  ScheduleBuilderService,
 ];
 
 @Global()
@@ -96,7 +99,8 @@ const RepoServices = [
       SchoolDistrict,
       County,
       SchoolPartner,
-      EmailRecord
+      EmailRecord,
+      ScheduleBuilder,
     ]),
   ],
   providers: RepoServices,

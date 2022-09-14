@@ -31,7 +31,7 @@ export class RegionService {
       where: {
         id: region_id,
       },
-      relations: ['region', 'SchoolYears', 'SchoolYears.SchoolPartners'],
+      relations: ['region', 'SchoolYears', 'SchoolYears.SchoolPartners', 'SchoolYears.ScheduleBuilder'],
     });
     return data;
   }

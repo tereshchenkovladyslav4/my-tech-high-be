@@ -22,7 +22,7 @@ export class SchoolYearsService {
       where: {
         school_year_id: school_year_id,
       },
-      relations: ['Region'],
+      relations: ['Region', 'ScheduleBuilder'],
     });
   }
 
