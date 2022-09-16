@@ -49,4 +49,25 @@ export class StudentCurrentStatus {
 
   @Field(() => Int, { nullable: true })
   withdraw_deadline_num_days?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  midyear_application?: boolean;
+
+  @Field(() => String, { nullable: true })
+  schedule_builder_close?: string;
+
+  @Field(() => String, { nullable: true })
+  schedule_builder_open?: string;
+
+  @Field(() => String, { nullable: true })
+  midyear_schedule_close?: string;
+
+  @Field(() => String, { nullable: true })
+  midyear_schedule_open?: string;
+
+  @Field(() => String, { nullable: true })
+  second_semester_open?: string;
+
+  @Field(() => String, { nullable: true })
+  second_semester_close?: string;
 }

@@ -23,6 +23,9 @@ import * as Moment from 'moment';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { Region } from '../models/region.entity';
 import { Pagination } from 'src/paginate';
+import { YEAR_STATUS } from '../enums/year-status.enum';
+import { cloneDeep } from 'lodash';
+
 @Injectable()
 export class StudentsService {
   constructor(
@@ -62,6 +65,15 @@ export class StudentsService {
     );
     const previousScholYear = previousYearOb ? previousYearOb.school_year_id : 0;
 
+    let filterSibling = false;
+    let enrolledInStatus = [];
+
+    const studentStatus = filter?.yearStatus || [];
+    if (studentStatus.length) {
+      filterSibling = studentStatus.includes(YEAR_STATUS.SIBLING);
+      enrolledInStatus = studentStatus.filter((el) => el !== YEAR_STATUS.SIBLING);
+    }
+
     const qb = this.studentsRepository
       .createQueryBuilder('student')
       .leftJoinAndSelect('student.grade_levels', 'grade_levels')
@@ -70,17 +82,16 @@ export class StudentsService {
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('p_person.person_address', 'p_address')
       .leftJoinAndSelect('p_address.address', 'address')
-      .leftJoinAndSelect('student.currentSoe', 'currentSoe', 'currentSoe.school_year_id= :currentSchoolYear', {
-        currentSchoolYear: filter.schoolYear,
-      })
+      .leftJoinAndSelect('student.currentSoe', 'currentSoe', `currentSoe.school_year_id=${filter.schoolYear}`)
       .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
-      .leftJoinAndSelect('student.previousSoe', 'previousSoe', 'previousSoe.school_year_id= :previousScholYear', {
-        previousScholYear: previousScholYear,
-      })
+      .leftJoinAndSelect('student.previousSoe', 'previousSoe', `previousSoe.school_year_id=${previousScholYear}`)
       .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
       .leftJoinAndSelect('student.packets', 'packets')
       .where(`grade_levels.school_year_id = ${filter.schoolYear}`);
 
+    if (enrolledInStatus.length) {
+      qb.andWhere(`student.reenrolled IN (${enrolledInStatus.join(',')})`);
+    }
     if (filter && filter.grades && filter.grades.length > 0) {
       const grades = [];
 
@@ -107,52 +118,43 @@ export class StudentsService {
             if (!grades.includes('K')) grades.push('K');
           }
         });
-      qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
-    }
-
-    const studentStatus = filter?.yearStatus || [];
-    if (studentStatus.length) {
-      qb.andWhere('student.reenrolled IN (:studentStatus)', { studentStatus });
+      qb.andWhere(`grade_levels.grade_level IN (${grades.join(',')})`);
     }
 
     const schoolDistrict = filter?.schoolDistrict || [];
     const hadFilterSchoolDistrict = schoolDistrict.length && !schoolDistrict.includes('all');
 
     if (hadFilterSchoolDistrict) {
-      qb.andWhere('packets.school_district IN (:...names)', {
-        names: filter.schoolDistrict,
-      });
+      qb.andWhere(`packets.school_district IN (${filter.schoolDistrict.join(',')})`);
     }
 
     if (filter && filter.schoolOfEnrollments && filter.schoolOfEnrollments.length > 0) {
+      const filterSchoolOfEnrollments = filter.schoolOfEnrollments.join(',');
       if (filter.schoolOfEnrollments.indexOf('unassigned') !== -1) {
         qb.andWhere(
           new Brackets((sub) => {
             sub
-              .orWhere('currentSoe.school_partner_id IN (:currentPartners)', {
-                currentPartners: filter.schoolOfEnrollments,
-              })
+              .orWhere(`currentSoe.school_partner_id IN (${filterSchoolOfEnrollments})`)
               .orWhere('currentSoe.school_partner_id IS NULL');
           }),
         );
       } else {
-        qb.andWhere('currentSoe.school_partner_id IN (:currentPartners)', {
-          currentPartners: filter.schoolOfEnrollments,
-        });
+        qb.andWhere(`currentSoe.school_partner_id IN (${filterSchoolOfEnrollments})`);
       }
     }
 
     if (filter && filter.previousSOE && filter.previousSOE.length > 0) {
+      const filterPreviousSOE = filter.previousSOE.join(',');
       if (filter.previousSOE.indexOf('unassigned') !== -1) {
         qb.andWhere(
           new Brackets((sub) => {
             sub
-              .orWhere('previousSoe.school_partner_id IN (:previousPartner)', { previousPartner: filter.previousSOE })
+              .orWhere(`previousSoe.school_partner_id IN (${filterPreviousSOE})`)
               .orWhere('previousSoe.school_partner_id IS NULL');
           }),
         );
       } else {
-        qb.andWhere('previousSoe.school_partner_id IN (:previousPartner)', { previousPartner: filter.previousSOE });
+        qb.andWhere(`previousSoe.school_partner_id IN (${filterPreviousSOE})`);
       }
     }
 
@@ -160,72 +162,146 @@ export class StudentsService {
       qb.andWhere(
         new Brackets((sub) => {
           sub
-            .orWhere('person.first_name like :text', { text: `%${search}%` })
-            .orWhere('person.last_name like :text', { text: `%${search}%` })
-            .orWhere('p_person.first_name like :text', { text: `%${search}%` })
-            .orWhere('p_person.last_name like :text', { text: `%${search}%` })
-            .orWhere('address.city like :text', { text: `%${search}%` })
-            .orWhere('grade_levels.grade_level like :text', {
-              text: `%${search}%`,
-            })
-            .orWhere('currentPartner.name like :text', { text: `%${search}%` })
-            .orWhere('previousPartner.name like :text', {
-              text: `%${search}%`,
-            });
+            .orWhere(`person.first_name like %${search}%$`)
+            .orWhere(`person.last_name like %${search}%`)
+            .orWhere(`p_person.first_name like %${search}%`)
+            .orWhere(`p_person.last_name like %${search}%`)
+            .orWhere(`address.city like %${search}%`)
+            .orWhere(`grade_levels.grade_level like %${search}%`)
+            .orWhere(`currentPartner.name like %${search}%`)
+            .orWhere(`previousPartner.name like %${search}%`);
         }),
       );
     }
+    if (filterSibling) {
+      const queryRunner = await getConnection().createQueryRunner();
+      const qbOnlyParentSelect = cloneDeep(qb);
+      qbOnlyParentSelect.select('student.parent_id');
+      const [parentsIds] = qbOnlyParentSelect.getQueryAndParameters();
+      qb.addSelect('student.*');
+      const allStudent = this.studentsRepository
+        .createQueryBuilder('student')
+        .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+        .leftJoinAndSelect('student.person', 'person')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .leftJoinAndSelect('p_person.person_address', 'p_address')
+        .leftJoinAndSelect('p_address.address', 'address')
+        .leftJoinAndSelect('student.currentSoe', 'currentSoe')
+        .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
+        .leftJoinAndSelect('student.previousSoe', 'previousSoe')
+        .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+        .leftJoinAndSelect('student.packets', 'packets')
+        .addSelect('student.*')
+        .where(`student.parent_id IN (${parentsIds})`);
 
-    if (sort) {
-      if (_sortBy[1].toLocaleLowerCase() === 'desc') {
-        if (_sortBy[0] === 'grade') {
-          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level1');
-          qb.orderBy('student_grade_level1', 'DESC');
-        } else if (_sortBy[0] === 'student') {
-          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
-          qb.orderBy('student_name', 'DESC');
-        } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
-          qb.orderBy('parent_name', 'DESC');
-        } else if (_sortBy[0] === 'city') {
-          qb.orderBy('address.city', 'DESC');
-        } else if (_sortBy[0] === 'currentSOE') {
-          qb.orderBy('currentPartner.name', 'DESC');
-        } else if (_sortBy[0] === 'previousSOE') {
-          qb.orderBy('previousPartner.name', 'DESC');
-        } else {
-          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
-          qb.orderBy('student_name', 'DESC');
+      const sortBy = _sortBy?.[1]?.toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
+      let sortParent = 'ASC';
+      if (sort && _sortBy[0] === 'parent') {
+        sortParent = sortBy;
+      }
+      // RECHECK: parent name order rule
+      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, FIELD('grade_levels_school_year_id', ${filter.schoolYear}) DESC`;
+      // Group sorting
+      if (filter?.grades?.length) {
+        const filterGrade = filter.grades;
+        if (sort) {
+          if (_sortBy[0] === 'grade') {
+            filterGrade.sort((a, b) => {
+              if (sortBy === 'DESC') return a > b ? -1 : 1;
+              else return a > b ? -1 : 1;
+            });
+          }
         }
+        orderByFilter += `, FIELD('grade_levels_grade_level', ${filterGrade.join(',')}) DESC`;
       } else {
-        if (_sortBy[0] === 'grade') {
-          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level1');
-          qb.orderBy('student_grade_level1', 'ASC');
-        } else if (_sortBy[0] === 'student') {
-          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
-          qb.orderBy('student_name', 'ASC');
-        } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
-          qb.orderBy('parent_name', 'ASC');
-        } else if (_sortBy[0] === 'city') {
-          qb.orderBy('address.city', 'ASC');
-        } else if (_sortBy[0] === 'currentSOE') {
-          qb.orderBy('currentPartner.name', 'ASC');
-        } else if (_sortBy[0] === 'previousSOE') {
-          qb.orderBy('previousPartner.name', 'ASC');
-        } else {
-          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
-          qb.orderBy('student_name', 'ASC');
+        if (sort) {
+          if (_sortBy[0] === 'grade') {
+            orderByFilter += `, grade_levels_grade_level ${sortBy}`;
+          }
         }
       }
+      // console.log(orderByFilter, 'orderByFilter');
+
+      const [sqlAll] = allStudent.getQueryAndParameters();
+      const [sql1] = qb.getQueryAndParameters();
+      const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} UNION ${sqlAll}) aaa GROUP BY student_id`;
+
+      let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
+      const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
+
+      results = results.map((res) => {
+        const rrr = { ...res };
+
+        const currentSoe = [];
+        const previousSoe = [];
+
+        if (res.currentPartner_names) {
+          [...new Set(res.currentPartner_names.split(','))].forEach((name) => {
+            currentSoe.push({
+              partner: { name },
+            });
+          });
+        }
+        if (res.previousPartner_names) {
+          [...new Set(res.previousPartner_names.split(','))].forEach((name) => {
+            previousSoe.push({
+              partner: { name },
+            });
+          });
+        }
+
+        rrr.currentSoe = currentSoe;
+        rrr.previousSoe = previousSoe;
+
+        return this.studentsRepository.create(rrr);
+      });
+
+      queryRunner.release();
+
+      return new Pagination<Student>({
+        results,
+        total: totalRes?.[0]?.total || 0,
+      });
+    } else {
+      if (sort) {
+        const sortBy = _sortBy[1].toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
+        switch (_sortBy[0]) {
+          case 'grade':
+            qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level1');
+            qb.orderBy('student_grade_level1', sortBy);
+            break;
+          case 'student':
+            qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
+            qb.orderBy('student_name', sortBy);
+            break;
+          case 'parent':
+            qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
+            qb.orderBy('parent_name', sortBy);
+            break;
+          case 'city':
+            qb.orderBy('address.city', sortBy);
+            break;
+          case 'currentSOE':
+            qb.orderBy('currentPartner.name', sortBy);
+            break;
+          case 'previousSOE':
+            qb.orderBy('previousPartner.name', sortBy);
+            break;
+          default:
+            qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
+            qb.orderBy('student_name', sortBy);
+            break;
+        }
+      }
+
+      const [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
+
+      return new Pagination<Student>({
+        results,
+        total,
+      });
     }
-
-    const [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
-
-    return new Pagination<Student>({
-      results,
-      total,
-    });
   }
 
   findOneById(student_id: number): Promise<Student> {
@@ -279,6 +355,13 @@ export class StudentsService {
       enrollment_packet_deadline_num_days: 0,
       enrollment_packet_date_deadline: null,
       withdraw_deadline_num_days: 0,
+      midyear_application: false,
+      schedule_builder_close: '0000-00-00',
+      schedule_builder_open: '0000-00-00',
+      midyear_schedule_close: '0000-00-00',
+      midyear_schedule_open: '0000-00-00',
+      second_semester_open: '0000-00-00',
+      second_semester_close: '0000-00-00',
     };
 
     const parent = await createQueryBuilder(Parent)
@@ -318,9 +401,7 @@ export class StudentsService {
       .andWhere('application.school_year_id = :schoolYear', {
         schoolYear: (studentGradeLevel && studentGradeLevel.school_year_id) || null,
       })
-      .andWhere('`Student`.student_id = :studentId', {
-        studentId: studentData.student_id,
-      })
+      .andWhere('`Student`.student_id = :studentId', { studentId: studentData.student_id })
       .orderBy('application.application_id', 'DESC')
       .orderBy('packet.packet_id', 'DESC')
       .printSql()
@@ -348,6 +429,13 @@ export class StudentsService {
             .format('MM.DD')) ||
         null,
       withdraw_deadline_num_days: parent.region_withdraw_deadline_num_days,
+      midyear_application: (student && student.application_midyear_application) || false,
+      schedule_builder_close: schoolYear.schedule_builder_close || '0000-00-00',
+      schedule_builder_open: schoolYear.schedule_builder_open || '0000-00-00',
+      midyear_schedule_close: schoolYear.midyear_schedule_close || '0000-00-00',
+      midyear_schedule_open: schoolYear.midyear_schedule_open || '0000-00-00',
+      second_semester_open: schoolYear.second_semester_open || '0000-00-00',
+      second_semester_close: schoolYear.second_semester_close || '0000-00-00',
     };
   }
 

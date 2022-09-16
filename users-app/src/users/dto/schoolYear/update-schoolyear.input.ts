@@ -55,4 +55,31 @@ export class UpdateSchoolYearInput {
 
   @Field(() => String, { nullable: true })
   opt_out_form_description?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  schedule?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  diploma_seeking?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  testing_preference?: boolean;
+
+  @Field(() => String, { nullable: true })
+  schedule_builder_open?: string;
+
+  @Field(() => String, { nullable: true })
+  schedule_builder_close?: string;
+
+  @Field(() => String, { nullable: true })
+  second_semester_open?: string;
+
+  @Field(() => String, { nullable: true })
+  second_semester_close?: string;
+
+  @Field(() => String, { nullable: true })
+  midyear_schedule_open?: string;
+
+  @Field(() => String, { nullable: true })
+  midyear_schedule_close?: string;
 }

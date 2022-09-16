@@ -44,6 +44,7 @@ import { FilesService } from './services/files.service';
 import { S3Service } from './services/s3.service';
 import { StudentRecordFileService } from './services/student-record-file.service';
 import { ResourceLevel } from './models/resource-level.entity';
+import { TimezoneService } from './services/timezone.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -65,6 +66,7 @@ const servicesImports = [
   StudentRecordFileService,
   FilesService,
   S3Service,
+  TimezoneService,
 ];
 
 @Global()

@@ -17,7 +17,7 @@ import { SchoolPartner } from './school-partner.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description, ScheduleBuilder")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description, schedule, diploma_seeking, testing_preference, schedule_builder_open, schedule_builder_close, second_semester_open, second_semester_close, midyear_schedule_open, midyear_schedule_close, ScheduleBuilder")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -138,6 +138,42 @@ export class SchoolYear extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   @Field((type) => String, { nullable: true })
   opt_out_form_description: string;
+
+  @Column()
+  @Field((type) => Boolean, { nullable: true })
+  schedule: boolean;
+
+  @Column()
+  @Field((type) => Boolean, { nullable: true })
+  diploma_seeking: boolean;
+
+  @Column()
+  @Field((type) => Boolean, { nullable: true })
+  testing_preference: boolean;
+
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  schedule_builder_open: string;
+
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  schedule_builder_close: string;
+
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  second_semester_open: string;
+
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  second_semester_close: string;
+
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  midyear_schedule_open: string;
+
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  midyear_schedule_close: string;
 
   @ManyToOne(() => Region, (region) => region.schoolYears)
   @JoinColumn([{ name: 'RegionId', referencedColumnName: 'id' }])

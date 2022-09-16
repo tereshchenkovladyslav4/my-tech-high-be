@@ -1,20 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, createQueryBuilder, getConnection } from 'typeorm';
+import { Repository, createQueryBuilder } from 'typeorm';
 import { Student } from '../models/student.entity';
 import { ToDoCategory, ToDoItem } from '../models/todo-item.entity';
 import { User } from '../models/user.entity';
-import { ParentToDo } from '../models/parent-todo.entity';
 import { SchoolYearsService } from './schoolyears.service';
-import { ApplicationsService } from './applications.service';
-import { PacketsService } from './packets.service';
 import { Application } from '../models/application.entity';
 import { Packet } from '../models/packet.entity';
 import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
-import { SchoolYear } from '../models/schoolyear.entity';
 import { WithdrawalStatus } from '../enums';
+import { TimezoneService } from './timezone.service';
+import { SchoolYear } from '../models/schoolyear.entity';
 
 @Injectable()
 export class ParentToDosService {
@@ -22,8 +20,7 @@ export class ParentToDosService {
     @InjectRepository(Student)
     private readonly studentsRepository: Repository<Student>,
     private schoolYearsService: SchoolYearsService,
-    private applicationsService: ApplicationsService,
-    private packetsService: PacketsService,
+    private timeZoneService: TimezoneService,
   ) {}
 
   async forUsers(user_id: number): Promise<Student[]> {
@@ -45,26 +42,16 @@ export class ParentToDosService {
 
   async getParent(user_id: number): Promise<any> {
     return await createQueryBuilder(Parent)
-      .innerJoinAndSelect(
-        Person,
-        'person',
-        'person.person_id = `Parent`.person_id',
-      )
+      .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
       .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
-      .innerJoinAndSelect(
-        UserRegion,
-        'userRegion',
-        'userRegion.user_id = user.user_id',
-      )
+      .innerJoinAndSelect(UserRegion, 'userRegion', 'userRegion.user_id = user.user_id')
       .where('user.user_id = :userId', { userId: user_id })
       .printSql()
       .getRawOne();
   }
 
   async getActiveSchoolYears(region_id: number): Promise<any> {
-    const activeSchoolYears = await this.schoolYearsService.getAllActive(
-      region_id,
-    );
+    const activeSchoolYears = await this.schoolYearsService.getAllActive(region_id);
 
     //console.log('activeSchoolYears: ', activeSchoolYears);
     let _activeSchoolYears = [];
@@ -74,6 +61,48 @@ export class ParentToDosService {
       });
     }
     console.log('ActiveSchoolYears: ', _activeSchoolYears);
+
+    return _activeSchoolYears;
+  }
+
+  async getScheduleActiveSchoolYears(region_id: number): Promise<any> {
+    const activeSchoolYears = await this.schoolYearsService.getAllActive(region_id);
+    let _activeSchoolYears = [];
+    const nowDate = await this.timeZoneService.getTimezoneDate(region_id);
+
+    if (activeSchoolYears) {
+      _activeSchoolYears = activeSchoolYears
+        .filter(
+          (schoolYear) =>
+            schoolYear.schedule &&
+            schoolYear.schedule_builder_open <= nowDate &&
+            schoolYear.schedule_builder_close >= nowDate,
+        )
+        .map(function (a) {
+          return a.school_year_id;
+        });
+    }
+
+    return _activeSchoolYears;
+  }
+
+  async getScheduleActiveMidSchoolYears(region_id: number): Promise<any> {
+    const activeSchoolYears = await this.schoolYearsService.getAllActive(region_id);
+    let _activeSchoolYears = [];
+    const nowDate = await this.timeZoneService.getTimezoneDate(region_id);
+
+    if (activeSchoolYears) {
+      _activeSchoolYears = activeSchoolYears
+        .filter(
+          (schoolYear) =>
+            schoolYear.schedule &&
+            schoolYear.midyear_schedule_open <= nowDate &&
+            schoolYear.midyear_schedule_close >= nowDate,
+        )
+        .map(function (a) {
+          return a.school_year_id;
+        });
+    }
 
     return _activeSchoolYears;
   }
@@ -95,9 +124,7 @@ export class ParentToDosService {
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
-    const activeSchoolYears = await this.getActiveSchoolYears(
-      userRegion_region_id,
-    );
+    const activeSchoolYears = await this.getActiveSchoolYears(userRegion_region_id);
 
     if (activeSchoolYears.length == 0) {
       return defaultResponse;
@@ -150,9 +177,7 @@ export class ParentToDosService {
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
-    const activeSchoolYears = await this.getActiveSchoolYears(
-      userRegion_region_id,
-    );
+    const activeSchoolYears = await this.getActiveSchoolYears(userRegion_region_id);
 
     if (activeSchoolYears.length == 0) {
       return defaultResponse;
@@ -188,18 +213,46 @@ export class ParentToDosService {
   }
 
   async submitSchedule(user: User): Promise<ToDoItem> {
-    // Fetch students for Enrollment Packets
-    const students = [];
-
-    return {
+    const parent = await this.getParent(user.user_id);
+    const defaultResponse = {
       category: ToDoCategory.SUBMIT_SCHEDULE,
       phrase: 'Submit Schedule',
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
       homeroom: 1, // yes
-      students: students,
+      students: [],
     };
+    if (!parent) {
+      return defaultResponse;
+    }
+
+    const { userRegion_region_id, Parent_parent_id } = parent;
+    const scheduledActiveSchoolYears = await this.getScheduleActiveSchoolYears(userRegion_region_id);
+    const scheduleActiveMidSchoolYears = await this.getScheduleActiveMidSchoolYears(userRegion_region_id);
+
+    if (scheduledActiveSchoolYears.length == 0 && scheduleActiveMidSchoolYears.length == 0) {
+      return defaultResponse;
+    }
+
+    const students = await createQueryBuilder(Student)
+      .innerJoin(
+        Application,
+        'application',
+        'application.student_id = `Student`.student_id AND (application.midyear_application = 0 AND application.school_year_id IN (:schoolYears) || application.midyear_application = 1 AND application.school_year_id IN (:midSchoolYears))',
+        {
+          schoolYears: scheduledActiveSchoolYears.length ? scheduledActiveSchoolYears : [0],
+          midSchoolYears: scheduleActiveMidSchoolYears.length ? scheduleActiveMidSchoolYears : [0],
+        },
+      )
+      .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
+      .orderBy('application.application_id', 'DESC')
+      .printSql()
+      .getMany();
+
+    defaultResponse.students = students;
+
+    return defaultResponse;
   }
 
   async resubmitSchedule(user: User): Promise<ToDoItem> {
