@@ -730,69 +730,51 @@ export class EnrollmentsService {
   async runScheduleReminders(): Promise<String> {
     try {
       let MailData = [];
-      const emailTemplates = await this.emailTemplateService.findAllByTemplate(
-        'Packet Reminders',
-      );
+      const emailTemplates = await this.emailTemplateService.findAllByTemplate('Packet Reminders');
 
       if (emailTemplates.length > 0) {
         emailTemplates.forEach(async (emailTemplate) => {
-          const emailReminder =
-            await this.emailReminderService.findByTemplateId(emailTemplate.id);
+          const emailReminder = await this.emailReminderService.findByTemplateId(emailTemplate.id);
           if (emailReminder.length > 0) {
             emailReminder.forEach(async (remind) => {
               const reminder = remind.reminder;
               const reminderDate = new Date();
               reminderDate.setDate(reminderDate.getDate() + reminder);
-              const packets = await this.packetsService.findReminders(
-                reminderDate,
-                reminder,
-                emailTemplate.region_id,
-              );
-              if (emailTemplate) {
+              const packets = await this.packetsService.findReminders(reminderDate, reminder, emailTemplate.region_id);              
+              if (emailTemplate) {                
                 await Promise.all(
                   packets.map(async (packet) => {
                     // remove sending duplicate mail
-                    const pack_ids = Object.keys(MailData);
-                    const duplicate = pack_ids.map((b) => {   
-                      if(parseInt(b) == packet.packet_id && MailData[b] == remind.reminder_id) { return true }})
-                    if(!duplicate.includes(true)) {
+                    const pack_ids = Object.keys(MailData);                    
+                    const duplicate = pack_ids.map((b) => {
+                      if (parseInt(b) == packet.packet_id) {
+                        return true;
+                      }
+                    });
+                    if (!duplicate.includes(true)) {
                       MailData[packet.packet_id] = remind.reminder_id;
                       // <------------------------*-------------------------------->
-                      
                       const webAppUrl = process.env.WEB_APP_URL;
                       const student = packet.student.person;
                       const parent = packet.student.parent.person;
-                      const school_year = packet.student.applications[0].school_year
-                      const email = packet.student.parent.person.email
+                      const school_year = packet.student.applications[0].school_year;
+                      const email = packet.student.parent.person.email;
                       const setEmailBodyInfo = () => {
-                        const yearbegin = new Date(school_year.date_begin)
-                          .getFullYear()
-                          .toString();
-                        const yearend = new Date(school_year.date_end)
-                          .getFullYear()
-                          .toString();
-                        const emailBody = remind.body || emailTemplate.body
-                        const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`
+                        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+                        const yearend = new Date(school_year.date_end).getFullYear().toString();
+                        const emailBody = remind.body || emailTemplate.body;
+                        const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`;
                         return emailBody
                           .toString()
                           .replace(/\[STUDENT\]/g, student.first_name)
                           .replace(/\[PARENT\]/g, parent.first_name)
                           .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-                          .replace(
-                            /\[APPLICATION_YEAR\]/g,
-                            `${yearbegin}-${yearend.substring(2, 4)}`,
-                          )
-                          .replace(
-                            /\[DEADLINE\]/g,
-                            `${Moment(packet.deadline).format('MM/DD/yy')}`,
-                          )
-                          .replace(
-                            /\[LINK\]/g,
-                            `<a href='${link}'>${link}</a>`,
-                          );
+                          .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+                          .replace(/\[DEADLINE\]/g, `${Moment(packet.deadline).format('MM/DD/yy')}`)
+                          .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`);
                       };
                       const body = setEmailBodyInfo();
-  
+
                       await this.sesEmailService.sendEmail({
                         email: email,
                         subject: remind.subject || emailTemplate.subject,

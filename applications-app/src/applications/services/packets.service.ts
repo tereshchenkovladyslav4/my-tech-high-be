@@ -383,6 +383,7 @@ export class PacketsService {
           `DATE( DATE_ADD(applications.date_accepted, INTERVAL GREATEST( ( region.enrollment_packet_deadline_num_days - :reminderDate ), 0 ) DAY) ) = CURDATE()`,
           { reminderDate: reminder },
         )
+        .addGroupBy('packet.packet_id')
         //.andWhere('packet.deadline >= :startDate', { startDate: date })
         //.andWhere('packet.deadline < :toDate', { toDate: toDate })
         .getMany();
