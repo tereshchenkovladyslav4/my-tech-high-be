@@ -1,20 +1,5 @@
-import {
-  Directive,
-  Field,
-  ID,
-  ObjectType,
-  Int,
-  InputType,
-} from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  OneToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Packet } from './packet.entity';
 import { Application } from './application.entity';
 import { Parent } from './parent.entity';
@@ -29,7 +14,7 @@ import { SchoolEnrollment } from './school-enrollment.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference")',
+  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id")',
 )
 @Entity('mth_student')
 export class Student extends BaseEntity {
@@ -87,14 +72,21 @@ export class Student extends BaseEntity {
   @Directive('@external')
   testing_preference?: string;
 
+  @Column()
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  opt_out_form_signature_name?: string;
+
+  @Column()
+  @Field(() => Int, { nullable: true })
+  @Directive('@external')
+  opt_out_form_signature_file_id?: number;
+
   @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status?: StudentStatus[];
 
-  @OneToMany(
-    (type) => StudentReenrollmentStatus,
-    (studentReenrollmentStatus) => studentReenrollmentStatus.student,
-  )
+  @OneToMany((type) => StudentReenrollmentStatus, (studentReenrollmentStatus) => studentReenrollmentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   reenrollment_status?: StudentReenrollmentStatus[];
 

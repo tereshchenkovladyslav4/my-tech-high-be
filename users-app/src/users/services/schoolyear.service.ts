@@ -1,12 +1,14 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { map } from 'lodash';
+import { ScheduleBuilder } from 'src/models/scheduler-builder.entity';
 import { SchoolPartner } from 'src/models/school-partner.entity';
 import { Repository, LessThanOrEqual, MoreThanOrEqual, getConnection } from 'typeorm';
 import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
 import { RegionService } from './region/region.service';
+import { ScheduleBuilderService } from './schedule-builder.service';
 import { SchoolPartnerService } from './school-partner.service';
 @Injectable()
 export class SchoolYearsService {
@@ -14,6 +16,8 @@ export class SchoolYearsService {
     @InjectRepository(SchoolYear)
     private schoolYearsRepository: Repository<SchoolYear>,
     private schoolPartnerService: SchoolPartnerService,
+    private scheduleBuilderService: ScheduleBuilderService,
+
     private regionService: RegionService,
   ) {}
 
@@ -81,14 +85,27 @@ export class SchoolYearsService {
     const data = this.schoolYearsRepository.create(createSchoolYearInput);
 
     if (createSchoolYearInput.cloneSchoolYearId) {
-      // Clone grades
-      const cloneSchoolYear = await this.schoolYearsRepository.findOne({
+      const cloneSchoolYear: SchoolYear = await this.schoolYearsRepository.findOne({
         where: {
           school_year_id: createSchoolYearInput.cloneSchoolYearId,
         },
       });
+      // Clone grades
       if (cloneSchoolYear?.grades) data.grades = cloneSchoolYear.grades;
       data.enrollment_packet = false;
+      // clone previous year's schedule builder 
+      if(cloneSchoolYear?.ScheduleBuilder as ScheduleBuilder){
+        await this.scheduleBuilderService.createOrUpdate({
+          max_num_periods: cloneSchoolYear.ScheduleBuilder.max_num_periods,
+          custom_built: cloneSchoolYear.ScheduleBuilder.custom_built,
+          always_unlock: cloneSchoolYear.ScheduleBuilder.always_unlock,
+          parent_tooltip: cloneSchoolYear.ScheduleBuilder.parent_tooltip,
+          third_party_provider: cloneSchoolYear.ScheduleBuilder.third_party_provider,
+          split_enrollment: cloneSchoolYear.ScheduleBuilder.split_enrollment,
+          school_year_id: data.school_year_id,
+        });
+      }
+
     }
 
     const updatedRecord = await this.schoolYearsRepository.save(data);

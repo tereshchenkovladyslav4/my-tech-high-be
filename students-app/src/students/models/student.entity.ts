@@ -17,7 +17,9 @@ import { StudentRecord } from './student-record.entity';
 import { ResourceRequest } from './resource-request.entity';
 
 @ObjectType()
-@Directive('@key(fields: "student_id, parent_id, person_id,special_ed,diploma_seeking, testing_preference")')
+@Directive(
+  '@key(fields: "student_id, parent_id, person_id,special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id")',
+)
 @Entity('mth_student')
 export class Student extends BaseEntity {
   @Column()
@@ -64,6 +66,14 @@ export class Student extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   testing_preference: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  opt_out_form_signature_name: string;
+
+  @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
+  opt_out_form_signature_file_id: number;
 
   @OneToOne((type) => Parent)
   @JoinColumn({ name: 'parent_id' })

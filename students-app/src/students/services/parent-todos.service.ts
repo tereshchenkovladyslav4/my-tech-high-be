@@ -239,7 +239,7 @@ export class ParentToDosService {
       .innerJoin(
         Application,
         'application',
-        'application.student_id = `Student`.student_id AND (application.midyear_application = 0 AND application.school_year_id IN (:schoolYears) || application.midyear_application = 1 AND application.school_year_id IN (:midSchoolYears))',
+        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND (application.midyear_application = 0 AND application.school_year_id IN (:schoolYears) || application.midyear_application = 1 AND application.school_year_id IN (:midSchoolYears))",
         {
           schoolYears: scheduledActiveSchoolYears.length ? scheduledActiveSchoolYears : [0],
           midSchoolYears: scheduleActiveMidSchoolYears.length ? scheduleActiveMidSchoolYears : [0],

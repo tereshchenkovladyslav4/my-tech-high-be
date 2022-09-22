@@ -1,7 +1,7 @@
-import { Field, Float, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
-export class CreateOrUpdateAssessmentInput {
+export class AssessmentInput {
   @Field(() => Int, { nullable: true })
   assessment_id?: number;
 
@@ -22,16 +22,40 @@ export class CreateOrUpdateAssessmentInput {
 
   @Field(() => Boolean, { nullable: true })
   is_archived: boolean;
+}
+
+@InputType()
+export class AssessmentOptionInput {
+  @Field(() => Int, { nullable: true })
+  option_id: number;
+
+  @Field(() => Int, { nullable: true })
+  AssessmentId: number;
 
   @Field(() => String, { nullable: true })
-  option1: string;
+  label: string;
 
   @Field(() => String, { nullable: true })
-  option_list: string;
+  method: string;
+
+  @Field(() => Boolean, { nullable: true })
+  require_reason: boolean;
+
+  @Field(() => String, { nullable: true })
+  reason: string;
+}
+
+@InputType()
+export class CreateOrUpdateAssessmentInput {
+  @Field(() => AssessmentInput, { nullable: true })
+  assessment: AssessmentInput;
+
+  @Field(() => [AssessmentOptionInput], { nullable: true })
+  options: AssessmentOptionInput[];
 }
 
 @InputType()
 export class UpdateAssessmentInputs {
-  @Field((type) => [CreateOrUpdateAssessmentInput], { nullable: true })
-  updateAssessments: CreateOrUpdateAssessmentInput[];
+  @Field((type) => [AssessmentInput], { nullable: true })
+  updateAssessments: AssessmentInput[];
 }

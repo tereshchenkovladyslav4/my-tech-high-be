@@ -64,12 +64,21 @@ export class StudentsService {
 
   async update(updateStudentInput: UpdateStudentInput): Promise<boolean> {
     try {
-      const { student_id, special_ed, diploma_seeking, testing_preference } = updateStudentInput;
+      const {
+        student_id,
+        special_ed,
+        diploma_seeking,
+        testing_preference,
+        opt_out_form_signature_name,
+        opt_out_form_signature_file_id,
+      } = updateStudentInput;
       await this.studentsRepository.save({
         student_id,
         special_ed,
         diploma_seeking,
         testing_preference,
+        opt_out_form_signature_name,
+        opt_out_form_signature_file_id,
       });
       await this.studentStatusService.update(updateStudentInput);
       return true;

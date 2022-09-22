@@ -8,8 +8,11 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { AssessmentOption } from './assessment-option.entity';
 import { SchoolYear } from './schoolyear.entity';
+import { StudentAssessmentOption } from './student-assessment-option.entity';
 
 @ObjectType()
 @Directive('@key(fields: "assessment_id")')
@@ -44,14 +47,6 @@ export class Assessment extends BaseEntity {
   @Field(() => Boolean, { nullable: true })
   is_archived: boolean;
 
-  @Column({ type: 'varchar' })
-  @Field(() => String, { nullable: true })
-  option1: string;
-
-  @Column({ type: 'text' })
-  @Field(() => String, { nullable: true })
-  option_list: string;
-
   @CreateDateColumn()
   created_at!: Date;
 
@@ -62,4 +57,12 @@ export class Assessment extends BaseEntity {
   @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   @Field(() => SchoolYear, { nullable: true })
   SchoolYear: SchoolYear;
+
+  @OneToMany(() => AssessmentOption, (assessment) => assessment.Assessment)
+  @Field(() => [AssessmentOption], { nullable: true })
+  Options: AssessmentOption[];
+
+  @OneToMany(() => StudentAssessmentOption, (studentAssessmentOption) => studentAssessmentOption.Assessment)
+  @Field(() => [StudentAssessmentOption], { nullable: true })
+  StudentAssessments: StudentAssessmentOption[];
 }

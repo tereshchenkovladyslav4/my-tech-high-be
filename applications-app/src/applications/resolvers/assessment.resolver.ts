@@ -38,7 +38,7 @@ export class AssessmentResolver {
   async deleteResource(
     @Args({ name: 'assessment_id', type: () => ID })
     assessment_id: number,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.delete(assessment_id);
   }
 }

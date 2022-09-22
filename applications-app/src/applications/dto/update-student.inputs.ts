@@ -27,4 +27,10 @@ export class UpdateStudentInput {
 
   @Field(() => String, { nullable: true })
   date?: string;
+
+  @Field(() => String, { nullable: true })
+  opt_out_form_signature_name?: string;
+
+  @Field(() => Int, { nullable: true })
+  opt_out_form_signature_file_id?: number;
 }
