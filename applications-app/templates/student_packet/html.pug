@@ -89,45 +89,50 @@ head
       each group in contactInfo
         .div_group
           p.group_name #{group.group_name}
-        each question in group.questions
-          .list_item
-            if question.answer == 'Checked'
-              p.list_label !{question.question}
-            else
-              p.list_label !{question.question}:
-              p.list_value #{question.answer}
+        if group.questions
+          each question in group.questions
+            .list_item
+              if question.answer == 'Checked'
+                p.list_label !{question.question}
+              else
+                p.list_label !{question.question}:
+                p.list_value #{question.answer}
       
     .right_list
       each group in personalInfo
         .div_group
           p.group_name #{group.group_name}
-        each question in group.questions
-          .list_item
-            if question.answer == 'Checked'
-              p.list_label !{question.question}
-            else
-              p.list_label !{question.question}:
-              p.list_value #{question.answer}
+          if group.questions
+        if group.questions
+          each question in group.questions
+            .list_item
+              if question.answer == 'Checked'
+                p.list_label !{question.question}
+              else
+                p.list_label !{question.question}:
+                p.list_value #{question.answer}
       each group in educationInfo
         .div_group
           p.group_name #{group.group_name}
-        each question in group.questions
-          .list_item
-            if question.answer == 'Checked'
-              p.list_label !{question.question}
-            else
-              p.list_label !{question.question}:
-              p.list_value #{question.answer}
+        if group.questions
+          each question in group.questions
+            .list_item
+              if question.answer == 'Checked'
+                p.list_label !{question.question}
+              else
+                p.list_label !{question.question}:
+                p.list_value #{question.answer}
     .div_agree
-      each question in submissionInfo[0].questions
-        if question.answer == 'Checked'
-          p.text_align_center
-            | #{question.question}
-        else 
-          p.text_align_center
-            | #{question.question}
-          p.text_align_center
-            | #{question.answer}
+      if submissionInfo[0] && submissionInfo[0].questions
+        each question in submissionInfo[0].questions
+          if question.answer == 'Checked'
+            p.text_align_center
+              | #{question.question}
+          else 
+            p.text_align_center
+              | #{question.question}
+            p.text_align_center
+              | #{question.answer}
     .signature
       p.signature_item
         | #{signature_name}

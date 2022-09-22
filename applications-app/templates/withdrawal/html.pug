@@ -14,6 +14,10 @@ html(lang='en')
         font-size: 12px;
       }
 
+      .header {
+        padding: 0 32px;
+      }
+
       .header__logo img {
         height: 64px;
         display: block;
@@ -57,13 +61,13 @@ html(lang='en')
       .content_wrap(style={padding: '16px', 'font-weight': '500'})
         .basic-content(style={padding: '16px'})
           .content_list
-            .content_list__item(style={width: '40%'})
+            .content_list__item(style={width: '100%'})
               .label Student Name:
               .value #{studentName}
-            .content_list__item(style={width: '30%'})
+            .content_list__item(style={width: '60%'})
               .label Birthdate:
               .value #{birthdate}
-            .content_list__item(style={width: '30%'})
+            .content_list__item(style={width: '40%'})
               .label Grade:
               .value #{grades}
             .content_list__item(style={width: '60%'})
@@ -71,7 +75,7 @@ html(lang='en')
               .value #{address}
             .content_list__item(style={width: '40%'})
               .label Phone:
-              .value #{phone}
+              .value #{parentPhone}
             .content_list__item
               .label Effective Withdraw Date:
               .value #{dateEffective}
@@ -100,9 +104,8 @@ html(lang='en')
                       .label(style={'margin-left': '4px'})!=item.question
                     break
                   when 7
-                    .content_list__item
+                    .content_list__item(style={ '-webkit-justify-content': 'center' })
                       .label!=item.question
-                      .value #{item.response}
                     break
                   when 9
                     .content_list__item
@@ -129,7 +132,7 @@ html(lang='en')
           .content_list(style={border: 'solid 1px #A1A1A1'})
             .content_list__item For School Use Only
             .content_list__item(style={width: '30%'})
-              .label Register:
+              .label Registrar:
               .value
             .content_list__item(style={width: '30%'})
               .label Administrator:

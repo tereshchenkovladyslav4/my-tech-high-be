@@ -63,9 +63,7 @@ export class StudentStatusService {
     }
   }
 
-  async getAllCount(
-    schoolYearDataInput: SchoolYearDataInput,
-  ): Promise<SchoolYearData[]> {
+  async getAllCount(schoolYearDataInput: SchoolYearDataInput): Promise<SchoolYearData[]> {
     const queryRunner = await getConnection().createQueryRunner();
     const ParentResult = await queryRunner.query(
       `SELECT 
@@ -110,7 +108,7 @@ export class StudentStatusService {
         students.push({ status: 'Active', count: element.count });
         sped.push({ status: 'Active', count: element.sped });
         spedTotal += Number(element.sped || 0);
-      } else if (Number(element.status) === StudentStatusEnum.WITHDRAWAL) {
+      } else if (Number(element.status) === StudentStatusEnum.WITHDRAWN) {
         students.push({ status: 'Withdrawn', count: element.count });
         sped.push({ status: 'Withdrawn', count: element.sped });
       } else if (Number(element.status) === StudentStatusEnum.GRADUATED) {
@@ -130,7 +128,7 @@ export class StudentStatusService {
         parents.push({ status: 'Pending', count: element.count });
       } else if (Number(element.status) === StudentStatusEnum.ACTIVE) {
         parents.push({ status: 'Active', count: element.count });
-      } else if (Number(element.status) === StudentStatusEnum.WITHDRAWAL) {
+      } else if (Number(element.status) === StudentStatusEnum.WITHDRAWN) {
         parents.push({ status: 'Withdrawn', count: element.count });
       } else if (Number(element.status) === StudentStatusEnum.GRADUATED) {
         parents.push({ status: 'Graduated', count: element.count });
@@ -149,9 +147,7 @@ export class StudentStatusService {
       const found = sped.some((el) => el.status === status);
       if (!found) sped.push({ status: status, count: 0 });
     });
-    students.sort(
-      (a, b) => status.indexOf(a.status) - status.indexOf(b.status),
-    );
+    students.sort((a, b) => status.indexOf(a.status) - status.indexOf(b.status));
     parents.sort((a, b) => status.indexOf(a.status) - status.indexOf(b.status));
     sped.sort((a, b) => status.indexOf(a.status) - status.indexOf(b.status));
     const data = [

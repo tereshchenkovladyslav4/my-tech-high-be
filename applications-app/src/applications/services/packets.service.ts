@@ -1,4 +1,4 @@
-import { Injectable, forwardRef, Inject } from '@nestjs/common';
+import { Injectable, forwardRef, Inject, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets, getConnection } from 'typeorm';
 import { PacketsArgs } from '../dto/packets.args';
@@ -383,7 +383,6 @@ export class PacketsService {
           `DATE( DATE_ADD(applications.date_accepted, INTERVAL GREATEST( ( region.enrollment_packet_deadline_num_days - :reminderDate ), 0 ) DAY) ) = CURDATE()`,
           { reminderDate: reminder },
         )
-        .addGroupBy('packet.packet_id')
         //.andWhere('packet.deadline >= :startDate', { startDate: date })
         //.andWhere('packet.deadline < :toDate', { toDate: toDate })
         .getMany();
@@ -466,15 +465,53 @@ export class PacketsService {
     return true;
   }
 
+  insertInfoToArray(information: QuestionItem[], group_name: string, question: string, answer: string) {
+    if (information?.filter((item) => item.group_name == group_name)?.length > 0) {
+      information?.map((item) => {
+        if (item.group_name == group_name) {
+          item.questions.push({
+            question: question,
+            answer: answer,
+          });
+        }
+      });
+    } else {
+      information.push({
+        group_name: group_name,
+        questions: [
+          {
+            question: question,
+            answer: answer,
+          },
+        ],
+      });
+    }
+  }
+
   async generateStudentPacketPDF(param: StudentPacketPDFInput): Promise<boolean> {
     try {
       const { student_id, region_id } = param;
+
+      const contactInfo: QuestionItem[] = [];
+      const personalInfo: QuestionItem[] = [];
+      const educationInfo: QuestionItem[] = [];
+      const submissionInfo: QuestionItem[] = [];
+
       const studentInfo = await this.studentService.findOneById(student_id);
+      if (!studentInfo)
+        throw new ServiceUnavailableException(`Not found Student Informations for student: ${student_id}`);
+
       const packets = await this.findByStudent(studentInfo?.student_id);
+      if (!packets || packets.length == 0)
+        throw new ServiceUnavailableException(`Not found Student Packet Informations.for student: ${student_id}`);
       const packet = packets?.[packets?.length - 1];
+
       const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
+      if (!schoolYear) throw new ServiceUnavailableException(`Not found SchoolYear Info for student: ${student_id}.`);
+
       const yearbegin = Moment(schoolYear.date_begin).format('YYYY');
       const yearend = Moment(schoolYear.date_end).format('YYYY');
+
       const packetPdfInfo = {
         student: {
           ...studentInfo?.person,
@@ -495,10 +532,7 @@ export class PacketsService {
         address: { ...studentInfo?.person?.person_address?.address },
         school_year_id: studentInfo?.student_grade_level?.school_year_id,
       };
-      const contactInfo: QuestionItem[] = [];
-      const personalInfo: QuestionItem[] = [];
-      const educationInfo: QuestionItem[] = [];
-      const submissionInfo: QuestionItem[] = [];
+
       const queryRunner = await getConnection().createQueryRunner();
       const enrollmentQuestions = await queryRunner.query(`
         SELECT
@@ -514,6 +548,10 @@ export class PacketsService {
         ORDER BY questionTab.id, questionGroup.order, questions.order;
       `);
       queryRunner.release();
+
+      if (!enrollmentQuestions || enrollmentQuestions.length == 0)
+        throw new ServiceUnavailableException(`Not found Enrollment Questions for student: ${student_id}`);
+
       enrollmentQuestions?.map((question) => {
         if (!question?.group_name.includes('Instructions')) {
           const keyName = question.slug?.split('_')[0];
@@ -533,102 +571,25 @@ export class PacketsService {
               : question?.type == 3 && packetPdfInfo[keyName][fieldName]
               ? packetPdfInfo[keyName][fieldName]?.map((item) => item?.label)?.join(',')
               : packetPdfInfo[keyName][fieldName];
-          if (
-            question?.tab_name == 'Contact' &&
-            contactInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
-            answer
-          ) {
-            contactInfo?.map((item) => {
-              if (item.group_name == question?.group_name) {
-                item.questions.push({
-                  question: question?.question,
-                  answer: answer,
-                });
-              }
-            });
-          } else if (question?.tab_name == 'Contact' && answer) {
-            contactInfo.push({
-              group_name: question?.group_name,
-              questions: [
-                {
-                  question: question?.question,
-                  answer: answer,
-                },
-              ],
-            });
-          } else if (
-            question?.tab_name == 'Personal' &&
-            personalInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
-            answer
-          ) {
-            personalInfo?.map((item) => {
-              if (item.group_name == question?.group_name) {
-                item.questions.push({
-                  question: question?.question,
-                  answer: answer,
-                });
-              }
-            });
-          } else if (question?.tab_name == 'Personal' && answer) {
-            personalInfo.push({
-              group_name: question?.group_name,
-              questions: [
-                {
-                  question: question?.question,
-                  answer: answer,
-                },
-              ],
-            });
-          } else if (
-            question?.tab_name == 'Education' &&
-            educationInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
-            answer
-          ) {
-            educationInfo?.map((item) => {
-              if (item.group_name == question?.group_name) {
-                item.questions.push({
-                  question: question?.question,
-                  answer: answer,
-                });
-              }
-            });
-          } else if (question?.tab_name == 'Education' && answer) {
-            educationInfo.push({
-              group_name: question?.group_name,
-              questions: [
-                {
-                  question: question?.question,
-                  answer: answer,
-                },
-              ],
-            });
-          } else if (
-            question?.tab_name == 'Submission' &&
-            submissionInfo?.filter((item) => item.group_name == question?.group_name)?.length > 0 &&
-            answer
-          ) {
-            submissionInfo?.map((item) => {
-              if (item.group_name == question?.group_name) {
-                item.questions.push({
-                  question: question?.question,
-                  answer: answer,
-                });
-              }
-            });
-          } else if (question?.tab_name == 'Submission' && answer) {
-            submissionInfo.push({
-              group_name: question?.group_name,
-              questions: [
-                {
-                  question: question?.question,
-                  answer: answer,
-                },
-              ],
-            });
+
+          if (answer) {
+            if (question?.tab_name == 'Contact') {
+              this.insertInfoToArray(contactInfo, question?.group_name, question?.question, answer);
+            } else if (question?.tab_name == 'Personal') {
+              this.insertInfoToArray(personalInfo, question?.group_name, question?.question, answer);
+            } else if (question?.tab_name == 'Education') {
+              this.insertInfoToArray(educationInfo, question?.group_name, question?.question, answer);
+            } else if (question?.tab_name == 'Submission') {
+              this.insertInfoToArray(submissionInfo, question?.group_name, question?.question, answer);
+            }
           }
         }
       });
+
       const signatureFileInfo = await this.filesService.findOneById(packet?.signature_file_id);
+      if (!signatureFileInfo)
+        throw new ServiceUnavailableException(`Not found Signature File for student: ${student_id}.`);
+
       const pdfBuffer = await this.pdfService
         .toBuffer(PdfTemplate.STUDENT_PACKET, {
           locals: {
@@ -639,10 +600,6 @@ export class PacketsService {
             signature_date: Moment(packet?.date_submitted).format('MM/DD/YYYY'),
             signature_name: `${studentInfo?.parent?.person?.first_name} ${studentInfo?.parent?.person?.last_name}`,
             signature_url: signatureFileInfo?.signedUrl,
-          },
-          viewportSize: {
-            width: 50,
-            height: 50,
           },
         })
         .toPromise();
@@ -655,19 +612,15 @@ export class PacketsService {
         yearbegin,
       );
 
-      // const signedUrl = await this.s3Service.getObjectSignedUrl(uploadFile.item1);
-      // console.log(signedUrl);
       await this.studentRecordService.createStudentRecord(
         student_id,
-        schoolYear.RegionId,
+        region_id,
         uploadFile.file_id,
         StudentRecordFileKind.STUDENT_PACKET,
       );
-
       return true;
     } catch (err) {
-      console.log(err, 'err');
-      return false;
+      throw new ServiceUnavailableException(err, `${param}`);
     }
   }
 }

@@ -37,6 +37,7 @@ export class StudentRecordService {
       .leftJoinAndSelect('Student.grade_levels', 'grade_levels')
       .leftJoinAndSelect('StudentRecordFiles.File', 'File')
       .leftJoinAndSelect('Student.status', 'student_status')
+      .leftJoinAndSelect('Student.status_history', 'status_history')
       .where(`record.RegionId = ${region_id}`);
 
     const grades = [];
@@ -102,8 +103,14 @@ export class StudentRecordService {
       const statusList = JSON.parse(status);
       if (statusList.includes('Withdrawn')) {
         qb.andWhere('student_status.status = 2');
+      } else if (statusList.includes('Returning')) {
+        qb.andWhere(
+          '(student_status.status = 0 OR student_status.status = 1) AND status_history.student_id IS NOT NULL AND (status_history.status = 0 OR status_history.status = 1)',
+        );
+      } else if (statusList.includes('New')) {
+        qb.andWhere('(student_status.status = 0 OR student_status.status = 1) AND status_history.student_id IS NULL');
       } else {
-        qb.andWhere('student_status.status <> 2');
+        qb.andWhere('student_status.status = 0 OR student_status.status = 1');
       }
     }
 
@@ -131,7 +138,14 @@ export class StudentRecordService {
       // TO DO
     }
 
+    const specialEdList = [];
     if (special_ed) {
+      const temp = JSON.parse(special_ed);
+      if (temp?.length > 0) {
+        temp.forEach((item) => {
+          specialEdList.push(Number(item));
+        });
+      }
       // TO DO
     }
 
@@ -139,15 +153,10 @@ export class StudentRecordService {
       // TO DO
     }
 
-    const fileKinds = [];
+    let fileKinds = [];
 
     if (other) {
-      const fileKindList = JSON.parse(other);
-      fileKindList.map((item) => {
-        if (!fileKinds.includes(item)) {
-          fileKinds.push(item);
-        }
-      });
+      fileKinds = JSON.parse(other);
     }
 
     if (grades.length > 0) {
@@ -158,6 +167,10 @@ export class StudentRecordService {
       qb.andWhere('record.StudentId IN (:studentIds)', {
         studentIds: studentIds,
       });
+    }
+
+    if (specialEdList.length > 0) {
+      qb.andWhere('Student.special_ed IN (:specialEds)', { specialEds: specialEdList });
     }
 
     if (fileKinds.length > 0) {

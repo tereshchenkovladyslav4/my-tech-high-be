@@ -106,7 +106,8 @@ export class Student extends BaseEntity {
   @Field(() => [Withdrawal], { nullable: true })
   StudentWithdrawals: Withdrawal[];
 
-  @OneToMany((type) => StudentStatusHistory, (studentStatusHistory) => studentStatusHistory.student_id)
+  @OneToOne((type) => StudentStatusHistory, (studentStatusHistory) => studentStatusHistory.Student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status_history?: StudentStatusHistory[];
 
   @OneToMany((type) => StudentReenrollmentStatus, (studentReenrollmentStatus) => studentReenrollmentStatus.student_id)

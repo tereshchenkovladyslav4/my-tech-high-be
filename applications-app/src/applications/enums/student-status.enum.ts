@@ -4,7 +4,7 @@ export enum StudentStatusEnum {
   PENDING = 0,
   ACTIVE = 1,
   APPLIED = 5,
-  WITHDRAWAL = 2,
+  WITHDRAWN = 2,
   GRADUATED = 3,
 }
 

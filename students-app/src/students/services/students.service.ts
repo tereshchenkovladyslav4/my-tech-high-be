@@ -118,18 +118,18 @@ export class StudentsService {
             if (!grades.includes('K')) grades.push('K');
           }
         });
-      qb.andWhere(`grade_levels.grade_level IN (${grades.join(',')})`);
+      qb.andWhere(`grade_levels.grade_level IN (${grades.map((el) => `'${el}'`).join(',')})`);
     }
 
     const schoolDistrict = filter?.schoolDistrict || [];
     const hadFilterSchoolDistrict = schoolDistrict.length && !schoolDistrict.includes('all');
 
     if (hadFilterSchoolDistrict) {
-      qb.andWhere(`packets.school_district IN (${filter.schoolDistrict.join(',')})`);
+      qb.andWhere(`packets.school_district IN (${filter.schoolDistrict.map((el) => `'${el}'`).join(',')})`);
     }
 
     if (filter && filter.schoolOfEnrollments && filter.schoolOfEnrollments.length > 0) {
-      const filterSchoolOfEnrollments = filter.schoolOfEnrollments.join(',');
+      const filterSchoolOfEnrollments = filter.schoolOfEnrollments.map((el) => `'${el}'`).join(',');
       if (filter.schoolOfEnrollments.indexOf('unassigned') !== -1) {
         qb.andWhere(
           new Brackets((sub) => {
@@ -144,7 +144,7 @@ export class StudentsService {
     }
 
     if (filter && filter.previousSOE && filter.previousSOE.length > 0) {
-      const filterPreviousSOE = filter.previousSOE.join(',');
+      const filterPreviousSOE = filter.previousSOE.map((el) => `'${el}'`).join(',');
       if (filter.previousSOE.indexOf('unassigned') !== -1) {
         qb.andWhere(
           new Brackets((sub) => {
@@ -162,14 +162,14 @@ export class StudentsService {
       qb.andWhere(
         new Brackets((sub) => {
           sub
-            .orWhere(`person.first_name like '%${search}%'`)
-            .orWhere(`person.last_name like '%${search}%'`)
-            .orWhere(`p_person.first_name like '%${search}%'`)
-            .orWhere(`p_person.last_name like '%${search}%'`)
-            .orWhere(`address.city like '%${search}%'`)
-            .orWhere(`grade_levels.grade_level like '%${search}%'`)
-            .orWhere(`currentPartner.name like '%${search}%'`)
-            .orWhere(`previousPartner.name like '%${search}%'`);
+            .orWhere(`person.first_name like %${search}%$`)
+            .orWhere(`person.last_name like %${search}%`)
+            .orWhere(`p_person.first_name like %${search}%`)
+            .orWhere(`p_person.last_name like %${search}%`)
+            .orWhere(`address.city like %${search}%`)
+            .orWhere(`grade_levels.grade_level like %${search}%`)
+            .orWhere(`currentPartner.name like %${search}%`)
+            .orWhere(`previousPartner.name like %${search}%`);
         }),
       );
     }
@@ -201,7 +201,7 @@ export class StudentsService {
         sortParent = sortBy;
       }
       // RECHECK: parent name order rule
-      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, grade_levels_school_year_id=${filter.schoolYear} DESC`;
+      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, FIELD('grade_levels_school_year_id', ${filter.schoolYear}) DESC`;
       // Group sorting
       if (filter?.grades?.length) {
         const filterGrade = filter.grades;
@@ -213,8 +213,7 @@ export class StudentsService {
             });
           }
         }
-        const gradeOrders = filterGrade.map((filterValue) => `grade_levels_grade_level=${filterValue} DESC`).join(',');
-        orderByFilter += `, ${gradeOrders}`;
+        orderByFilter += `, FIELD('grade_levels_grade_level', ${filterGrade.join(',')}) DESC`;
       } else {
         if (sort) {
           if (_sortBy[0] === 'grade') {
@@ -222,6 +221,7 @@ export class StudentsService {
           }
         }
       }
+      // console.log(orderByFilter, 'orderByFilter');
 
       const [sqlAll] = allStudent.getQueryAndParameters();
       const [sql1] = qb.getQueryAndParameters();

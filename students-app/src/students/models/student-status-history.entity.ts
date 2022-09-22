@@ -1,5 +1,6 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, UpdateDateColumn, OneToOne } from 'typeorm';
+import { Student } from './student.entity';
 
 @ObjectType()
 @Directive('@key(fields: "student_id")')
@@ -20,4 +21,8 @@ export class StudentStatusHistory {
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
   date_updated?: Date;
+
+  @OneToOne((type) => Student, (student) => student.status_history)
+  @Field(() => Student, { nullable: true })
+  Student?: Student;
 }
