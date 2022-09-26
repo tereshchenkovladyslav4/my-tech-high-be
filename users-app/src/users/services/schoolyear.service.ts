@@ -93,22 +93,22 @@ export class SchoolYearsService {
       // Clone grades
       if (cloneSchoolYear?.grades) data.grades = cloneSchoolYear.grades;
       data.enrollment_packet = false;
-      // clone previous year's schedule builder 
-      if(cloneSchoolYear?.ScheduleBuilder as ScheduleBuilder){
-        await this.scheduleBuilderService.createOrUpdate({
-          max_num_periods: cloneSchoolYear.ScheduleBuilder.max_num_periods,
-          custom_built: cloneSchoolYear.ScheduleBuilder.custom_built,
-          always_unlock: cloneSchoolYear.ScheduleBuilder.always_unlock,
-          parent_tooltip: cloneSchoolYear.ScheduleBuilder.parent_tooltip,
-          third_party_provider: cloneSchoolYear.ScheduleBuilder.third_party_provider,
-          split_enrollment: cloneSchoolYear.ScheduleBuilder.split_enrollment,
-          school_year_id: data.school_year_id,
-        });
-      }
-
     }
 
     const updatedRecord = await this.schoolYearsRepository.save(data);
+
+    const previousScheduleBuilder = await this.scheduleBuilderService.findOneById(createSchoolYearInput.cloneSchoolYearId);
+    if(previousScheduleBuilder){
+        await this.scheduleBuilderService.createOrUpdate({
+          max_num_periods: previousScheduleBuilder.max_num_periods,
+          custom_built: previousScheduleBuilder.custom_built,
+          always_unlock: previousScheduleBuilder.always_unlock,
+          parent_tooltip: previousScheduleBuilder.parent_tooltip,
+          third_party_provider: previousScheduleBuilder.third_party_provider,
+          split_enrollment: previousScheduleBuilder.split_enrollment,
+          school_year_id: updatedRecord.school_year_id,
+      });
+    }
 
     let schoolPartnerList: SchoolPartner[] = [];
     if (previousYearId) {

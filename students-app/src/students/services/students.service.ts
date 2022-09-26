@@ -162,14 +162,14 @@ export class StudentsService {
       qb.andWhere(
         new Brackets((sub) => {
           sub
-            .orWhere(`person.first_name like %${search}%$`)
-            .orWhere(`person.last_name like %${search}%`)
-            .orWhere(`p_person.first_name like %${search}%`)
-            .orWhere(`p_person.last_name like %${search}%`)
-            .orWhere(`address.city like %${search}%`)
-            .orWhere(`grade_levels.grade_level like %${search}%`)
-            .orWhere(`currentPartner.name like %${search}%`)
-            .orWhere(`previousPartner.name like %${search}%`);
+            .orWhere(`person.first_name like '%${search}%'`)
+            .orWhere(`person.last_name like '%${search}%'`)
+            .orWhere(`p_person.first_name like '%${search}%'`)
+            .orWhere(`p_person.last_name like '%${search}%'`)
+            .orWhere(`address.city like '%${search}%'`)
+            .orWhere(`grade_levels.grade_level like '%${search}%'`)
+            .orWhere(`currentPartner.name like '%${search}%'`)
+            .orWhere(`previousPartner.name like '%${search}%'`);
         }),
       );
     }
@@ -201,7 +201,7 @@ export class StudentsService {
         sortParent = sortBy;
       }
       // RECHECK: parent name order rule
-      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, FIELD('grade_levels_school_year_id', ${filter.schoolYear}) DESC`;
+      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, grade_levels_school_year_id=${filter.schoolYear} DESC`;
       // Group sorting
       if (filter?.grades?.length) {
         const filterGrade = filter.grades;
@@ -213,7 +213,8 @@ export class StudentsService {
             });
           }
         }
-        orderByFilter += `, FIELD('grade_levels_grade_level', ${filterGrade.join(',')}) DESC`;
+        const gradeOrders = filterGrade.map((filterValue) => `grade_levels_grade_level=${filterValue} DESC`).join(',');
+        orderByFilter += `, ${gradeOrders}`;
       } else {
         if (sort) {
           if (_sortBy[0] === 'grade') {
@@ -221,7 +222,6 @@ export class StudentsService {
           }
         }
       }
-      // console.log(orderByFilter, 'orderByFilter');
 
       const [sqlAll] = allStudent.getQueryAndParameters();
       const [sql1] = qb.getQueryAndParameters();
