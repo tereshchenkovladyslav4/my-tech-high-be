@@ -98,6 +98,8 @@ import { AssessmentOptionService } from './services/assessment-option.service';
 import { StudentAssessmentService } from './services/student-assessment.service';
 import { AssessmentOption } from './models/assessment-option.entity';
 import { StudentAssessmentOption } from './models/student-assessment-option.entity';
+import { DiplomaAnswer } from './models/diploma-answer.entity';
+import { DiplomaAnswerService } from './services/diploma-answer.service';
 
 const servicesImports = [
   UsersService,
@@ -150,6 +152,7 @@ const servicesImports = [
   DiplomaService,
   AssessmentOptionService,
   StudentAssessmentService,
+  DiplomaAnswerService,
 ];
 
 @Global()
@@ -203,6 +206,7 @@ const servicesImports = [
       DiplomaQuestion,
       AssessmentOption,
       StudentAssessmentOption,
+      DiplomaAnswer,
     ]),
     PDFModule.register({
       view: {

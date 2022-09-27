@@ -45,6 +45,8 @@ import { SchoolPartnerService } from './services/school-partner.service';
 import { SchoolPartner } from '../models/school-partner.entity';
 import { ScheduleBuilderService } from './services/schedule-builder.service';
 import { ScheduleBuilder } from 'src/models/scheduler-builder.entity';
+import { DiplomaService } from './services/diploma.service';
+import { DiplomaQuestion } from 'src/models/diploma-question.entity';
 
 const RepoServices = [
   UsersService,
@@ -68,6 +70,7 @@ const RepoServices = [
   SchoolPartnerService,
   EmailRecordsService,
   ScheduleBuilderService,
+  DiplomaService,
 ];
 
 @Global()
@@ -101,6 +104,7 @@ const RepoServices = [
       SchoolPartner,
       EmailRecord,
       ScheduleBuilder,
+      DiplomaQuestion,
     ]),
   ],
   providers: RepoServices,

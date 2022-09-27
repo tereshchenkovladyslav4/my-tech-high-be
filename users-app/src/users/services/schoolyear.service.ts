@@ -7,6 +7,7 @@ import { Repository, LessThanOrEqual, MoreThanOrEqual, getConnection } from 'typ
 import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
+import { DiplomaService } from './diploma.service';
 import { RegionService } from './region/region.service';
 import { ScheduleBuilderService } from './schedule-builder.service';
 import { SchoolPartnerService } from './school-partner.service';
@@ -19,6 +20,7 @@ export class SchoolYearsService {
     private scheduleBuilderService: ScheduleBuilderService,
 
     private regionService: RegionService,
+    private diplomaService: DiplomaService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -97,16 +99,18 @@ export class SchoolYearsService {
 
     const updatedRecord = await this.schoolYearsRepository.save(data);
 
-    const previousScheduleBuilder = await this.scheduleBuilderService.findOneById(createSchoolYearInput.cloneSchoolYearId);
-    if(previousScheduleBuilder){
-        await this.scheduleBuilderService.createOrUpdate({
-          max_num_periods: previousScheduleBuilder.max_num_periods,
-          custom_built: previousScheduleBuilder.custom_built,
-          always_unlock: previousScheduleBuilder.always_unlock,
-          parent_tooltip: previousScheduleBuilder.parent_tooltip,
-          third_party_provider: previousScheduleBuilder.third_party_provider,
-          split_enrollment: previousScheduleBuilder.split_enrollment,
-          school_year_id: updatedRecord.school_year_id,
+    const previousScheduleBuilder = await this.scheduleBuilderService.findOneById(
+      createSchoolYearInput.cloneSchoolYearId,
+    );
+    if (previousScheduleBuilder) {
+      await this.scheduleBuilderService.createOrUpdate({
+        max_num_periods: previousScheduleBuilder.max_num_periods,
+        custom_built: previousScheduleBuilder.custom_built,
+        always_unlock: previousScheduleBuilder.always_unlock,
+        parent_tooltip: previousScheduleBuilder.parent_tooltip,
+        third_party_provider: previousScheduleBuilder.third_party_provider,
+        split_enrollment: previousScheduleBuilder.split_enrollment,
+        school_year_id: updatedRecord.school_year_id,
       });
     }
 
@@ -189,6 +193,14 @@ export class SchoolYearsService {
         );
       }
       queryRunner.release();
+    }
+
+    if (createSchoolYearInput.cloneSchoolYearId) {
+      // clone diploma seeking
+      await this.diplomaService.cloneDiplomaQuestion(
+        createSchoolYearInput.cloneSchoolYearId,
+        updatedRecord.school_year_id,
+      );
     }
     return updatedRecord;
   }

@@ -53,6 +53,7 @@ import { Assessment } from './models/assessment.entity';
 import { DiplomaResolver } from './resolvers/diploma.resolver';
 import { DiplomaQuestion } from './models/diploma-question.entity';
 import { StudentAssessmentResolver } from './resolvers/student-assessment.resolver';
+import { DiplomaAnswer } from './models/diploma-answer.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -117,6 +118,7 @@ const graphQLImports = [
           EmailRecord,
           ResourceLevel,
           DiplomaQuestion,
+          DiplomaAnswer,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),
