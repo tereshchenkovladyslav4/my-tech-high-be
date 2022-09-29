@@ -118,13 +118,13 @@ export class WithdrawalService {
         });
 
         if (emailTemplate) {
-          const setEmailBodyInfo = (student, school_year) => {
+          const setAdditionalLinksInfo = (content, student, school_year) => {
             const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
             const yearEnd = new Date(school_year.date_end).getFullYear().toString();
 
             const link = `${webAppUrl}/parent-link/withdrawal/${StudentId}`;
 
-            return emailTemplate.body
+            return content
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
@@ -135,11 +135,12 @@ export class WithdrawalService {
 
           const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id);
 
-          const body = setEmailBodyInfo(student, school_year);
+          const body = setAdditionalLinksInfo(emailTemplate.body, student, school_year);
+          const emailSubject = setAdditionalLinksInfo(emailTemplate.subject, student, school_year);
 
           await this.emailService.sendEmail({
             email: student.parent?.person?.email,
-            subject: emailTemplate.subject,
+            subject: emailSubject,
             content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
@@ -153,7 +154,7 @@ export class WithdrawalService {
           if (withdrawalResponse?.withdrawal_id) {
             await this.withdrawalEmailService.create({
               withdrawal_id: withdrawalResponse?.withdrawal_id,
-              subject: emailTemplate.subject,
+              subject: emailSubject,
               body: body,
               from_email: emailTemplate.from,
               created_at: new Date(),
@@ -446,7 +447,14 @@ export class WithdrawalService {
         const yearEnd = new Date(date_end).getFullYear().toString();
         await this.emailService.sendEmail({
           email: parent_email,
-          subject: email_subject,
+          subject: email_subject
+            .toString()
+            .replace(/\[STUDENT\]/g, student_name)
+            .replace(/\[PARENT\]/g, parent_name)
+            .replace(/\[YEAR\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`)
+            .replace(/\[Student\]/g, student_name)
+            .replace(/\[Parent\]/g, parent_name)
+            .replace(/\[Year\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`),
           content: email_body
             .toString()
             .replace(/\[STUDENT\]/g, student_name)
@@ -483,11 +491,11 @@ export class WithdrawalService {
       .whereInIds(withdrawal_ids)
       .getManyAndCount();
 
-    const setEmailBodyInfo = (student, school_year) => {
+    const setAdditionalLinksInfo = (content, student, school_year) => {
       const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearEnd = new Date(school_year.date_end).getFullYear().toString();
 
-      return body
+      return content
         .toString()
         .replace(/\[STUDENT\]/g, student.person.first_name)
         .replace(/\[PARENT\]/g, student.parent.person.first_name)
@@ -503,7 +511,8 @@ export class WithdrawalService {
       const temp = {
         withdrawal_id: item.withdrawal_id,
         email: item.Student.parent.person.email,
-        body: setEmailBodyInfo(item.Student, school_year),
+        body: setAdditionalLinksInfo(body, item.Student, school_year),
+        subject: setAdditionalLinksInfo(subject, item.Student, school_year),
       };
       emailBody.push(temp);
     });
@@ -512,7 +521,7 @@ export class WithdrawalService {
     emailBody.map(async (emailData) => {
       await this.emailService.sendEmail({
         email: emailData.email,
-        subject,
+        subject: emailData.subject,
         content: emailData.body,
         from: from || emailTemplate.from,
         bcc: emailTemplate.bcc,
@@ -524,7 +533,7 @@ export class WithdrawalService {
       emailBody.map(async (emailData) => {
         return await this.withdrawalEmailService.create({
           withdrawal_id: emailData.withdrawal_id,
-          subject: subject,
+          subject: emailData.subject,
           body: emailData.body,
           from_email: from || emailTemplate.from,
           created_at: new Date(),
@@ -652,11 +661,11 @@ export class WithdrawalService {
         }
       }
 
-      const setEmailBodyInfo = (student, school_year) => {
+      const setAdditionalLinksInfo = (content, student, school_year) => {
         const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
         const yearEnd = new Date(school_year.date_end).getFullYear().toString();
 
-        return body
+        return content
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
           .replace(/\[PARENT\]/g, student.parent.person.first_name)
@@ -667,18 +676,19 @@ export class WithdrawalService {
       };
       const emailBody = [];
       const school_year = await this.schoolYearService.findOneById(withdraw.Student.grade_levels[0].school_year_id);
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
       const temp = {
         withdrawal_id: withdraw.withdrawal_id,
         email: withdraw.Student.parent.person.email,
-        body: setEmailBodyInfo(withdraw.Student, school_year),
+        body: setAdditionalLinksInfo(body, withdraw.Student, school_year),
+        subject: setAdditionalLinksInfo(emailTemplate.subject, withdraw.Student, school_year),
       };
       emailBody.push(temp);
-      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
 
       emailBody.map(async (emailData) => {
         await this.emailService.sendEmail({
           email: emailData.email,
-          subject: emailTemplate.subject,
+          subject: emailData.subject,
           content: emailData.body,
           from: emailTemplate.from,
           bcc: emailTemplate.bcc,
@@ -690,7 +700,7 @@ export class WithdrawalService {
         emailBody.map(async (emailData) => {
           return await this.withdrawalEmailService.create({
             withdrawal_id: emailData.withdrawal_id,
-            subject: emailTemplate.subject,
+            subject: emailData.subject,
             body: emailData.body,
             from_email: emailTemplate.from,
             created_at: new Date(),

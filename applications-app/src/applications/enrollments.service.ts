@@ -199,6 +199,26 @@ export class EnrollmentsService {
               )
               .replace(/\[DEADLINE\]/g, `${Moment().format('MM/DD/yy')}`);
           };
+
+          const setEmailSubjectInfo = (student, school_year) => {
+            const yearbegin = new Date(school_year.date_begin)
+              .getFullYear()
+              .toString();
+            const yearend = new Date(school_year.date_end)
+              .getFullYear()
+              .toString();
+
+            return emailTemplate.subject
+              .toString()
+              .replace(/\[STUDENT\]/g, student.person.first_name)
+              .replace(/\[PARENT\]/g, student.parent.person.first_name)
+              .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+              .replace(
+                /\[APPLICATION_YEAR\]/g,
+                `${yearbegin}-${yearend.substring(2, 4)}`,
+              )
+              .replace(/\[DEADLINE\]/g, `${Moment().format('MM/DD/yy')}`);
+          };
           const gradeLevels = await this.studentGradeLevelsService.forStudents(
             tmp.student_id,
           );
@@ -206,10 +226,11 @@ export class EnrollmentsService {
             school_year_id || gradeLevels[0].school_year_id,
           );
           const body = setEmailBodyInfo(studentPerson, school_year);
+          const emailSubject = setEmailSubjectInfo(studentPerson, school_year);
 
           await this.sesEmailService.sendEmail({
             email: studentPerson.parent?.person?.email,
-            subject: emailTemplate.subject,
+            subject: emailSubject,
             content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
@@ -764,24 +785,25 @@ export class EnrollmentsService {
                       const parent = packet.student.parent.person;
                       const school_year = packet.student.applications[0].school_year
                       const email = packet.student.parent.person.email
-                      const setEmailBodyInfo = () => {
+                      const setAdditionalLinksInfo = (content) => {
                         const yearbegin = new Date(school_year.date_begin)
                           .getFullYear()
                           .toString();
                         const yearend = new Date(school_year.date_end)
                           .getFullYear()
                           .toString();
-                        const emailBody = remind.body || emailTemplate.body
-                        const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`
-                        return emailBody
+
+                        const yearText = school_year.midyear_application
+                          ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+                          : `${yearbegin}-${yearend.substring(2, 4)}`;
+                        
+                        const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`;
+                        return content
                           .toString()
                           .replace(/\[STUDENT\]/g, student.first_name)
                           .replace(/\[PARENT\]/g, parent.first_name)
-                          .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-                          .replace(
-                            /\[APPLICATION_YEAR\]/g,
-                            `${yearbegin}-${yearend.substring(2, 4)}`,
-                          )
+                          .replace(/\[YEAR\]/g, yearText)
+                          .replace(/\[APPLICATION_YEAR\]/g, yearText)
                           .replace(
                             /\[DEADLINE\]/g,
                             `${Moment(packet.deadline).format('MM/DD/yy')}`,
@@ -791,11 +813,12 @@ export class EnrollmentsService {
                             `<a href='${link}'>${link}</a>`,
                           );
                       };
-                      const body = setEmailBodyInfo();
+                      const body = setAdditionalLinksInfo(remind.body || emailTemplate.body);
+                      const emailSubject = setAdditionalLinksInfo(remind.subject || emailTemplate.subject);
   
                       await this.sesEmailService.sendEmail({
                         email: email,
-                        subject: remind.subject || emailTemplate.subject,
+                        subject: emailSubject,
                         content: body,
                         bcc: emailTemplate.bcc,
                         from: emailTemplate.from,

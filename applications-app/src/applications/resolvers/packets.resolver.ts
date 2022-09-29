@@ -127,13 +127,16 @@ export class PacketsResolver {
 
   @Mutation((returns) => ResponseDTO, { name: 'sendEmail' })
   async sendEmail(@Args('emailInput') emailInput: EmailInput): Promise<ResponseDTO> {
-    const { content } = emailInput;
+    const { content, subject } = emailInput;
     const webAppUrl = process.env.WEB_APP_URL;
     const body = content.toString().replace(/\[HOST\]/g, webAppUrl);
+    const emailSubject = subject.toString().replace(/\[HOST\]/g, webAppUrl);
     delete emailInput.content;
+    delete emailInput.subject;
     const emailData = {
       ...emailInput,
       content: body,
+      subject: emailSubject,
     };
     return await this.emailService.sendEmail(emailData);
   }

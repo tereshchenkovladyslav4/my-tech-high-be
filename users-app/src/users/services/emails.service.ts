@@ -57,7 +57,12 @@ export class EmailsService {
         '[LINK]',
         `<p><a href="${webAppUrl}/confirm/?token=${token}">${webAppUrl}/confirm</a><br></p>`,
       );
-      subject = template.subject;
+      subject = template.subject.toString();
+      subject = subject.replace('[USER]', response[0].first_name);
+      subject = subject.replace(
+        '[LINK]',
+        `<p><a href="${webAppUrl}/confirm/?token=${token}">${webAppUrl}/confirm</a><br></p>`,
+      );
     }
     const result = await this.SESService.sendEmail(
       recipientEmail,
@@ -121,7 +126,12 @@ export class EmailsService {
         '[LINK]',
         `<p><a href="${webAppUrl}/email-verification/?token=${token}">${webAppUrl}/email-verification</a><br></p>`,
       );
-      subject = template.subject;
+      subject = template.subject.toString();
+      subject = subject.replace('[USER]', response[0].first_name);
+      subject = subject.replace(
+        '[LINK]',
+        `<p><a href="${webAppUrl}/email-verification/?token=${token}">${webAppUrl}/email-verification</a><br></p>`,
+      );
     }
 
     const result = await this.SESService.sendEmail(

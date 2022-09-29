@@ -52,15 +52,18 @@ export class EmailsService {
     let content = '<p>Did you forget your password?</p>'
 
     if (template && response.length > 0) {
-      content = template.body.toString()
-      console.log('This is the response')
-      console.log(response)
+      content = template.body.toString()      
       content = content.replace('[USER]', response[0].firstName)
       content = content.replace(
         '[LINK]',
         `<p><a href="${webAppUrl}/reset-password/?token=${token}">${webAppUrl}/reset-password</a><br></p>`
       )
-      subject = template.subject
+      subject = template.subject.toString()
+      subject = subject.replace('[USER]', response[0].firstName)
+      subject = subject.replace(
+        '[LINK]',
+        `<p><a href="${webAppUrl}/reset-password/?token=${token}">${webAppUrl}/reset-password</a><br></p>`
+      )
     }
     const result = await this.SESService.sendEmail(
       recipientEmail,
@@ -182,7 +185,12 @@ export class EmailsService {
         `<p><a href="${webAppUrl}/confirm/?token=${token}">${webAppUrl}/confirm</a><br></p>`
       )
 
-      subject = template.subject
+      subject = template.subject.toString()
+      subject = subject.replace('[USER]', response[0].firstName)
+      subject = subject.replace(
+        '[LINK]',
+        `<p><a href="${webAppUrl}/confirm/?token=${token}">${webAppUrl}/confirm</a><br></p>`
+      )
     }
     const result = await this.SESService.sendEmail(
       recipientEmail,

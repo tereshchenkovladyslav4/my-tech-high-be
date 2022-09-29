@@ -261,11 +261,11 @@ export class PacketsService {
       .whereInIds(application_ids)
       .getManyAndCount();
 
-    const setEmailBodyInfo = (student, school_year) => {
+    const setAdditionalLinksInfo = (content, student, school_year) => {
       const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
 
-      return body
+      return content
         .toString()
         .replace(/\[STUDENT\]/g, student.person.first_name)
         .replace(/\[PARENT\]/g, student.parent.person.first_name)
@@ -281,7 +281,8 @@ export class PacketsService {
       const temp = {
         packet_id: item.packet_id,
         email: item.student.parent.person.email,
-        body: setEmailBodyInfo(item.student, school_year),
+        body: setAdditionalLinksInfo(body, item.student, school_year),
+        subject: setAdditionalLinksInfo(subject, item.student, school_year),
       };
       emailBody.push(temp);
     });
@@ -292,7 +293,7 @@ export class PacketsService {
     emailBody.map(async (emailData) => {
       const result = await this.sesEmailService.sendEmail({
         email: emailData.email,
-        subject,
+        subject: emailData.subject,
         content: emailData.body,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,

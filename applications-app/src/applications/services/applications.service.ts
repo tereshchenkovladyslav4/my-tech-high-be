@@ -106,9 +106,7 @@ export class ApplicationsService {
     };
   }
 
-  async findAll(
-    applicationsArgs: ApplicationsArgs,
-  ): Promise<Pagination<Application>> {
+  async findAll(applicationsArgs: ApplicationsArgs): Promise<Pagination<Application>> {
     const { skip, take, sort, filter, search, region_id } = applicationsArgs;
     const _sortBy = sort.split('|');
     const userEmails = this.applicationEmailsService.findByOrder();
@@ -123,10 +121,7 @@ export class ApplicationsService {
       .leftJoinAndSelect('p_person.email_verifier', 'email_verifier')
       .leftJoinAndSelect('application.school_year', 'school_year')
       .leftJoinAndSelect('application.application_emails', 'application_emails')
-      .leftJoinAndSelect(
-        'application.application_emails',
-        '(' + userEmails + ')',
-      )
+      .leftJoinAndSelect('application.application_emails', '(' + userEmails + ')')
 
       // .leftJoinAndSelect(
       //   qb => qb
@@ -474,7 +469,7 @@ export class ApplicationsService {
         }
 
         if (emailTemplate) {
-          const setEmailBodyInfo = (student, school_year) => {
+          const setAdditionalLinksInfo = (content, student, school_year) => {
             const yearbegin = new Date(school_year.date_begin)
               .getFullYear()
               .toString();
@@ -485,7 +480,7 @@ export class ApplicationsService {
               ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
               : `${yearbegin}-${yearend.substring(2, 4)}`;
 
-            return emailTemplate.body
+            return content
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
@@ -496,11 +491,12 @@ export class ApplicationsService {
                 `${Moment.utc(UTCDeadline).format('MM/DD/yy')}`,
               );
           };
-          const body = setEmailBodyInfo(student, school_year);
+          const body = setAdditionalLinksInfo(emailTemplate.body, student, school_year);
+          const emailSubject= setAdditionalLinksInfo(emailTemplate.subject, student, school_year);
 
           await this.sesEmailService.sendEmail({
             email: student.parent?.person?.email,
-            subject: emailTemplate.subject,
+            subject: emailSubject,
             content: body,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
@@ -562,15 +558,34 @@ export class ApplicationsService {
         .toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
 
+      const yearText = school_year.midyear_application
+        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+        : `${yearbegin}-${yearend.substring(2, 4)}`;
+
       return emailTemplate.body
         .toString()
         .replace(/\[STUDENT\]/g, student.person?.first_name)
         .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
-        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-        .replace(
-          /\[APPLICATION_YEAR\]/g,
-          `${yearbegin}-${yearend.substring(2, 4)}`,
-        );
+        .replace(/\[YEAR\]/g, yearText)
+        .replace(/\[APPLICATION_YEAR\]/g, yearText);
+    };
+
+    const setEmailSubjectInfo = (student, school_year) => {
+      const yearbegin = new Date(school_year.date_begin)
+        .getFullYear()
+        .toString();
+      const yearend = new Date(school_year.date_end).getFullYear().toString();
+
+      const yearText = school_year.midyear_application
+        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+        : `${yearbegin}-${yearend.substring(2, 4)}`;
+
+      return emailTemplate.subject
+        .toString()
+        .replace(/\[STUDENT\]/g, student.person?.first_name)
+        .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
+        .replace(/\[YEAR\]/g, yearText)
+        .replace(/\[APPLICATION_YEAR\]/g, yearText);
     };
 
     for (let index = 0; index < results.length; index++) {
@@ -582,10 +597,11 @@ export class ApplicationsService {
         gradeLevels[0].school_year_id,
       );
       const emailBody = setEmailBodyInfo(item.student, school_year);
+      const emailSubject = setEmailSubjectInfo(item.student, school_year);
 
       const result = await this.sesEmailService.sendEmail({
         email: item.student.parent.person.email,
-        subject,
+        subject: emailSubject,
         content: emailBody,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,

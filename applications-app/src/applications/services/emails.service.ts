@@ -47,21 +47,14 @@ export class EmailsService {
     let settings = [];
     const webAppUrl = process.env.WEB_APP_URL;
 
-    const regions: UserRegion[] =
-      await this.userRegionService.findUserRegionByUserId(
-        emailVerifier.user_id,
-      );
+    const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(emailVerifier.user_id);
 
-    var region_id = 1;
+    let region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate =
-      await this.emailTemplateService.findByTemplateAndRegion(
-        'Email Verification',
-        region_id,
-      );
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Email Verification', region_id);
 
     // const siteSettings = this.coreSettingsService.getSiteSettings();
 
@@ -73,15 +66,10 @@ export class EmailsService {
     // console.log( "settings: ", settings );
     const recipientEmail = emailInput.recipients || emailVerifier.email;
     const emailVerificationLink = webAppUrl + '/confirm/?token=' + token;
-    const link =
-      '<a href="' +
-      emailVerificationLink +
-      '">' +
-      webAppUrl +
-      '/confirm' +
-      '</a>';
+    const link = '<a href="' + emailVerificationLink + '">' + webAppUrl + '/confirm' + '</a>';
 
     let content = '';
+    let subject = emailTemplate?.subject;
 
     if (emailTemplate) {
       const setEmailBodyInfo = (user) => {
@@ -91,17 +79,23 @@ export class EmailsService {
           .replace(/\[LINK\]/g, link);
       };
 
-      const recipient: User = await this.usersService.findOneByEmail(
-        recipientEmail,
-      );
+      const setEmailSubjectInfo = (user) => {
+        return emailTemplate.subject
+          .toString()
+          .replace(/\[USER\]/g, user.firstName)
+          .replace(/\[LINK\]/g, link);
+      };
+
+      const recipient: User = await this.usersService.findOneByEmail(recipientEmail);
       if (recipient) {
         content = setEmailBodyInfo(recipient);
+        subject = setEmailSubjectInfo(recipient);
       }
     }
 
     const result = await this.SESService.sendEmail(
       recipientEmail,
-      emailTemplate?.subject,
+      subject,
       content,
       emailTemplate?.bcc,
       emailTemplate?.from,
@@ -111,7 +105,7 @@ export class EmailsService {
 
     // Add Email Records
     await this.emailRecordsService.create({
-      subject: emailTemplate?.subject,
+      subject: subject,
       body: content,
       to_email: recipientEmail,
       from_email: emailTemplate?.from,
@@ -208,50 +202,43 @@ export class EmailsService {
   // }
 
   async sendAnnouncementEmail(announcementEmail: AnnouncementEmailArgs) {
-    const {
-      user,
-      body,
-      sender,
-      subject,
-      announcementId,
-    } = announcementEmail;
+    const { user, body, sender, subject, announcementId } = announcementEmail;
 
-      if (user.user_id) {
-        const currUserAnnouncement =
-          await this.userAnnouncementService.findById({
-            announcementId,
-            userId: user.user_id,
+    if (user.user_id) {
+      const currUserAnnouncement =
+        await this.userAnnouncementService.findById({
+          announcementId,
+          userId: user.user_id,
+        });
+      if (currUserAnnouncement) {
+        await this.userAnnouncementService.save({
+          AnnouncementId: announcementId,
+          user_id: user.user_id,
+          status: 'Unread',
+          id: currUserAnnouncement.id,
+        });
+      } else {
+        try {
+          await this.sendEmail({
+            email: user.email,
+            subject,
+            content: body,
+            from: sender,
           });
-        if (currUserAnnouncement) {
-          await this.userAnnouncementService.save({
-            AnnouncementId: announcementId,
-            user_id: user.user_id,
-            status: 'Unread',
-            id: currUserAnnouncement.id,
-          });
-        } else {
-          try {
-            await this.sendEmail({
-              email: user.email,
-              subject,
-              content: body,
-              from: sender,
-            });
-          } catch (error) {
-            console.log(error, 'Email Error');
-          }
-          await this.userAnnouncementService.save({
-            AnnouncementId: announcementId,
-            user_id: user.user_id,
-            status: 'Unread',
-          });
+        } catch (error) {
+          console.log(error, 'Email Error');
         }
+        await this.userAnnouncementService.save({
+          AnnouncementId: announcementId,
+          user_id: user.user_id,
+          status: 'Unread',
+        });
       }
+    }
   }
 
   async sendEmail(emailInput: EmailInput): Promise<ResponseDTO> {
-    const { email, subject, content, bcc, from, template_name, region_id } =
-      emailInput;
+    const { email, subject, content, bcc, from, template_name, region_id } = emailInput;
 
     const result = await this.SESService.sendEmail(
       email,
