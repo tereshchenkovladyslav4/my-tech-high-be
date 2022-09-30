@@ -213,7 +213,9 @@ export class StudentsService {
             });
           }
         }
-        const gradeOrders = filterGrade.map((filterValue) => `grade_levels_grade_level=${filterValue} DESC`).join(',');
+        const gradeOrders = filterGrade
+          .map((filterValue) => `grade_levels_grade_level='${filterValue}' DESC`)
+          .join(',');
         orderByFilter += `, ${gradeOrders}`;
       } else {
         if (sort) {

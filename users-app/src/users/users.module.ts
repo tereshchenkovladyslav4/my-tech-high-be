@@ -18,6 +18,7 @@ import { QuestionResolver } from './resolvers/question.resolver';
 import { SchoolPartnerResolver } from './resolvers/school-partner.resolver';
 import { SchoolPartner } from '../models/school-partner.entity';
 import { ScheduleBuilderResolver } from './resolvers/schedule-builder.resolver';
+import { PeriodResolver } from './resolvers/period.resolver';
 
 const graphQLImports = [
   UsersResolver,
@@ -34,6 +35,7 @@ const graphQLImports = [
   QuestionResolver,
   SchoolPartnerResolver,
   ScheduleBuilderResolver,
+  PeriodResolver,
 ];
 
 @Module({

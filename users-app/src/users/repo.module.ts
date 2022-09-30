@@ -47,6 +47,8 @@ import { ScheduleBuilderService } from './services/schedule-builder.service';
 import { ScheduleBuilder } from 'src/models/scheduler-builder.entity';
 import { DiplomaService } from './services/diploma.service';
 import { DiplomaQuestion } from 'src/models/diploma-question.entity';
+import { Period } from 'src/models/period.entity';
+import { PeriodService } from './services/period.service';
 
 const RepoServices = [
   UsersService,
@@ -71,6 +73,7 @@ const RepoServices = [
   EmailRecordsService,
   ScheduleBuilderService,
   DiplomaService,
+  PeriodService,
 ];
 
 @Global()
@@ -105,6 +108,7 @@ const RepoServices = [
       EmailRecord,
       ScheduleBuilder,
       DiplomaQuestion,
+      Period,
     ]),
   ],
   providers: RepoServices,

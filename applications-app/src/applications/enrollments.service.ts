@@ -776,15 +776,17 @@ export class EnrollmentsService {
                     const pack_ids = Object.keys(MailData);
                     const duplicate = pack_ids.map((b) => {   
                       if(parseInt(b) == packet.packet_id && MailData[b] == remind.reminder_id) { return true }})
-                    if(!duplicate.includes(true)) {
+                    if (!duplicate.includes(true)) {
                       MailData[packet.packet_id] = remind.reminder_id;
                       // <------------------------*-------------------------------->
-                      
+
                       const webAppUrl = process.env.WEB_APP_URL;
                       const student = packet.student.person;
                       const parent = packet.student.parent.person;
-                      const school_year = packet.student.applications[0].school_year
-                      const email = packet.student.parent.person.email
+                      const school_year = packet.student.applications[0].school_year;
+                      const currApplication = packet.student.applications[0];
+                      const email = packet.student.parent.person.email;
+
                       const setAdditionalLinksInfo = (content) => {
                         const yearbegin = new Date(school_year.date_begin)
                           .getFullYear()
@@ -793,10 +795,10 @@ export class EnrollmentsService {
                           .getFullYear()
                           .toString();
 
-                        const yearText = school_year.midyear_application
+                        const yearText = currApplication.midyear_application
                           ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
                           : `${yearbegin}-${yearend.substring(2, 4)}`;
-                        
+
                         const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`;
                         return content
                           .toString()
@@ -813,9 +815,10 @@ export class EnrollmentsService {
                             `<a href='${link}'>${link}</a>`,
                           );
                       };
+
                       const body = setAdditionalLinksInfo(remind.body || emailTemplate.body);
                       const emailSubject = setAdditionalLinksInfo(remind.subject || emailTemplate.subject);
-  
+
                       await this.sesEmailService.sendEmail({
                         email: email,
                         subject: emailSubject,
