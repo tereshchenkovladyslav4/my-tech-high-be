@@ -46,6 +46,20 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-prod
 
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Production Failed!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ failure() || cancelled() }}
+
   build-authentication-service:
     name: Build Authentication Service
     runs-on: ubuntu-latest
@@ -74,6 +88,20 @@ jobs:
           ECS_CLUSTER: infocenter-v2-be--prod
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-prod
+
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Production Failed!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ failure() || cancelled() }}
 
   build-students-service:
     name: Build Students Service
@@ -104,6 +132,20 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-prod
 
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Production Failed!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ failure() || cancelled() }}
+
   build-users-service:
     name: Build Users Service
     runs-on: ubuntu-latest
@@ -132,6 +174,20 @@ jobs:
           ECS_CLUSTER: infocenter-v2-be--prod
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-prod
+
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Production Failed!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ failure() || cancelled() }}
 
   build-media-service:
     name: Build Media Service
@@ -162,6 +218,20 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-prod
 
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Production Failed!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ failure() || cancelled() }}
+
   build-gateway-service:
     name: Build Gateway Service
     runs-on: ubuntu-latest
@@ -191,3 +261,44 @@ jobs:
           ECS_CLUSTER: infocenter-v2-be--prod
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-prod
+
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Production Failed!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ failure() || cancelled() }}
+
+  send-slack-success-message:
+    name: Send Slack Success Message
+    runs-on: ubuntu-latest
+    needs:
+      [
+        generate-tag,
+        build-application-service,
+        build-authentication-service,
+        build-students-service,
+        build-users-service,
+        build-gateway-service,
+        build-media-service,
+      ]
+    steps:
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Production Successful!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
