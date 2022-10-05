@@ -82,4 +82,10 @@ export class UpdateSchoolYearInput {
 
   @Field(() => String, { nullable: true })
   midyear_schedule_close?: string;
+
+  @Field(() => String, { nullable: true })
+  homeroom_resource_open?: string;
+
+  @Field(() => String, { nullable: true })
+  homeroom_resource_close?: string;
 }

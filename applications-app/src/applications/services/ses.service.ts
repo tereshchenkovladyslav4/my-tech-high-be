@@ -23,6 +23,7 @@ export class SESService {
     const BccAddresses = bcc
       ? bcc.replace(/\s+/g, '').split(';').join(',').split(',')
       : undefined;
+      
     let params = {
       Source: from
         ? from

@@ -1,5 +1,6 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, JoinColumn, ManyToOne } from 'typeorm';
+import { Region } from './region.entity';
 
 @ObjectType()
 @Entity({ name: 'mth_immunization_settings' })
@@ -7,78 +8,82 @@ export class ImmunizationSettings extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  id?: number
+  id?: number;
+
+  @Column()
+  @Field(() => Int, { nullable: true })
+  region_id: number;
 
   @Column()
   @Field(() => String, { nullable: true })
-  title?: string
+  title?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
-  min_grade_level?: string
+  min_grade_level?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
-  max_grade_level?: string
+  max_grade_level?: string;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  min_school_year_required?: number
+  min_school_year_required?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  max_school_year_required?: number
+  max_school_year_required?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  immunity_allowed?: number
+  immunity_allowed?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  exempt_update?: number
+  exempt_update?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
-  level_exempt_update?: string
+  level_exempt_update?: string;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  consecutive_vaccine?: number
+  consecutive_vaccine?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  min_spacing_interval?: number
+  min_spacing_interval?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  min_spacing_date?: number
+  min_spacing_date?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  max_spacing_interval?: number
+  max_spacing_interval?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  max_spacing_date?: number
+  max_spacing_date?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
-  email_update_template?: string
+  email_update_template?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
-  date_created?: string
+  date_created?: string;
 
   @Column()
-  date_updated?: string
+  date_updated?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
-  tooltip?: string
+  tooltip?: string;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  auto_populate_date_from?: number
+  auto_populate_date_from?: number;
 
   @Column()
   @Field(() => Boolean)
@@ -95,4 +100,7 @@ export class ImmunizationSettings extends BaseEntity {
   @Field(() => Boolean)
   is_deleted?: boolean;
 
+  @ManyToOne(() => Region, (region) => region.ImmunizationSettings)
+  @JoinColumn([{ name: 'region_id', referencedColumnName: 'id' }])
+  Region: Region;
 }

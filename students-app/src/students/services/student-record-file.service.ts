@@ -10,9 +10,7 @@ export class StudentRecordFileService {
     private readonly repo: Repository<StudentRecordFile>,
   ) {}
 
-  async save(
-    createStudentRecordFileInput: StudentRecordFileInput,
-  ): Promise<StudentRecordFile> {
+  async save(createStudentRecordFileInput: StudentRecordFileInput): Promise<StudentRecordFile> {
     try {
       const result = await this.repo.save(createStudentRecordFileInput);
       return result;

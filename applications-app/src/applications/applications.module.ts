@@ -54,6 +54,13 @@ import { DiplomaResolver } from './resolvers/diploma.resolver';
 import { DiplomaQuestion } from './models/diploma-question.entity';
 import { StudentAssessmentResolver } from './resolvers/student-assessment.resolver';
 import { DiplomaAnswer } from './models/diploma-answer.entity';
+import { SubjectResolver } from './resolvers/subject.resolver';
+import { Period } from './models/period.entity';
+import { Title } from './models/title.entity';
+import { Subject } from './models/subject.entity';
+import { SubjectPeriod } from './models/subject-period.entity';
+import { PeriodResolver } from './resolvers/period.resolver';
+import { TitleResolver } from './resolvers/title.resolver';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -76,6 +83,9 @@ const graphQLImports = [
   EmailRecordResolver,
   DiplomaResolver,
   StudentAssessmentResolver,
+  SubjectResolver,
+  PeriodResolver,
+  TitleResolver,
 ];
 @Module({
   imports: [
@@ -119,6 +129,11 @@ const graphQLImports = [
           ResourceLevel,
           DiplomaQuestion,
           DiplomaAnswer,
+          DiplomaQuestion,
+          Period,
+          Title,
+          Subject,
+          SubjectPeriod,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

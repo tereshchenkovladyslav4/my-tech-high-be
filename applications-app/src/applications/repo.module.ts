@@ -85,7 +85,6 @@ import { ResourceService } from './services/resource.service';
 import { Resource } from './models/resource.entity';
 import { SchoolEnrollment } from './models/school-enrollment.entity';
 import { EmailRecord } from './models/email-record.entity';
-import { PDFModule } from '@t00nday/nestjs-pdf';
 import { StudentRecordService } from './services/student-record.service';
 import { Role } from './models/role.entity';
 import { ResourceLevelService } from './services/resource-level.service';
@@ -98,8 +97,16 @@ import { AssessmentOptionService } from './services/assessment-option.service';
 import { StudentAssessmentService } from './services/student-assessment.service';
 import { AssessmentOption } from './models/assessment-option.entity';
 import { StudentAssessmentOption } from './models/student-assessment-option.entity';
+import { PDFService } from './services/pdf.service';
 import { DiplomaAnswer } from './models/diploma-answer.entity';
 import { DiplomaAnswerService } from './services/diploma-answer.service';
+import { Period } from './models/period.entity';
+import { Title } from './models/title.entity';
+import { Subject } from './models/subject.entity';
+import { SubjectPeriod } from './models/subject-period.entity';
+import { SubjectService } from './services/subject.service';
+import { PeriodService } from './services/period.service';
+import { TitleService } from './services/title.service';
 
 const servicesImports = [
   UsersService,
@@ -152,7 +159,12 @@ const servicesImports = [
   DiplomaService,
   AssessmentOptionService,
   StudentAssessmentService,
+  PDFService,
   DiplomaAnswerService,
+  DiplomaService,
+  SubjectService,
+  TitleService,
+  PeriodService,
 ];
 
 @Global()
@@ -207,13 +219,12 @@ const servicesImports = [
       AssessmentOption,
       StudentAssessmentOption,
       DiplomaAnswer,
+      DiplomaQuestion,
+      Period,
+      Title,
+      Subject,
+      SubjectPeriod,
     ]),
-    PDFModule.register({
-      view: {
-        root: 'templates',
-        engine: 'pug',
-      },
-    }),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],

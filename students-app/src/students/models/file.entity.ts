@@ -1,19 +1,10 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  In,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In, OneToMany } from 'typeorm';
 import { StudentRecordFile } from './student-record-file.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive(
-  '@key(fields: "file_id, name, type, item1, item2, item3, year, is_new_upload_type, uploaded_by, signedUrl")',
-)
+@Directive('@key(fields: "file_id, name, type, item1, item2, item3, year, is_new_upload_type, uploaded_by, signedUrl")')
 @Entity('mth_file')
 export class File extends BaseEntity {
   @Column()
@@ -64,12 +55,9 @@ export class File extends BaseEntity {
 
   @Field(() => String, { nullable: true })
   @Directive('@external')
-  signedUrl?: String;
+  signedUrl?: string;
 
-  @OneToMany(
-    () => StudentRecordFile,
-    (studentRecordFile) => studentRecordFile.File,
-  )
+  @OneToMany(() => StudentRecordFile, (studentRecordFile) => studentRecordFile.File)
   @Field(() => [StudentRecordFile], { nullable: true })
   StudentRecordFiles: StudentRecordFile[];
 }

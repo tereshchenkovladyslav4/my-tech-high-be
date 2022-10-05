@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { ApplicationsService as StudentApplicationsService } from './services/applications.service';
 import { ParentsService } from './services/parents.service';
 import { PersonsService } from './services/persons.service';
@@ -15,8 +11,6 @@ import { Person } from './models/person.entity';
 import { CreateApplicationInput } from './dto/new-application.inputs';
 import { CreateParentPersonInput } from './dto/new-parent-person.inputs';
 import { omit } from 'lodash';
-import { CreateStudentPersonInput } from './dto/new-student-person.inputs';
-import { CreateStudentPacketInput } from './dto/new-student-packet.inputs';
 import { Student } from './models/student.entity';
 import { StudentGradeLevelsService } from './services/student-grade-levels.service';
 import { CreateStudentApplicationsInput } from './dto/new-student-applications.inputs';
@@ -31,8 +25,6 @@ import { Application } from './models/application.entity';
 import { StudentStatusService } from './services/student-status.service';
 import { UserRegion } from './models/user-region.entity';
 import { SchoolYearService } from './services/schoolyear.service';
-import { NewParentPacketContactInput } from './dto/new-parent-packet-contact.inputs';
-import { CreateAddressInput } from './dto/new-address.inputs';
 import { PersonAddressService } from './services/person-address.service';
 import { EmailRecordsService } from './services/email-records.service';
 import { SchoolYear } from './models/schoolyear.entity';
@@ -76,22 +68,14 @@ export class ApplicationsService {
   }
 
   getSpeicalEdOption(special_ed) {
-    if (special_ed == 'None')
-      return 0;
-    if (special_ed == 'IEP')
-      return 1;
-    if (special_ed == '504')
-      return 2;
+    if (special_ed == 'None') return 0;
+    if (special_ed == 'IEP') return 1;
+    if (special_ed == '504') return 2;
     return 3;
   }
 
-  async createNewApplication(
-    newApplication: CreateApplicationInput,
-  ): Promise<ParentApplication> {
-    const parent = await this.createParentPerson(
-      newApplication.parent,
-      Number(newApplication.state),
-    );
+  async createNewApplication(newApplication: CreateApplicationInput): Promise<ParentApplication> {
+    const parent = await this.createParentPerson(newApplication.parent, Number(newApplication.state));
     const parent_id = parent && (await parent).parent_id;
     const studentApplications = (await newApplication).students;
 
@@ -104,9 +88,9 @@ export class ApplicationsService {
             parent_id,
             school_year_id: newApplication.program_year,
             studentApplication,
-            referred_by:  newApplication.referred_by,
+            referred_by: newApplication.referred_by,
             meta: newApplication.meta,
-            address:  newApplication.address,
+            address: newApplication.address,
             packet: newApplication.packet,
             midyear_application: newApplication.midyear_application,
           }),
@@ -139,62 +123,46 @@ export class ApplicationsService {
 
   async sendApplicationRecieveEmail(email: string): Promise<boolean> {
     const user = await this.usersService.findOneByEmail(email);
-    const regions = await this.userRegionService.findUserRegionByUserId(
-      user.user_id,
-    );
+    const regions = await this.userRegionService.findUserRegionByUserId(user.user_id);
 
     var region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
-    const emailTemplate =
-      await this.emailTemplateService.findByTemplateAndRegion(
-        'Application Received',
-        region_id,
-      );
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Application Received', region_id);
     if (emailTemplate) {
       const person = await this.personsService.findOneByUserId(user.user_id);
       const parent = await this.parentsService.findOneByEmail(email);
 
-      const students = await this.studentsService.findOneByParent(
-        parent.parent_id,
-      );
+      const students = await this.studentsService.findOneByParent(parent.parent_id);
 
       const setAdditionalLinksInfo = async (content: string, school_year: SchoolYear, student: Student) => {
-
-        const yearbegin = new Date(school_year.date_begin)
-          .getFullYear()
-          .toString();
+        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
         const yearend = new Date(school_year.date_end).getFullYear().toString();
 
-
-        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({school_year_id: school_year.school_year_id, student_id: student.student_id}) 
+        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({
+          school_year_id: school_year.school_year_id,
+          student_id: student.student_id,
+        });
 
         const yearText = currApplication.midyear_application
-        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
-        : `${yearbegin}-${yearend.substring(2, 4)}`
+          ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+          : `${yearbegin}-${yearend.substring(2, 4)}`;
 
         return content
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
           .replace(/\[PARENT\]/g, person.first_name)
           .replace(/\[YEAR\]/g, yearText)
-          .replace(
-            /\[APPLICATION_YEAR\]/g,
-            yearText,
-          );
+          .replace(/\[APPLICATION_YEAR\]/g, yearText);
       };
       let emailBody = emailTemplate.body;
 
       if (students.length > 0) {
         students.forEach(async (student) => {
-          const gradeLevels = await this.studentGradeLevelsService.forStudents(
-            student.student_id,
-          );
+          const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
-          const school_year = await this.schoolYearService.findOneById(
-            gradeLevels[0]?.school_year_id,
-          );
+          const school_year = await this.schoolYearService.findOneById(gradeLevels[0]?.school_year_id);
 
           emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
           const emailSubject = await setAdditionalLinksInfo(emailTemplate.subject, school_year, student);
@@ -222,11 +190,7 @@ export class ApplicationsService {
     console.log('User: ', user);
 
     const parent = await createQueryBuilder(Parent)
-      .innerJoinAndSelect(
-        Person,
-        'person',
-        'person.person_id = `Parent`.person_id',
-      )
+      .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
       .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
       .where('user.user_id = :userId', { userId: user.user_id })
       .printSql()
@@ -238,7 +202,7 @@ export class ApplicationsService {
       studentApplications.map(
         async (studentApplication) =>
           await this.createStudentApplication({
-            parent_id:  parent.parent_id,
+            parent_id: parent.parent_id,
             school_year_id: newApplication.program_year,
             studentApplication,
             referred_by: '',
@@ -249,53 +213,41 @@ export class ApplicationsService {
     );
 
     const person = await this.personsService.findOneById(parent.person_id);
-    const regions: UserRegion[] =
-      await this.userRegionService.findUserRegionByUserId(person.user_id);
+    const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(person.user_id);
 
     var region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate =
-      await this.emailTemplateService.findByTemplateAndRegion(
-        'Application Received',
-        region_id,
-      );
-      
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Application Received', region_id);
+
     if (emailTemplate) {
       const setAdditionalLinksInfo = async (content, school_year, student) => {
-
-        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({school_year_id: school_year.school_year_id, student_id: student.student_id}) 
-        const yearbegin = new Date(school_year.date_begin)
-          .getFullYear()
-          .toString();
+        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({
+          school_year_id: school_year.school_year_id,
+          student_id: student.student_id,
+        });
+        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
 
         const yearend = new Date(school_year.date_end).getFullYear().toString();
         const yearText = currApplication.midyear_application
-        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
-        : `${yearbegin}-${yearend.substring(2, 4)}`
-        
+          ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+          : `${yearbegin}-${yearend.substring(2, 4)}`;
+
         return content
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
           .replace(/\[PARENT\]/g, person.first_name)
           .replace(/\[YEAR\]/g, yearText)
-          .replace(
-            /\[APPLICATION_YEAR\]/g,
-            `${yearbegin}-${yearend.substring(2, 4)}`,
-          );
+          .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
       };
       let emailBody = emailTemplate.body;
       if (students.length > 0) {
         students.forEach(async (student) => {
-          const gradeLevels = await this.studentGradeLevelsService.forStudents(
-            student.student_id,
-          );
+          const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
-          const school_year = await this.schoolYearService.findOneById(
-            gradeLevels[0]?.school_year_id,
-          );
+          const school_year = await this.schoolYearService.findOneById(gradeLevels[0]?.school_year_id);
 
           emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
           const emailSubject = await setAdditionalLinksInfo(emailTemplate.subject, school_year, student);
@@ -335,10 +287,7 @@ export class ApplicationsService {
     };
   }
 
-  async createParentPerson(
-    parentPerson: CreateParentPersonInput,
-    region: number,
-  ): Promise<Parent> {
+  async createParentPerson(parentPerson: CreateParentPersonInput, region: number): Promise<Parent> {
     const hasUser = await this.usersService.findOneByEmail(parentPerson.email);
     if (hasUser) throw new ServiceUnavailableException('Email Already Exist!');
 
@@ -388,78 +337,54 @@ export class ApplicationsService {
       region_id: [region],
     };
     await this.userRegionService.createUserRegion(regionPayload);
-    if (!updatedPerson)
-      throw new ServiceUnavailableException('Person User ID Not been Updated');
+    if (!updatedPerson) throw new ServiceUnavailableException('Person User ID Not been Updated');
     console.log('Updated Person: ', updatedPerson);
 
     return parent;
   }
 
-  async createStudentApplication(
-    createStudentApplicationInput: CreateStudentApplicationInput,
-  ): Promise<any> {
-    const {
-      parent_id,
-      school_year_id,
-      studentApplication,
-      referred_by,
-      meta,
-      address,
-      packet,
-      midyear_application,
-    } = createStudentApplicationInput;
-    const {
-      first_name,
-      last_name,
-      grade_level,
-      meta: studentMeta,
-    } = studentApplication;
-    const studentApplicationInput = omit(studentApplication, [
-      'grade_level',
-      'meta',
-      'address',
-      'packet',
-    ]);
+  async createStudentApplication(createStudentApplicationInput: CreateStudentApplicationInput): Promise<any> {
+    const { parent_id, school_year_id, studentApplication, referred_by, meta, address, packet, midyear_application } =
+      createStudentApplicationInput;
+    const { first_name, last_name, grade_level, meta: studentMeta } = studentApplication;
+    const studentApplicationInput = omit(studentApplication, ['grade_level', 'meta', 'address', 'packet']);
     const person = await this.personsService.create(studentApplicationInput);
     if (!person) throw new ServiceUnavailableException('Person Not Created');
     console.log('Person: ', person);
 
-    const personAddress = await this.personAddressService.createOrUpdate(
-      person,
-      { ...address, ...studentApplication.address },
-    );
-    if (!personAddress)
-      throw new ServiceUnavailableException('PersonAddress Not Created');
+    const personAddress = await this.personAddressService.createOrUpdate(person, {
+      ...address,
+      ...studentApplication.address,
+    });
+    if (!personAddress) throw new ServiceUnavailableException('PersonAddress Not Created');
     console.log('PersonAddress: ', personAddress);
 
     const { person_id } = person;
 
     // Get Current Speical ED
     let special_ed = 0;
-    const student_meta = JSON.parse(studentMeta);    
+    const student_meta = JSON.parse(studentMeta);
     if ('meta_special_education' in student_meta) {
       special_ed = this.getSpeicalEdOption(student_meta['meta_special_education']);
     }
-    console.log("Student Special Ed: ", special_ed);
-    
+    console.log('Student Special Ed: ', special_ed);
+
     const student = await this.studentsService.create({
       parent_id,
       person_id,
       special_ed,
-      grade_level,      
+      grade_level,
     });
     if (!student) throw new ServiceUnavailableException('Student Not Created');
     console.log('Student: ', student);
 
     const { student_id } = student;
-    const student_grade_level =
-      await this.studentGradeLevelsService.createOrUpdate({
-        student_id,
-        school_year_id,
-        grade_level,
-      });
-    if (!student_grade_level)
-      throw new ServiceUnavailableException('Student Grade Level Not Created');
+    const student_grade_level = await this.studentGradeLevelsService.createOrUpdate({
+      student_id,
+      school_year_id,
+      grade_level,
+    });
+    if (!student_grade_level) throw new ServiceUnavailableException('Student Grade Level Not Created');
     console.log('Student Grade Level: ', student);
     const application_meta = JSON.stringify({
       ...JSON.parse(meta),
@@ -471,17 +396,12 @@ export class ApplicationsService {
       referred_by,
       meta: application_meta,
       secondary_contact_first:
-        studentApplication?.packet?.secondary_contact_first ||
-        packet?.secondary_contact_first ||
-        null,
+        studentApplication?.packet?.secondary_contact_first || packet?.secondary_contact_first || null,
       secondary_contact_last:
-        studentApplication?.packet?.secondary_contact_last ||
-        packet?.secondary_contact_last ||
-        null,
+        studentApplication?.packet?.secondary_contact_last || packet?.secondary_contact_last || null,
       midyear_application: midyear_application,
     });
-    if (!application)
-      throw new ServiceUnavailableException('Application Not Created');
+    if (!application) throw new ServiceUnavailableException('Application Not Created');
 
     console.log('Application: ', student);
     student.applications?.push(application);
@@ -501,47 +421,29 @@ export class ApplicationsService {
     return { ...student, person: person, status: statudUpdated };
   }
 
-  async deleteStudentApplication(
-    application_ids: string[],
-  ): Promise<Application[]> {
-    const applications = await this.studentApplicationsService.findByIds(
-      application_ids,
-    );
+  async deleteStudentApplication(application_ids: string[]): Promise<Application[]> {
+    const applications = await this.studentApplicationsService.findByIds(application_ids);
     await application_ids.map(async (application_id) => {
-      const application = await this.studentApplicationsService.findOneById(
-        Number(application_id),
-      );
+      const application = await this.studentApplicationsService.findOneById(Number(application_id));
 
-      if (!application)
-        throw new ServiceUnavailableException('Application Not Found');
-      const student = await this.studentsService.findOneById(
-        application.student_id,
-      );
+      if (!application) throw new ServiceUnavailableException('Application Not Found');
+      const student = await this.studentsService.findOneById(application.student_id);
       if (!student) throw new ServiceUnavailableException('Student Not Found');
 
-      const deletedStudent = await this.studentsService.delete(
-        student.student_id,
-      );
-      if (!deletedStudent)
-        throw new ServiceUnavailableException('Student Not Deleted');
+      const deletedStudent = await this.studentsService.delete(student.student_id);
+      if (!deletedStudent) throw new ServiceUnavailableException('Student Not Deleted');
 
-      const deletedStudentGradeLevel =
-        await this.studentGradeLevelsService.delete(
-          student.student_id,
-          application.school_year_id,
-        );
-      if (!deletedStudentGradeLevel)
-        throw new ServiceUnavailableException('StudentGradeLevel Not Deleted');
+      const deletedStudentGradeLevel = await this.studentGradeLevelsService.delete(
+        student.student_id,
+        application.school_year_id,
+      );
+      if (!deletedStudentGradeLevel) throw new ServiceUnavailableException('StudentGradeLevel Not Deleted');
 
       const deletePerson = await this.personsService.delete(student.person_id);
-      if (!deletePerson)
-        throw new ServiceUnavailableException('Person Not Deleted');
+      if (!deletePerson) throw new ServiceUnavailableException('Person Not Deleted');
 
-      const studentApplication = await this.studentApplicationsService.delete(
-        Number(application_id),
-      );
-      if (!studentApplication)
-        throw new ServiceUnavailableException('Application Not Deleted');
+      const studentApplication = await this.studentApplicationsService.delete(Number(application_id));
+      if (!studentApplication) throw new ServiceUnavailableException('Application Not Deleted');
     });
     return applications;
   }

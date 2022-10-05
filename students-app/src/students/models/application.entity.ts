@@ -1,13 +1,5 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  ManyToOne,
-} from 'typeorm';
-import { Student } from './student.entity';
-import { SchoolYear } from './schoolyear.entity';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @ObjectType()
 @Directive('@extends')
@@ -26,6 +18,9 @@ export class Application extends BaseEntity {
 
   @Column()
   school_year_id?: number;
+
+  @Column()
+  midyear_application?: number;
 
   @Column()
   status?: string;

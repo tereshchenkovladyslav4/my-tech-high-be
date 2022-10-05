@@ -1,7 +1,6 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Resource } from './resource.entity';
-import { Student } from './student.entity';
 import { ResourceRequest } from './resource-request.entity';
 
 @ObjectType()
@@ -42,7 +41,7 @@ export class ResourceLevel {
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'resource_id', referencedColumnName: 'resource_id' }])
-  @Field(() => Student, { nullable: true })
+  @Field(() => Resource, { nullable: true })
   @Directive('@external')
   Resource: Resource;
 

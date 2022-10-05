@@ -1,10 +1,4 @@
-import {
-  Args,
-  ID,
-  Query,
-  Resolver,
-  Mutation,
-} from '@nestjs/graphql';
+import { Args, ID, Query, Resolver, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { SchoolYear } from '../../models/schoolyear.entity';
@@ -17,9 +11,7 @@ export class SchoolYearResolver {
   constructor(private schoolYearsService: SchoolYearsService) {}
 
   @Query((returns) => SchoolYear, { name: 'getSchoolYear' })
-  async getSchoolYear(
-    @Args({ name: 'school_year_id', type: () => ID }) school_year_id: number,
-  ): Promise<SchoolYear> {
+  async getSchoolYear(@Args({ name: 'school_year_id', type: () => ID }) school_year_id: number): Promise<SchoolYear> {
     return this.schoolYearsService.findOneById(school_year_id);
   }
   @Query((returns) => [SchoolYear], { name: 'getSchoolYearAll' })
@@ -28,9 +20,7 @@ export class SchoolYearResolver {
   }
 
   @Query((returns) => [SchoolYear], { name: 'getActiveSchoolYears' })
-  async getActiveSchoolYears(
-    @Args({ name: 'region_id', type: () => ID }) region_id: number,
-  ): Promise<SchoolYear[]> {
+  async getActiveSchoolYears(@Args({ name: 'region_id', type: () => ID }) region_id: number): Promise<SchoolYear[]> {
     return this.schoolYearsService.findActiveSchoolYears(region_id);
   }
 
@@ -52,10 +42,7 @@ export class SchoolYearResolver {
     @Args('createSchoolYearInput') createSchoolYearInput: CreateSchoolYearInput,
     @Args('previousYearId') previousYearId?: number,
   ): Promise<SchoolYear> {
-    const response = this.schoolYearsService.createSchoolYear(
-      createSchoolYearInput,
-      previousYearId
-    );
+    const response = this.schoolYearsService.createSchoolYear(createSchoolYearInput, previousYearId);
     return response;
   }
 
@@ -64,9 +51,7 @@ export class SchoolYearResolver {
   async updateSchoolYear(
     @Args('updateSchoolYearInput') updateSchoolYearInput: UpdateSchoolYearInput,
   ): Promise<SchoolYear> {
-    const response = await this.schoolYearsService.updateSchoolYear(
-      updateSchoolYearInput,
-    );
+    const response = await this.schoolYearsService.updateSchoolYear(updateSchoolYearInput);
     return response;
   }
 

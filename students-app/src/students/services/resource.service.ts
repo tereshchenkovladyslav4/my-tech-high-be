@@ -7,6 +7,7 @@ import { RequestResourcesInput } from '../dto/request-resources.input';
 import { Resource } from '../models/resource.entity';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { ResourceRequestStatus, StudentStatusEnum } from '../enums';
+import { TimezoneService } from './timezone.service';
 
 @Injectable()
 export class ResourceService {
@@ -14,6 +15,7 @@ export class ResourceService {
     @InjectRepository(Resource)
     private readonly repo: Repository<Resource>,
     private studentGradeLevelService: StudentGradeLevelsService,
+    private timezoneService: TimezoneService,
   ) {}
 
   async find(studentId: number): Promise<Resource[]> {
@@ -23,10 +25,10 @@ export class ResourceService {
       return [];
     }
 
-    const { school_year_id: schoolYearId, grade_level: gradeLevel } = studentGradeLevel;
+    const { grade_level: gradeLevel } = studentGradeLevel;
 
     const queryRunner = await getConnection().createQueryRunner();
-
+    const now = await this.timezoneService.getTimezoneDate(1);
     // TODO Total requests should be calculated for only accepted requests
     const data = await this.repo
       .createQueryBuilder('resource')
@@ -34,10 +36,13 @@ export class ResourceService {
       .leftJoinAndSelect('resource.StudentsInCart', 'StudentsInCart', `StudentsInCart.student_id=${studentId}`)
       .leftJoinAndSelect('resource.ResourceRequests', 'ResourceRequests', `ResourceRequests.student_id=${studentId}`)
       .leftJoinAndSelect('resource.ResourceLevels', 'ResourceLevels')
+      .leftJoinAndSelect('resource.SchoolYear', 'SchoolYear')
       .loadRelationCountAndMap('resource.TotalRequests', 'resource.ResourceRequests')
       .loadRelationCountAndMap('ResourceLevels.TotalRequests', 'ResourceLevels.ResourceRequests')
-      .where({ SchoolYearId: schoolYearId, is_active: 1 })
-      .andWhere(`find_in_set('${gradeLevel}',grades) <> 0`)
+      //.where({ SchoolYearId: schoolYearId, is_active: 1 })
+      .andWhere(`find_in_set('${gradeLevel}',resource.grades) <> 0`)
+      .andWhere(`SchoolYear.homeroom_resource_open <= '${now}'`)
+      .andWhere(`SchoolYear.homeroom_resource_close >= '${now}'`)
       .orderBy({
         'HiddenStudents.resource_id': 'ASC',
         'resource.priority': 'ASC',

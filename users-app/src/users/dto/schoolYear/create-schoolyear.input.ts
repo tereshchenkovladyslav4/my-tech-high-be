@@ -28,6 +28,12 @@ export class CreateSchoolYearInput {
   @Field(() => Date, { nullable: true })
   midyear_application_close?: string;
 
+  @Field(() => Date, { nullable: true })
+  homeroom_resource_open?: string;
+
+  @Field(() => Date, { nullable: true })
+  homeroom_resource_close?: string;
+
   @Field(() => Int)
   @IsNotEmpty()
   RegionId?: number;

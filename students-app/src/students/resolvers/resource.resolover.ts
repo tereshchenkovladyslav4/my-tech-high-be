@@ -13,9 +13,7 @@ export class ResourceResolver {
 
   @Query((returns) => [Resource], { name: 'studentResources' })
   @UseGuards(new AuthGuard())
-  get(
-    @Args({ name: 'studentId', type: () => ID }) studentId: number,
-  ): Promise<Resource[]> {
+  get(@Args({ name: 'studentId', type: () => ID }) studentId: number): Promise<Resource[]> {
     return this.service.find(studentId);
   }
 

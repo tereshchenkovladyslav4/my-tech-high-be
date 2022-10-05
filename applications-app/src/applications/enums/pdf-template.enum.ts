@@ -1,4 +1,4 @@
 export enum PdfTemplate {
-  WITHDRAWAL = 'withdrawal',
-  STUDENT_PACKET = 'student_packet',
+  WITHDRAWAL = 'withdrawal/template.html',
+  STUDENT_PACKET = 'student_packet/template.html',
 }

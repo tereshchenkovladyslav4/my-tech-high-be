@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Moment from 'moment';
 import { Pagination } from 'src/paginate';
@@ -25,12 +25,11 @@ import { UserRegionService } from './user-region.service';
 import { WithdrawalEmailsService } from './withdrawal-emails.service';
 import { PdfTemplate, StudentRecordFileKind, WithdrawalStatus, WithdrawalOption, StudentStatusEnum } from '../enums';
 import { WithdrawalInput } from '../dto/withdrawal.input';
-import { PDFService } from '@t00nday/nestjs-pdf';
 import { FilesService } from './files.service';
 import { StudentRecordService } from './student-record.service';
 import { S3DirectoryStudentRecords } from '../utils';
 import { gradeText } from '../utils';
-
+import { PDFService } from './pdf.service';
 @Injectable()
 export class WithdrawalService {
   constructor(
@@ -44,9 +43,9 @@ export class WithdrawalService {
     private emailTemplateService: EmailTemplatesService,
     private schoolYearService: SchoolYearService,
     private withdrawalEmailService: WithdrawalEmailsService,
-    private pdfService: PDFService,
     private filesService: FilesService,
     private studentRecordService: StudentRecordService,
+    private pdfService: PDFService,
   ) {}
 
   async save(withdrawalInput: WithdrawalInput): Promise<boolean> {
@@ -570,7 +569,10 @@ export class WithdrawalService {
         .andWhere({ status: WithdrawalStatus.REQUESTED })
         .getManyAndCount();
 
+      if (!results?.length) throw new ServiceUnavailableException(`Not found Withdrawal data`);
+
       const queryRunner = await getConnection().createQueryRunner();
+
       for (let index = 0; index < results.length; index++) {
         const item = results[index];
         const withdrawalId = item.withdrawal_id;
@@ -593,7 +595,7 @@ export class WithdrawalService {
 
       return true;
     } catch (e) {
-      return false;
+      throw new ServiceUnavailableException(e, `${param}`);
     }
   }
 
@@ -767,51 +769,65 @@ export class WithdrawalService {
         .leftJoinAndSelect('student.grade_levels', 'grade')
         .where({ withdrawal_id: withdrawalId })
         .getOne();
-      if (!withdraw) return false;
+      if (!withdraw) throw new ServiceUnavailableException(`Not found Withdrawal data: ${withdrawalId}`);
 
-      const studentId = withdraw.StudentId;
-      const questions = withdraw.response ? JSON.parse(withdraw.response) : [];
-      questions.map((item) => {
-        switch (item.type) {
-          case 1: {
-            item.response = item.options.find((option) => option.value === item.response)?.label;
-            break;
-          }
-          case 6: {
-            item.response = Moment(item.response).format('MM/DD/YYYY');
-            break;
-          }
-        }
-      });
+      const studentId = withdraw?.StudentId;
+      if (!studentId) throw new ServiceUnavailableException(`Not found student Id: ${withdrawalId}`);
 
-      const schoolYearId = withdraw.Student.grade_levels[0].school_year_id;
+      const questions = withdraw?.response ? JSON.parse(withdraw.response) : null;
+      if (!questions?.length) throw new ServiceUnavailableException(`Not found questions: ${withdrawalId}`);
+
+      if (questions?.length) {
+        questions.map((item) => {
+          switch (item?.type) {
+            case 1: {
+              item.response = item?.options?.find((option) => option?.value === item?.response)?.label;
+              break;
+            }
+            case 6: {
+              item.response = Moment(item?.response).format('MM/DD/YYYY');
+              break;
+            }
+          }
+        });
+      }
+
+      const schoolYearId = withdraw?.Student?.grade_levels[0]?.school_year_id;
+      if (!schoolYearId) throw new ServiceUnavailableException(`Not found schoolYearId: ${withdrawalId}`);
       const schoolYear = await this.schoolYearService.findOneById(schoolYearId);
-      const yearBegin = Moment(schoolYear.date_begin).format('YYYY');
-      const yearEnd = Moment(schoolYear.date_end).format('YYYY');
+      if (!schoolYear) throw new ServiceUnavailableException(`Not found schoolYear: ${withdrawalId}`);
+      const yearBegin = Moment(schoolYear?.date_begin).format('YYYY');
+      const yearEnd = Moment(schoolYear?.date_end).format('YYYY');
       const address =
-        withdraw.Student.person.person_address.address || withdraw.Student.parent.person.person_address.address;
+        withdraw?.Student?.person?.person_address?.address ||
+        withdraw?.Student?.parent?.person?.person_address?.address;
 
-      const pdfBuffer = await this.pdfService
-        .toBuffer(PdfTemplate.WITHDRAWAL, {
-          locals: {
-            stateLogo: schoolYear.region.state_logo,
-            studentName: `${withdraw.Student.person.first_name} ${withdraw.Student.person.last_name}`,
-            birthdate: withdraw.Student.person.date_of_birth
-              ? Moment(withdraw.Student.person.date_of_birth).format('MM/DD/YYYY')
-              : 'NA',
-            address: address.street
-              ? `${address.street} ${address.street2 ? address.street2 + ' ' : ''} 
-                ${address.city || ''}, ${address.state || ''} ${address.zip || ''}`
-              : 'NA',
-            parentPhone: withdraw.Student.parent.person.person_phone?.number || 'NA',
-            grades: gradeText(withdraw.Student),
-            dateEffective: withdraw.date_effective ? Moment(withdraw.date_effective).format('MM/DD/YYYY') : 'NA',
-            schoolYear: `${yearBegin}-${yearEnd}`,
-            date: Moment().format('MM/DD/YYYY'),
-            questions,
-          },
-        })
-        .toPromise();
+      const options = {
+        format: 'A4',
+        orientation: 'portrait',
+        border: '10mm',
+      };
+      const pdfBuffer = await this.pdfService.create(
+        PdfTemplate.WITHDRAWAL,
+        {
+          stateLogo: schoolYear?.region?.state_logo,
+          studentName: `${withdraw?.Student?.person?.first_name} ${withdraw?.Student?.person?.last_name}`,
+          birthdate: withdraw?.Student?.person?.date_of_birth
+            ? Moment(withdraw?.Student?.person?.date_of_birth).format('MM/DD/YYYY')
+            : 'NA',
+          address: address?.street
+            ? `${address?.street} ${address?.street2 ? address?.street2 + ' ' : ''}
+                ${address?.city || ''}, ${address?.state || ''} ${address?.zip || ''}`
+            : 'NA',
+          parentPhone: withdraw?.Student?.parent?.person?.person_phone?.number || 'NA',
+          grades: gradeText(withdraw?.Student),
+          dateEffective: withdraw?.date_effective ? Moment(withdraw?.date_effective).format('MM/DD/YYYY') : 'NA',
+          schoolYear: `${yearBegin}-${yearEnd}`,
+          date: Moment().format('MM/DD/YYYY'),
+          questions,
+        },
+        options,
+      );
 
       const uploadFile = await this.filesService.upload(
         pdfBuffer,
@@ -820,7 +836,7 @@ export class WithdrawalService {
         'application/pdf',
         yearBegin,
       );
-
+      if (!uploadFile) throw new ServiceUnavailableException(`Upload file failed: ${withdrawalId}`);
       await this.studentRecordService.createStudentRecord(
         studentId,
         schoolYear.RegionId,
@@ -830,7 +846,8 @@ export class WithdrawalService {
 
       return true;
     } catch (err) {
-      return false;
+      console.error('***************************withdrawal pdf error*******************', err);
+      throw new ServiceUnavailableException(err, `${withdrawalId}`);
     }
   }
 }

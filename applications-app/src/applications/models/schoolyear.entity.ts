@@ -14,10 +14,11 @@ import { Region } from './region.entity';
 import { Resource } from './resource.entity';
 import { ScheduleBuilder } from './scheduler-builder.entity';
 import { SchoolPartner } from './school-partner.entity';
+import { Subject } from './subject.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description, schedule, diploma_seeking, testing_preference, schedule_builder_open, schedule_builder_close, second_semester_open, second_semester_close, midyear_schedule_open, midyear_schedule_close, ScheduleBuilder")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description, schedule, diploma_seeking, testing_preference, schedule_builder_open, schedule_builder_close, second_semester_open, second_semester_close, midyear_schedule_open, midyear_schedule_close, homeroom_resource_open, homeroom_resource_close, ScheduleBuilder, Resources")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -175,6 +176,14 @@ export class SchoolYear extends BaseEntity {
   @Field(() => String, { nullable: true })
   midyear_schedule_close: string;
 
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  homeroom_resource_open: string;
+
+  @Column({ type: 'date', nullable: true })
+  @Field(() => String, { nullable: true })
+  homeroom_resource_close: string;
+
   @ManyToOne(() => Region, (region) => region.schoolYears)
   @JoinColumn([{ name: 'RegionId', referencedColumnName: 'id' }])
   region: Region;
@@ -194,4 +203,8 @@ export class SchoolYear extends BaseEntity {
   @OneToOne(() => ScheduleBuilder, (scheduleBuilder) => scheduleBuilder.schoolYear)
   @Field(() => ScheduleBuilder, { nullable: true })
   ScheduleBuilder: ScheduleBuilder;
+
+  @OneToMany(() => Subject, (subject) => subject.SchoolYear)
+  @Field(() => [Subject], { nullable: true })
+  Subjects: Subject[];
 }

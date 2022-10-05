@@ -1,23 +1,14 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, OneToMany } from 'typeorm';
 import { Announcement } from './announcement.entity';
 import { EventType } from './event-type.entity';
 import { UserRegion } from './user-region.entity';
 import { SchoolYear } from './schoolyear.entity';
+import { ImmunizationSettings } from './immunization-settings.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive(
-  '@key(fields: "id, name, program, state_logo, enrollment_packet_deadline_num_days, region")',
-)
+@Directive('@key(fields: "id, name, program, state_logo, enrollment_packet_deadline_num_days, region")')
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()
@@ -34,12 +25,12 @@ export class Region extends BaseEntity {
   @Column()
   @Field((type) => String, { nullable: true })
   @Directive('@external')
-  program: String;
+  program: string;
 
   @Column()
   @Field((type) => String, { nullable: true })
   @Directive('@external')
-  state_logo: String;
+  state_logo: string;
 
   @Column()
   @Field((type) => Int, { nullable: true })
@@ -62,4 +53,7 @@ export class Region extends BaseEntity {
 
   @OneToMany(() => SchoolYear, (schoolYear) => schoolYear.region)
   schoolYears: SchoolYear[];
+
+  @OneToMany(() => ImmunizationSettings, (immunizationSettings) => immunizationSettings.Region)
+  ImmunizationSettings: ImmunizationSettings[];
 }

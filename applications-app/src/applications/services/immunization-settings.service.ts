@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { ImmunizationSettings } from '../models/immunization-settings.entity';
 import { Pagination } from '../../paginate';
 import { UpdateImmunizationSettingsInput } from '../dto/update-immunization-settings.input';
-import { FindImunizationSettingsInput } from '../dto/find-immunization';
+import { FindImmunizationSettingsInput } from '../dto/find-immunization';
 
 @Injectable()
 export class ImmunizationSettingsService {
@@ -13,17 +13,16 @@ export class ImmunizationSettingsService {
     private readonly immunizationSettingsRepository: Repository<ImmunizationSettings>,
   ) {}
 
-  async findAll(
-    where: FindImunizationSettingsInput | null,
-  ): Promise<Pagination<ImmunizationSettings>> {
+  async findAll(where: FindImmunizationSettingsInput | null): Promise<Pagination<ImmunizationSettings>> {
     let qb = this.immunizationSettingsRepository
       .createQueryBuilder('immunization_settings')
       .orderBy('immunization_settings.order', 'ASC')
       .where('immunization_settings.is_deleted = 0');
     if (typeof where?.is_enabled !== 'undefined') {
-      qb = qb.where(
-        'immunization_settings.is_enabled = ' + (where.is_enabled ? 1 : 0),
-      );
+      qb = qb.where('immunization_settings.is_enabled = ' + (where.is_enabled ? 1 : 0));
+    }
+    if (where?.region_id) {
+      qb = qb.andWhere(`region_id = ${where.region_id}`);
     }
     const [results, total] = await qb.getManyAndCount();
 
@@ -49,11 +48,7 @@ export class ImmunizationSettingsService {
       if (!e.id || !e.title) continue;
       if (e.consecutive_vaccine === 0) {
         e.consecutives = getConsecutivesId(e.id);
-        sortedRes = [
-          ...sortedRes,
-          e,
-          ...e.consecutives.map((id) => immunizations.find((v) => v.id === id)),
-        ];
+        sortedRes = [...sortedRes, e, ...e.consecutives.map((id) => immunizations.find((v) => v.id === id))];
       }
     }
     return sortedRes;
@@ -69,10 +64,8 @@ export class ImmunizationSettingsService {
       id,
       is_deleted: true,
     });
-    const parentId = await (
-      await this.immunizationSettingsRepository.findOne(id)
-    ).consecutive_vaccine;
-    let qb = await this.immunizationSettingsRepository
+    const parentId = await (await this.immunizationSettingsRepository.findOne(id)).consecutive_vaccine;
+    const qb = await this.immunizationSettingsRepository
       .createQueryBuilder('immunization_settings')
       .orderBy('immunization_settings.order', 'ASC')
       .where('immunization_settings.is_deleted = 0')

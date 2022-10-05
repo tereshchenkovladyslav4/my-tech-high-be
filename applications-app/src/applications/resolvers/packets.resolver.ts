@@ -34,7 +34,7 @@ import { EnrollmentPacketDocumentInput } from '../dto/enrollment-packet-document
 import { EnrollmentPacketSubmissionInput } from '../dto/enrollment-packet-submission.inputs';
 import { DeleteApplicationInput } from '../dto/delete-application.inputs';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
-import { FindImunizationSettingsInput } from '../dto/find-immunization';
+import { FindImmunizationSettingsInput } from '../dto/find-immunization';
 import { PacketEmailsService } from '../services/packet-emails.service';
 import { EnrollmentPacketSubmitInput } from '../dto/enrollment-packet-submit.input';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
@@ -83,7 +83,7 @@ export class PacketsResolver {
     name: 'immunizationSettings',
   })
   async getImmunizationSettings(
-    @Args('where', { nullable: true }) where: FindImunizationSettingsInput,
+    @Args('where', { nullable: true }) where: FindImmunizationSettingsInput,
   ): Promise<Pagination<ImmunizationSettings>> {
     return this.immunizationSettingsService.findAll(where);
   }

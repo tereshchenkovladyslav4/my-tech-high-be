@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style type="text/css">
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        zoom: 0.7;
+      }
+      p {
+        margin: 0;
+      }
+      body {
+        font-family: VisbyCF;
+        margin: 16px;
+        font-size: 12px;
+      }
+
+      .header {
+        padding: 0 32px;
+      }
+
+      .header__logo img {
+        height: 64px;
+        display: block;
+      }
+
+      .main {
+        margin-top: 24px;
+      }
+
+      .content_list {
+        display: -webkit-flex;
+        -webkit-flex-wrap: wrap;
+        margin: -16px -4px;
+      }
+
+      .content_list__item {
+        display: -webkit-flex;
+        -webkit-align-items: end;
+        width: 100%;
+        padding: 8px 4px;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+      }
+
+      .content_list__item .label {
+        margin-right: 8px;
+      }
+
+      .content_list__item .value {
+        -webkit-flex: 1;
+        border-bottom: solid 1px #a1a1a1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="header__logo">
+        <img src="{{stateLogo}}" />
+      </div>
+    </div>
+    <div class="main">
+      <h1 style="text-align: center; font-size: 16px; font-weight: bold">Student Withdrawal Report</h1>
+
+      <div class="content_wrap" style="padding: 16px; font-weight: 500">
+        <div class="basic-content" style="padding: 16px">
+          <div class="content_list">
+            <div class="content_list__item" style="width: 100%">
+              <div class="label">Student Name:</div>
+              <div class="value">{{studentName}}</div>
+            </div>
+            <div class="content_list__item" style="width: 60%">
+              <div class="label">Birthdate:</div>
+              <div class="value">{{birthdate}}</div>
+            </div>
+            <div class="content_list__item" style="width: 40%">
+              <div class="label">Grade:</div>
+              <div class="value">{{grades}}</div>
+            </div>
+            <div class="content_list__item" style="width: 60%">
+              <div class="label">Address:</div>
+              <div class="value">{{address}}</div>
+            </div>
+            <div class="content_list__item" style="width: 40%">
+              <div class="label">Phone:</div>
+              <div class="value">{{parentPhone}}</div>
+            </div>
+            <div class="content_list__item">
+              <div class="label">Effective Withdraw Date:</div>
+              <div class="value">{{dateEffective}}</div>
+            </div>
+
+            <div class="content_list__item" style="width: 30%">
+              <div class="label">Date:</div>
+              <div class="value">{{date}}</div>
+            </div>
+
+            {{#if questions.length}} {{#each questions}} {{#ifCond this.type '==' '3'}}
+            <div class="content_list__item" style="-webkit-align-items: flex-start">
+              <div class="label">{{this.question}}:</div>
+              <div style="display: block">
+                {{#if this.options.length}} {{#each this.options}}
+                <div style="display: -webkit-flex; -webkit-align-items: center">
+                  {{#ifCond this.value "==" this.response}}
+                  <input class="checkbox__option__input" type="checkbox" checked onclick="return false;" />
+                  {{/ifCond}} {{#ifCond this.value "!=" this.response}}
+                  <input class="checkbox__option__input" type="checkbox" onclick="return false;" />
+                  {{/ifCond}}
+                  <div class="v-label">{{this.label}}</div>
+                </div>
+                {{/each}} {{/if}}
+              </div>
+            </div>
+            {{/ifCond}} {{#ifCond this.type '==' '4'}}
+            <div class="content_list__item" style="-webkit-align-items: flex-start">
+              {{#if this.response}}
+              <input class="checkbox__option__input" type="checkbox" checked onclick="return false;" />
+              {{else}}
+              <input class="checkbox__option__input" type="checkbox" onclick="return false;" />
+              {{/if}}
+              <div class="label" style="margin-left: 4px">{{{this.question}}}</div>
+            </div>
+            {{/ifCond}} {{#ifCond this.type '==' '7'}}
+            <div class="content_list__item" style="-webkit-justify-content: center">
+              <div class="label">{{{this.question}}}</div>
+            </div>
+            {{/ifCond}} {{#ifCond this.type '==' '9'}}
+            <div class="content_list__item">
+              <div class="label">Name:</div>
+              <div class="value">{{this.response.name}}</div>
+            </div>
+            <div class="content_list__item">
+              <div class="label">Signature:</div>
+              <div class="value">
+                <img class="signature" src="{{this.response.signature}}" />
+              </div>
+            </div>
+            {{/ifCond}} {{#ifCond this.type '!=' '3'}} {{#ifCond this.type '!=' '4'}} {{#ifCond this.type '!=' '7'}}
+            {{#ifCond this.type '!=' '9'}}
+            <div class="content_list__item">
+              <div class="label">{{this.question}}:</div>
+              <div class="value">{{this.response}}</div>
+            </div>
+            {{/ifCond}} {{/ifCond}} {{/ifCond}} {{/ifCond}} {{/each}} {{else}}
+            <p style="width: 100%; padding: 24px 0">Undeclared</p>
+            {{/if}}
+          </div>
+        </div>
+        <div class="for_school_use_only" style="page-break-inside: avoid; padding-top: 64px">
+          <div class="content_list" style="border: solid 1px #a1a1a1">
+            <div class="content_list__item">For School Use Only</div>
+            <div class="content_list__item" style="width: 30%">
+              <div class="label">Registrar:</div>
+              <div class="value"></div>
+            </div>
+            <div class="content_list__item" style="width: 30%">
+              <div class="label">Administrator:</div>
+              <div class="value"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

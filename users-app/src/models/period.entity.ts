@@ -1,10 +1,11 @@
 import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import { IsEnum } from 'class-validator';
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { REDUCE_FUNDS, SEMESTER_TYPE } from '../enums/period.enum';
+import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
-@Directive('@key(fields: "id,archived")')
+@Directive('@key(fields: "id, school_year_id, period, category, archived")')
 @Entity({ name: 'mth_period' })
 export class Period extends BaseEntity {
   @Column()
@@ -67,4 +68,8 @@ export class Period extends BaseEntity {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Periods)
+  @JoinColumn([{ name: 'school_year_id', referencedColumnName: 'school_year_id' }])
+  SchoolYear: SchoolYear;
 }

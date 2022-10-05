@@ -63,7 +63,7 @@ export class StudentsService {
       parseInt(Moment(currentYear.date_begin).format('YYYY')),
       currentYear.RegionId,
     );
-    const previousScholYear = previousYearOb ? previousYearOb.school_year_id : 0;
+    const previousSchoolYear = previousYearOb ? previousYearOb.school_year_id : 0;
 
     let filterSibling = false;
     let enrolledInStatus = [];
@@ -77,6 +77,7 @@ export class StudentsService {
     const qb = this.studentsRepository
       .createQueryBuilder('student')
       .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+      .leftJoinAndSelect('student.status', 'status')
       .leftJoinAndSelect('student.person', 'person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
@@ -84,10 +85,10 @@ export class StudentsService {
       .leftJoinAndSelect('p_address.address', 'address')
       .leftJoinAndSelect('student.currentSoe', 'currentSoe', `currentSoe.school_year_id=${filter.schoolYear}`)
       .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
-      .leftJoinAndSelect('student.previousSoe', 'previousSoe', `previousSoe.school_year_id=${previousScholYear}`)
+      .leftJoinAndSelect('student.previousSoe', 'previousSoe', `previousSoe.school_year_id=${previousSchoolYear}`)
       .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
       .leftJoinAndSelect('student.packets', 'packets')
-      .where(`grade_levels.school_year_id = ${filter.schoolYear}`);
+      .where(`grade_levels.school_year_id = ${filter.schoolYear} AND status.status IN (0, 1)`);
 
     if (enrolledInStatus.length) {
       qb.andWhere(`student.reenrolled IN (${enrolledInStatus.join(',')})`);

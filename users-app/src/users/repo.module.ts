@@ -49,6 +49,8 @@ import { DiplomaService } from './services/diploma.service';
 import { DiplomaQuestion } from 'src/models/diploma-question.entity';
 import { Period } from 'src/models/period.entity';
 import { PeriodService } from './services/period.service';
+import { Resource } from 'src/models/resource.entity';
+import { ResourceLevel } from 'src/models/resource-level.entity';
 
 const RepoServices = [
   UsersService,
@@ -109,6 +111,8 @@ const RepoServices = [
       ScheduleBuilder,
       DiplomaQuestion,
       Period,
+      Resource,
+      ResourceLevel,
     ]),
   ],
   providers: RepoServices,

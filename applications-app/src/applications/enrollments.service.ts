@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { ApplicationsService as StudentApplicationsService } from './services/applications.service';
 import { ParentsService } from './services/parents.service';
 import { PersonsService } from './services/persons.service';
@@ -70,9 +66,7 @@ export class EnrollmentsService {
     private userRegionService: UserRegionService,
   ) {}
 
-  async saveEnrollmentPacket(
-    enrollmentPacketInput: EnrollmentPacketInput,
-  ): Promise<EnrollmentPacket> {
+  async saveEnrollmentPacket(enrollmentPacketInput: EnrollmentPacketInput): Promise<EnrollmentPacket> {
     const {
       packet_id,
       admin_notes,
@@ -99,20 +93,16 @@ export class EnrollmentsService {
         });
 
         if (student.address) {
-          const personAddress = this.personAddressService.createOrUpdate(
-            studentPerson,
-            student.address,
-          );
+          const personAddress = this.personAddressService.createOrUpdate(studentPerson, student.address);
         }
 
         const { grade_level } = student;
         if (school_year_id && grade_level && student_id) {
-          const studentGradeLevel =
-            await this.studentGradeLevelsService.createOrUpdate({
-              student_id,
-              school_year_id,
-              grade_level,
-            });
+          const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+            student_id,
+            school_year_id,
+            grade_level,
+          });
         }
       }
 
@@ -122,9 +112,7 @@ export class EnrollmentsService {
           ...parent,
         });
 
-        const parentPhone = await this.phonesService.findOneByPersonId(
-          parent_person_id,
-        );
+        const parentPhone = await this.phonesService.findOneByPersonId(parent_person_id);
         if (!parentPhone) {
           await this.phonesService.create({
             person_id: parent_person_id,
@@ -144,9 +132,7 @@ export class EnrollmentsService {
         ...packet,
         admin_notes: admin_notes,
         medical_exemption,
-        exemption_form_date: exemption_form_date
-          ? new Date(exemption_form_date)
-          : null,
+        exemption_form_date: exemption_form_date ? new Date(exemption_form_date) : null,
         status: status,
         deadline: new Date(),
         date_submitted: new Date(),
@@ -159,72 +145,47 @@ export class EnrollmentsService {
       if (templates[status]) {
         const tmp = await this.packetsService.findOneById(packet_id);
 
-        const studentPerson = await this.studentsService.findOneById(
-          tmp.student_id,
-        );
+        const studentPerson = await this.studentsService.findOneById(tmp.student_id);
 
-        const regions: UserRegion[] =
-          await this.userRegionService.findUserRegionByUserId(
-            studentPerson.parent?.person?.user_id,
-          );
+        const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
+          studentPerson.parent?.person?.user_id,
+        );
 
         var region_id = 1;
         if (regions.length != 0) {
           region_id = regions[0].region_id;
         }
 
-        const emailTemplate =
-          await this.emailTemplateService.findByTemplateAndRegion(
-            templates[status],
-            region_id,
-          );
+        const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(templates[status], region_id);
 
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {
-            const yearbegin = new Date(school_year.date_begin)
-              .getFullYear()
-              .toString();
-            const yearend = new Date(school_year.date_end)
-              .getFullYear()
-              .toString();
+            const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+            const yearend = new Date(school_year.date_end).getFullYear().toString();
 
             return emailTemplate.body
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
               .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-              .replace(
-                /\[APPLICATION_YEAR\]/g,
-                `${yearbegin}-${yearend.substring(2, 4)}`,
-              )
+              .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
               .replace(/\[DEADLINE\]/g, `${Moment().format('MM/DD/yy')}`);
           };
 
           const setEmailSubjectInfo = (student, school_year) => {
-            const yearbegin = new Date(school_year.date_begin)
-              .getFullYear()
-              .toString();
-            const yearend = new Date(school_year.date_end)
-              .getFullYear()
-              .toString();
+            const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+            const yearend = new Date(school_year.date_end).getFullYear().toString();
 
             return emailTemplate.subject
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
               .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-              .replace(
-                /\[APPLICATION_YEAR\]/g,
-                `${yearbegin}-${yearend.substring(2, 4)}`,
-              )
+              .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
               .replace(/\[DEADLINE\]/g, `${Moment().format('MM/DD/yy')}`);
           };
-          const gradeLevels = await this.studentGradeLevelsService.forStudents(
-            tmp.student_id,
-          );
-          const school_year = await this.schoolYearService.findOneById(
-            school_year_id || gradeLevels[0].school_year_id,
-          );
+          const gradeLevels = await this.studentGradeLevelsService.forStudents(tmp.student_id);
+          const school_year = await this.schoolYearService.findOneById(school_year_id || gradeLevels[0].school_year_id);
           const body = setEmailBodyInfo(studentPerson, school_year);
           const emailSubject = setEmailSubjectInfo(studentPerson, school_year);
 
@@ -235,7 +196,7 @@ export class EnrollmentsService {
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,
             region_id: region_id,
-            template_name: templates[status]
+            template_name: templates[status],
           });
         }
       }
@@ -245,10 +206,7 @@ export class EnrollmentsService {
       };
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
-      throw new common_1.HttpException(
-        message,
-        common_1.HttpStatus.UNAUTHORIZED,
-      );
+      throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -293,18 +251,13 @@ export class EnrollmentsService {
   ];
 
   getSpeicalEdOption(special_ed) {
-    if (special_ed == 'None')
-      return 0;
-    if (special_ed == 'IEP')
-      return 1;
-    if (special_ed == '504')
-      return 2;
-    return 3;
+    if (special_ed == 'None') return 1;
+    if (special_ed == 'IEP') return 2;
+    if (special_ed == '504') return 3;
+    return 4;
   }
 
-  async saveContacts(
-    enrollmentPacketContactInput: EnrollmentPacketContactInput,
-  ): Promise<EnrollmentPacket> {
+  async saveContacts(enrollmentPacketContactInput: EnrollmentPacketContactInput): Promise<EnrollmentPacket> {
     console.log('Input: ', enrollmentPacketContactInput);
     const { student_id, packet, school_year_id } = enrollmentPacketContactInput;
     const student = await this.studentsService.findOneById(student_id);
@@ -332,18 +285,16 @@ export class EnrollmentsService {
       }
       await this.studentsService.update({
         student_id,
-        special_ed
+        special_ed,
       });
-      
+
       const parentPerson = await this.personsService.update({
         person_id: parentPersonId,
         ...enrollmentPacketContactInput.parent,
       });
       console.log('Parent Person: ', parentPerson);
 
-      const parentPhone = await this.phonesService.findOneByPersonId(
-        parentPersonId,
-      );
+      const parentPhone = await this.phonesService.findOneByPersonId(parentPersonId);
       if (!parentPhone) {
         await this.phonesService.create({
           person_id: parentPersonId,
@@ -357,8 +308,7 @@ export class EnrollmentsService {
         });
       }
 
-      if (!parentPhone)
-        throw new ServiceUnavailableException('Parent Phone Not Created');
+      if (!parentPhone) throw new ServiceUnavailableException('Parent Phone Not Created');
 
       const studentPerson = await this.personsService.update({
         person_id: studentPersonId,
@@ -386,18 +336,16 @@ export class EnrollmentsService {
         person_id: studentPerson.person_id,
         number: enrollmentPacketContactInput.student.phone_number,
       });
-      if (!phone)
-        throw new ServiceUnavailableException('Student Phone Not Created');
+      if (!phone) throw new ServiceUnavailableException('Student Phone Not Created');
       console.log('Student Phone: ', phone);
 
       const { grade_level } = enrollmentPacketContactInput.student;
       if (school_year_id && grade_level) {
-        const studentGradeLevel =
-          await this.studentGradeLevelsService.createOrUpdate({
-            student_id,
-            school_year_id,
-            grade_level,
-          });
+        const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+          student_id,
+          school_year_id,
+          grade_level,
+        });
       }
 
       const studentPacket = await this.packetsService.createOrUpdate({
@@ -412,6 +360,7 @@ export class EnrollmentsService {
         secondary_contact_last: packet.secondary_contact_last,
         school_district: packet.school_district,
         meta: packet.meta,
+        special_ed: String(special_ed),
       });
       console.log('Student Packet: ', studentPacket);
 
@@ -421,19 +370,13 @@ export class EnrollmentsService {
       };
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
-      throw new common_1.HttpException(
-        message,
-        common_1.HttpStatus.UNAUTHORIZED,
-      );
+      throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
     }
   }
 
-  async submitEnrollment(
-    enrollmentPacketContactInput: EnrollmentPacketSubmitInput,
-  ): Promise<EnrollmentPacket> {
+  async submitEnrollment(enrollmentPacketContactInput: EnrollmentPacketSubmitInput): Promise<EnrollmentPacket> {
     console.log('Input: ', enrollmentPacketContactInput);
-    const { student_id, packet, school_year_id, signature_file_id, packet_id } =
-      enrollmentPacketContactInput;
+    const { student_id, packet, school_year_id, signature_file_id, packet_id } = enrollmentPacketContactInput;
     const student = await this.studentsService.findOneById(student_id);
 
     if (!student) throw new ServiceUnavailableException('Student Not Found');
@@ -484,26 +427,25 @@ export class EnrollmentsService {
         person_id: studentPerson.person_id,
         number: enrollmentPacketContactInput.student.phone_number,
       });
-      if (!phone)
-        throw new ServiceUnavailableException('Student Phone Not Created');
+      if (!phone) throw new ServiceUnavailableException('Student Phone Not Created');
       console.log('Student Phone: ', phone);
 
       const { grade_level } = enrollmentPacketContactInput.student;
       if (school_year_id) {
-        const studentGradeLevel =
-          await this.studentGradeLevelsService.createOrUpdate({
-            student_id,
-            school_year_id,
-            grade_level,
-          });
+        const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+          student_id,
+          school_year_id,
+          grade_level,
+        });
       }
 
-      let status = "Submitted";
-      if(packetData && packetData.missing_files
+      let status = 'Submitted';
+      if (
+        packetData &&
+        packetData.missing_files
         //  && JSON.stringify(packetData.missing_files) && JSON.parse(packetData.missing_files).length > 0
-        )
-      {
-        status = "Resubmitted";
+      ) {
+        status = 'Resubmitted';
       }
 
       const studentPacket = await this.packetsService.createOrUpdate({
@@ -528,16 +470,11 @@ export class EnrollmentsService {
       };
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
-      throw new common_1.HttpException(
-        message,
-        common_1.HttpStatus.UNAUTHORIZED,
-      );
+      throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
     }
   }
 
-  async savePersoanl(
-    enrollmentPacketPersonalInput: EnrollmentPacketPersonalInput,
-  ): Promise<EnrollmentPacket> {
+  async savePersoanl(enrollmentPacketPersonalInput: EnrollmentPacketPersonalInput): Promise<EnrollmentPacket> {
     console.log(enrollmentPacketPersonalInput);
 
     const { packet_id } = enrollmentPacketPersonalInput;
@@ -555,8 +492,7 @@ export class EnrollmentsService {
     const { person_id } = student;
     const StudentPerson = this.personsService.findOneById(person_id);
 
-    if (!StudentPerson)
-      throw new ServiceUnavailableException('StudentPerson Not Found');
+    if (!StudentPerson) throw new ServiceUnavailableException('StudentPerson Not Found');
     console.log('StudentPerson: ', StudentPerson);
 
     try {
@@ -610,10 +546,7 @@ export class EnrollmentsService {
       console.log('Student Packet: ', studentPacket);
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
-      throw new common_1.HttpException(
-        message,
-        common_1.HttpStatus.UNAUTHORIZED,
-      );
+      throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
     }
 
     return {
@@ -622,9 +555,7 @@ export class EnrollmentsService {
     };
   }
 
-  async saveEducation(
-    enrollmentPacketEducationInput: EnrollmentPacketEducationInput,
-  ): Promise<EnrollmentPacket> {
+  async saveEducation(enrollmentPacketEducationInput: EnrollmentPacketEducationInput): Promise<EnrollmentPacket> {
     console.log(enrollmentPacketEducationInput);
 
     const { packet_id } = enrollmentPacketEducationInput;
@@ -648,28 +579,22 @@ export class EnrollmentsService {
         last_school_type: enrollmentPacketEducationInput.last_school_type,
         last_school: enrollmentPacketEducationInput.last_school,
         last_school_address: enrollmentPacketEducationInput.last_school_address,
-        understands_sped_scheduling:
-          enrollmentPacketEducationInput.understands_special_ed || 0,
-        permission_to_request_records:
-          enrollmentPacketEducationInput.permission_to_request_records,
+        understands_sped_scheduling: enrollmentPacketEducationInput.understands_special_ed || 0,
+        permission_to_request_records: enrollmentPacketEducationInput.permission_to_request_records,
       });
       console.log('Student Packet: ', studentPacket);
 
       const { school_year_id, grade_level } = enrollmentPacketEducationInput;
-      const studentGradeLevel =
-        await this.studentGradeLevelsService.createOrUpdate({
-          student_id,
-          school_year_id,
-          grade_level,
-        });
+      const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+        student_id,
+        school_year_id,
+        grade_level,
+      });
 
       console.log('Student Grade Level: ', studentGradeLevel);
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
-      throw new common_1.HttpException(
-        message,
-        common_1.HttpStatus.UNAUTHORIZED,
-      );
+      throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
     }
 
     return {
@@ -677,9 +602,7 @@ export class EnrollmentsService {
       packet,
     };
   }
-  async saveDocument(
-    enrollmentPacketDocumentInput: EnrollmentPacketDocumentInput,
-  ): Promise<EnrollmentPacket | any> {
+  async saveDocument(enrollmentPacketDocumentInput: EnrollmentPacketDocumentInput): Promise<EnrollmentPacket | any> {
     const { packet_id, documents } = enrollmentPacketDocumentInput;
     const packet = await this.packetsService.findOneById(packet_id);
 
@@ -736,10 +659,7 @@ export class EnrollmentsService {
       console.log('Student Packet: ', studentPacket);
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
-      throw new common_1.HttpException(
-        message,
-        common_1.HttpStatus.UNAUTHORIZED,
-      );
+      throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
     }
 
     return {
@@ -751,34 +671,29 @@ export class EnrollmentsService {
   async runScheduleReminders(): Promise<String> {
     try {
       let MailData = [];
-      const emailTemplates = await this.emailTemplateService.findAllByTemplate(
-        'Packet Reminders',
-      );
+      const emailTemplates = await this.emailTemplateService.findAllByTemplate('Packet Reminders');
 
       if (emailTemplates.length > 0) {
         emailTemplates.forEach(async (emailTemplate) => {
-          const emailReminder =
-            await this.emailReminderService.findByTemplateId(emailTemplate.id);
+          const emailReminder = await this.emailReminderService.findByTemplateId(emailTemplate.id);
           if (emailReminder.length > 0) {
             emailReminder.forEach(async (remind) => {
               const reminder = remind.reminder;
               const reminderDate = new Date();
               reminderDate.setDate(reminderDate.getDate() + reminder);
-              const packets = await this.packetsService.findReminders(
-                reminderDate,
-                reminder,
-                emailTemplate.region_id,
-              );
+              const packets = await this.packetsService.findReminders(reminderDate, reminder, emailTemplate.region_id);
               if (emailTemplate) {
                 await Promise.all(
                   packets.map(async (packet) => {
                     // remove sending duplicate mail
                     const pack_ids = Object.keys(MailData);
-                    const duplicate = pack_ids.map((b) => {   
-                      if(parseInt(b) == packet.packet_id && MailData[b] == remind.reminder_id) { return true }})
+                    const duplicate = pack_ids.map((b) => {
+                      if (parseInt(b) == packet.packet_id && MailData[b] == remind.reminder_id) {
+                        return true;
+                      }
+                    });
                     if (!duplicate.includes(true)) {
                       MailData[packet.packet_id] = remind.reminder_id;
-                      // <------------------------*-------------------------------->
 
                       const webAppUrl = process.env.WEB_APP_URL;
                       const student = packet.student.person;
@@ -788,12 +703,8 @@ export class EnrollmentsService {
                       const email = packet.student.parent.person.email;
 
                       const setAdditionalLinksInfo = (content) => {
-                        const yearbegin = new Date(school_year.date_begin)
-                          .getFullYear()
-                          .toString();
-                        const yearend = new Date(school_year.date_end)
-                          .getFullYear()
-                          .toString();
+                        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+                        const yearend = new Date(school_year.date_end).getFullYear().toString();
 
                         const yearText = currApplication.midyear_application
                           ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
@@ -806,14 +717,8 @@ export class EnrollmentsService {
                           .replace(/\[PARENT\]/g, parent.first_name)
                           .replace(/\[YEAR\]/g, yearText)
                           .replace(/\[APPLICATION_YEAR\]/g, yearText)
-                          .replace(
-                            /\[DEADLINE\]/g,
-                            `${Moment(packet.deadline).format('MM/DD/yy')}`,
-                          )
-                          .replace(
-                            /\[LINK\]/g,
-                            `<a href='${link}'>${link}</a>`,
-                          );
+                          .replace(/\[DEADLINE\]/g, `${Moment(packet.deadline).format('MM/DD/yy')}`)
+                          .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`);
                       };
 
                       const body = setAdditionalLinksInfo(remind.body || emailTemplate.body);

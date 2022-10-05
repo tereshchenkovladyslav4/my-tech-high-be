@@ -7,7 +7,7 @@ import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels")',
+  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels, SchoolYear")',
 )
 @Entity({ name: 'mth_resource_settings' })
 export class Resource extends BaseEntity {

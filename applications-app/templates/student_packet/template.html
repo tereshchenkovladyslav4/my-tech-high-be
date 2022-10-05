@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style type="text/css">
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        zoom: 0.8;
+      }
+      p {
+        margin-bottom: 5px;
+      }
+
+      body {
+        font-family: VisbyCF;
+        margin: 16px;
+        font-size: 8px;
+      }
+
+      .main {
+        margin: 0;
+      }
+
+      .container {
+        padding: 20px 40px;
+      }
+
+      .list_item {
+        float: left;
+        width: 100%;
+        height: auto;
+        border-bottom: 2px solid #eee;
+        page-break-inside: avoid;
+      }
+
+      .list_label {
+        float: left;
+        width: 27%;
+        margin-top: 5px;
+        font-size: 8px;
+        font-weight: bold;
+      }
+
+      .list_value {
+        float: left;
+        width: 68%;
+        margin-top: 5px;
+        margin-left: 5%;
+        font-size: 8px;
+        font-weight: 500;
+        word-wrap: break-word;
+      }
+
+      .left_list {
+        float: left;
+        width: 48%;
+      }
+
+      .right_list {
+        float: left;
+        width: 48%;
+        margin-left: 2%;
+      }
+
+      .div_agree {
+        float: left;
+        width: 100%;
+        font-size: 10px;
+        margin-top: 20px;
+      }
+
+      .group_name {
+        font-size: 14px;
+        margin-top: 5px;
+        font-weight: bold;
+      }
+
+      .div_group {
+        float: left;
+        width: 100%;
+        border-bottom: 1px solid #eee;
+      }
+
+      .subscribe {
+        float: left;
+        width: 100%;
+      }
+
+      .text_align_center {
+        text-align: center;
+      }
+
+      .subscribe_image {
+        float: right;
+        margin-right: 0px;
+        width: 300px;
+        height: 100px;
+      }
+
+      .subscribe_item {
+        float: right;
+        width: 100%;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <div class="container">
+        <div class="left_list">
+          {{#each contactInfo}}
+          <div class="div_group">
+            <p class="group_name">{{this.group_name}}</p>
+          </div>
+          {{#each this.questions}} {{#ifCond this.answer '!=' 'Checked'}}
+          <div class="list_item">
+            <p class="list_label">{{this.question}}:</p>
+            <p class="list_value">{{this.answer}}</p>
+          </div>
+          {{/ifCond}} {{#ifCond this.answer '==' 'Checked'}}
+          <div class="list_item">
+            <p>{{this.question}}</p>
+          </div>
+          {{/ifCond}}{{/each}} {{/each}}
+        </div>
+        <div class="right_list">
+          {{#each personalInfo}}
+          <div class="div_group">
+            <p class="group_name">{{this.group_name}}</p>
+          </div>
+          {{#each this.questions}} {{#ifCond this.answer '!=' 'Checked'}}
+          <div class="list_item">
+            <p class="list_label">{{this.question}}:</p>
+            <p class="list_value">{{this.answer}}</p>
+          </div>
+          {{/ifCond}} {{#ifCond this.answer '==' 'Checked'}}
+          <div class="list_item">
+            <p>{{{this.question}}}</p>
+          </div>
+          {{/ifCond}}{{/each}} {{/each}} {{#each educationInfo}}
+          <div class="div_group">
+            <p class="group_name">{{this.group_name}}</p>
+          </div>
+          {{#each this.questions}} {{#ifCond this.answer '!=' 'Checked'}}
+          <div class="list_item">
+            <p class="list_label">{{this.question}}:</p>
+            <p class="list_value">{{this.answer}}</p>
+          </div>
+          {{/ifCond}} {{#ifCond this.answer '==' 'Checked'}}
+          <div class="list_item">
+            <p>{{{this.question}}}</p>
+          </div>
+          {{/ifCond}}{{/each}} {{/each}}
+        </div>
+        <div class="div_agree">
+          {{#each submissionInfo}} {{#each this.questions}} {{#ifCond this.answer '==' 'Checked'}}
+          <p class="text_align_center">{{{this.question}}}</p>
+          {{/ifCond}} {{#ifCond this.answer '!=' 'Checked'}}
+          <p class="text_align_center">{{this.question}}: {{this.answer}}</p>
+          {{/ifCond}} {{/each}}{{/each}}
+        </div>
+        <div class="subscribe">
+          <p class="subscribe_item">{{signature_name}}</p>
+          <img class="subscribe_image" src="{{signature_url}}" />
+          <p class="subscribe_item">DATE: {{signature_date}}</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

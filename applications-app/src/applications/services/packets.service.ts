@@ -21,11 +21,13 @@ import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.input
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 import { StudentsService } from './students.service';
-import { PDFService } from '@t00nday/nestjs-pdf';
 import { PdfTemplate, StudentRecordFileKind } from '../enums';
 import { FilesService } from './files.service';
 import { StudentRecordService } from './student-record.service';
 import { S3Service } from './s3.service';
+import { UserRegion } from '../models/user-region.entity';
+import { UserRegionService } from './user-region.service';
+import { PDFService } from './pdf.service';
 
 class Question {
   question: string;
@@ -48,10 +50,11 @@ export class PacketsService {
     private emailTemplateService: EmailTemplatesService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private studentService: StudentsService,
-    private pdfService: PDFService,
     private filesService: FilesService,
     private studentRecordService: StudentRecordService,
+    private userRegionService: UserRegionService,
     private readonly s3Service: S3Service,
+    private pdfService: PDFService,
   ) {}
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
@@ -261,6 +264,22 @@ export class PacketsService {
       .whereInIds(application_ids)
       .getManyAndCount();
 
+    const tmp = results[0];
+
+    const studentPerson = await this.studentService.findOneById(
+      tmp.student_id,
+    );
+
+    const regions: UserRegion[] =
+      await this.userRegionService.findUserRegionByUserId(
+        studentPerson.parent?.person?.user_id,
+      );
+
+    let region_id = 1;
+    if (regions.length != 0) {
+      region_id = regions[0].region_id;
+    }
+
     const setAdditionalLinksInfo = (content, student, school_year) => {
       const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
@@ -286,7 +305,7 @@ export class PacketsService {
       };
       emailBody.push(temp);
     });
-    const emailTemplate = await this.emailTemplateService.findByTemplate('Enrollment Packet Page');
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Enrollment Packet Page', region_id);
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
     }
@@ -297,7 +316,7 @@ export class PacketsService {
         content: emailData.body,
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
-        region_id: 1,
+        region_id: region_id,
         template_name: 'Enrollment Packet Page',
       });
     });
@@ -591,19 +610,24 @@ export class PacketsService {
       if (!signatureFileInfo)
         throw new ServiceUnavailableException(`Not found Signature File for student: ${student_id}.`);
 
-      const pdfBuffer = await this.pdfService
-        .toBuffer(PdfTemplate.STUDENT_PACKET, {
-          locals: {
-            contactInfo: contactInfo,
-            personalInfo: personalInfo,
-            educationInfo: educationInfo,
-            submissionInfo: submissionInfo,
-            signature_date: Moment(packet?.date_submitted).format('MM/DD/YYYY'),
-            signature_name: `${studentInfo?.parent?.person?.first_name} ${studentInfo?.parent?.person?.last_name}`,
-            signature_url: signatureFileInfo?.signedUrl,
-          },
-        })
-        .toPromise();
+      const options = {
+        format: 'A4',
+        orientation: 'portrait',
+        border: '10mm',
+      };
+      const pdfBuffer = await this.pdfService.create(
+        PdfTemplate.STUDENT_PACKET,
+        {
+          contactInfo: contactInfo,
+          personalInfo: personalInfo,
+          educationInfo: educationInfo,
+          submissionInfo: submissionInfo,
+          signature_date: Moment(packet?.date_submitted).format('MM/DD/YYYY'),
+          signature_name: `${studentInfo?.parent?.person?.first_name} ${studentInfo?.parent?.person?.last_name}`,
+          signature_url: signatureFileInfo?.signedUrl,
+        },
+        options,
+      );
 
       const uploadFile = await this.filesService.upload(
         pdfBuffer,

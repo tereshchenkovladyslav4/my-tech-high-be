@@ -28,7 +28,7 @@ export class SchoolYearsService {
       where: {
         school_year_id: school_year_id,
       },
-      relations: ['Region', 'ScheduleBuilder'],
+      relations: ['Region', 'ScheduleBuilder', 'Periods'],
     });
   }
 
@@ -114,7 +114,7 @@ export class SchoolYearsService {
       });
     }
 
-    let schoolPartnerList: SchoolPartner[] = [];
+    const schoolPartnerList: SchoolPartner[] = [];
     if (previousYearId) {
       const prevYearPartners = await this.schoolPartnerService.findBySchoolYear(previousYearId);
       map(prevYearPartners, async (partner) => {
@@ -193,10 +193,7 @@ export class SchoolYearsService {
         );
       }
       queryRunner.release();
-    }
 
-    if (createSchoolYearInput.cloneSchoolYearId) {
-      // clone diploma seeking
       await this.diplomaService.cloneDiplomaQuestion(
         createSchoolYearInput.cloneSchoolYearId,
         updatedRecord.school_year_id,

@@ -245,6 +245,11 @@ export class ParentToDosService {
           midSchoolYears: scheduleActiveMidSchoolYears.length ? scheduleActiveMidSchoolYears : [0],
         },
       )
+      .innerJoin(
+        Packet,
+        'packet',
+        "packet.student_id = `Student`.student_id AND ( packet.status <> 'Submitted' AND packet.status <> 'Resubmitted' ) AND packet.deleted = 0",
+      )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .orderBy('application.application_id', 'DESC')
       .printSql()

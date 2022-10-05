@@ -1,12 +1,5 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Student } from './student.entity';
 
 @ObjectType()
@@ -22,7 +15,7 @@ export class StudentStatus {
   school_year_id?: number;
 
   @Field(() => Int)
-  @Column()
+  @Column({ comment: 'PENDING = 0, ACTIVE = 1, WITHDRAWN = 2, GRADUATED = 3, APPLIED = 5' })
   status?: number;
 
   @Field(() => Date, { nullable: true })

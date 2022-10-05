@@ -1,16 +1,17 @@
 import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
-import { Column, Entity, BaseEntity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Column, Entity, BaseEntity, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { ResourceSubtitle } from '../enums';
 import { ResourceCart } from './resource-cart.entity';
 import { ResourceLevel } from './resource-level.entity';
 import { ResourceRequest } from './resource-request.entity';
+import { SchoolYear } from './schoolyear.entity';
 import { StudentHiddenResource } from './student-hidden-resource.entity';
 
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels")',
+  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels, SchoolYear")',
 )
 @Entity({ name: 'mth_resource_settings' })
 export class Resource extends BaseEntity {
@@ -145,4 +146,13 @@ export class Resource extends BaseEntity {
   @Field(() => [ResourceLevel], { nullable: true })
   @Directive('@external')
   ResourceLevels: ResourceLevel[];
+
+  @ManyToOne(() => SchoolYear, (schoolyear) => schoolyear.Resources, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
+  @Field(() => SchoolYear, { nullable: true })
+  @Directive('@external')
+  SchoolYear: SchoolYear;
 }

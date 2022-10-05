@@ -5,6 +5,9 @@ export class UpdateImmunizationSettingsInput {
   @Field(() => Int, { nullable: true })
   id?: number;
 
+  @Field(() => Int)
+  region_id: number;
+
   @Field(() => String)
   title?: string;
 
@@ -27,7 +30,7 @@ export class UpdateImmunizationSettingsInput {
   exempt_update?: number;
 
   @Field(() => String, { nullable: true })
-  level_exempt_update?: string
+  level_exempt_update?: string;
 
   @Field(() => String, { nullable: true })
   email_update_template?: string;

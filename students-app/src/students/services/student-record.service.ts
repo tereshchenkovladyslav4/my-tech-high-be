@@ -159,9 +159,14 @@ export class StudentRecordService {
       fileKinds = JSON.parse(other);
     }
 
-    if (grades.length > 0) {
-      qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
+    if (grades.length == 0) {
+      return new Pagination<StudentRecord>({
+        results: [],
+        total: 0,
+      });
     }
+
+    qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
 
     if (studentIds.length > 0) {
       qb.andWhere('record.StudentId IN (:studentIds)', {
@@ -186,6 +191,7 @@ export class StudentRecordService {
       total: total,
     });
   }
+
   async createStudentRecord(
     studentId: number,
     regionId: number,
