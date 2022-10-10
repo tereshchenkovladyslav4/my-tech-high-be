@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, OneToOne } from 'typeorm';
 import { Resource } from './resource.entity';
 import { ScheduleBuilder } from './scheduler-builder.entity';
@@ -12,7 +12,7 @@ import { SchoolPartner } from './school-partner.entity';
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
   @Column()
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
   school_year_id?: number;
@@ -113,67 +113,67 @@ export class SchoolYear extends BaseEntity {
   midyear_application?: number;
 
   @Column('int', { name: 'RegionId', nullable: true })
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   RegionId?: number;
 
   @Column({ type: 'date' })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   birth_date_cut: string;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   @Directive('@external')
   special_ed: boolean;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   special_ed_options: string;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   @Directive('@external')
   enrollment_packet: boolean;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   grades: string;
 
   @Column({ type: 'varchar', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   testing_preference_title: string;
 
   @Column({ type: 'text', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   testing_preference_description: string;
 
   @Column({ type: 'varchar', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   opt_out_form_title: string;
 
   @Column({ type: 'text', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   opt_out_form_description: string;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   @Directive('@external')
   schedule: boolean;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   @Directive('@external')
   diploma_seeking: boolean;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   @Directive('@external')
   testing_preference: boolean;
 

@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -23,7 +23,7 @@ import { Subject } from './subject.entity';
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
   @Column()
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn({ type: 'int', name: 'school_year_id' })
   school_year_id: number;
 
@@ -101,55 +101,55 @@ export class SchoolYear extends BaseEntity {
   midyear_application?: number;
 
   @Column('int', { name: 'RegionId', nullable: true })
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   RegionId: number | null;
 
   @Column({ type: 'date' })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   birth_date_cut: string;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   special_ed: boolean;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   special_ed_options: string;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   enrollment_packet: boolean;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   grades: string;
 
   @Column({ type: 'varchar', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   testing_preference_title: string;
 
   @Column({ type: 'text', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   testing_preference_description: string;
 
   @Column({ type: 'varchar', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   opt_out_form_title: string;
 
   @Column({ type: 'text', nullable: true })
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   opt_out_form_description: string;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   schedule: boolean;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   diploma_seeking: boolean;
 
   @Column()
-  @Field((type) => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true })
   testing_preference: boolean;
 
   @Column({ type: 'date', nullable: true })

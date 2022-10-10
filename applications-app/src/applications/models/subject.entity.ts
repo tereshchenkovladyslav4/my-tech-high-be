@@ -13,13 +13,14 @@ import {
 import { SchoolYear } from './schoolyear.entity';
 import { Title } from './title.entity';
 import { Period } from './period.entity';
+import { Course } from './course.entity';
 
 @ObjectType()
 @Directive('@key(fields: "subject_id, SchoolYearId, name, priority, is_active, Titles, Periods")')
 @Entity({ name: 'mth_subject' })
 export class Subject extends BaseEntity {
   @Column('int', { name: 'subject_id', nullable: true })
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   subject_id?: number;
 
@@ -63,4 +64,8 @@ export class Subject extends BaseEntity {
   })
   @Field(() => [Period], { nullable: true })
   Periods: Period[];
+
+  @OneToMany(() => Course, (course) => course.Subject)
+  @Field(() => [Course], { nullable: true })
+  Courses: Course[];
 }

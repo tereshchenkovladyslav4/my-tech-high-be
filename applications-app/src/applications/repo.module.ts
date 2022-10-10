@@ -103,10 +103,13 @@ import { DiplomaAnswerService } from './services/diploma-answer.service';
 import { Period } from './models/period.entity';
 import { Title } from './models/title.entity';
 import { Subject } from './models/subject.entity';
-import { SubjectPeriod } from './models/subject-period.entity';
 import { SubjectService } from './services/subject.service';
 import { PeriodService } from './services/period.service';
 import { TitleService } from './services/title.service';
+import { ProviderService } from './services/provider.service';
+import { Provider } from './models/provider.entity';
+import { CourseService } from './services/course.service';
+import { Course } from './models/course.entity';
 
 const servicesImports = [
   UsersService,
@@ -165,6 +168,8 @@ const servicesImports = [
   SubjectService,
   TitleService,
   PeriodService,
+  ProviderService,
+  CourseService,
 ];
 
 @Global()
@@ -223,7 +228,8 @@ const servicesImports = [
       Period,
       Title,
       Subject,
-      SubjectPeriod,
+      Provider,
+      Course,
     ]),
   ],
   providers: [...servicesImports],

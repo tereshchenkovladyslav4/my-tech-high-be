@@ -58,9 +58,12 @@ import { SubjectResolver } from './resolvers/subject.resolver';
 import { Period } from './models/period.entity';
 import { Title } from './models/title.entity';
 import { Subject } from './models/subject.entity';
-import { SubjectPeriod } from './models/subject-period.entity';
 import { PeriodResolver } from './resolvers/period.resolver';
 import { TitleResolver } from './resolvers/title.resolver';
+import { ProviderResolver } from './resolvers/provider.resolver';
+import { Provider } from './models/provider.entity';
+import { CourseResolver } from './resolvers/course.resolver';
+import { Course } from './models/course.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -86,6 +89,8 @@ const graphQLImports = [
   SubjectResolver,
   PeriodResolver,
   TitleResolver,
+  ProviderResolver,
+  CourseResolver,
 ];
 @Module({
   imports: [
@@ -133,7 +138,8 @@ const graphQLImports = [
           Period,
           Title,
           Subject,
-          SubjectPeriod,
+          Provider,
+          Course,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

@@ -26,7 +26,9 @@ export class SubjectService {
       .leftJoinAndSelect(
         'subject.Titles',
         'Titles',
-        `Titles.deleted = false AND Titles.name LIKE '%${searchField}%' AND Titles.is_active = ${!!isActive}`,
+        `Titles.deleted = false ${
+          searchField ? 'AND Titles.name LIKE "%' + searchField + '%"' : ''
+        } AND Titles.is_active = ${!!isActive}`,
       )
       .where({ SchoolYearId: schoolYearId, deleted: false })
       .orderBy({

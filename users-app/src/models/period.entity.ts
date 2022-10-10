@@ -33,7 +33,11 @@ export class Period extends BaseEntity {
   @Field((type) => String, { nullable: true })
   grade_level_max: string;
 
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: REDUCE_FUNDS,
+    comment: 'NONE: NONE(default), SUPPLEMENTAL: SUPPLEMENTAL, TECHNOLOGY: TECHNOLOGY',
+  })
   @Field((type) => REDUCE_FUNDS, { nullable: true })
   reduce_funds?: REDUCE_FUNDS;
 
@@ -41,8 +45,11 @@ export class Period extends BaseEntity {
   @Field((type) => Int, { nullable: true })
   price?: number;
 
-  @Column()
-  @IsEnum(SEMESTER_TYPE)
+  @Column({
+    type: 'enum',
+    enum: SEMESTER_TYPE,
+    comment: 'NONE: NONE(default), PERIOD: PERIOD, SUBJECT: SUBJECT',
+  })
   @Field((type) => SEMESTER_TYPE, { nullable: true })
   semester?: SEMESTER_TYPE;
 

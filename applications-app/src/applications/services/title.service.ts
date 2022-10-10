@@ -15,6 +15,10 @@ export class TitleService {
     return await this.repo.createQueryBuilder('title').where({ subject_id: subjectId }).getMany();
   }
 
+  async findByIds(titleIds: (number | string)[]): Promise<Title[]> {
+    return await this.repo.findByIds(titleIds);
+  }
+
   async save(titleInput: CreateOrUpdateTitleInput): Promise<Title> {
     try {
       const result = await this.repo.save({ ...titleInput });

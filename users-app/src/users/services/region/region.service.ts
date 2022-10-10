@@ -22,18 +22,16 @@ export class RegionService {
 
   async getTimezoneDate(region_id: number): Promise<string> {
     const tzOffset = await this.timezoneOffset(region_id);
-    const nowDate = Moment().utcOffset(tzOffset).format(MYSQL_DATE_FORMAT);
-    return nowDate;
+    return Moment().utcOffset(tzOffset).format(MYSQL_DATE_FORMAT);
   }
 
   async findRegionById(region_id: number): Promise<Region> {
-    const data = await this.regionRepository.findOne({
+    return await this.regionRepository.findOne({
       where: {
         id: region_id,
       },
       relations: ['region', 'SchoolYears', 'SchoolYears.SchoolPartners', 'SchoolYears.ScheduleBuilder'],
     });
-    return data;
   }
 
   getAllRegions(): Promise<Region[]> {
@@ -42,8 +40,7 @@ export class RegionService {
 
   async createRegion(createRegionInput: CreateRegionInput): Promise<Region> {
     const data = this.regionRepository.create(createRegionInput);
-    const updatedRecord = await this.regionRepository.save(data);
-    return updatedRecord;
+    return await this.regionRepository.save(data);
   }
 
   async updateRegion(updateRegionInput: UpdateRegionInput): Promise<any> {
@@ -51,26 +48,18 @@ export class RegionService {
       const countyArray = JSON.parse(updateRegionInput.county_array);
       let values = '';
       for (let i = 0; i < countyArray.length; i++) {
-        if (i == 0)
-          values += `("${countyArray[i].county_name}", ${updateRegionInput.id})`;
-        else
-          values += `, ("${countyArray[i].county_name}", ${updateRegionInput.id})`;
+        if (i == 0) values += `("${countyArray[i].county_name}", ${updateRegionInput.id})`;
+        else values += `, ("${countyArray[i].county_name}", ${updateRegionInput.id})`;
       }
 
       if (values != '') {
-        await this.regionRepository.query(
-          `DELETE FROM infocenter.county WHERE Region_id = ${updateRegionInput.id}; `,
-        );
-        await this.regionRepository.query(
-          `INSERT INTO infocenter.county (county_name, Region_id) VALUES ${values} `,
-        );
+        await this.regionRepository.query(`DELETE FROM infocenter.county WHERE Region_id = ${updateRegionInput.id}; `);
+        await this.regionRepository.query(`INSERT INTO infocenter.county (county_name, Region_id) VALUES ${values} `);
       }
     }
 
     if (updateRegionInput.school_district_array) {
-      const schoolDistrictArray = JSON.parse(
-        updateRegionInput.school_district_array,
-      );
+      const schoolDistrictArray = JSON.parse(updateRegionInput.school_district_array);
       let values = '';
       for (let i = 0; i < schoolDistrictArray.length; i++) {
         if (i == 0)
@@ -96,10 +85,8 @@ export class RegionService {
       county_file_path: updateRegionInput.county_file_path,
       school_district_file_name: updateRegionInput.school_district_file_name,
       school_district_file_path: updateRegionInput.school_district_file_path,
-      application_deadline_num_days:
-        updateRegionInput.application_deadline_num_days,
-      enrollment_packet_deadline_num_days:
-        updateRegionInput.enrollment_packet_deadline_num_days,
+      application_deadline_num_days: updateRegionInput.application_deadline_num_days,
+      enrollment_packet_deadline_num_days: updateRegionInput.enrollment_packet_deadline_num_days,
       withdraw_deadline_num_days: updateRegionInput.withdraw_deadline_num_days,
       resource_confirm_details: updateRegionInput.resource_confirm_details,
     };
@@ -116,7 +103,7 @@ export class RegionService {
     }
   }
 
-  async removeRegionById(region_id: number): Promise<String> {
+  async removeRegionById(region_id: number): Promise<string> {
     const data = await this.regionRepository.delete(region_id);
     if (data.affected > 0) {
       return 'Region Removed';
@@ -125,10 +112,8 @@ export class RegionService {
     }
   }
 
-  async removeCountyInfoByRegionId(region_id: number): Promise<String> {
-    await this.regionRepository.query(
-      `DELETE FROM infocenter.county WHERE Region_id = ${region_id};`,
-    );
+  async removeCountyInfoByRegionId(region_id: number): Promise<string> {
+    await this.regionRepository.query(`DELETE FROM infocenter.county WHERE Region_id = ${region_id};`);
 
     let attachmentId = '';
     let fileId = '';
@@ -153,10 +138,8 @@ export class RegionService {
     return fileId;
   }
 
-  async removeSchoolDistrictInfoByRegionId(region_id: number): Promise<String> {
-    await this.regionRepository.query(
-      `DELETE FROM infocenter.school_district WHERE Region_id = ${region_id};`,
-    );
+  async removeSchoolDistrictInfoByRegionId(region_id: number): Promise<string> {
+    await this.regionRepository.query(`DELETE FROM infocenter.school_district WHERE Region_id = ${region_id};`);
 
     let attachmentId = '';
     let fileId = '';
@@ -181,11 +164,7 @@ export class RegionService {
     return fileId;
   }
 
-  async saveRegionDeadlines(
-    region_id: number,
-    deadline: number,
-    category: string,
-  ): Promise<any> {
+  async saveRegionDeadlines(region_id: number, deadline: number, category: string): Promise<any> {
     console.log('region: ', region_id);
     if (category == 'Applications')
       return await getConnection()

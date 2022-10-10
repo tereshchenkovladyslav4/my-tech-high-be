@@ -30,6 +30,7 @@ export class ResourceService {
     const queryRunner = await getConnection().createQueryRunner();
     const now = await this.timezoneService.getTimezoneDate(1);
     // TODO Total requests should be calculated for only accepted requests
+    // TODO Have to filter by active school years for the student
     const data = await this.repo
       .createQueryBuilder('resource')
       .leftJoinAndSelect('resource.HiddenStudents', 'HiddenStudents', `HiddenStudents.student_id=${studentId}`)
@@ -39,7 +40,7 @@ export class ResourceService {
       .leftJoinAndSelect('resource.SchoolYear', 'SchoolYear')
       .loadRelationCountAndMap('resource.TotalRequests', 'resource.ResourceRequests')
       .loadRelationCountAndMap('ResourceLevels.TotalRequests', 'ResourceLevels.ResourceRequests')
-      //.where({ SchoolYearId: schoolYearId, is_active: 1 })
+      .where({ is_active: 1 })
       .andWhere(`find_in_set('${gradeLevel}',resource.grades) <> 0`)
       .andWhere(`SchoolYear.homeroom_resource_open <= '${now}'`)
       .andWhere(`SchoolYear.homeroom_resource_close >= '${now}'`)

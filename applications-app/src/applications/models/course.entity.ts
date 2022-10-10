@@ -1,20 +1,21 @@
 import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Subject } from './subject.entity';
-import { Course } from './course.entity';
+import { Title } from './title.entity';
+import { Provider } from './provider.entity';
 
 @ObjectType()
-@Directive('@key(fields: "title_id, subject_id, name, is_active, deleted, Subject")')
-@Entity('mth_title')
-export class Title {
-  @Column('int', { name: 'title_id', nullable: true })
+@Directive('@key(fields: "id, provider_id")')
+@Entity('mth_course')
+export class Course {
+  @Column('int', { name: 'id', nullable: true })
   @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
-  title_id: number;
+  id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  subject_id?: number;
+  provider_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
@@ -36,9 +37,41 @@ export class Title {
   @Field(() => String, { nullable: true })
   max_alt_grade: string;
 
+  @Column('tinyint', { name: 'always_unlock', default: false })
+  @Field(() => Boolean, { nullable: true })
+  always_unlock: boolean;
+
+  @Column('tinyint', { name: 'software_reimbursement', default: false })
+  @Field(() => Boolean, { nullable: true })
+  software_reimbursement: boolean;
+
+  @Column('tinyint', { name: 'display_notification', default: false })
+  @Field(() => Boolean, { nullable: true })
+  display_notification: boolean;
+
+  @Column('text', { nullable: true })
+  @Field(() => String, { nullable: true })
+  course_notification: string;
+
+  @Column('tinyint', { name: 'launchpad_course', default: false })
+  @Field(() => Boolean, { nullable: true })
+  launchpad_course: boolean;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  course_id?: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  website: string;
+
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   diploma_seeking_path: string;
+
+  @Column('int', { name: 'limit', nullable: true })
+  @Field(() => Int, { nullable: true })
+  limit: number | null;
 
   @Column()
   @Field(() => String, { nullable: true })
@@ -57,49 +90,9 @@ export class Title {
   @Field(() => String, { nullable: true })
   reduce_funds_notification: string;
 
-  @Column('text', { nullable: true })
-  @Field(() => String, { nullable: true })
-  custom_built_description: string;
-
-  @Column('text', { nullable: true })
-  @Field(() => String, { nullable: true })
-  subject_notification: string;
-
-  @Column('tinyint', { name: 'always_unlock', default: false })
-  @Field(() => Boolean, { nullable: true })
-  always_unlock: boolean;
-
-  @Column('tinyint', { name: 'custom_built', default: false })
-  @Field(() => Boolean, { nullable: true })
-  custom_built: boolean;
-
-  @Column('tinyint', { name: 'third_party_provider', default: false })
-  @Field(() => Boolean, { nullable: true })
-  third_party_provider: boolean;
-
-  @Column('tinyint', { name: 'split_enrollment', default: false })
-  @Field(() => Boolean, { nullable: true })
-  split_enrollment: boolean;
-
-  @Column('tinyint', { name: 'software_reimbursement', default: false })
-  @Field(() => Boolean, { nullable: true })
-  software_reimbursement: boolean;
-
-  @Column('tinyint', { name: 'display_notification', default: false })
-  @Field(() => Boolean, { nullable: true })
-  display_notification: boolean;
-
-  @Column('tinyint', { name: 'launchpad_course', default: false })
-  @Field(() => Boolean, { nullable: true })
-  launchpad_course: boolean;
-
-  @Column({ nullable: true })
-  @Field(() => String, { nullable: true })
-  course_id?: string;
-
-  @Column('text', { nullable: true })
-  @Field(() => String, { nullable: true })
-  state_course_codes: string;
+  @Column()
+  @Field(() => ID, { nullable: true })
+  subject_id?: number;
 
   @Column('tinyint', { name: 'is_active', default: true })
   @Field(() => Boolean, { nullable: true })
@@ -109,7 +102,15 @@ export class Title {
   @Field(() => Boolean, { nullable: true })
   deleted: boolean;
 
-  @ManyToOne(() => Subject, (subject) => subject.Titles, {
+  @ManyToOne(() => Provider, (provider) => provider.Courses, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'provider_id', referencedColumnName: 'id' }])
+  @Field(() => Provider, { nullable: true })
+  Provider: Provider;
+
+  @ManyToOne(() => Subject, (subject) => subject.Courses, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
@@ -117,10 +118,12 @@ export class Title {
   @Field(() => Subject, { nullable: true })
   Subject: Subject;
 
-  @ManyToMany(() => Course, (course) => course.Titles, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
+  @ManyToMany(() => Title, (title) => title.Courses)
+  @JoinTable({
+    name: 'mth_course_title',
+    joinColumn: { name: 'course_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'title_id', referencedColumnName: 'title_id' },
   })
-  @Field(() => [Course], { nullable: true })
-  Courses: Course[];
+  @Field(() => [Title], { nullable: true })
+  Titles: Title[];
 }

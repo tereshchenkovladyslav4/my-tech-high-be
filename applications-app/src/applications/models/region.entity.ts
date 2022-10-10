@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, OneToMany } from 'typeorm';
 import { Announcement } from './announcement.entity';
 import { EventType } from './event-type.entity';
@@ -12,28 +12,28 @@ import { ImmunizationSettings } from './immunization-settings.entity';
 @Entity({ name: 'region' })
 export class Region extends BaseEntity {
   @Column()
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   @Directive('@external')
   id: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   name: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   program: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   state_logo: string;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   enrollment_packet_deadline_num_days: number;
 

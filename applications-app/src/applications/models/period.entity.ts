@@ -1,6 +1,7 @@
 import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany, JoinTable } from 'typeorm';
 import { Subject } from './subject.entity';
+import { Provider } from './provider.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -37,11 +38,13 @@ export class Period extends BaseEntity {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  @JoinTable({
-    name: 'mth_subject_period',
-    joinColumn: { name: 'period_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'subject_id', referencedColumnName: 'subject_id' },
-  })
   @Field(() => [Subject], { nullable: true })
   Subjects: Subject[];
+
+  @ManyToMany(() => Provider, (provider) => provider.Periods, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @Field(() => [Provider], { nullable: true })
+  Providers: Provider[];
 }

@@ -17,10 +17,10 @@ export class PeriodResolver {
   @UseGuards(new AuthGuard())
   get(
     @Args({ name: 'school_year_id', type: () => ID }) school_year_id: number,
-    @Args({ name: 'hide_archived', type: () => Boolean, nullable: true }) hide_archived: boolean,
+    @Args({ name: 'archived', type: () => Boolean, nullable: true }) archived: boolean,
     @Args({ name: 'keyword', type: () => String, nullable: true }) keyword: string,
   ): Promise<Period[]> {
-    return this.service.find(school_year_id, hide_archived, keyword);
+    return this.service.find(school_year_id, archived, keyword);
   }
   // ===========================================================================================================
   // GET: Saved Period indexes (0 - max_num_periods)

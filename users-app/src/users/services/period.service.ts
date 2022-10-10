@@ -17,9 +17,12 @@ export class PeriodService {
 
   // ===========================================================================================================
   // find all
-  async find(school_year_id: number, hide_archived: boolean, keyword?: string): Promise<Period[]> {
+  async find(school_year_id: number, archived?: boolean, keyword?: string): Promise<Period[]> {
     const qb = createQueryBuilder(Period).where('school_year_id = :school_year_id', { school_year_id });
-    if (hide_archived) qb.andWhere('`archived` <> 1');
+    // archived
+    if (archived === true) qb.andWhere('`archived` = 1');
+    else if (archived === false) qb.andWhere('`archived` = 0');
+    // keyword
     if (keyword) {
       qb.andWhere(
         new Brackets((sub) => {
