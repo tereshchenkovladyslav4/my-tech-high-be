@@ -35,6 +35,15 @@ export class PeriodService {
     }
     return await qb.getMany();
   }
+  // find all saved period indexes for validation
+  async findPeriodByIds(school_year_id: number): Promise<Period[]> {
+    const items = await createQueryBuilder(Period)
+      .where('school_year_id = :school_year_id', { school_year_id })
+      .getMany();
+
+    return items;
+  }
+
   // ===========================================================================================================
   // find all saved period indexes for validation
   async findIds(school_year_id: number): Promise<number[]> {

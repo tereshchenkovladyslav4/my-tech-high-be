@@ -251,9 +251,10 @@ export class ApplicationsService {
 
           emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
           const emailSubject = await setAdditionalLinksInfo(emailTemplate.subject, school_year, student);
+
           await this.emailsService.sendEmail({
             email: person?.email,
-            subject: emailTemplate.subject,
+            subject: emailSubject,
             content: emailBody,
             bcc: emailTemplate.bcc,
             from: emailTemplate.from,

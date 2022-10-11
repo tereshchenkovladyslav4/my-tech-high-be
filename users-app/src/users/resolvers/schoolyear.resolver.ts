@@ -5,10 +5,11 @@ import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
 import { SchoolYearsService } from '../services/schoolyear.service';
+import { PeriodService } from '../services/period.service';
 
 @Resolver((of) => SchoolYear)
 export class SchoolYearResolver {
-  constructor(private schoolYearsService: SchoolYearsService) {}
+  constructor(private schoolYearsService: SchoolYearsService, private periodService: PeriodService) {}
 
   @Query((returns) => SchoolYear, { name: 'getSchoolYear' })
   async getSchoolYear(@Args({ name: 'school_year_id', type: () => ID }) school_year_id: number): Promise<SchoolYear> {
@@ -42,7 +43,44 @@ export class SchoolYearResolver {
     @Args('createSchoolYearInput') createSchoolYearInput: CreateSchoolYearInput,
     @Args('previousYearId') previousYearId?: number,
   ): Promise<SchoolYear> {
-    const response = this.schoolYearsService.createSchoolYear(createSchoolYearInput, previousYearId);
+    const response = await this.schoolYearsService.createSchoolYear(createSchoolYearInput, previousYearId);
+    // clone schedulebuilder(already done) and period
+    if (createSchoolYearInput.cloneSchoolYearId) {
+      const previousPeriods = await this.periodService.findPeriodByIds(createSchoolYearInput.cloneSchoolYearId);
+      for (let i = 0; i < previousPeriods.length; i++) {
+        const clonePeriod = previousPeriods[i];
+        const {
+          school_year_id,
+          period,
+          category,
+          grade_level_min,
+          grade_level_max,
+          reduce_funds,
+          price,
+          semester,
+          message_semester,
+          message_period,
+          notify_semester,
+          notify_period,
+          archived,
+        } = clonePeriod;
+        const newOne = await this.periodService.upsert({
+          school_year_id: response.school_year_id,
+          period,
+          category,
+          grade_level_min,
+          grade_level_max,
+          reduce_funds,
+          price,
+          semester,
+          message_semester,
+          message_period,
+          notify_semester,
+          notify_period,
+          archived,
+        });
+      }
+    }
     return response;
   }
 

@@ -151,24 +151,29 @@ export class EnrollmentsService {
           studentPerson.parent?.person?.user_id,
         );
 
-        var region_id = 1;
+        let region_id = 1;
         if (regions.length != 0) {
           region_id = regions[0].region_id;
         }
 
         const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(templates[status], region_id);
+        const application = studentPerson.applications.at(-1);
 
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {
             const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
             const yearend = new Date(school_year.date_end).getFullYear().toString();
 
+            const yearText = application.midyear_application
+              ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+              : `${yearbegin}-${yearend.substring(2, 4)}`;
+
             return emailTemplate.body
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
-              .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-              .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+              .replace(/\[YEAR\]/g, yearText)
+              .replace(/\[APPLICATION_YEAR\]/g, yearText)
               .replace(/\[DEADLINE\]/g, `${Moment().format('MM/DD/yy')}`);
           };
 
@@ -176,16 +181,20 @@ export class EnrollmentsService {
             const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
             const yearend = new Date(school_year.date_end).getFullYear().toString();
 
+            const yearText = application.midyear_application
+              ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+              : `${yearbegin}-${yearend.substring(2, 4)}`;
+
             return emailTemplate.subject
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
-              .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
-              .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+              .replace(/\[YEAR\]/g, yearText)
+              .replace(/\[APPLICATION_YEAR\]/g, yearText)
               .replace(/\[DEADLINE\]/g, `${Moment().format('MM/DD/yy')}`);
           };
-          const gradeLevels = await this.studentGradeLevelsService.forStudents(tmp.student_id);
-          const school_year = await this.schoolYearService.findOneById(school_year_id || gradeLevels[0].school_year_id);
+          // const gradeLevels = await this.studentGradeLevelsService.forStudents(tmp.student_id);
+          const school_year = await this.schoolYearService.findOneById(application.school_year_id);
           const body = setEmailBodyInfo(studentPerson, school_year);
           const emailSubject = setEmailSubjectInfo(studentPerson, school_year);
 

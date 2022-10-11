@@ -21,6 +21,7 @@ export class StudentsService {
       relations: [
         'person',
         'parent',
+        'applications',
         'parent.person',
         'grade_levels',
         'student_grade_level',

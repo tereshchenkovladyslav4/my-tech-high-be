@@ -524,6 +524,7 @@ export class ApplicationsService {
     const [results, total] = await this.applicationsRepository
       .createQueryBuilder('application')
       .leftJoinAndSelect('application.student', 'student')
+      .leftJoinAndSelect('application.school_year', 'school_year')
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'person')
@@ -553,9 +554,7 @@ export class ApplicationsService {
     }
 
     const setEmailBodyInfo = (student, school_year, application) => {
-      const yearbegin = new Date(school_year.date_begin)
-        .getFullYear()
-        .toString();
+      const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
 
       const yearText = application.midyear_application
@@ -571,9 +570,7 @@ export class ApplicationsService {
     };
 
     const setEmailSubjectInfo = (student, school_year, application) => {
-      const yearbegin = new Date(school_year.date_begin)
-        .getFullYear()
-        .toString();
+      const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
 
       const yearText = application.midyear_application
@@ -590,14 +587,10 @@ export class ApplicationsService {
 
     for (let index = 0; index < results.length; index++) {
       const item = results[index];
-      const gradeLevels = await this.studentGradeLevelsService.forStudents(
-        item.student.student_id,
-      );
-      const school_year = await this.schoolYearService.findOneById(
-        gradeLevels[0].school_year_id,
-      );
-      const emailBody = setEmailBodyInfo(item.student, school_year, item);
-      const emailSubject = setEmailSubjectInfo(item.student, school_year, item);
+      // const gradeLevels = await this.studentGradeLevelsService.forStudents(item.student.student_id);
+      // const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id);
+      const emailBody = setEmailBodyInfo(item.student, item.school_year, item);
+      const emailSubject = setEmailSubjectInfo(item.student, item.school_year, item);
 
       const result = await this.sesEmailService.sendEmail({
         email: item.student.parent.person.email,
