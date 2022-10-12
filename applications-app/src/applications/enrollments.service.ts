@@ -157,7 +157,7 @@ export class EnrollmentsService {
         }
 
         const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(templates[status], region_id);
-        const application = studentPerson.applications.at(-1);
+        const application = studentPerson.applications[0];
 
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {
@@ -209,6 +209,8 @@ export class EnrollmentsService {
           });
         }
       }
+
+      console.log(studentPacket);
 
       return {
         packet: studentPacket,

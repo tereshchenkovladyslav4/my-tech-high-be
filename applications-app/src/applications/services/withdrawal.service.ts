@@ -169,7 +169,7 @@ export class WithdrawalService {
       await queryRunner.release();
       return true;
     } catch (error) {
-      return false;
+      throw new ServiceUnavailableException(error, `${withdrawalInput}`);
     }
   }
 
@@ -355,6 +355,7 @@ export class WithdrawalService {
   async runScheduleReminders(remind_date = 0): Promise<string> {
     try {
       const queryRunner = await getConnection().createQueryRunner();
+      const webAppUrl = process.env.WEB_APP_URL;
       // Automatically make a student as "Undeclared" when parent does not submit withdraw form by deadline and send parents an email notification
       const withdrawals = await queryRunner.query(`
         SELECT
@@ -390,10 +391,15 @@ export class WithdrawalService {
 					withdrawal.*,
 					region.withdraw_deadline_num_days - withdrawal.diff_date AS remain_date,
 					region.id AS region_id,
+          application.midyear_application as midyear_application,
 					person.email AS parent_email,
 					templates.id AS email_templates_id,
 					templates.bcc AS email_bcc,
 					templates.from AS email_from
+          studentInfo.first_name AS student_name,
+          person.first_name AS parent_name,
+          schoolYear.date_begin AS date_begin,
+          schoolYear.date_end AS date_end
 				FROM (
 					SELECT StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal WHERE status='${
             WithdrawalStatus.NOTIFIED
@@ -403,6 +409,7 @@ export class WithdrawalService {
 				LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
 				LEFT JOIN infocenter.region region ON (region.id = schoolYear.RegionId)
 				LEFT JOIN infocenter.mth_student student ON (student.student_id = withdrawal.student_id)
+        LEFT JOIN infocenter.mth_person studentInfo ON (studentInfo.person_id = student.person_id)
 				LEFT JOIN infocenter.mth_parent parent ON (parent.parent_id = student.parent_id)
 				LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
 				LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Notify of Withdraw' AND templates.region_id = schoolYear.RegionId)
@@ -412,16 +419,52 @@ export class WithdrawalService {
 			`);
       await queryRunner.release();
       reminders.map(async (reminder) => {
-        const { remain_date, parent_email, email_templates_id, email_bcc, email_from } = reminder;
+        const {
+          remain_date,
+          parent_email,
+          email_templates_id,
+          email_bcc,
+          email_from,
+          student_name,
+          parent_name,
+          date_begin,
+          date_end,
+          midyear_application,
+          student_id,
+        } = reminder;
+        const yearBegin = new Date(date_begin).getFullYear().toString();
+        const yearEnd = new Date(date_end).getFullYear().toString();
+
+        const link = `${webAppUrl}/parent-link/withdrawal/${student_id}`;
+
+        const yearText = midyear_application
+          ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+          : `${yearBegin}-${yearEnd.substring(2, 4)}`;
+
         const emailReminders = await this.emailReminderService.findByTemplateIdAndReminder(
           email_templates_id,
           Number(remain_date),
         );
         emailReminders.map(async (emailReminder) => {
+          const deadline = new Date();
+          deadline.setDate(deadline.getDate() + remain_date);
+
           await this.emailService.sendEmail({
             email: parent_email,
-            subject: emailReminder.subject,
-            content: emailReminder.body,
+            subject: emailReminder.subject
+              .toString()
+              .replace(/\[STUDENT\]/g, student_name)
+              .replace(/\[PARENT\]/g, parent_name)
+              .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`)
+              .replace(/\[DEADLINE\]/g, `${Moment(deadline).format('MM/DD/yy')}`)
+              .replace(/\[YEAR\]/g, yearText),
+            content: emailReminder.body
+              .toString()
+              .replace(/\[STUDENT\]/g, student_name)
+              .replace(/\[PARENT\]/g, parent_name)
+              .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`)
+              .replace(/\[DEADLINE\]/g, `${Moment(deadline).format('MM/DD/yy')}`)
+              .replace(/\[YEAR\]/g, yearText),
             bcc: email_bcc,
             from: email_from,
             template_name: 'Withdrawal Reminder',
@@ -474,7 +517,7 @@ export class WithdrawalService {
       });
       return 'Successfully run schedule reminders.';
     } catch (error) {
-      return error;
+      throw new ServiceUnavailableException(error);
     }
   }
 
@@ -711,7 +754,7 @@ export class WithdrawalService {
       );
       return true;
     } catch (e) {
-      return false;
+      throw new ServiceUnavailableException(e, `${param}`);
     }
   }
 
@@ -775,7 +818,6 @@ export class WithdrawalService {
       if (!studentId) throw new ServiceUnavailableException(`Not found student Id: ${withdrawalId}`);
 
       const questions = withdraw?.response ? JSON.parse(withdraw.response) : null;
-      if (!questions?.length) throw new ServiceUnavailableException(`Not found questions: ${withdrawalId}`);
 
       if (questions?.length) {
         questions.map((item) => {
@@ -831,7 +873,7 @@ export class WithdrawalService {
 
       const uploadFile = await this.filesService.upload(
         pdfBuffer,
-        S3DirectoryStudentRecords(schoolYear.region.name, withdraw.StudentId),
+        S3DirectoryStudentRecords(schoolYear.region?.name, withdraw.StudentId),
         'withdraw_form',
         'application/pdf',
         yearBegin,

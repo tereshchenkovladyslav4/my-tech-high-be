@@ -125,7 +125,7 @@ export class ApplicationsService {
     const user = await this.usersService.findOneByEmail(email);
     const regions = await this.userRegionService.findUserRegionByUserId(user.user_id);
 
-    var region_id = 1;
+    let region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
@@ -215,7 +215,7 @@ export class ApplicationsService {
     const person = await this.personsService.findOneById(parent.person_id);
     const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(person.user_id);
 
-    var region_id = 1;
+    let region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }

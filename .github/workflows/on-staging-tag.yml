@@ -39,10 +39,10 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:applications-app ./applications-app/
           docker push $REGISTRY/$REPOSITORY:applications-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-applications-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
-          aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
           ECS_CLUSTER: infocenter-v2-be--staging
+          ECS_SERVICE: staging-applications-app
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-staging
 
@@ -82,10 +82,10 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:authentication ./authentication/
           docker push $REGISTRY/$REPOSITORY:authentication
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-authentication" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
-          aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
           ECS_CLUSTER: infocenter-v2-be--staging
+          ECS_SERVICE: staging-authentication
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-staging
 
@@ -125,10 +125,10 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:students-app ./students-app/
           docker push $REGISTRY/$REPOSITORY:students-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-students-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
-          aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
           ECS_CLUSTER: infocenter-v2-be--staging
+          ECS_SERVICE: staging-students-app
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-staging
 
@@ -168,10 +168,10 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:users-app ./users-app/
           docker push $REGISTRY/$REPOSITORY:users-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-users" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
-          aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
           ECS_CLUSTER: infocenter-v2-be--staging
+          ECS_SERVICE: staging-users
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-staging
 
@@ -211,10 +211,10 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:media-app ./media-app/
           docker push $REGISTRY/$REPOSITORY:media-app
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-media-app" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
-          aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
           ECS_CLUSTER: infocenter-v2-be--staging
+          ECS_SERVICE: staging-media-app
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-staging
 
@@ -255,10 +255,10 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:gateway ./gateway/
           docker push $REGISTRY/$REPOSITORY:gateway
-          OLD_TASK_ID=$(aws ecs list-tasks --cluster $ECS_CLUSTER  --service "staging-gateway" --desired-status RUNNING | egrep "task/" | sed -E "s/.*task\/(.*)\"/\1/")
-          aws ecs stop-task --cluster $ECS_CLUSTER --task ${OLD_TASK_ID}
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
           ECS_CLUSTER: infocenter-v2-be--staging
+          ECS_SERVICE: staging-gateway
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: infocenter-v2-be-staging
 

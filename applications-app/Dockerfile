@@ -28,12 +28,16 @@ COPY . .
 
 RUN npm run build
 
+RUN npm run db:migrate
+
 EXPOSE 3004
 
 FROM node:12.22.12-alpine as production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
+
+ARG ENVIRONMENT=""
 
 RUN apk add fontconfig ttf-dejavu
 # if ever you need to change phantom js version number in future ENV comes handy as it can be used as a dynamic variable
@@ -59,6 +63,8 @@ COPY package*.json ./
 RUN npm install --only=production
 
 COPY . .
+
+COPY .${ENVIRONMENT}.env .env
 
 COPY --from=development /usr/src/app/dist ./dist
 
