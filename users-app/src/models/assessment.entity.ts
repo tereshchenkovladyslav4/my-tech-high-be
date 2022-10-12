@@ -4,49 +4,53 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   BaseEntity,
-  ManyToOne,
-  JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
 import { AssessmentOption } from './assessment-option.entity';
-import { SchoolYear } from './schoolyear.entity';
-import { StudentAssessmentOption } from './student-assessment-option.entity';
 
 @ObjectType()
 @Directive(
   '@key(fields: "assessment_id, SchoolYearId, test_name, grades, information, information, priority, is_archived, Options")',
 )
+@Directive('@extends')
 @Entity({ name: 'mth_assessment' })
 export class Assessment extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn({ type: 'int', name: 'assessment_id' })
+  @Directive('@external')
   assessment_id: number;
 
   @Column({ type: 'int', name: 'SchoolYearId' })
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   SchoolYearId: number;
 
   @Column({ type: 'varchar' })
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   test_name: string;
 
   @Column({ type: 'varchar' })
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   grades: string;
 
   @Column({ type: 'text' })
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   information: string;
 
   @Column('int', { name: 'priority', nullable: true })
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   priority: number;
 
   @Column('tinyint', { name: 'is_archived', default: true })
   @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   is_archived: boolean;
 
   @CreateDateColumn()
@@ -55,16 +59,8 @@ export class Assessment extends BaseEntity {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Assessments)
-  @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
-  @Field(() => SchoolYear, { nullable: true })
-  SchoolYear: SchoolYear;
-
   @OneToMany(() => AssessmentOption, (assessment) => assessment.Assessment)
   @Field(() => [AssessmentOption], { nullable: true })
+  @Directive('@external')
   Options: AssessmentOption[];
-
-  @OneToMany(() => StudentAssessmentOption, (studentAssessmentOption) => studentAssessmentOption.Assessment)
-  @Field(() => [StudentAssessmentOption], { nullable: true })
-  StudentAssessments: StudentAssessmentOption[];
 }

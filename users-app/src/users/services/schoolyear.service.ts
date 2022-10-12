@@ -11,6 +11,9 @@ import { DiplomaService } from './diploma.service';
 import { RegionService } from './region/region.service';
 import { ScheduleBuilderService } from './schedule-builder.service';
 import { SchoolPartnerService } from './school-partner.service';
+import { AssessmentService } from './assessment.service';
+import { ResourceService } from './resource.service';
+
 @Injectable()
 export class SchoolYearsService {
   constructor(
@@ -18,9 +21,10 @@ export class SchoolYearsService {
     private schoolYearsRepository: Repository<SchoolYear>,
     private schoolPartnerService: SchoolPartnerService,
     private scheduleBuilderService: ScheduleBuilderService,
-
     private regionService: RegionService,
     private diplomaService: DiplomaService,
+    private assessmentService: AssessmentService,
+    private resourceService: ResourceService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -135,69 +139,11 @@ export class SchoolYearsService {
     }
 
     if (createSchoolYearInput.cloneSchoolYearId) {
-      // Clone homeroom resources
+      // Clone homeroom resources, assessments, diploma question...
       const newSchoolYearId = updatedRecord.school_year_id;
-
-      const queryRunner = await getConnection().createQueryRunner();
-      const resources = await queryRunner.query(
-        `SELECT
-          resource.*
-        FROM infocenter.mth_resource_settings AS resource
-        WHERE
-          SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}
-        ORDER BY resource_id ASC`,
-      );
-      const assessments = await queryRunner.query(
-        `
-          SELECT
-            assessment.*
-          FROM infocenter.mth_assessment AS assessment
-          WHERE
-            SchoolYearId = ${createSchoolYearInput.cloneSchoolYearId}
-          ORDER BY assessment_id
-        `,
-      );
-
-      for (let index = 0; index < resources.length; index++) {
-        const {
-          title,
-          image,
-          subtitle,
-          price,
-          website,
-          grades,
-          std_user_name,
-          std_password,
-          detail,
-          priority,
-          is_active,
-          resource_limit,
-          add_resource_level,
-          family_resource,
-        } = resources[index];
-        await queryRunner.query(
-          `INSERT INTO infocenter.mth_resource_settings
-            (SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource)
-          VALUES
-            (${newSchoolYearId}, "${title}", "${image}", "${subtitle}", ${price}, "${website}", "${grades}", "${std_user_name}", "${std_password}", "${detail}", ${priority}, ${is_active}, ${resource_limit}, ${add_resource_level}, ${family_resource});`,
-        );
-      }
-
-      for (let index = 0; index < assessments.length; index++) {
-        const { test_name, grades, information, priority, is_archived, option1, option_list } = assessments[index];
-        await queryRunner.query(
-          `INSERT INTO infocenter.mth_assessment
-            (SchoolYearId, test_name, grades, information, priority, is_archived, option1, option_list)
-          VALUES
-            (${newSchoolYearId}, "${test_name}", "${grades}", "${information}", ${priority}, "${is_archived}", '${option1}', '${option_list}');`,
-        );
-      }
-      queryRunner.release();
-
-      await this.diplomaService.cloneDiplomaQuestion(
-        createSchoolYearInput.cloneSchoolYearId,
-        updatedRecord.school_year_id,
-      );
+      await this.resourceService.cloneForSchoolYear(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
+      await this.assessmentService.cloneForSchoolYear(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
+      await this.diplomaService.cloneDiplomaQuestion(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
     }
     return updatedRecord;
   }

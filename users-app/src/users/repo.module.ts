@@ -51,6 +51,12 @@ import { Period } from 'src/models/period.entity';
 import { PeriodService } from './services/period.service';
 import { Resource } from 'src/models/resource.entity';
 import { ResourceLevel } from 'src/models/resource-level.entity';
+import { Assessment } from '../models/assessment.entity';
+import { AssessmentOption } from '../models/assessment-option.entity';
+import { AssessmentService } from './services/assessment.service';
+import { AssessmentOptionService } from './services/assessment-option.service';
+import { ResourceService } from './services/resource.service';
+import { ResourceLevelService } from './services/resource-level.service';
 
 const RepoServices = [
   UsersService,
@@ -76,6 +82,10 @@ const RepoServices = [
   ScheduleBuilderService,
   DiplomaService,
   PeriodService,
+  AssessmentService,
+  AssessmentOptionService,
+  ResourceService,
+  ResourceLevelService,
 ];
 
 @Global()
@@ -113,6 +123,8 @@ const RepoServices = [
       Period,
       Resource,
       ResourceLevel,
+      Assessment,
+      AssessmentOption,
     ]),
   ],
   providers: RepoServices,

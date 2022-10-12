@@ -140,15 +140,15 @@ export class SchoolYear extends BaseEntity {
   @Field(() => String, { nullable: true })
   opt_out_form_description: string;
 
-  @Column()
+  @Column('tinyint', { name: 'schedule', default: false })
   @Field(() => Boolean, { nullable: true })
   schedule: boolean;
 
-  @Column()
+  @Column('tinyint', { name: 'diploma_seeking', default: false })
   @Field(() => Boolean, { nullable: true })
   diploma_seeking: boolean;
 
-  @Column()
+  @Column('tinyint', { name: 'testing_preference', default: false })
   @Field(() => Boolean, { nullable: true })
   testing_preference: boolean;
 
