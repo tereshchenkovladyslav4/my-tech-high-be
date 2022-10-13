@@ -13,8 +13,8 @@ export class PacketFilesService {
     @InjectRepository(PacketFile)
     private readonly packetFilesRepository: Repository<PacketFile>,
     @InjectRepository(File)
-    private readonly filesRepository: Repository<File>
-  ) { }
+    private readonly filesRepository: Repository<File>,
+  ) {}
 
   async findOneById(file_id: number): Promise<PacketFile> {
     return this.packetFilesRepository.findOne(file_id);
@@ -22,7 +22,7 @@ export class PacketFilesService {
 
   async getSignatureFile(file_id: number): Promise<File> {
     const packetFile = await this.packetFilesRepository.findOne(file_id);
-    if (!packetFile) return null
+    if (!packetFile) return null;
     const file = await this.filesRepository.findOne(packetFile.mth_file_id);
     file.signedUrl = await this.s3Service.getObjectSignedUrl(file.item1);
     return file;
@@ -31,30 +31,21 @@ export class PacketFilesService {
   async findByPacket(packet_id: number): Promise<PacketFile[]> {
     return this.packetFilesRepository.find({
       where: {
-        packet_id: packet_id
-      }
+        packet_id: packet_id,
+      },
     });
   }
 
-  async createMany( packet_id: number, documents: DocumentItemInput[] ): Promise<any> {
+  async createMany(packet_id: number, documents: DocumentItemInput[]): Promise<any> {
+    const files = [];
+    documents.map((item, i) => {
+      files.push({
+        packet_id,
+        mth_file_id: item.mth_file_id,
+        kind: item.kind,
+      });
+    });
 
-    let files = [];
-        documents.map( (item, i) => {
-            files.push({
-                packet_id,
-                mth_file_id: item.mth_file_id,
-                kind: item.kind
-            })
-        } );
-
-
-    return await getConnection()
-        .createQueryBuilder()
-        .insert()
-        .into(PacketFile)
-        .values(files)
-        .orIgnore()
-        .execute();
+    return await getConnection().createQueryBuilder().insert().into(PacketFile).values(files).orIgnore().execute();
   }
-  
 }

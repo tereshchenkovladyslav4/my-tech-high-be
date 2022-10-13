@@ -12,14 +12,10 @@ export class SESService {
   });
 
   async sendEmail(recipientEmail, subject, content, bcc?, from?): Promise<boolean> {
-    const BccAddresses = bcc
-      ? bcc.replace(/\s+/g, '').split(';').join(',').split(',')
-      : undefined;
+    const BccAddresses = bcc ? bcc.replace(/\s+/g, '').split(';').join(',').split(',') : undefined;
 
-    let params = {
-      Source: from
-        ? from
-        : this.SES_EMAIL_FROM_NAME + '<' + this.SES_EMAIL_FROM + '>',
+    const params = {
+      Source: from ? from : this.SES_EMAIL_FROM_NAME + '<' + this.SES_EMAIL_FROM + '>',
       Destination: {
         ToAddresses: [recipientEmail],
         BccAddresses,
@@ -46,13 +42,12 @@ export class SESService {
       email_status = false;
       console.log('Email Changed');
       console.log(result);
-    }
-    catch (err) {
+    } catch (err) {
       email_status = true;
       console.log('Email Changed');
       console.log(err);
     }
 
-    return email_status;    
+    return email_status;
   }
 }

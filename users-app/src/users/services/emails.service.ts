@@ -8,41 +8,31 @@ import { User } from 'src/models/user.entity';
 import { EmailRecordsService } from './email-records.service';
 import { getConnection } from 'typeorm';
 
-var base64 = require('base-64');
+const base64 = require('base-64');
 @Injectable()
 export class EmailsService {
   constructor(
     private SESService: SESService,
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
-    private emailRecordsService:EmailRecordsService,
+    private emailRecordsService: EmailRecordsService,
   ) {}
 
-  async sendAccountVerificationEmail(
-    emailVerifier: EmailVerifier,
-  ): Promise<any> {
+  async sendAccountVerificationEmail(emailVerifier: EmailVerifier): Promise<any> {
     const webAppUrl = process.env.WEB_APP_URL;
     const token = this.encrypt(emailVerifier);
     const recipientEmail = emailVerifier.email;
-    const regions: UserRegion[] =
-      await this.userRegionService.findUserRegionByUserId(
-        emailVerifier.user_id,
-      );
+    const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(emailVerifier.user_id);
 
-    var region_id = 1;
+    let region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
 
-    const template = await this.emailTemplateService.findByTemplateAndRegion(
-      'Email Verification',
-      region_id,
-    );
+    const template = await this.emailTemplateService.findByTemplateAndRegion('Email Verification', region_id);
 
-    let subject =
-      'Thank you for submitting an application to the My Tech High program test';
-    let content =
-      '<p>We have received your application to participate in the My Tech High program.</p>';
+    let subject = 'Thank you for submitting an application to the My Tech High program test';
+    let content = '<p>We have received your application to participate in the My Tech High program.</p>';
 
     const queryRunner = await getConnection().createQueryRunner();
     const response = (await queryRunner.query(
@@ -64,15 +54,9 @@ export class EmailsService {
         `<p><a href="${webAppUrl}/confirm/?token=${token}">${webAppUrl}/confirm</a><br></p>`,
       );
     }
-    const result = await this.SESService.sendEmail(
-      recipientEmail,
-      subject,
-      content,
-      template?.bcc,
-      template?.from,
-    );
+    const result = await this.SESService.sendEmail(recipientEmail, subject, content, template?.bcc, template?.from);
 
-    const email_status = (result == false ? 'Sent' : 'Error');
+    const email_status = result == false ? 'Sent' : 'Error';
 
     // Add Email Records
     await this.emailRecordsService.create({
@@ -83,22 +67,17 @@ export class EmailsService {
       template_name: 'Email Verification',
       bcc: template?.bcc,
       status: email_status,
-      region_id: region_id
+      region_id: region_id,
     });
 
     return result;
   }
 
-  async sendEmailUpdateVerificationEmail(
-    emailVerifier: EmailVerifier,
-  ): Promise<any> {
+  async sendEmailUpdateVerificationEmail(emailVerifier: EmailVerifier): Promise<any> {
     const webAppUrl = process.env.WEB_APP_URL;
     const token = this.encrypt(emailVerifier);
     const recipientEmail = emailVerifier.email;
-    const regions: UserRegion[] =
-      await this.userRegionService.findUserRegionByUserId(
-        emailVerifier.user_id,
-      );
+    const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(emailVerifier.user_id);
 
     const queryRunner = await getConnection().createQueryRunner();
     const response = (await queryRunner.query(
@@ -106,18 +85,14 @@ export class EmailsService {
     )) as User[];
     queryRunner.release();
 
-    var region_id = 1;
+    let region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
-    const template = await this.emailTemplateService.findByTemplateAndRegion(
-      'Email Changed',
-      region_id,
-    );
+    const template = await this.emailTemplateService.findByTemplateAndRegion('Email Changed', region_id);
 
     let subject = 'Email Change';
-    let content =
-      '<p>Please click on the link below to verify your new email address.</p>';
+    let content = '<p>Please click on the link below to verify your new email address.</p>';
 
     if (template && response.length > 0) {
       content = template.body.toString();
@@ -134,15 +109,9 @@ export class EmailsService {
       );
     }
 
-    const result = await this.SESService.sendEmail(
-      recipientEmail,
-      subject,
-      content,
-      template?.bcc,
-      template?.from,
-    );
-    
-    const email_status = (result == false ? 'Sent' : 'Error');
+    const result = await this.SESService.sendEmail(recipientEmail, subject, content, template?.bcc, template?.from);
+
+    const email_status = result == false ? 'Sent' : 'Error';
 
     // Add Email Records
     await this.emailRecordsService.create({
@@ -153,15 +122,13 @@ export class EmailsService {
       template_name: 'Email Changed',
       bcc: template?.bcc,
       status: email_status,
-      region_id: region_id
+      region_id: region_id,
     });
 
     return result;
   }
 
   encrypt(emailVerifier: EmailVerifier) {
-    return base64.encode(
-      `${emailVerifier.user_id}-${emailVerifier.email}-${emailVerifier.date_created}`,
-    );
+    return base64.encode(`${emailVerifier.user_id}-${emailVerifier.email}-${emailVerifier.date_created}`);
   }
 }

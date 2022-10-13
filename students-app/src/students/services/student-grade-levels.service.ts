@@ -11,9 +11,7 @@ export class StudentGradeLevelsService {
     private readonly studentGradeLevelsRepository: Repository<StudentGradeLevel>,
   ) {}
 
-  findAll(
-    studentGradeLevelsArgs: StudentGradeLevelsArgs,
-  ): Promise<StudentGradeLevel[]> {
+  findAll(studentGradeLevelsArgs: StudentGradeLevelsArgs): Promise<StudentGradeLevel[]> {
     return this.studentGradeLevelsRepository.find(studentGradeLevelsArgs);
   }
 
@@ -26,10 +24,7 @@ export class StudentGradeLevelsService {
     return this.studentGradeLevelsRepository
       .createQueryBuilder('studentGradeLevel')
       .where('student_id = :student_id', { student_id: student_id })
-      .addSelect(
-        'ABS(studentGradeLevel.grade_level + 0)',
-        'student_grade_level',
-      )
+      .addSelect('ABS(studentGradeLevel.grade_level + 0)', 'student_grade_level')
       .orderBy('student_grade_level', 'ASC')
       .getMany();
   }

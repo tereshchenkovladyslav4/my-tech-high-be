@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import * as jwt from 'jsonwebtoken';
 
@@ -27,9 +21,9 @@ export class AuthGuard implements CanActivate {
     const token = auth.split(' ')[1];
 
     try {
-      const decoded = jwt.verify(token, 'info_center-v_2.0') as any
-      if(decoded.masquerade === true && decoded.level !== 1){
-        const message = 'Error only Super Admins can edit user data.'
+      const decoded = jwt.verify(token, 'info_center-v_2.0') as any;
+      if (decoded.masquerade === true && decoded.level !== 1) {
+        const message = 'Error only Super Admins can edit user data.';
         throw new HttpException(message, HttpStatus.UNAUTHORIZED);
       }
       return decoded;

@@ -7,7 +7,7 @@ import { User } from '../../users/models/user.entity';
 
 @Resolver()
 export class AuthResolver {
-  constructor( private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   //@Query((returns) => AuthPayload )
   //@UseGuards(LocalAuthGuard)

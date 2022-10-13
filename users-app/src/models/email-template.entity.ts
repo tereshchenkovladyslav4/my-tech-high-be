@@ -47,7 +47,7 @@ export class EmailTemplate extends BaseEntity {
 
   @Column()
   @Field((type) => String, { nullable: true, defaultValue: '' })
-  standard_responses: String;
+  standard_responses: string;
 
   // @Column()
   // @Field((type) => String, { nullable: true })
@@ -57,25 +57,21 @@ export class EmailTemplate extends BaseEntity {
   @Field(() => Int, { nullable: true })
   category_id?: number;
 
-  @ManyToOne(
-    () => EmailTemplateCategory,
-    (category) => category.email_templates,
-    {
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    },
-  )
+  @ManyToOne(() => EmailTemplateCategory, (category) => category.email_templates, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'category_id', referencedColumnName: 'category_id' }])
   @Field(() => EmailTemplateCategory, { nullable: true })
   category: EmailTemplateCategory;
 
   @Column()
   @Field((type) => String, { nullable: true, defaultValue: '' })
-  template: String;
+  template: string;
 
   @Column()
   @Field((type) => String, { nullable: true, defaultValue: '' })
-  inserts: String;
+  inserts: string;
 
   @Column()
   @Field((type) => Int, { nullable: true, defaultValue: 1 })

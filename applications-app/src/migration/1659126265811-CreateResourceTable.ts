@@ -16,9 +16,7 @@ export class CreateResourceTable1659126265811 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_resource\` DROP FOREIGN KEY \`FK_9bac4ea97bfc1bc39cc03750a94\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_resource\` DROP FOREIGN KEY \`FK_9bac4ea97bfc1bc39cc03750a94\``);
     await queryRunner.query(
       `ALTER TABLE \`mth_schoolyear\` CHANGE \`school_year_id\` \`school_year_id\` int UNSIGNED NOT NULL AUTO_INCREMENT`,
     );

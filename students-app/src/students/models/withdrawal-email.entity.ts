@@ -1,26 +1,10 @@
-import {
-  Directive,
-  Field,
-  ID,
-  ObjectType,
-  Int,
-  InputType,
-} from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
 import { Withdrawal } from './withdrawal.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive(
-  '@key(fields: "withdrawal_email_id, withdrawal_id, subject, body, from_email, created_at")',
-)
+@Directive('@key(fields: "withdrawal_email_id, withdrawal_id, subject, body, from_email, created_at")')
 @Entity('mth_withdrawal_email')
 export class WithdrawalEmail extends BaseEntity {
   @Column()

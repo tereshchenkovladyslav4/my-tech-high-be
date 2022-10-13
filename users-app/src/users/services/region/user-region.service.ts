@@ -36,9 +36,7 @@ export class UserRegionService {
     });
   }
 
-  async createUserRegion(
-    createUserRegionInput: CreateUserRegionInput,
-  ): Promise<UserRegion[]> {
+  async createUserRegion(createUserRegionInput: CreateUserRegionInput): Promise<UserRegion[]> {
     try {
       await Promise.all(
         createUserRegionInput.region_id.map(async (id) => {
@@ -73,25 +71,17 @@ export class UserRegionService {
     return deleteCount;
   }
 
-  async updateUserRegion(
-    updateUserRegionInput: UpdateUserRegionInput,
-  ): Promise<UserRegion[]> {
+  async updateUserRegion(updateUserRegionInput: UpdateUserRegionInput): Promise<UserRegion[]> {
     try {
-      await this.removeUserRecords(
-        updateUserRegionInput.region_id,
-        updateUserRegionInput.user_id,
-      );
+      await this.removeUserRecords(updateUserRegionInput.region_id, updateUserRegionInput.user_id);
       return await this.createUserRegion(updateUserRegionInput);
     } catch (error) {
-      console.log(
-        `🚀 ~ file: user-region.service.ts ~ line 64 ~ UserRegionService ~ updateUserRegion ~ error`,
-        error,
-      );
+      console.log(`🚀 ~ file: user-region.service.ts ~ line 64 ~ UserRegionService ~ updateUserRegion ~ error`, error);
       throw new BadRequestException();
     }
   }
 
-  async removeUserRegionById(region_id: number): Promise<String> {
+  async removeUserRegionById(region_id: number): Promise<string> {
     const data = await this.userRegionRepository.delete(region_id);
     if (data.affected > 0) {
       return 'User region has been removed';

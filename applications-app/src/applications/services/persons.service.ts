@@ -12,12 +12,12 @@ export class PersonsService {
   constructor(
     @InjectRepository(Person)
     private repo: Repository<Person>,
-  ) { }
+  ) {}
 
   findOneById(person_id: number): Promise<Person> {
     return this.repo.findOne(person_id);
   }
-  
+
   findOneByUserId(user_id: number): Promise<Person> {
     return this.repo.findOne({ user_id });
   }
@@ -30,9 +30,7 @@ export class PersonsService {
     return this.repo.save(updatePersonInput);
   }
 
-  async updateUserId(
-    savePersonUserIdInput: SavePersonUserIdInput,
-  ): Promise<Person> {
+  async updateUserId(savePersonUserIdInput: SavePersonUserIdInput): Promise<Person> {
     return this.repo.save(savePersonUserIdInput);
   }
 
@@ -43,13 +41,11 @@ export class PersonsService {
   }
 
   //  Find Persons by user ids
-  async findByUserId(user_ids: number | number[]) : Promise<Person[]> {
-    return this.repo.find(
-      {
-        where: {
-          user_id: In(typeof(user_ids) == 'number' ? [user_ids] : user_ids)
-        }
-      }
-    );
+  async findByUserId(user_ids: number | number[]): Promise<Person[]> {
+    return this.repo.find({
+      where: {
+        user_id: In(typeof user_ids == 'number' ? [user_ids] : user_ids),
+      },
+    });
   }
 }

@@ -1,14 +1,10 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateResourceSettingsTable1659470507074
-  implements MigrationInterface
-{
+export class CreateResourceSettingsTable1659470507074 implements MigrationInterface {
   name = 'CreateResourceSettingsTable1659470507074';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_resource\` DROP FOREIGN KEY \`FK_9bac4ea97bfc1bc39cc03750a94\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_resource\` DROP FOREIGN KEY \`FK_9bac4ea97bfc1bc39cc03750a94\``);
     await queryRunner.query(`DROP TABLE \`mth_resource\``);
     await queryRunner.query(`DROP TABLE \`mth_resource_settings\``);
     await queryRunner.query(

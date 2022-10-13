@@ -12,5 +12,5 @@ export class Settings extends BaseEntity {
 
   @Field(() => Int, { nullable: true })
   @Column()
-  enable_immunizations?: number
+  enable_immunizations?: number;
 }

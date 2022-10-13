@@ -60,9 +60,7 @@ export class ApplicationsResolver {
 
   @Query((returns) => ApplicationPagination, { name: 'applications' })
   //@UseGuards(new AuthGuard())
-  async getApplications(
-    @Args() applicationsArgs: ApplicationsArgs,
-  ): Promise<Pagination<Application>> {
+  async getApplications(@Args() applicationsArgs: ApplicationsArgs): Promise<Pagination<Application>> {
     const results = await this.applicationsService.findAll(applicationsArgs);
     console.log(results);
     return results;
@@ -70,18 +68,14 @@ export class ApplicationsResolver {
 
   @Query((returns) => ResponseDTO, { name: 'getTodoListItems' })
   @UseGuards(new AuthGuard())
-  async getTodoListItems(
-    @Args({ name: 'regionId', type: () => ID }) regionId: number,
-  ): Promise<ResponseDTO> {
+  async getTodoListItems(@Args({ name: 'regionId', type: () => ID }) regionId: number): Promise<ResponseDTO> {
     const results = await this.applicationsService.getTodoListItems(regionId);
     return results;
   }
 
   @Query((returns) => Application, { name: 'application' })
   @UseGuards(new AuthGuard())
-  async getApplication(
-    @Args({ name: 'application_id', type: () => ID }) application_id: number,
-  ): Promise<Application> {
+  async getApplication(@Args({ name: 'application_id', type: () => ID }) application_id: number): Promise<Application> {
     return this.applicationsService.findOneById(application_id);
   }
 
@@ -114,9 +108,7 @@ export class ApplicationsResolver {
     @Args('createApplicationInput')
     createApplicationInput: CreateApplicationInput,
   ): Promise<ParentApplication> {
-    return await this.studentApplicationsService.createNewApplication(
-      createApplicationInput,
-    );
+    return await this.studentApplicationsService.createNewApplication(createApplicationInput);
   }
 
   @Mutation((returns) => ParentApplication, {
@@ -132,10 +124,7 @@ export class ApplicationsResolver {
       const authUser = await this.usersService.findOneByEmail(user.username);
       if (!authUser) throw new UnauthorizedException();
 
-      return await this.studentApplicationsService.createNewStudentApplications(
-        authUser,
-        createApplicationInput,
-      );
+      return await this.studentApplicationsService.createNewStudentApplications(authUser, createApplicationInput);
     } else {
       throw new UnauthorizedException();
     }
@@ -148,9 +137,7 @@ export class ApplicationsResolver {
     @Args({ name: 'email', type: () => String })
     email: string,
   ): Promise<boolean> {
-    return await this.studentApplicationsService.sendApplicationRecieveEmail(
-      email,
-    );
+    return await this.studentApplicationsService.sendApplicationRecieveEmail(email);
   }
 
   @Mutation((returns) => [Application], { name: 'acceptApplication' })
@@ -158,9 +145,7 @@ export class ApplicationsResolver {
     @Args('acceptApplicationInput')
     acceptApplicationInput: AcceptApplicationInput,
   ): Promise<Application[]> {
-    return await this.applicationsService.acceptApplication(
-      acceptApplicationInput,
-    );
+    return await this.applicationsService.acceptApplication(acceptApplicationInput);
   }
 
   @ResolveField((of) => Student, { name: 'student' })
@@ -174,19 +159,12 @@ export class ApplicationsResolver {
   }
 
   @ResolveField((of) => [ApplicationEmail], { name: 'application_emails' })
-  public async getApplicationEmails(
-    @Parent() application: Application,
-  ): Promise<ApplicationEmail[]> {
-    return this.applicationEmailsService.findByApplication(
-      application.application_id,
-    );
+  public async getApplicationEmails(@Parent() application: Application): Promise<ApplicationEmail[]> {
+    return this.applicationEmailsService.findByApplication(application.application_id);
   }
 
   @ResolveReference()
-  resolveReference(reference: {
-    __typename: string;
-    application_id: number;
-  }): Promise<Application> {
+  resolveReference(reference: { __typename: string; application_id: number }): Promise<Application> {
     return this.applicationsService.findOneById(reference.application_id);
   }
 
@@ -196,9 +174,7 @@ export class ApplicationsResolver {
     deleteApplicationInput: DeleteApplicationInput,
   ): Promise<Application[]> {
     const { application_ids } = deleteApplicationInput;
-    return await this.studentApplicationsService.deleteStudentApplication(
-      application_ids,
-    );
+    return await this.studentApplicationsService.deleteStudentApplication(application_ids);
   }
 
   @Mutation((returns) => [ApplicationEmail], { name: 'emailApplication' })
@@ -212,20 +188,16 @@ export class ApplicationsResolver {
   async moveThisYearApplication(
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Boolean> {
-    return await this.applicationsService.moveThisYearApplication(
-      deleteApplicationInput,
-    );
+  ): Promise<boolean> {
+    return await this.applicationsService.moveThisYearApplication(deleteApplicationInput);
   }
 
   @Mutation((returns) => Boolean, { name: 'moveNextYearApplication' })
   async moveNextYearApplication(
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Boolean> {
-    return await this.applicationsService.moveNextYearApplication(
-      deleteApplicationInput,
-    );
+  ): Promise<boolean> {
+    return await this.applicationsService.moveNextYearApplication(deleteApplicationInput);
   }
 
   @Mutation((returns) => Application, { name: 'updateApplication' })
@@ -233,9 +205,7 @@ export class ApplicationsResolver {
     @Args('updateApplicationInput')
     updateApplicationInput: UpdateApplicationInput,
   ): Promise<Application> {
-    return await this.applicationsService.updateApplication(
-      updateApplicationInput,
-    );
+    return await this.applicationsService.updateApplication(updateApplicationInput);
   }
 
   @Mutation((returns) => Application, { name: 'toggleHideApplication' })
@@ -243,9 +213,7 @@ export class ApplicationsResolver {
     @Args('updateApplicationInput')
     updateApplicationInput: UpdateApplicationInput,
   ): Promise<Application> {
-    return await this.applicationsService.toggleHideApplication(
-      updateApplicationInput,
-    );
+    return await this.applicationsService.toggleHideApplication(updateApplicationInput);
   }
 
   @Mutation((returns) => ImmunizationSettings, {
@@ -255,9 +223,7 @@ export class ApplicationsResolver {
     @Args('updateImmunizationSettingsInput')
     updateImmunizationSettingsInput: UpdateImmunizationSettingsInput,
   ): Promise<ImmunizationSettings> {
-    return await this.immunizationSettingsService.updateOrAdd(
-      updateImmunizationSettingsInput,
-    );
+    return await this.immunizationSettingsService.updateOrAdd(updateImmunizationSettingsInput);
   }
 
   @Mutation((returns) => Boolean, {
@@ -285,9 +251,7 @@ export class ApplicationsResolver {
   async updateApplicationSchoolYearByIds(
     @Args('updateApplicationSchoolYearInput')
     updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,
-  ): Promise<Boolean> {
-    return await this.applicationsService.updateApplicationSchoolYearByIds(
-      updateApplicationSchoolYearInput,
-    );
+  ): Promise<boolean> {
+    return await this.applicationsService.updateApplicationSchoolYearByIds(updateApplicationSchoolYearInput);
   }
 }

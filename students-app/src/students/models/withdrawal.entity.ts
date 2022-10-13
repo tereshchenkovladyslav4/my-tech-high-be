@@ -1,21 +1,6 @@
-import {
-  Directive,
-  Field,
-  ID,
-  InputType,
-  Int,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn, IsInt } from 'class-validator';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  JoinColumn,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn, BaseEntity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Student } from './student.entity';
 import { WithdrawalEmail } from './withdrawal-email.entity';
 

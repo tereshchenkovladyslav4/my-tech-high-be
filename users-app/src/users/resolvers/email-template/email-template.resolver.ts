@@ -8,9 +8,7 @@ export class EmailTemplateResolver {
   constructor(private emailTemplatesService: EmailTemplatesService) {}
 
   @Query(() => EmailTemplate, { name: 'emailTemplate', nullable: true })
-  getEmailTemplate(
-    @Args({ name: 'templateId', type: () => ID }) id: number,
-  ): Promise<EmailTemplate> {
+  getEmailTemplate(@Args({ name: 'templateId', type: () => ID }) id: number): Promise<EmailTemplate> {
     return this.emailTemplatesService.findById(id);
   }
   @Query(() => EmailTemplate, { name: 'emailTemplateName', nullable: true })
@@ -21,9 +19,7 @@ export class EmailTemplateResolver {
     return this.emailTemplatesService.findByTemplateAndRegion(template, regionId);
   }
   @Query(() => [EmailTemplate], { name: 'emailTemplatesByRegion' })
-  getEmailTemplatesByRegion(
-    @Args({ name: 'regionId', type: () => ID }) regionId: number,
-  ): Promise<EmailTemplate[]> {
+  getEmailTemplatesByRegion(@Args({ name: 'regionId', type: () => ID }) regionId: number): Promise<EmailTemplate[]> {
     return this.emailTemplatesService.findByRegion(regionId);
   }
 
@@ -32,9 +28,7 @@ export class EmailTemplateResolver {
     @Args('createEmailTemplateInput')
     createEmailTemplateInput: CreateEmailTemplateInput,
   ): Promise<EmailTemplate> {
-    return this.emailTemplatesService.createEmailTemplate(
-      createEmailTemplateInput,
-    );
+    return this.emailTemplatesService.createEmailTemplate(createEmailTemplateInput);
   }
 
   @Mutation((of) => EmailTemplate, { name: 'updateEmailTemplate' })
@@ -42,9 +36,7 @@ export class EmailTemplateResolver {
     @Args('createEmailTemplateInput')
     createEmailTemplateInput: CreateEmailTemplateInput,
   ): Promise<EmailTemplate> {
-    const response = await this.emailTemplatesService.updateEmailTemplate(
-      createEmailTemplateInput,
-    );
+    const response = await this.emailTemplatesService.updateEmailTemplate(createEmailTemplateInput);
     return response;
   }
 }

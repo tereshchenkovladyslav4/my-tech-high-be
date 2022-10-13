@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CountyAndShoolDistrictTableAdd1651100580163
-  implements MigrationInterface
-{
+export class CountyAndShoolDistrictTableAdd1651100580163 implements MigrationInterface {
   name = 'CountyAndShoolDistrictTableAdd1651100580163';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -21,12 +19,8 @@ export class CountyAndShoolDistrictTableAdd1651100580163
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`school_district\` DROP FOREIGN KEY \`FK_089bfb8c371ae6a2d9fd07f00a8\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`county\` DROP FOREIGN KEY \`FK_68d68ff03d3c00621ccf95d7856\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`school_district\` DROP FOREIGN KEY \`FK_089bfb8c371ae6a2d9fd07f00a8\``);
+    await queryRunner.query(`ALTER TABLE \`county\` DROP FOREIGN KEY \`FK_68d68ff03d3c00621ccf95d7856\``);
     await queryRunner.query(`DROP TABLE \`school_district\``);
     await queryRunner.query(`DROP TABLE \`county\``);
   }

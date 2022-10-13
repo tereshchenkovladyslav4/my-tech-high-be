@@ -1,13 +1,6 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import {
-    BaseEntity,
-    Column,
-    Entity,
-    JoinColumn,
-    PrimaryGeneratedColumn,
-    ManyToOne,
-  } from 'typeorm';
-  import { EmailTemplate } from './email-template.entity';
+import { BaseEntity, Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { EmailTemplate } from './email-template.entity';
 
 @ObjectType()
 @Directive('@key(fields: "reminder_id")')
@@ -35,10 +28,10 @@ export class EmailReminder extends BaseEntity {
   reminder: number;
 
   @Column()
-  @Field(type => Int, { nullable: true })
-  email_template_id: number
+  @Field((type) => Int, { nullable: true })
+  email_template_id: number;
 
-  @ManyToOne(() => EmailTemplate, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "email_template_id", referencedColumnName: "id" })
-  email_template?: EmailTemplate
+  @ManyToOne(() => EmailTemplate, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'email_template_id', referencedColumnName: 'id' })
+  email_template?: EmailTemplate;
 }

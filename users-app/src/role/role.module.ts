@@ -2,12 +2,10 @@ import { Module } from '@nestjs/common';
 import { GraphQLFederationModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApolloServerPluginInlineTraceDisabled } from 'apollo-server-core';
-import RoleRepoModule from "./repo.module";
+import RoleRepoModule from './repo.module';
 import { RoleResolver } from './resolver/role.resolver';
 
-const graphQLImports = [
-  RoleResolver
-];
+const graphQLImports = [RoleResolver];
 
 @Module({
   imports: [
@@ -27,4 +25,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class RoleGraphqlModule { }
+export class RoleGraphqlModule {}

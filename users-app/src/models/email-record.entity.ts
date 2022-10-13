@@ -1,10 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,  
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @ObjectType()
 @Directive('@key(fields: "id")')
@@ -23,7 +18,7 @@ export class EmailRecord extends BaseEntity {
 
   @Column()
   @Field(() => String)
-  to_email: string
+  to_email: string;
 
   @Column()
   @Field(() => String)
@@ -31,11 +26,11 @@ export class EmailRecord extends BaseEntity {
 
   @Column()
   @Field(() => String)
-  template_name: string; 
+  template_name: string;
 
   @Column()
-  @Field(() => Int, {nullable: true, defaultValue: 1})
-  region_id: number; 
+  @Field(() => Int, { nullable: true, defaultValue: 1 })
+  region_id: number;
 
   @Column()
   @Field(() => String)
@@ -43,7 +38,7 @@ export class EmailRecord extends BaseEntity {
 
   @Column()
   @Field(() => String)
-  status: string; 
+  status: string;
 
   @Column('text', { name: 'body', nullable: true })
   @Field(() => String, { nullable: true })

@@ -6,10 +6,9 @@ import { Packet } from './packet.entity';
 
 @ObjectType()
 export class EnrollmentPacket {
-
   @Field((type) => Packet)
-  packet?: Packet
+  packet?: Packet;
 
   @Field((type) => Student)
-  student?: Student
+  student?: Student;
 }

@@ -10,11 +10,11 @@ import { MePermission } from './users/models/me-permission.entity';
 import { LocalStrategy } from './users/strategies/local.strategy';
 import { MeConfirmation } from './users/models/me-confirmation.entity';
 
-const graphQLImports = [
-  UsersResolver
-];
+const graphQLImports = [UsersResolver];
 @Module({
-  imports: [AuthModule, UsersModule,
+  imports: [
+    AuthModule,
+    UsersModule,
     GraphQLFederationModule.forRoot({
       plugins: [ApolloServerPluginInlineTraceDisabled()],
       autoSchemaFile: true,
@@ -25,8 +25,8 @@ const graphQLImports = [
         orphanedTypes: [MePermission, MeConfirmation],
       },
       context: ({ req }) => ({ headers: req.headers }),
-  }),
-  ...graphQLImports
+    }),
+    ...graphQLImports,
   ],
   controllers: [AppController],
   providers: [AppService, LocalStrategy],

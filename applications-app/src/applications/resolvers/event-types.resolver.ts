@@ -4,19 +4,14 @@ import { AuthGuard } from '../guards/auth.guard';
 import { EventType } from '../models/event-type.entity';
 import { EventTypesService } from '../services/event-types.service';
 import { CreateEventTypeInput } from '../dto/new-event-type.inputs';
-import {
-  UpdateEventTypeInput,
-  UpdateEventTypeInputs,
-} from '../dto/update-event-type.inputs';
+import { UpdateEventTypeInput, UpdateEventTypeInputs } from '../dto/update-event-type.inputs';
 @Resolver((of) => EventType)
 export class EventTypesResolver {
   constructor(private eventTypesService: EventTypesService) {}
 
   @Query((returns) => [EventType], { name: 'eventTypes' })
   @UseGuards(new AuthGuard())
-  async getEventTypes(
-    @Args('region_id', { type: () => Int }) region_id: number,
-  ): Promise<EventType[]> {
+  async getEventTypes(@Args('region_id', { type: () => Int }) region_id: number): Promise<EventType[]> {
     return this.eventTypesService.findAll(region_id);
   }
 

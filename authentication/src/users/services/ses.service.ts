@@ -1,5 +1,5 @@
-import { Injectable, Req, Res } from "@nestjs/common";
-import * as AWS from "aws-sdk";
+import { Injectable, Req, Res } from '@nestjs/common';
+import * as AWS from 'aws-sdk';
 
 @Injectable()
 export class SESService {
@@ -12,12 +12,10 @@ export class SESService {
   });
 
   async sendEmail(recipientEmail, subject, content, bcc?, from?): Promise<boolean> {
-    const BccAddresses = bcc
-      ? bcc.replace(/\s+/g, '').split(';').join(',').split(',')
-      : undefined;
+    const BccAddresses = bcc ? bcc.replace(/\s+/g, '').split(';').join(',').split(',') : undefined;
 
-    let params = {
-      Source: from ? from : this.SES_EMAIL_FROM_NAME + "<" + this.SES_EMAIL_FROM + ">",
+    const params = {
+      Source: from ? from : this.SES_EMAIL_FROM_NAME + '<' + this.SES_EMAIL_FROM + '>',
       Destination: {
         ToAddresses: [recipientEmail],
         BccAddresses,
@@ -26,12 +24,12 @@ export class SESService {
       Message: {
         Body: {
           Html: {
-            Charset: "UTF-8",
+            Charset: 'UTF-8',
             Data: content,
           },
         },
         Subject: {
-          Charset: "UTF-8",
+          Charset: 'UTF-8',
           Data: subject,
         },
       },
@@ -42,11 +40,10 @@ export class SESService {
       const result = await this.ses.sendEmail(params).promise();
       email_status = false;
       console.log(result);
-    }
-    catch (err) {
+    } catch (err) {
       email_status = true;
     }
 
-    return email_status;  
+    return email_status;
   }
 }

@@ -1,5 +1,4 @@
-const SnakeNamingStrategy =
-  require('typeorm-naming-strategies').SnakeNamingStrategy
+const SnakeNamingStrategy = require('typeorm-naming-strategies').SnakeNamingStrategy;
 module.exports = {
   name: 'default',
   type: 'mysql',
@@ -17,6 +16,6 @@ module.exports = {
   namingStrategy: new SnakeNamingStrategy(),
   migrations: ['dist/migration/**/*.*'],
   cli: {
-    migrationsDir: 'src/migration'
-  }
-}
+    migrationsDir: 'src/migration',
+  },
+};

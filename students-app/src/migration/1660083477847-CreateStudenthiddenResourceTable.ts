@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateStudenthiddenResourceTable1660083477847
-  implements MigrationInterface
-{
+export class CreateStudenthiddenResourceTable1660083477847 implements MigrationInterface {
   name = 'CreateStudenthiddenResourceTable1660083477847';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

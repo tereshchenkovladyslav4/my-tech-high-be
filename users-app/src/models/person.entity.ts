@@ -5,13 +5,13 @@ import { User } from './user.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "person_id, user_id")')
-@Entity({ name: 'mth_person'})
+@Entity({ name: 'mth_person' })
 export class Person extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  person_id?: number
+  person_id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
@@ -19,29 +19,29 @@ export class Person extends BaseEntity {
   user_id?: number;
 
   @Column()
-  first_name?: string
+  first_name?: string;
 
   @Column()
-  last_name?: string
+  last_name?: string;
 
   @Column()
-  middle_name?: string
+  middle_name?: string;
 
   @Column()
-  preferred_first_name?: string
+  preferred_first_name?: string;
 
   @Column()
-  preferred_last_name?: string
+  preferred_last_name?: string;
 
   @Column()
-  gender?: string
+  gender?: string;
 
   @Column()
-  email?: string
+  email?: string;
 
   @Column()
-  date_of_birth?: Date
+  date_of_birth?: Date;
 
-  @OneToOne(type => User, user => user.user_id)
-	user: User | null
+  @OneToOne((type) => User, (user) => user.user_id)
+  user: User | null;
 }

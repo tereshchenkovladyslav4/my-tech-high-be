@@ -12,17 +12,17 @@ export class Parent extends BaseEntity {
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  parent_id?: number
+  parent_id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
   @Directive('@external')
-  person_id?: number
+  person_id?: number;
 
   @OneToOne((type) => Person)
   @JoinColumn({ name: 'person_id' })
-  person?: Person
+  person?: Person;
 
   @Field((type) => Phone)
-  phone?: Phone
+  phone?: Phone;
 }

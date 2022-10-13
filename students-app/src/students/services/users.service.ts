@@ -30,8 +30,7 @@ export class UsersService {
 
   async create(user: CreateStudentUserInput): Promise<User> {
     const password =
-      (user.password && this.encryptPassword(user.password)) ||
-      this.encryptPassword(new Date().toString());
+      (user.password && this.encryptPassword(user.password)) || this.encryptPassword(new Date().toString());
     const userInput = { ...user, password };
     console.log(userInput);
     return this.usersRepository.save(userInput);

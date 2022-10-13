@@ -14,7 +14,7 @@ export class EmailTemplatesService {
     private categoryService: EmailCategoryService,
     private emailReminderService: EmailReminderService,
     private regionService: RegionService,
-  ) { }
+  ) {}
 
   async findAll(): Promise<EmailTemplate[]> {
     const data = await this.emailTemplateRepository.find({
@@ -58,19 +58,14 @@ export class EmailTemplatesService {
     return data;
   }
 
-  async findByTemplateAndRegion(
-    template: string,
-    regionId: number,
-  ): Promise<EmailTemplate> {
+  async findByTemplateAndRegion(template: string, regionId: number): Promise<EmailTemplate> {
     const data = await this.emailTemplateRepository.findOne({
       where: { template_name: template, region_id: regionId },
     });
     return data;
   }
 
-  async createEmailTemplate(
-    createEmailTemplateInput: CreateEmailTemplateInput,
-  ): Promise<EmailTemplate> {
+  async createEmailTemplate(createEmailTemplateInput: CreateEmailTemplateInput): Promise<EmailTemplate> {
     const { emailTemplate, category } = createEmailTemplateInput;
     let categoryId = null;
     const emailCategory = await this.categoryService.findByName(category);
@@ -88,9 +83,7 @@ export class EmailTemplatesService {
     });
   }
 
-  async updateEmailTemplate(
-    createEmailTemplateInput: CreateEmailTemplateInput,
-  ): Promise<EmailTemplate> {
+  async updateEmailTemplate(createEmailTemplateInput: CreateEmailTemplateInput): Promise<EmailTemplate> {
     const { emailTemplate, category } = createEmailTemplateInput;
     const reminders = emailTemplate?.reminders;
     const template = await this.findById(emailTemplate.id);
@@ -102,11 +95,7 @@ export class EmailTemplatesService {
     await this.emailTemplateRepository.update(template, emailTemplate);
 
     if (deadline) {
-      await this.regionService.saveRegionDeadlines(
-        template.region.id,
-        deadline,
-        category,
-      );
+      await this.regionService.saveRegionDeadlines(template.region.id, deadline, category);
     }
 
     // remove old remider

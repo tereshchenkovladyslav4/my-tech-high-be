@@ -11,14 +11,14 @@ export class QuickLinkService {
   ) {}
 
   async findAll(): Promise<QuickLink[]> {
-    const data = await this.quickLinkRepository.find({where: {flag: Not(2)}});
+    const data = await this.quickLinkRepository.find({ where: { flag: Not(2) } });
     return data;
   }
 
   async findByRegion(regionId: number): Promise<QuickLink[]> {
     const data = await this.quickLinkRepository.find({
-      where: {region_id: regionId, flag: Not(2)},
-      order: {sequence: 'ASC'}
+      where: { region_id: regionId, flag: Not(2) },
+      order: { sequence: 'ASC' },
     });
     return data;
   }
@@ -27,19 +27,15 @@ export class QuickLinkService {
     const data = await this.quickLinkRepository.findOne(id);
     return data;
   }
-  
-  async createQuickLink(
-    quickLink: QuickLink,
-  ): Promise<QuickLink> {
+
+  async createQuickLink(quickLink: QuickLink): Promise<QuickLink> {
     return await this.quickLinkRepository.save({
       ...quickLink,
     });
   }
 
-  async updateQuickLink(
-    quickLink: QuickLink,
-  ): Promise<QuickLink> {
-    await this.quickLinkRepository.update({id: quickLink.id}, quickLink);
+  async updateQuickLink(quickLink: QuickLink): Promise<QuickLink> {
+    await this.quickLinkRepository.update({ id: quickLink.id }, quickLink);
     return await this.findById(quickLink.id);
   }
 
@@ -47,7 +43,7 @@ export class QuickLinkService {
     const data = await this.quickLinkRepository.findOne(id);
     return this.quickLinkRepository.save({
       ...data,
-      image_url: ''
+      image_url: '',
     });
   }
 }

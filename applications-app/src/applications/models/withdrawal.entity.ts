@@ -1,21 +1,6 @@
-import {
-  Directive,
-  Field,
-  ID,
-  InputType,
-  Int,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn, IsInt } from 'class-validator';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  JoinColumn,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn, BaseEntity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Student } from './student.entity';
 import { WithdrawalEmail } from './withdrawal-email.entity';
 
@@ -89,10 +74,7 @@ export class Withdrawal extends BaseEntity {
   @Field(() => Student, { nullable: true })
   Student: Student;
 
-  @OneToMany(
-    () => WithdrawalEmail,
-    (withdrawalEmail) => withdrawalEmail.Withdrawal,
-  )
+  @OneToMany(() => WithdrawalEmail, (withdrawalEmail) => withdrawalEmail.Withdrawal)
   @Field(() => [WithdrawalEmail], { nullable: true })
   withdrawalEmails: WithdrawalEmail[];
 }

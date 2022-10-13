@@ -10,9 +10,7 @@ export class CountyResolver {
 
   @Query(() => [County], { name: 'getCounties', nullable: true })
   // @UseGuards(new AuthGuard())
-  getCounties(
-    @Args({ name: 'id', type: () => ID }) id: number,
-  ): Promise<County[]> {
+  getCounties(@Args({ name: 'id', type: () => ID }) id: number): Promise<County[]> {
     return this.countyService.findCountiesById(id);
   }
 }

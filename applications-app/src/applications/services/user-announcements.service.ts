@@ -13,9 +13,7 @@ export class UserAnnouncementsService {
     private readonly userAnnouncementsRepository: Repository<UserAnnouncement>,
   ) {}
 
-  async findAll(
-    request: UserAnnouncementRequestParams,
-  ): Promise<Array<UserAnnouncementResponse>> {
+  async findAll(request: UserAnnouncementRequestParams): Promise<Array<UserAnnouncementResponse>> {
     try {
       const queryRunner = await getConnection().createQueryRunner();
       const { limit, user_id, search } = request;
@@ -100,8 +98,8 @@ export class UserAnnouncementsService {
     try {
       return this.userAnnouncementsRepository.save({ id: id, status: 'Read' });
     } catch (error) {
-      console.error(error)
-      return error
+      console.error(error);
+      return error;
     }
   }
 
@@ -113,10 +111,7 @@ export class UserAnnouncementsService {
     }
   }
 
-  async findById({
-    announcementId,
-    userId
-  }): Promise<UserAnnouncement | undefined>  {
-    return await this.userAnnouncementsRepository.findOne({ user_id: userId, AnnouncementId: announcementId})
+  async findById({ announcementId, userId }): Promise<UserAnnouncement | undefined> {
+    return await this.userAnnouncementsRepository.findOne({ user_id: userId, AnnouncementId: announcementId });
   }
 }

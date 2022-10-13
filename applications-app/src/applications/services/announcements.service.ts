@@ -86,9 +86,7 @@ export class AnnouncementsService {
     }
   }
 
-  async update(
-    updateAnnouncementInput: UpdateAnnouncementInput,
-  ): Promise<Announcement> {
+  async update(updateAnnouncementInput: UpdateAnnouncementInput): Promise<Announcement> {
     const {
       announcement_id,
       posted_by,
@@ -114,10 +112,7 @@ export class AnnouncementsService {
           filter_program_years,
           filter_school_partners,
         });
-        if (
-          (status == 'Published' && !isArchived) ||
-          status === 'Republished'
-        ) {
+        if ((status == 'Published' && !isArchived) || status === 'Republished') {
           userEmailList.map(async (user) => {
             await this.sesEmailService.sendAnnouncementEmail({
               body,
@@ -153,17 +148,10 @@ export class AnnouncementsService {
     }
   }
 
-  async getAnnouncementUsersByFilters(
-    announcementEmailInputs: AnnouncementFilterArgs,
-  ): Promise<User[]> {
+  async getAnnouncementUsersByFilters(announcementEmailInputs: AnnouncementFilterArgs): Promise<User[]> {
     {
-      const {
-        RegionId,
-        filter_grades,
-        filter_users,
-        filter_program_years,
-        filter_school_partners,
-      } = announcementEmailInputs;
+      const { RegionId, filter_grades, filter_users, filter_program_years, filter_school_partners } =
+        announcementEmailInputs;
 
       const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
       const roleNameFilters = [];
@@ -178,11 +166,7 @@ export class AnnouncementsService {
       let adminTeachersResults = [];
       if (userTypes.indexOf('0') > -1 || userTypes.indexOf('3') > -1) {
         const adminTeacherUsers = await createQueryBuilder(User)
-          .leftJoin(
-            UserRegion,
-            'userRegion',
-            'userRegion.user_id = `User`.user_id',
-          )
+          .leftJoin(UserRegion, 'userRegion', 'userRegion.user_id = `User`.user_id')
           .leftJoin(Role, 'roles', 'roles.level = `User`.level')
           .select('`User`.user_id', 'user_id')
           .addSelect('`User`.email', 'email')
@@ -212,37 +196,13 @@ export class AnnouncementsService {
       if (userTypes.indexOf('1') > -1) {
         const parentQuery = this.applicationsRepository
           .createQueryBuilder('application')
-          .leftJoin(
-            Student,
-            'student',
-            'student.student_id = application.student_id',
-          )
-          .leftJoin(
-            Observer,
-            'observer',
-            'observer.student_id = student.student_id',
-          )
+          .leftJoin(Student, 'student', 'student.student_id = application.student_id')
+          .leftJoin(Observer, 'observer', 'observer.student_id = student.student_id')
           .leftJoin(Parent, 'parent', 'parent.parent_id = student.parent_id')
-          .leftJoinAndSelect(
-            Person,
-            'person',
-            'person.person_id = parent.person_id',
-          )
-          .leftJoin(
-            StudentGradeLevel,
-            'studentGradeLevel',
-            'studentGradeLevel.student_id = student.student_id',
-          )
-          .leftJoin(
-            SchoolYear,
-            'schoolYear',
-            'schoolYear.school_year_id = application.school_year_id',
-          )
-          .leftJoin(
-            SchoolPartner,
-            'schoolPartner',
-            'schoolPartner.school_year_id = schoolYear.school_year_id',
-          )
+          .leftJoinAndSelect(Person, 'person', 'person.person_id = parent.person_id')
+          .leftJoin(StudentGradeLevel, 'studentGradeLevel', 'studentGradeLevel.student_id = student.student_id')
+          .leftJoin(SchoolYear, 'schoolYear', 'schoolYear.school_year_id = application.school_year_id')
+          .leftJoin(SchoolPartner, 'schoolPartner', 'schoolPartner.school_year_id = schoolYear.school_year_id')
           .select('person.user_id', 'user_id')
           .addSelect('person.email', 'email')
           .distinct(true)
@@ -264,20 +224,14 @@ export class AnnouncementsService {
         //.getRawMany();
 
         if (Array.isArray(isMidYear) && isMidYear > 0)
-          parentQuery.andWhere(
-            'IFNULL( application.midyear_application, 0 ) = :isMidYear',
-            {
-              isMidYear,
-            },
-          );
+          parentQuery.andWhere('IFNULL( application.midyear_application, 0 ) = :isMidYear', {
+            isMidYear,
+          });
 
         if (Array.isArray(schoolPartners)) {
-          parentQuery.andWhere(
-            'schoolPartner.school_partner_id IN(:...schoolPartnerIds)',
-            {
-              schoolPartnerIds: schoolPartners,
-            },
-          );
+          parentQuery.andWhere('schoolPartner.school_partner_id IN(:...schoolPartnerIds)', {
+            schoolPartnerIds: schoolPartners,
+          });
         }
 
         // if (schoolYearId > 0)
@@ -291,12 +245,7 @@ export class AnnouncementsService {
       }
 
       const announcementUsers = [
-        ...new Map(
-          [...adminTeachersResults, ...parentResults].map((item) => [
-            item['email'],
-            item,
-          ]),
-        ).values(),
+        ...new Map([...adminTeachersResults, ...parentResults].map((item) => [item['email'], item])).values(),
       ];
 
       return announcementUsers as User[];

@@ -3,13 +3,12 @@ import { Application } from './application.entity';
 
 @ObjectType()
 export class ApplicationPagination {
-
   @Field((type) => [Application])
-  results?: Application[]
+  results?: Application[];
 
   @Field((type) => Int)
-  page_total?: number
+  page_total?: number;
 
   @Field((type) => Int)
-  total?: number
+  total?: number;
 }

@@ -7,8 +7,8 @@ export class UpdateSchoolPartnerInput {
 
   @Field(() => String)
   abbreviation?: string;
-	
-  @Field(() => String, {nullable: true})
+
+  @Field(() => String, { nullable: true })
   photo?: string;
 
   @Field(() => Int)

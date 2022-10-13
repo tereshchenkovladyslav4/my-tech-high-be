@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateStudentRecordTable1660087136983
-  implements MigrationInterface
-{
+export class CreateStudentRecordTable1660087136983 implements MigrationInterface {
   name = 'CreateStudentRecordTable1660087136983';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -18,12 +16,8 @@ export class CreateStudentRecordTable1660087136983
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_student_record\` DROP FOREIGN KEY \`FK_745a17d6f9e175380aaf7b70f59\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mth_student_record\` DROP FOREIGN KEY \`FK_b36e0527efbc9e40f8292dcbbbb\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_student_record\` DROP FOREIGN KEY \`FK_745a17d6f9e175380aaf7b70f59\``);
+    await queryRunner.query(`ALTER TABLE \`mth_student_record\` DROP FOREIGN KEY \`FK_b36e0527efbc9e40f8292dcbbbb\``);
     await queryRunner.query(`DROP TABLE \`mth_student_record\``);
   }
 }

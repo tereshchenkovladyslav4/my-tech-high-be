@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateResourceCartTable1660181638333
-  implements MigrationInterface
-{
+export class CreateResourceCartTable1660181638333 implements MigrationInterface {
   name = 'CreateResourceCartTable1660181638333';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -18,12 +16,8 @@ export class CreateResourceCartTable1660181638333
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_resource_cart\` DROP FOREIGN KEY \`FK_a34047a0c8d3bfceedd1c2f7595\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mth_resource_cart\` DROP FOREIGN KEY \`FK_ecf7bef7473e67bfee128946386\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_resource_cart\` DROP FOREIGN KEY \`FK_a34047a0c8d3bfceedd1c2f7595\``);
+    await queryRunner.query(`ALTER TABLE \`mth_resource_cart\` DROP FOREIGN KEY \`FK_ecf7bef7473e67bfee128946386\``);
     await queryRunner.query(`DROP TABLE \`mth_resource_cart\``);
   }
 }

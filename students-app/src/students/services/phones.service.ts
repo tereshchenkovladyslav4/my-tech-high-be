@@ -10,6 +10,6 @@ export class PhonesService {
   ) {}
 
   findOneByPersonId(person_id: number): Promise<Phone> {
-    return this.phonesRepository.findOne({person_id: person_id});
+    return this.phonesRepository.findOne({ person_id: person_id });
   }
 }

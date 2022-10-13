@@ -679,9 +679,9 @@ export class EnrollmentsService {
     };
   }
 
-  async runScheduleReminders(): Promise<String> {
+  async runScheduleReminders(): Promise<string> {
     try {
-      let MailData = [];
+      const MailData = [];
       const emailTemplates = await this.emailTemplateService.findAllByTemplate('Packet Reminders');
 
       if (emailTemplates.length > 0) {

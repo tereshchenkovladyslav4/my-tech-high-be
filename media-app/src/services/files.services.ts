@@ -9,7 +9,6 @@ export class FilesService {
   constructor(
     @InjectRepository(File)
     private readonly filesRepository: Repository<File>,
-    
   ) {}
 
   async create(file: CreateFileInput): Promise<File> {

@@ -1,19 +1,13 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddErollmentPacketFieldToSchoolYearTable1655139196158
-  implements MigrationInterface
-{
+export class AddErollmentPacketFieldToSchoolYearTable1655139196158 implements MigrationInterface {
   name = 'AddErollmentPacketFieldToSchoolYearTable1655139196158';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_schoolyear\` ADD \`enrollment_packet\` tinyint NOT NULL`,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_schoolyear\` ADD \`enrollment_packet\` tinyint NOT NULL`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_schoolyear\` DROP COLUMN \`enrollment_packet\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_schoolyear\` DROP COLUMN \`enrollment_packet\``);
   }
 }

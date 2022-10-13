@@ -21,7 +21,7 @@ import { VerifyInput } from '../dto/verify.inputs';
 import * as Moment from 'moment';
 import { EmailsService } from '../services/emails.service';
 import { ForgotPasswordResponse } from '../models/forgot-password-response';
-var base64 = require('base-64');
+const base64 = require('base-64');
 
 export const CurrentUser = createParamDecorator((data: unknown, context: ExecutionContext) => {
   const ctx = GqlExecutionContext.create(context);
@@ -132,7 +132,7 @@ export class UsersResolver {
   // }
 
   @Mutation((of) => Boolean, { name: 'resendVerificationEmail' })
-  public async resendVerificationEmail(@Args({ name: 'email', type: () => String }) email: string): Promise<Boolean> {
+  public async resendVerificationEmail(@Args({ name: 'email', type: () => String }) email: string): Promise<boolean> {
     const status = await this.usersService.resendVerificationEmail(email);
     if (status) {
       return true;

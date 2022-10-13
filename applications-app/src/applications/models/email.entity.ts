@@ -7,8 +7,8 @@ export class Email extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   @PrimaryColumn()
-  name?: string
-  
+  name?: string;
+
   @Column()
   @Field(() => String, { nullable: true })
   @PrimaryColumn()
@@ -35,6 +35,6 @@ export class Email extends BaseEntity {
   user_changeable?: number;
 
   @Column()
-  @Field(() => Date, {nullable: true})
-  date_changed?: Date
+  @Field(() => Date, { nullable: true })
+  date_changed?: Date;
 }

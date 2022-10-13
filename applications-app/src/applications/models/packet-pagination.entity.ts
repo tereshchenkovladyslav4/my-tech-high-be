@@ -3,13 +3,12 @@ import { Packet } from './packet.entity';
 
 @ObjectType()
 export class PacketPagination {
-
   @Field((type) => [Packet])
-  results?: Packet[]
+  results?: Packet[];
 
   @Field((type) => Int)
-  page_total?: number
+  page_total?: number;
 
   @Field((type) => Int)
-  total?: number
+  total?: number;
 }

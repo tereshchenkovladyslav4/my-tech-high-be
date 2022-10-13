@@ -1,15 +1,14 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
 
-
 type SortType = {
-	column: 'name' | 'abbreviation'
-	direction: 'ASC' | 'DESC'
-}
+  column: 'name' | 'abbreviation';
+  direction: 'ASC' | 'DESC';
+};
 
 @InputType()
 export class SchoolPartnerArgs {
   @Field((type) => Sort)
-  sort: SortType = null
+  sort: SortType = null;
 
   @Field((type) => ID)
   region_id = 0;
@@ -21,8 +20,8 @@ export class SchoolPartnerArgs {
 @InputType('Sort')
 export class Sort {
   @Field((type) => String)
-  column
+  column;
 
   @Field((type) => String)
-  direction
+  direction;
 }

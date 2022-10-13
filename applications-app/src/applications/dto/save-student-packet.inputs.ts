@@ -12,7 +12,7 @@ export class SaveStudentPacketInput {
   status?: string;
 
   @Field({ nullable: true })
-  deadline?: String;
+  deadline?: string;
 
   @Field({ nullable: true, defaultValue: null })
   date_submitted?: Date;

@@ -1,12 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import {
-  IsOptional,
-  IsDate,
-  MaxLength,
-  IsEmail,
-  Length,
-  IsInt,
-} from 'class-validator';
+import { IsOptional, IsDate, MaxLength, IsEmail, Length, IsInt } from 'class-validator';
 import { CreateAddressInput } from './new-address.inputs';
 
 @InputType()

@@ -34,7 +34,7 @@ export class CreatePersonInput {
   @IsOptional()
   gender?: string;
 
-  @Field({nullable: true})
+  @Field({ nullable: true })
   @IsEmail()
   email?: string;
 

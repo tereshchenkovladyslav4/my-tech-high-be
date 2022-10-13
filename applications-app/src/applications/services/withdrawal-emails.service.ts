@@ -26,9 +26,7 @@ export class WithdrawalEmailsService {
       .getQuery();
   }
 
-  async create(
-    withdrawalEmail: CreateWithdrawalEmailInput,
-  ): Promise<WithdrawalEmail> {
+  async create(withdrawalEmail: CreateWithdrawalEmailInput): Promise<WithdrawalEmail> {
     return this.withdrawalEmailsRepository.save(withdrawalEmail);
   }
 }

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateAnnouncementTable1653204280958
-  implements MigrationInterface
-{
+export class CreateAnnouncementTable1653204280958 implements MigrationInterface {
   name = 'CreateAnnouncementTable1653204280958';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -12,18 +10,12 @@ export class CreateAnnouncementTable1653204280958
     await queryRunner.query(
       `ALTER TABLE \`announcement\` ADD CONSTRAINT \`FK_480684abccae6be52d94e3e1aaf\` FOREIGN KEY (\`RegionId\`) REFERENCES \`region\`(\`id\`) ON DELETE SET NULL ON UPDATE CASCADE`,
     );
-    await queryRunner.query(
-      `ALTER TABLE \`mth_application_email\` CHANGE \`body\` \`body\` text NULL`,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_application_email\` CHANGE \`body\` \`body\` text NULL`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`announcement\` DROP FOREIGN KEY \`FK_480684abccae6be52d94e3e1aaf\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`announcement\` DROP FOREIGN KEY \`FK_480684abccae6be52d94e3e1aaf\``);
     await queryRunner.query(`DROP TABLE \`announcement\``);
-    await queryRunner.query(
-      `ALTER TABLE \`mth_application_email\` CHANGE \`body\` \`body\` VARCHAR(255) NULL`,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_application_email\` CHANGE \`body\` \`body\` VARCHAR(255) NULL`);
   }
 }

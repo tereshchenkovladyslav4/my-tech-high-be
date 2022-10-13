@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ColumnSizeIncreaseForGradeLevel1656011964403
-  implements MigrationInterface
-{
+export class ColumnSizeIncreaseForGradeLevel1656011964403 implements MigrationInterface {
   name = 'ColumnSizeIncreaseForGradeLevel1656011964403';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

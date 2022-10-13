@@ -1,10 +1,10 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateQuickLinkTable1652175631405 implements MigrationInterface {
-    name = 'CreateQuickLinkTable1652175631405'
+  name = 'CreateQuickLinkTable1652175631405';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TABLE IF NOT EXISTS \`mth_quick_link\` (
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE TABLE IF NOT EXISTS \`mth_quick_link\` (
             \`id\` INT NOT NULL AUTO_INCREMENT,
             \`region_id\` INT NOT NULL,
             \`title\` VARCHAR(45) NOT NULL,
@@ -15,10 +15,9 @@ export class CreateQuickLinkTable1652175631405 implements MigrationInterface {
             \`reserved\` TEXT NOT NULL COMMENT 'type = 1 => website link',
             \`flag\` SMALLINT NOT NULL DEFAULT 0 COMMENT '0 => Normal   1 => Archived    2 => Deleted',
             PRIMARY KEY (\`id\`));`);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP TABLE IF EXISTS \`mth_quick_link\``);
-    }
-
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP TABLE IF EXISTS \`mth_quick_link\``);
+  }
 }

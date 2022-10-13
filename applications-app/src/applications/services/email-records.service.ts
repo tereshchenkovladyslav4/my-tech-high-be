@@ -18,9 +18,9 @@ export class EmailRecordsService {
     @InjectRepository(EmailRecord)
     private readonly emailRecordsRepository: Repository<EmailRecord>,
     private SESService: SESService,
-  ) { }
+  ) {}
 
-  async create(emailRecord:CreateEmailRecordInput ): Promise<EmailRecord> {
+  async create(emailRecord: CreateEmailRecordInput): Promise<EmailRecord> {
     return this.emailRecordsRepository.save(emailRecord);
   }
 
@@ -35,11 +35,11 @@ export class EmailRecordsService {
       });
     }
 
-    let qb = this.emailRecordsRepository
+    const qb = this.emailRecordsRepository
       .createQueryBuilder('record')
       .where(`record.region_id = ${region_id}`)
-      .andWhere('record.status IN (:status)', { status: filters })      
-    
+      .andWhere('record.status IN (:status)', { status: filters });
+
     if (search) {
       const date = search
         .split('/')
@@ -61,9 +61,9 @@ export class EmailRecordsService {
               .orWhere('record.status like :text', { text: `%${search}%` })
               .orWhere('record.to_email like :text', { text: `%${search}%` })
               .orWhere('record.from_email like :text', { text: `%${search}%` })
-              .orWhere('record.subject like :text', { text: `%${search}%` })              
+              .orWhere('record.subject like :text', { text: `%${search}%` })
               .orWhere('record.template_name like :text', { text: `%${search}%` });
-              
+
             if (Moment(search, 'MM/DD/YY', true).isValid()) {
               sub.orWhere('packet.deadline like :text', {
                 text: `%${Moment(search).format('YYYY-MM-DD')}%`,
@@ -75,25 +75,17 @@ export class EmailRecordsService {
     }
 
     if (sort) {
-        let sort_filed = 'id';
+      let sort_filed = 'id';
 
-        if (_sortBy[0] == 'date')
-            sort_filed = 'created_at';
-        else if (_sortBy[0] == 'to')
-            sort_filed = 'to_email';
-        else if (_sortBy[0] == 'email_template')
-            sort_filed = 'template_name'
-        else if (_sortBy[0] == 'subject')
-            sort_filed = 'subject'
-        else if (_sortBy[0] == 'from')
-            sort_filed = 'from_email'
-        else if (_sortBy[0] == 'status')
-            sort_filed = 'status'
+      if (_sortBy[0] == 'date') sort_filed = 'created_at';
+      else if (_sortBy[0] == 'to') sort_filed = 'to_email';
+      else if (_sortBy[0] == 'email_template') sort_filed = 'template_name';
+      else if (_sortBy[0] == 'subject') sort_filed = 'subject';
+      else if (_sortBy[0] == 'from') sort_filed = 'from_email';
+      else if (_sortBy[0] == 'status') sort_filed = 'status';
 
-        if (_sortBy[1].toLocaleLowerCase() == 'desc')
-            qb.orderBy('record.' + sort_filed, 'DESC');
-        else
-            qb.orderBy('record.' + sort_filed, 'ASC');
+      if (_sortBy[1].toLocaleLowerCase() == 'desc') qb.orderBy('record.' + sort_filed, 'DESC');
+      else qb.orderBy('record.' + sort_filed, 'ASC');
     }
 
     let result = [];
@@ -111,9 +103,8 @@ export class EmailRecordsService {
     });
   }
 
-
   async getRecordCountByRegionId(region_id: number): Promise<ResponseDTO> {
-    let qb = await this.emailRecordsRepository.query(
+    const qb = await this.emailRecordsRepository.query(
       `SELECT
           t1.status AS status,
           COUNT(*) AS count
@@ -123,8 +114,8 @@ export class EmailRecordsService {
         GROUP BY t1.status`,
     );
     const statusArray = {
-      'Sent': 0,
-      'Error': 0,
+      Sent: 0,
+      Error: 0,
     };
 
     qb.map((item) => {
@@ -138,51 +129,19 @@ export class EmailRecordsService {
 
   async deleteRecord(deleteRecordInput: DeleteRecordInput): Promise<EmailRecord[]> {
     const { record_ids } = deleteRecordInput;
-    const records = await this.emailRecordsRepository.findByIds(
-        record_ids,
-    );
+    const records = await this.emailRecordsRepository.findByIds(record_ids);
     const result = await this.emailRecordsRepository.delete(record_ids);
     return records;
   }
 
-  async resendRecords(deleteRecordInput: DeleteRecordInput): Promise<Boolean> {
+  async resendRecords(deleteRecordInput: DeleteRecordInput): Promise<boolean> {
     const { record_ids } = deleteRecordInput;
     const records = await this.emailRecordsRepository.findByIds(record_ids);
     await this.emailRecordsRepository.delete(record_ids);
 
     for (let i = 0; i < records.length; i++) {
-        const record = records[i]
-        const result = await this.SESService.sendEmail(
-            record.to_email,
-            record.subject,
-            record.body,
-            record.bcc,
-            record.from_email,
-          );
-    
-        const email_status = (result == false ? 'Sent' : 'Error');
-    
-        // Add Email Records
-        await this.emailRecordsRepository.insert({
-            subject: record.subject,
-            body: record.body,
-            to_email: record.to_email,
-            from_email: record.from_email,
-            template_name: record.template_name,
-            region_id: record.region_id,
-            bcc: record.bcc,
-            status: email_status
-        });
-    }
-
-    return true;
-  }
-
-  async resendEmail(record: UpdateEmailRecordInput): Promise<Boolean> {
-    const {id} = record;
-    await this.emailRecordsRepository.delete(id);
-    
-    const result = await this.SESService.sendEmail(
+      const record = records[i];
+      const result = await this.SESService.sendEmail(
         record.to_email,
         record.subject,
         record.body,
@@ -190,10 +149,10 @@ export class EmailRecordsService {
         record.from_email,
       );
 
-    const email_status = (result == false ? 'Sent' : 'Error');
+      const email_status = result == false ? 'Sent' : 'Error';
 
-    // Add Email Records
-    await this.emailRecordsRepository.insert({
+      // Add Email Records
+      await this.emailRecordsRepository.insert({
         subject: record.subject,
         body: record.body,
         to_email: record.to_email,
@@ -201,8 +160,38 @@ export class EmailRecordsService {
         template_name: record.template_name,
         region_id: record.region_id,
         bcc: record.bcc,
-        status: email_status
+        status: email_status,
+      });
+    }
+
+    return true;
+  }
+
+  async resendEmail(record: UpdateEmailRecordInput): Promise<boolean> {
+    const { id } = record;
+    await this.emailRecordsRepository.delete(id);
+
+    const result = await this.SESService.sendEmail(
+      record.to_email,
+      record.subject,
+      record.body,
+      record.bcc,
+      record.from_email,
+    );
+
+    const email_status = result == false ? 'Sent' : 'Error';
+
+    // Add Email Records
+    await this.emailRecordsRepository.insert({
+      subject: record.subject,
+      body: record.body,
+      to_email: record.to_email,
+      from_email: record.from_email,
+      template_name: record.template_name,
+      region_id: record.region_id,
+      bcc: record.bcc,
+      status: email_status,
     });
-    return true
+    return true;
   }
 }

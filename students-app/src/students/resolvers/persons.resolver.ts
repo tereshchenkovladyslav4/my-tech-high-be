@@ -1,12 +1,4 @@
-import {
-  Args,
-  ID,
-  Query,
-  Resolver,
-  ResolveReference,
-  ResolveField,
-  Parent,
-} from '@nestjs/graphql';
+import { Args, ID, Query, Resolver, ResolveReference, ResolveField, Parent } from '@nestjs/graphql';
 import { Person } from '../models/person.entity';
 import { PersonsArgs } from '../dto/persons.args';
 import { PersonsService } from '../services/persons.service';
@@ -30,9 +22,7 @@ export class PersonsResolver {
   ) {}
 
   @Query((returns) => Person, { name: 'person' })
-  async getPerson(
-    @Args({ name: 'person_id', type: () => ID }) person_id: number,
-  ): Promise<Person> {
+  async getPerson(@Args({ name: 'person_id', type: () => ID }) person_id: number): Promise<Person> {
     return await this.personsService.findOneById(person_id);
   }
 
@@ -48,27 +38,16 @@ export class PersonsResolver {
 
   @ResolveField((of) => Address, { name: 'address' })
   async getAddress(@Parent() person: Person): Promise<Address | any> {
-    return (
-      (await this.addressService.findOneByPersonId(person.person_id)) || {}
-    );
+    return (await this.addressService.findOneByPersonId(person.person_id)) || {};
   }
 
   @ResolveField((of) => EmailVerifier, { name: 'email_verifier' })
-  async getPersonEmailVerifier(
-    @Parent() person: Person,
-  ): Promise<EmailVerifier | any> {
-    return (
-      (await this.emailVerifiersService.getPersonEmailVerifier(
-        person.user_id,
-      )) || {}
-    );
+  async getPersonEmailVerifier(@Parent() person: Person): Promise<EmailVerifier | any> {
+    return (await this.emailVerifiersService.getPersonEmailVerifier(person.user_id)) || {};
   }
 
   @ResolveReference()
-  resolveReference(reference: {
-    __typename: string;
-    person_id: number;
-  }): Promise<Person> {
+  resolveReference(reference: { __typename: string; person_id: number }): Promise<Person> {
     return this.personsService.findOneById(reference.person_id);
   }
 

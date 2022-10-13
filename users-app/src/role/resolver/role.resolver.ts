@@ -9,50 +9,48 @@ import { RoleService } from './../services/role-service';
 
 @Resolver((of) => Role)
 export class RoleResolver {
-    constructor(private roleService: RoleService, private userService: UsersService) { }
+  constructor(private roleService: RoleService, private userService: UsersService) {}
 
+  //  @UseGuards(new AuthGuard())
+  @Query((of) => Role, { name: 'role' })
+  @UseGuards(new AuthGuard())
+  public async findRoleById(@Args({ name: 'id', type: () => ID }) id: number): Promise<Role> {
+    const res = await this.roleService.findRoleById(id);
+    return res;
+  }
 
-    //  @UseGuards(new AuthGuard())
-    @Query((of) => Role, { name: 'role' })
-    @UseGuards(new AuthGuard())
-    public async findRoleById(@Args({ name: 'id', type: () => ID }) id: number): Promise<Role> {
-        const res = await this.roleService.findRoleById(id);
-        return res;
+  @Query((of) => [Role], { name: 'roles' })
+  @UseGuards(new AuthGuard())
+  getAllRoles(): Promise<Role[]> {
+    return this.roleService.getAllRoles();
+  }
+  // @UseGuards(new AuthGuard())
+  @Mutation((of) => Role, { name: 'createRole' })
+  @UseGuards(new AuthGuard())
+  async createRole(@Args('createRoleInput') createRoleInput: CreateRoleInput): Promise<Role | any> {
+    if ((await this.userService.validateCreator(createRoleInput.creator_id)) === true) {
+      const response = await this.roleService.createRole(createRoleInput);
+      return response;
+    } else {
+      throw new UnauthorizedException();
     }
+  }
 
-    @Query((of) => [Role], { name: 'roles' })
-    @UseGuards(new AuthGuard())
-    getAllRoles(): Promise<Role[]> {
-        return this.roleService.getAllRoles();
+  @Mutation((of) => Role || String, { name: 'updateRole' })
+  @UseGuards(new AuthGuard())
+  @UsePipes(ValidationPipe)
+  async updateRole(@Args('updateRoleInput') updateRoleInput: UpdateRoleInput): Promise<string> {
+    if ((await this.userService.validateCreator(updateRoleInput.creator_id)) === true) {
+      return this.roleService.updateRole(updateRoleInput);
+    } else {
+      throw new UnauthorizedException();
     }
-    // @UseGuards(new AuthGuard())
-    @Mutation((of) => Role, { name: 'createRole' })
-    @UseGuards(new AuthGuard())
-    async createRole(@Args('createRoleInput') createRoleInput: CreateRoleInput): Promise<Role | any> {
-        if (await this.userService.validateCreator(createRoleInput.creator_id) === true) {
-            const response = await this.roleService.createRole(createRoleInput);
-            return response;
-        } else {
-            throw new UnauthorizedException();
-        }
-    }
+  }
 
-    @Mutation((of) => Role || String, { name: 'updateRole' })
-    @UseGuards(new AuthGuard())
-    @UsePipes(ValidationPipe)
-    async updateRole(@Args('updateRoleInput') updateRoleInput: UpdateRoleInput): Promise<String> {
-        if (await this.userService.validateCreator(updateRoleInput.creator_id) === true) {
-            return this.roleService.updateRole(updateRoleInput);
-        } else {
-            throw new UnauthorizedException();
-        }
-    }
-
-
-    @Mutation((of) => String, { name: 'removeRole' })
-    @UseGuards(new AuthGuard())
-    public async removeRoleById(@Args({ name: 'id', type: () => ID }) id: number): Promise<String> {
-        const response = await this.roleService.removeRoleById(id);
-        return response;
-    }
+  @Mutation((of) => String, { name: 'removeRole' })
+  @UseGuards(new AuthGuard())
+  public async removeRoleById(@Args({ name: 'id', type: () => ID }) id: number): Promise<string> {
+    const response = await this.roleService.removeRoleById(id);
+    return response;
+  }
 }

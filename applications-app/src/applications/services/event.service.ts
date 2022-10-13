@@ -11,9 +11,7 @@ export class EventsService {
     private readonly eventsRepository: Repository<ApplicationEvent>,
   ) {}
 
-  async findAll(
-    param: FindEventsByRegionIdSearch,
-  ): Promise<Array<ApplicationEvent>> {
+  async findAll(param: FindEventsByRegionIdSearch): Promise<Array<ApplicationEvent>> {
     try {
       const queryRunner = await getConnection().createQueryRunner();
       let subCond = '';
@@ -34,9 +32,7 @@ export class EventsService {
         if (grades) {
           grades.forEach((grade) => {
             filter_grades += ` OR events.filter_grades LIKE '%"${
-              grade.grade_level.includes('K')
-                ? 'Kindergarten'
-                : grade.grade_level
+              grade.grade_level.includes('K') ? 'Kindergarten' : grade.grade_level
             }"%'`;
           });
         }
@@ -85,9 +81,7 @@ export class EventsService {
     }
   }
 
-  async save(
-    createEventInput: CreateOrUpdateEventInput,
-  ): Promise<ApplicationEvent> {
+  async save(createEventInput: CreateOrUpdateEventInput): Promise<ApplicationEvent> {
     try {
       const result = await this.eventsRepository.save(createEventInput);
       return result;

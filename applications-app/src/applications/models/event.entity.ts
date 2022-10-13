@@ -1,13 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  JoinColumn,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn, BaseEntity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { EventType } from './event-type.entity';
 
 @ObjectType()

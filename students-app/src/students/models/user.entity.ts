@@ -1,12 +1,5 @@
 import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Student } from './student.entity';
 import { UserRegion } from './user-region.entity';
 

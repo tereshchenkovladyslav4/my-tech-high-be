@@ -6,16 +6,13 @@ import { CreateParentUserInput } from '../dto/parentUser/create-parent-user.inpu
 
 @Injectable()
 export class ParentUserService {
-    constructor(
-        @InjectRepository(ParentUser)
-        private readonly parentRepository: Repository<ParentUser>
-    ) { }
+  constructor(
+    @InjectRepository(ParentUser)
+    private readonly parentRepository: Repository<ParentUser>,
+  ) {}
 
-
-    async createParent(createParentUserInput: CreateParentUserInput): Promise<ParentUser> {
-        const data = this.parentRepository.create(createParentUserInput)
-        return await this.parentRepository.save(data);
-
-    }
-
+  async createParent(createParentUserInput: CreateParentUserInput): Promise<ParentUser> {
+    const data = this.parentRepository.create(createParentUserInput);
+    return await this.parentRepository.save(data);
+  }
 }

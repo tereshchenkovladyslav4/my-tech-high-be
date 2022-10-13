@@ -8,12 +8,7 @@ import { File } from './models/file.entity';
 import { User } from './models/user.entity';
 import { SchoolYear } from './models/schoolyear.entity';
 
-const servicesImports = [
-  S3Service,
-  FilesService,
-  UsersService,
-  SchoolYearService,
-];
+const servicesImports = [S3Service, FilesService, UsersService, SchoolYearService];
 
 @Global()
 @Module({

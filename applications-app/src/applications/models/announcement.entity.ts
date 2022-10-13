@@ -66,10 +66,7 @@ export class Announcement extends BaseEntity {
   @UpdateDateColumn()
   date?: Date;
 
-  @OneToMany(
-    () => UserAnnouncement,
-    (userAnnouncement) => userAnnouncement.Announcement,
-  )
+  @OneToMany(() => UserAnnouncement, (userAnnouncement) => userAnnouncement.Announcement)
   @Field(() => [UserAnnouncement], { nullable: true })
   UserAnnouncements: UserAnnouncement[];
 

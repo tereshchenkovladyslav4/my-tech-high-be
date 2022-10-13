@@ -21,7 +21,7 @@ import { SchoolYearService } from './schoolyear.service';
 import { EmailRecordsService } from './email-records.service';
 //import { AnnouncementsService } from './announcements.service';
 
-var base64 = require('base-64');
+const base64 = require('base-64');
 @Injectable()
 export class EmailsService {
   constructor(
@@ -44,7 +44,7 @@ export class EmailsService {
     parent_id: number,
     students: any,
   ): Promise<any> {
-    let settings = [];
+    const settings = [];
     const webAppUrl = process.env.WEB_APP_URL;
 
     const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(emailVerifier.user_id);
@@ -205,11 +205,10 @@ export class EmailsService {
     const { user, body, sender, subject, announcementId } = announcementEmail;
 
     if (user.user_id) {
-      const currUserAnnouncement =
-        await this.userAnnouncementService.findById({
-          announcementId,
-          userId: user.user_id,
-        });
+      const currUserAnnouncement = await this.userAnnouncementService.findById({
+        announcementId,
+        userId: user.user_id,
+      });
       if (currUserAnnouncement) {
         await this.userAnnouncementService.save({
           AnnouncementId: announcementId,
@@ -240,13 +239,7 @@ export class EmailsService {
   async sendEmail(emailInput: EmailInput): Promise<ResponseDTO> {
     const { email, subject, content, bcc, from, template_name, region_id } = emailInput;
 
-    const result = await this.SESService.sendEmail(
-      email,
-      subject,
-      content,
-      bcc,
-      from,
-    );
+    const result = await this.SESService.sendEmail(email, subject, content, bcc, from);
 
     const email_status = result == false ? 'Sent' : 'Error';
 
@@ -264,16 +257,11 @@ export class EmailsService {
 
     return <ResponseDTO>{
       error: result,
-      message:
-        result == false
-          ? 'Email Send Successfully'
-          : 'Unexpected Error Occured',
+      message: result == false ? 'Email Send Successfully' : 'Unexpected Error Occured',
     };
   }
 
   encrypt(emailVerifier: EmailVerifier) {
-    return base64.encode(
-      `${emailVerifier.user_id}-${emailVerifier.email}-${emailVerifier.date_created}`,
-    );
+    return base64.encode(`${emailVerifier.user_id}-${emailVerifier.email}-${emailVerifier.date_created}`);
   }
 }

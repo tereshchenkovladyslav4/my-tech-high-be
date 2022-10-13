@@ -1,13 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { File } from './file.entity';
 import { StudentRecord } from './student-record.entity';
 import { Student } from './student.entity';
@@ -31,7 +23,7 @@ export class StudentRecordFile extends BaseEntity {
 
   @Column({ type: 'varchar', name: 'file_kind', nullable: true })
   @Field(() => String, { nullable: true })
-  file_kind: String;
+  file_kind: string;
 
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
@@ -41,14 +33,10 @@ export class StudentRecordFile extends BaseEntity {
   @UpdateDateColumn()
   updated_at?: Date;
 
-  @ManyToOne(
-    () => StudentRecord,
-    (studentRecord) => studentRecord.StudentRecordFiles,
-    {
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    },
-  )
+  @ManyToOne(() => StudentRecord, (studentRecord) => studentRecord.StudentRecordFiles, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({ name: 'RecordId', referencedColumnName: 'record_id' })
   @Field(() => StudentRecord, { nullable: true })
   StudentRecord: StudentRecord;

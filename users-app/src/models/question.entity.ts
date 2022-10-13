@@ -1,10 +1,5 @@
 import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @InputType('question')
 @ObjectType()
@@ -35,14 +30,14 @@ export class Question extends BaseEntity {
   @Column()
   @Field(() => Int, { nullable: true })
   sequence?: number;
-  
-  @Column()
-  @Field((type) => String, { nullable: true })
-  question: String;
 
   @Column()
   @Field((type) => String, { nullable: true })
-  options: String;
+  question: string;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  options: string;
 
   @Column()
   @Field((type) => Int, { nullable: true })
@@ -58,7 +53,7 @@ export class Question extends BaseEntity {
 
   @Column()
   @Field((type) => String, { nullable: true })
-  additionalQuestion: String;
+  additionalQuestion: string;
 
   @Column()
   @Field(() => Int, { nullable: true })

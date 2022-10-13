@@ -266,14 +266,11 @@ export class PacketsService {
 
     const tmp = results[0];
 
-    const studentPerson = await this.studentService.findOneById(
-      tmp.student_id,
-    );
+    const studentPerson = await this.studentService.findOneById(tmp.student_id);
 
-    const regions: UserRegion[] =
-      await this.userRegionService.findUserRegionByUserId(
-        studentPerson.parent?.person?.user_id,
-      );
+    const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
+      studentPerson.parent?.person?.user_id,
+    );
 
     let region_id = 1;
     if (regions.length != 0) {

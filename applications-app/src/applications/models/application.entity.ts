@@ -89,10 +89,7 @@ export class Application extends BaseEntity {
   })
   school_year?: SchoolYear;
 
-  @OneToMany(
-    (type) => ApplicationEmail,
-    (application_email) => application_email.application,
-  )
+  @OneToMany((type) => ApplicationEmail, (application_email) => application_email.application)
   @JoinColumn({
     name: 'application_id',
     referencedColumnName: 'application_id',

@@ -1,20 +1,7 @@
 import { UpdateProfileInput } from './../dto/update-profile.inputs';
 import { UpdateAccountInput } from '../dto/update-account.inputs';
-import {
-  BadRequestException,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  Args,
-  Context,
-  ID,
-  Mutation,
-  Query,
-  Resolver,
-  ResolveField,
-  Parent,
-} from '@nestjs/graphql';
+import { BadRequestException, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Args, Context, ID, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import { Person } from 'src/models/person.entity';
 import { AuthService } from '../../auth/service/auth.service';
 import { AuthGuard } from '../../guards/auth.guard';
@@ -80,16 +67,9 @@ export class UsersResolver {
 
   @Mutation((of) => MePermission)
   @UseGuards(LocalAuthGuard)
-  public async login(
-    @Args('loginInput') loginInput: LoginInput,
-  ): Promise<AuthPayload | any> {
-    const user = await this.authService.validateUser(
-      loginInput.username,
-      loginInput.password,
-    );
-    const emailVerifier = await this.authService.getEmailVerification(
-      loginInput.username,
-    );
+  public async login(@Args('loginInput') loginInput: LoginInput): Promise<AuthPayload | any> {
+    const user = await this.authService.validateUser(loginInput.username, loginInput.password);
+    const emailVerifier = await this.authService.getEmailVerification(loginInput.username);
 
     if (emailVerifier?.verified == 0) {
       return {
@@ -113,9 +93,7 @@ export class UsersResolver {
 
   @Query(() => User, { name: 'user', nullable: true })
   @UseGuards(new AuthGuard())
-  getUser(
-    @Args({ name: 'user_id', type: () => ID }) user_id: number,
-  ): Promise<User> {
+  getUser(@Args({ name: 'user_id', type: () => ID }) user_id: number): Promise<User> {
     return this.usersService.findOneById(user_id);
   }
 
@@ -127,65 +105,43 @@ export class UsersResolver {
 
   @Query(() => [PersonInfo], { name: 'allPersonInfoBySearchItem' })
   @UseGuards(new AuthGuard())
-  getAllPersonInfoBySearchItem(
-    @Args('getPersonInfoArgs') getPersonInfoArgs: GetPersonInfoArgs,
-  ): Promise<PersonInfo[]> {
+  getAllPersonInfoBySearchItem(@Args('getPersonInfoArgs') getPersonInfoArgs: GetPersonInfoArgs): Promise<PersonInfo[]> {
     return this.usersService.findAllPersonInfoBySearchItem(getPersonInfoArgs);
   }
 
   @Query((returns) => UserPagination, { name: 'usersByRegions' })
   @UseGuards(new AuthGuard())
-  getUserByRegions(
-    @Args() userRegionArgs: UserRegionArgs,
-  ): Promise<Pagination<User>> {
-    if(userRegionArgs.filters.includes('Admin')){
+  getUserByRegions(@Args() userRegionArgs: UserRegionArgs): Promise<Pagination<User>> {
+    if (userRegionArgs.filters.includes('Admin')) {
       return this.usersService.findUsersByRegions({
         ...userRegionArgs,
-        filters: [...userRegionArgs.filters, 'Super Admin']
+        filters: [...userRegionArgs.filters, 'Super Admin'],
       });
-    }else{
-      return this.usersService.findUsersByRegions(userRegionArgs)
+    } else {
+      return this.usersService.findUsersByRegions(userRegionArgs);
     }
   }
 
   @UseGuards(new AuthGuard())
   @Mutation((of) => User, { name: 'createUser' })
-  async createUser(
-    @Args('createUserInput') createUserInput: CreateUserInput,
-  ): Promise<User> {
-    const isAdmin = await this.usersService.findOneById(
-      createUserInput.creator_id,
-    );
+  async createUser(@Args('createUserInput') createUserInput: CreateUserInput): Promise<User> {
+    const isAdmin = await this.usersService.findOneById(createUserInput.creator_id);
     const canAddObserver = createUserInput.level === 14 && isAdmin.level === 2;
-    if (
-      canAddObserver ||
-      (await this.usersService.validateCreator(createUserInput.creator_id)) ===
-        true
-    ) {
+    if (canAddObserver || (await this.usersService.validateCreator(createUserInput.creator_id)) === true) {
       let parentUser = null;
-      if (
-        Number(createUserInput.level) === 13 ||
-        Number(createUserInput.level) === 14
-      ) {
-        parentUser = await this.usersService.findOneByEmail(
-          createUserInput.parent_email,
-        );
+      if (Number(createUserInput.level) === 13 || Number(createUserInput.level) === 14) {
+        parentUser = await this.usersService.findOneByEmail(createUserInput.parent_email);
         if (!parentUser) {
           throw new BadRequestException('Parent Email does not exist');
         } else {
           if (parentUser.level !== 15) {
-            throw new BadRequestException(
-              'Email address does not relate to any Parent.',
-            );
+            throw new BadRequestException('Email address does not relate to any Parent.');
           }
         }
       }
       const response = await this.usersService.createUser(createUserInput);
       if (response) {
-        if (
-          Number(createUserInput.level) === 13 ||
-          Number(createUserInput.level) === 14
-        ) {
+        if (Number(createUserInput.level) === 13 || Number(createUserInput.level) === 14) {
           const parentPayload = {
             child_id: response.user_id,
             parent_email: parentUser.email,
@@ -214,15 +170,9 @@ export class UsersResolver {
 
   @Mutation((of) => User, { name: 'updateUser' })
   @UseGuards(new AuthGuard())
-  async updateUser(
-    @Args('updateUserInput') updateUserInput: UpdateUserInput,
-  ): Promise<User> {
-    if (
-      (await this.usersService.validateCreator(updateUserInput.creator_id)) ===
-      true
-    ) {
-      const { creator_id, level, regions, access, parent_email, ...rest } =
-        updateUserInput;
+  async updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput): Promise<User> {
+    if ((await this.usersService.validateCreator(updateUserInput.creator_id)) === true) {
+      const { creator_id, level, regions, access, parent_email, ...rest } = updateUserInput;
       let parentUser = null;
       if (Number(level) === 13 || Number(level) === 14) {
         parentUser = await this.usersService.findOneByEmail(parent_email);
@@ -230,17 +180,13 @@ export class UsersResolver {
           throw new BadRequestException('Parent Email does not exist');
         } else {
           if (parentUser.level !== 15) {
-            throw new BadRequestException(
-              'Email address does not relate to any Parent.',
-            );
+            throw new BadRequestException('Email address does not relate to any Parent.');
           }
         }
       }
       const response = await this.usersService.updateUser(rest);
       if (response) {
-        const regionCount = await this.userRegionService.findUserRegionByUserId(
-          updateUserInput.user_id,
-        );
+        const regionCount = await this.userRegionService.findUserRegionByUserId(updateUserInput.user_id);
         if (regionCount.length !== regions.length) {
           const regionPayload = {
             user_id: response.user_id,
@@ -249,9 +195,7 @@ export class UsersResolver {
           };
           await this.userRegionService.updateUserRegion(regionPayload);
         }
-        const accessCount = await this.userAccessService.findUserAccessByUserId(
-          updateUserInput.user_id,
-        );
+        const accessCount = await this.userAccessService.findUserAccessByUserId(updateUserInput.user_id);
         if (accessCount.length !== access.length) {
           const accessPayload = {
             user_id: response.user_id,
@@ -278,17 +222,9 @@ export class UsersResolver {
 
   @Mutation((of) => User, { name: 'changeUserStatus' })
   @UseGuards(new AuthGuard())
-  public async changeUserStatus(
-    @Args() changeStatusArgs: ChangeStatusArgs,
-  ): Promise<User> {
-    if (
-      (await this.usersService.validateCreator(changeStatusArgs.creator_id)) ===
-      true
-    ) {
-      const response = await this.usersService.changeUserStatus(
-        changeStatusArgs.user_id,
-        changeStatusArgs.status,
-      );
+  public async changeUserStatus(@Args() changeStatusArgs: ChangeStatusArgs): Promise<User> {
+    if ((await this.usersService.validateCreator(changeStatusArgs.creator_id)) === true) {
+      const response = await this.usersService.changeUserStatus(changeStatusArgs.user_id, changeStatusArgs.status);
       return response;
     } else {
       throw new UnauthorizedException();
@@ -305,10 +241,7 @@ export class UsersResolver {
       const authUser = await this.usersService.findOneByEmail(user.username);
       if (!authUser) throw new UnauthorizedException();
 
-      return await this.usersService.updateProfile(
-        authUser,
-        updateProfileInput,
-      );
+      return await this.usersService.updateProfile(authUser, updateProfileInput);
     } else {
       throw new UnauthorizedException();
     }
@@ -324,10 +257,7 @@ export class UsersResolver {
       const authUser = await this.usersService.findOneByEmail(user.username);
       if (!authUser) throw new UnauthorizedException();
 
-      return await this.usersService.updateAccount(
-        authUser,
-        updateAccountInput,
-      );
+      return await this.usersService.updateAccount(authUser, updateAccountInput);
     } else {
       throw new UnauthorizedException();
     }
@@ -360,21 +290,15 @@ export class UsersResolver {
     if (user) {
       const authUser = await this.usersService.findOneByEmail(user.username);
       if (!authUser) throw new UnauthorizedException();
-      if (masqueradeInput.masquerade === true && authUser.level !== 1)
-        throw new UnauthorizedException();
+      if (masqueradeInput.masquerade === true && authUser.level !== 1) throw new UnauthorizedException();
 
-      const userToUpdate = await this.usersService.findOneById(
-        masqueradeInput.user_id,
-      );
+      const userToUpdate = await this.usersService.findOneById(masqueradeInput.user_id);
       if (!userToUpdate) throw new BadRequestException();
 
       if (userToUpdate.level !== 2) throw new UnauthorizedException();
 
       if (userToUpdate.level === 2) {
-        return await this.usersService.toggleMasquerade(
-          userToUpdate,
-          masqueradeInput,
-        );
+        return await this.usersService.toggleMasquerade(userToUpdate, masqueradeInput);
       }
     } else {
       throw new UnauthorizedException();
@@ -383,14 +307,10 @@ export class UsersResolver {
 
   @Mutation((of) => MePermission)
   @UseGuards(new AuthGuard())
-  public async masqueradeUser(
-    @Context('user') user: any,
-    @Args('userId') userId: number,
-  ): Promise<AuthPayload | any> {
+  public async masqueradeUser(@Context('user') user: any, @Args('userId') userId: number): Promise<AuthPayload | any> {
     if (user) {
       const authUser = await this.usersService.findOneByEmail(user.username);
-      if (!authUser || authUser.masquerade === 0)
-        throw new UnauthorizedException();
+      if (!authUser || authUser.masquerade === 0) throw new UnauthorizedException();
       const masquerade = await this.usersService.findOneById(userId);
       const token = await this.authService.masquerade(masquerade, authUser);
       const payload = {

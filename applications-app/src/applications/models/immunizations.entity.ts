@@ -4,59 +4,59 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "id")')
-@Entity({ name: 'mth_immunizations'})
+@Entity({ name: 'mth_immunizations' })
 export class Immunizations extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  id?: number
+  id?: number;
 
   @Column()
-  title?: string
+  title?: string;
 
   @Column()
-  min_grade_level?: string
+  min_grade_level?: string;
 
   @Column()
-  max_grade_level?: string
+  max_grade_level?: string;
 
   @Column()
-  min_school_year_required?: number
+  min_school_year_required?: number;
 
   @Column()
-  max_school_year_required?: number
-  
-  @Column()
-  immunity_allowed?: number
+  max_school_year_required?: number;
 
   @Column()
-  exempt_update?: number
+  immunity_allowed?: number;
 
   @Column()
-  requires_update?: number
+  exempt_update?: number;
 
   @Column()
-  level_requires_update?: number
+  requires_update?: number;
 
   @Column()
-  level_exempt_update?: number
+  level_requires_update?: number;
 
   @Column()
-  consecutive_vaccine?: number
+  level_exempt_update?: number;
 
   @Column()
-  min_spacing_interval?: number
+  consecutive_vaccine?: number;
 
   @Column()
-  min_spacing_date?: string
+  min_spacing_interval?: number;
 
   @Column()
-  max_spacing_interval?: number
+  min_spacing_date?: string;
 
   @Column()
-  max_spacing_date?: string
+  max_spacing_interval?: number;
 
   @Column()
-  email_update_template?: string
+  max_spacing_date?: string;
+
+  @Column()
+  email_update_template?: string;
 }

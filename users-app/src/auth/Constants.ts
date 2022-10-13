@@ -1,3 +1,3 @@
 export const jwtConstants = {
-    secret: 'info_center-v_2.0',
+  secret: 'info_center-v_2.0',
 };

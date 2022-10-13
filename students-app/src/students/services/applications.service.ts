@@ -15,8 +15,8 @@ export class ApplicationsService {
       where: {
         student_id: student_id,
         school_year_id: school_year_id,
-        status: "Accepted"
-      }
-    })
+        status: 'Accepted',
+      },
+    });
   }
 }

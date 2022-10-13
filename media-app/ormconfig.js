@@ -1,6 +1,5 @@
 // Use require instead of import
-const SnakeNamingStrategy =
-  require('typeorm-naming-strategies').SnakeNamingStrategy;
+const SnakeNamingStrategy = require('typeorm-naming-strategies').SnakeNamingStrategy;
 
 module.exports = {
   name: 'default',

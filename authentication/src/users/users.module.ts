@@ -3,9 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import RepoModule from './repo.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot(),
-    RepoModule
-  ],
+  imports: [TypeOrmModule.forRoot(), RepoModule],
 })
 export class UsersModule {}

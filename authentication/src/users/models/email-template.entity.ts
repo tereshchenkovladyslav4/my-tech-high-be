@@ -1,5 +1,5 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql'
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @ObjectType()
 @Directive('@key(fields: "id")')
 @Entity({ name: 'email_templates' })
@@ -7,49 +7,49 @@ export class EmailTemplate extends BaseEntity {
   @Column()
   @Field((type) => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column()
   @Field((type) => String)
-  template_name: string
+  template_name: string;
 
   @Column()
   @Field((type) => String, { nullable: true })
-  title: string
+  title: string;
 
   @Column()
   @Field((type) => String, { nullable: true })
-  subject: string
+  subject: string;
 
   @Column()
   @Field((type) => String, { nullable: true })
-  from: string
+  from: string;
 
   @Column()
   @Field((type) => String, { nullable: true })
-  bcc: string
+  bcc: string;
 
   @Column()
   @Field((type) => String, { nullable: true })
-  body: string
+  body: string;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  category_id?: number
+  category_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
-  standard_responses?: string
+  standard_responses?: string;
 
   @Column()
   @Field((type) => String, { nullable: true, defaultValue: '' })
-  template: String;
+  template: string;
 
   @Column()
   @Field((type) => String, { nullable: true, defaultValue: '' })
-  inserts: String;
+  inserts: string;
 
   @Column()
   @Field((type) => Int, { nullable: true, defaultValue: 1 })
-  region_id: number
+  region_id: number;
 }

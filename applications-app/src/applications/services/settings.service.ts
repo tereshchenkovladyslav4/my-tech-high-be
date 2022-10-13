@@ -9,20 +9,20 @@ export class SettingsService {
   constructor(
     @InjectRepository(Settings)
     private readonly settingsRepository: Repository<Settings>,
-  ) { }
+  ) {}
 
   async findFirst(): Promise<Settings> {
     const res = await this.settingsRepository.findOne(1);
     if (!res) {
-      return this.updateSettings({ enable_immunizations: 1 })
+      return this.updateSettings({ enable_immunizations: 1 });
     }
-    return res
+    return res;
   }
 
   async updateSettings(input: UpdateSettingsInput): Promise<Settings> {
     return this.settingsRepository.save({
       id: 1,
-      enable_immunizations: input.enable_immunizations
-    })
+      enable_immunizations: input.enable_immunizations,
+    });
   }
 }

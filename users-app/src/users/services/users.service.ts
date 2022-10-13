@@ -1,16 +1,6 @@
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Brackets,
-  createQueryBuilder,
-  getConnection,
-  Repository,
-} from 'typeorm';
+import { Brackets, createQueryBuilder, getConnection, Repository } from 'typeorm';
 import { Address } from '../../models/address.entity';
 import { PersonAddress } from '../../models/person-address.entity';
 import { Person } from '../../models/person.entity';
@@ -40,14 +30,14 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     private emailService: EmailsService,
     private emailVerifierService: EmailVerifierService,
-    private userRegionService: UserRegionService
+    private userRegionService: UserRegionService,
   ) {}
 
   saltPassword(password: string) {
     return crypto.createHash('md5').update(`${password}${salt}`).digest('hex');
   }
 
-  async validateCreator(id: number): Promise<Boolean> {
+  async validateCreator(id: number): Promise<boolean> {
     // const user = this.usersRepository.createQueryBuilder("user").leftJoinAndSelect("user.user_id", "level")
     //   .where("level.user_id = :user_id", { id })
     const user = await this.usersRepository.findOne({
@@ -60,9 +50,7 @@ export class UsersService {
     return false;
   }
 
-  async findAllPersonInfoBySearchItem(
-    getPersonInfoArgs: GetPersonInfoArgs,
-  ): Promise<PersonInfo[]> {
+  async findAllPersonInfoBySearchItem(getPersonInfoArgs: GetPersonInfoArgs): Promise<PersonInfo[]> {
     try {
       const queryRunner = await getConnection().createQueryRunner();
       const response = (await queryRunner.query(
@@ -169,9 +157,7 @@ export class UsersService {
     });
   }
 
-  async findUsersByRegions(
-    userRegionArgs: UserRegionArgs,
-  ): Promise<Pagination<User>> {
+  async findUsersByRegions(userRegionArgs: UserRegionArgs): Promise<Pagination<User>> {
     const { skip, take, sort, filters, search, region_id } = userRegionArgs;
     const _sortBy = sort.split('|');
     if (filters.length === 0) {
@@ -251,26 +237,25 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: {
         email: email,
-        status: 1
-      }
+        status: 1,
+      },
     });
 
-    if( !user )
-      return user;
+    if (!user) return user;
 
     const queryRunner = await getConnection().createQueryRunner();
     const response = (await queryRunner.query(
       `SELECT person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id FROM infocenter.mth_person WHERE user_id = ${user.user_id}`,
     )) as Person[];
 
-    if(response.length == 0) {
+    if (response.length == 0) {
       await queryRunner.query(
         `INSERT INTO infocenter.mth_person (person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id)
-        VALUES (0, '${user.first_name}', '${user.last_name}', '', '', '', 'Male', '${user.email}', NOW(), ${user.user_id});`
+        VALUES (0, '${user.first_name}', '${user.last_name}', '', '', '', 'Male', '${user.email}', NOW(), ${user.user_id});`,
       );
     }
     await queryRunner.release();
-		
+
     return await this.usersRepository.findOne({
       where: {
         email: email,
@@ -292,9 +277,7 @@ export class UsersService {
   async createUser(createUserInput: CreateUserInput): Promise<User> {
     const isExist = await this.findOneByEmail(createUserInput.email);
     if (isExist) {
-      throw new BadRequestException(
-        'An account with this email address already exist!',
-      );
+      throw new BadRequestException('An account with this email address already exist!');
     } else {
       const payload = {
         email: createUserInput.email,
@@ -322,21 +305,14 @@ export class UsersService {
           verification_type: 0,
         });
 
-        if (!emailVerifier)
-          throw new HttpException(
-            'EmailVerifier Not Created',
-            HttpStatus.CONFLICT,
-          );
+        if (!emailVerifier) throw new HttpException('EmailVerifier Not Created', HttpStatus.CONFLICT);
         console.log('EmailVerifier: ', emailVerifier);
 
         await this.emailService.sendAccountVerificationEmail(emailVerifier);
 
         return user;
       } else {
-        throw new HttpException(
-          'There was an error creating user, Try Again!',
-          HttpStatus.CONFLICT,
-        );
+        throw new HttpException('There was an error creating user, Try Again!', HttpStatus.CONFLICT);
       }
     }
   }
@@ -344,22 +320,13 @@ export class UsersService {
   async updateUser(updateUserInput: UpdateUserInput): Promise<User> {
     const record = await this.findOneById(updateUserInput.user_id);
     if (!record) {
-      throw new HttpException(
-        'This account has been removed.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('This account has been removed.', HttpStatus.BAD_REQUEST);
     } else {
-      const user = await this.usersRepository.update(
-        updateUserInput.user_id,
-        updateUserInput,
-      );
+      const user = await this.usersRepository.update(updateUserInput.user_id, updateUserInput);
       if (user.affected > 0) {
         return await this.usersRepository.findOne(updateUserInput.user_id);
       } else {
-        throw new HttpException(
-          'There was an error updating user, Try Again!',
-          HttpStatus.CONFLICT,
-        );
+        throw new HttpException('There was an error updating user, Try Again!', HttpStatus.CONFLICT);
       }
     }
   }
@@ -369,10 +336,7 @@ export class UsersService {
     if (data.affected > 0) {
       return await this.findOneById(user_id);
     } else {
-      throw new HttpException(
-        'No record updated, Try again!',
-        HttpStatus.NOT_MODIFIED,
-      );
+      throw new HttpException('No record updated, Try again!', HttpStatus.NOT_MODIFIED);
     }
   }
 
@@ -384,10 +348,7 @@ export class UsersService {
       .getOne();
   }
 
-  async updateProfile(
-    user: User,
-    updateProfileInput: UpdateProfileInput,
-  ): Promise<User> {
+  async updateProfile(user: User, updateProfileInput: UpdateProfileInput): Promise<User> {
     const anotherperson = await createQueryBuilder(Person)
       .where('email = :email AND user_id != :userId', {
         email: updateProfileInput.email,
@@ -395,9 +356,7 @@ export class UsersService {
       })
       .getOne();
     if (anotherperson) {
-      throw new BadRequestException(
-        'Email is already in use. Please choose another one.',
-      );
+      throw new BadRequestException('Email is already in use. Please choose another one.');
     }
 
     const person = await createQueryBuilder(Person)
@@ -447,11 +406,7 @@ export class UsersService {
         verification_type: 0,
       });
 
-      if (!emailVerifier)
-        throw new HttpException(
-          'EmailVerifier Not Created',
-          HttpStatus.CONFLICT,
-        );
+      if (!emailVerifier) throw new HttpException('EmailVerifier Not Created', HttpStatus.CONFLICT);
       await this.emailService.sendEmailUpdateVerificationEmail(emailVerifier);
     }
 
@@ -489,11 +444,7 @@ export class UsersService {
 
     // Update Address
     const hasAddress = await createQueryBuilder(PersonAddress)
-      .innerJoin(
-        Person,
-        'person',
-        'person.person_id = `PersonAddress`.person_id',
-      )
+      .innerJoin(Person, 'person', 'person.person_id = `PersonAddress`.person_id')
       .where('`PersonAddress`.person_id = :id', { id: person.person_id })
       .printSql()
       .getOne();
@@ -552,12 +503,9 @@ export class UsersService {
     return user;
   }
 
-  async updateAccount(
-    user: User,
-    updateAccountInput: UpdateAccountInput,
-  ): Promise<User> {
+  async updateAccount(user: User, updateAccountInput: UpdateAccountInput): Promise<User> {
     const { oldpassword, password } = updateAccountInput;
-    let pattern = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})');
+    const pattern = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})');
     if (!pattern.test(password))
       throw new BadRequestException(
         'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character',
@@ -567,9 +515,7 @@ export class UsersService {
       throw new BadRequestException('Please enter the correct password.');
 
     if (user.password.match(this.saltPassword(password)))
-      throw new BadRequestException(
-        'The new password should be different from the current password.',
-      );
+      throw new BadRequestException('The new password should be different from the current password.');
 
     const updated_at = Moment().format('YYYY-MM-DD HH:mm:ss');
 
@@ -583,10 +529,7 @@ export class UsersService {
     return user;
   }
 
-  async toggleMasquerade(
-    user: User,
-    masqueradeInput: MasqueradeInput,
-  ): Promise<User> {
+  async toggleMasquerade(user: User, masqueradeInput: MasqueradeInput): Promise<User> {
     const { user_id, masquerade } = masqueradeInput;
 
     await getConnection()

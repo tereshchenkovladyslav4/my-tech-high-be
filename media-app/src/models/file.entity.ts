@@ -4,7 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 export class File extends BaseEntity {
   @Column()
   @PrimaryGeneratedColumn()
-  file_id?: number
+  file_id?: number;
 
   @Column()
   name?: string;

@@ -39,9 +39,7 @@ export class ApplicationQuestionsResolver {
   }
 
   @Mutation(() => Int, { name: 'deleteApplicationQuestion' })
-  async deleteApplicationQuestion(
-    @Args('id', { type: () => Int }) id: number,
-  ): Promise<number> {
+  async deleteApplicationQuestion(@Args('id', { type: () => Int }) id: number): Promise<number> {
     return await this.service.deleteApplication(id);
   }
 }

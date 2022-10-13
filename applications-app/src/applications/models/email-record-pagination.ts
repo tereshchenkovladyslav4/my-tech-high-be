@@ -3,13 +3,12 @@ import { EmailRecord } from './email-record.entity';
 
 @ObjectType()
 export class EmailRecordPagination {
-
   @Field((type) => [EmailRecord])
-  results?: EmailRecord[]
+  results?: EmailRecord[];
 
   @Field((type) => Int)
-  page_total?: number
+  page_total?: number;
 
   @Field((type) => Int)
-  total?: number
+  total?: number;
 }

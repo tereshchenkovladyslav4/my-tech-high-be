@@ -32,7 +32,7 @@ export class StudentImmunizationResolver {
       this.studentImmunizationService.findAll(student_id),
       this.immunizationSettingsService.findAll({ is_enabled: true, region_id: regionId }),
     ]);
-    let res: StudentImmunization[] = [];
+    const res: StudentImmunization[] = [];
     for (const imm of immunizations.results) {
       let sIm = studentImmunizations.find((v) => v.immunization_id === imm.id);
       if (!sIm) {

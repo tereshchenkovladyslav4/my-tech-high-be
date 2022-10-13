@@ -5,10 +5,7 @@ import RepoModule from './repo.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot(),
-    RepoModule,
-  ],
+  imports: [TypeOrmModule.forRoot(), RepoModule],
   controllers: [AppController],
   providers: [AppService],
 })

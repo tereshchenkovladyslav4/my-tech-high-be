@@ -7,6 +7,6 @@ async function bootstrap() {
 
   //app.use(graphqlUploadExpress({ maxFileSize: 2 * 1000 * 1000 }));
   await app.listen(3004);
-  console.log(`>>>>>>applications-app is running in the port 3004`)
+  console.log(`>>>>>>applications-app is running in the port 3004`);
 }
 bootstrap();

@@ -53,7 +53,7 @@ export class DiplomaResolver {
   async saveDiplomaQuestionGrade(
     @Args('diplomaQuestionInput')
     diplomaQuestionInput: DiplomaQuestionInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.diplomaService.saveQuestionGrades(diplomaQuestionInput);
   }
 

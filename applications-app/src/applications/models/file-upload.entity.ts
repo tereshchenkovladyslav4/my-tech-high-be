@@ -12,6 +12,6 @@ export class FileUpload {
   @Field(() => String, { nullable: true })
   encoding: string;
 
-  @Field( () => ReadStream )
-  stream?: ReadStream
+  @Field(() => ReadStream)
+  stream?: ReadStream;
 }

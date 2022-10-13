@@ -3,7 +3,6 @@ import { IsOptional, MaxLength, IsEmail, Length, IsInt } from 'class-validator';
 
 @InputType()
 export class CreateStudentUserInput {
- 
   @Field()
   @MaxLength(60)
   @IsOptional()
@@ -18,13 +17,13 @@ export class CreateStudentUserInput {
   @IsEmail()
   email?: string;
 
-  @Field({nullable: true})
-  password?: string
+  @Field({ nullable: true })
+  password?: string;
 
   @Field(() => Int, { defaultValue: 2 })
   @IsInt()
-  level?: number
+  level?: number;
 
-  @Field({nullable: true})
-  updateAt?: string
+  @Field({ nullable: true })
+  updateAt?: string;
 }

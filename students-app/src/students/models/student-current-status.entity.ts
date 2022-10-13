@@ -30,7 +30,7 @@ export class StudentCurrentStatus {
   application_date_submitted?: Date;
 
   @Field(() => String, { nullable: true })
-  application_date_accepted?: String;
+  application_date_accepted?: string;
 
   @Field((type) => Int, { nullable: true })
   packet_id?: number;
@@ -45,7 +45,7 @@ export class StudentCurrentStatus {
   enrollment_packet_deadline_num_days?: number;
 
   @Field(() => String, { nullable: true })
-  enrollment_packet_date_deadline?: String;
+  enrollment_packet_date_deadline?: string;
 
   @Field(() => Int, { nullable: true })
   withdraw_deadline_num_days?: number;

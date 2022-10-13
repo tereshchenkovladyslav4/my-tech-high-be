@@ -9,7 +9,7 @@ export class StudentImmunizationService {
   constructor(
     @InjectRepository(StudentImmunization)
     private StudentImmunizationRepository: Repository<StudentImmunization>,
-  ) { }
+  ) {}
 
   async createUpdate(data: StudentImmunization[]): Promise<boolean> {
     let result = true;
@@ -28,17 +28,12 @@ export class StudentImmunizationService {
     return result;
   }
 
-  async findOne(
-    studentId: number,
-    immunizationId: number,
-  ): Promise<StudentImmunization> {
+  async findOne(studentId: number, immunizationId: number): Promise<StudentImmunization> {
     return this.StudentImmunizationRepository.findOne({
       where: { student_id: studentId, immunization_id: immunizationId },
     });
   }
-  async findAll(
-    studentId: number,
-  ): Promise<StudentImmunization[]> {
+  async findAll(studentId: number): Promise<StudentImmunization[]> {
     return this.StudentImmunizationRepository.find({
       where: { student_id: studentId },
     });

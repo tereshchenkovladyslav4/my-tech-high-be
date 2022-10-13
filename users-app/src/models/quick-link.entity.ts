@@ -1,10 +1,5 @@
 import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @InputType('quickLink')
 @ObjectType()
@@ -39,10 +34,10 @@ export class QuickLink extends BaseEntity {
   @Column()
   @Field(() => Int, { nullable: true })
   sequence?: number;
-  
+
   @Column()
   @Field((type) => String, { nullable: true })
-  reserved: String;
+  reserved: string;
 
   @Column()
   @Field(() => Int, { nullable: true })

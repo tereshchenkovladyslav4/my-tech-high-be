@@ -3,21 +3,19 @@ import { IsNotEmpty, Max, Min } from 'class-validator';
 
 @InputType()
 export class UpdateUserRegionInput {
+  @Field(() => [Int])
+  @IsNotEmpty()
+  id?: [number];
 
-    @Field(() => [Int])
-    @IsNotEmpty()
-    id?: [number];
+  @Field(() => [Int])
+  @IsNotEmpty()
+  region_id?: [number];
 
-    @Field(() => [Int])
-    @IsNotEmpty()
-    region_id?: [number];
+  @Field(() => Int, { nullable: true })
+  @IsNotEmpty()
+  user_id?: number;
 
-    @Field(() => Int, { nullable: true })
-    @IsNotEmpty()
-    user_id?: number;
-
-
-    @Field(() => Int, { nullable: true })
-    @IsNotEmpty()
-    creator_id?: number;
+  @Field(() => Int, { nullable: true })
+  @IsNotEmpty()
+  creator_id?: number;
 }

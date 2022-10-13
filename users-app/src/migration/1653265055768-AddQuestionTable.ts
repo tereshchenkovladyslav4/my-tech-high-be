@@ -1,10 +1,10 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AddQuestionTable1653265055768 implements MigrationInterface {
-    name = 'AddQuestionTable1653265055768'
+  name = 'AddQuestionTable1653265055768';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TABLE IF NOT EXISTS \`mth_question\` (
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE TABLE IF NOT EXISTS \`mth_question\` (
             \`id\` int NOT NULL AUTO_INCREMENT,
             \`region_id\` int NOT NULL,
             \`section\` VARCHAR(40) NOT NULL COMMENT 'quick-link',
@@ -20,10 +20,9 @@ export class AddQuestionTable1653265055768 implements MigrationInterface {
             \`required\` tinyint(1) DEFAULT NULL COMMENT '0 => Not Required,  1 => Required',
             PRIMARY KEY (\`id\`) USING BTREE
           ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;`);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP TABLE IF EXISTS \`mth_question\``);
-    }
-
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP TABLE IF EXISTS \`mth_question\``);
+  }
 }

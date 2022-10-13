@@ -1,19 +1,5 @@
-import {
-  Directive,
-  Field,
-  ID,
-  ObjectType,
-  Int,
-  InputType,
-} from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn } from 'typeorm';
 import { EmailVerifier } from './email-verifier.entity';
 import { PersonAddress } from './person-address.entity';
 import { Phone } from './phone.entity';

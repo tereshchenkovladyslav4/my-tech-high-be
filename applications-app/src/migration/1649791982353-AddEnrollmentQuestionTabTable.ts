@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class AddEnrollmentQuestionTabTable1649791982353
-  implements MigrationInterface
-{
+export class AddEnrollmentQuestionTabTable1649791982353 implements MigrationInterface {
   name = 'AddEnrollmentQuestionTabTable1649791982353';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

@@ -32,8 +32,8 @@ export class CreateAnnouncementInput {
   isArchived?: boolean;
 
   @Field(() => String)
-  filter_program_years: string
+  filter_program_years: string;
 
   @Field(() => String)
-  filter_school_partners: string
+  filter_school_partners: string;
 }

@@ -40,6 +40,6 @@ export class NewApplicationQuestionsInput {
   @Field(() => String, { nullable: true })
   additional_question?: string;
 
-  @Field(() => Int, { defaultValue: 0  })
+  @Field(() => Int, { defaultValue: 0 })
   main_question?: number;
 }

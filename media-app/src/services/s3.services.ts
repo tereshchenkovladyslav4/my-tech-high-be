@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  Req,
-  Res,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, Req, Res, HttpException, HttpStatus } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 
 @Injectable()
@@ -19,18 +13,11 @@ export class S3Service {
   async uploadFile(file) {
     const { originalname } = file;
 
-    return await this.s3_upload(
-      file.buffer,
-      this.AWS_S3_BUCKET,
-      originalname,
-      file.mimetype,
-    );
+    return await this.s3_upload(file.buffer, this.AWS_S3_BUCKET, originalname, file.mimetype);
   }
 
   async deleteFile(attachmentId) {
-    return this.s3
-      .deleteObject({ Bucket: this.AWS_S3_BUCKET, Key: attachmentId })
-      .promise();
+    return this.s3.deleteObject({ Bucket: this.AWS_S3_BUCKET, Key: attachmentId }).promise();
   }
 
   async s3_upload(file, bucket, name, mimetype): Promise<any> {
@@ -49,16 +36,13 @@ export class S3Service {
     //console.log(params);
 
     try {
-      let s3Response = await this.s3.upload(params).promise();
+      const s3Response = await this.s3.upload(params).promise();
 
       //console.log(s3Response);
       return s3Response;
     } catch (e) {
       console.error('Unable to upload file to S3', e);
-      throw new HttpException(
-        'There was an error uploading file to storage, Try Again!',
-        HttpStatus.CONFLICT,
-      );
+      throw new HttpException('There was an error uploading file to storage, Try Again!', HttpStatus.CONFLICT);
     }
   }
 

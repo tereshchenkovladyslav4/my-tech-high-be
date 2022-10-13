@@ -1,4 +1,4 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql'
+import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import {
   BaseEntity,
   Column,
@@ -7,10 +7,10 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from 'typeorm'
-import { Region } from './region.entity'
-import { User } from './user.entity'
+  UpdateDateColumn,
+} from 'typeorm';
+import { Region } from './region.entity';
+import { User } from './user.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -21,17 +21,17 @@ export class UserRegion extends BaseEntity {
   @Field((type) => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  id: number
+  id: number;
 
   @Column()
   @Field((type) => Int, { nullable: true })
   @Directive('@external')
-  region_id: number
+  region_id: number;
 
   @Column()
   @Field((type) => Int, { nullable: true })
   @Directive('@external')
-  user_id: number
+  user_id: number;
 
   @ManyToOne(() => Region, (region) => region.region, { onDelete: 'CASCADE' })
   @Field(() => Region, { nullable: true })
@@ -46,8 +46,8 @@ export class UserRegion extends BaseEntity {
   user: User;
 
   @CreateDateColumn()
-  created_at!: Date
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at!: Date
+  updated_at!: Date;
 }

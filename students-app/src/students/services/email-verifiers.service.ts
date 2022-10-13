@@ -7,7 +7,7 @@ export class EmailVerifiersService {
   constructor(
     @InjectRepository(EmailVerifier)
     private emailVerifiersRepository: Repository<EmailVerifier>,
-  ) { }
+  ) {}
 
   async getPersonEmailVerifier(user_id: number): Promise<EmailVerifier> {
     return this.emailVerifiersRepository.findOne({ where: { user_id: user_id } });

@@ -5,13 +5,12 @@ import { Phone } from './phone.entity';
 
 @ObjectType()
 export class Profile {
-
   @Field((type) => Person)
-  person?: Person
+  person?: Person;
 
   @Field((type) => Phone)
-  phone?: Phone
-  
+  phone?: Phone;
+
   @Field((type) => Address)
-  address?: Address
+  address?: Address;
 }

@@ -19,17 +19,11 @@ import { IndividualWithdrawalInput } from '../dto/individual-withdrawal.inputs';
 
 @Resolver((of) => Withdrawal)
 export class WithdrawalResolver {
-  constructor(
-    private service: WithdrawalService,
-    private emailService: WithdrawalEmailsService,
-  ) {}
+  constructor(private service: WithdrawalService, private emailService: WithdrawalEmailsService) {}
 
   @Query((returns) => WithdrawalPagination, { name: 'withdrawals' })
   @UseGuards(new AuthGuard())
-  get(
-    @Args() pagination: PaginationInput,
-    @Args() filter: FilterInput,
-  ): Promise<Pagination<Withdrawal>> {
+  get(@Args() pagination: PaginationInput, @Args() filter: FilterInput): Promise<Pagination<Withdrawal>> {
     return this.service.find(pagination, filter);
   }
 
@@ -40,9 +34,7 @@ export class WithdrawalResolver {
   }
 
   @Query((returns) => [WithdrawalEmail], { name: 'getEmailsByWithdrawId' })
-  getWithdrawalEmails(
-    @Args({ name: 'withdrawId', type: () => Int }) withdrawId: number,
-  ): Promise<WithdrawalEmail[]> {
+  getWithdrawalEmails(@Args({ name: 'withdrawId', type: () => Int }) withdrawId: number): Promise<WithdrawalEmail[]> {
     return this.emailService.findByApplication(withdrawId);
   }
 
@@ -79,9 +71,7 @@ export class WithdrawalResolver {
 
   @Mutation((returns) => Boolean, { name: 'quickWithdrawal' })
   @UseGuards(new AuthGuard())
-  async quickWithdrawal(
-    @Args('quickWithdrawalInput') quickWithdrawalInput: QuickWithdrawalInput,
-  ): Promise<Boolean> {
+  async quickWithdrawal(@Args('quickWithdrawalInput') quickWithdrawalInput: QuickWithdrawalInput): Promise<boolean> {
     return await this.service.quickWithdrawal(quickWithdrawalInput);
   }
 
@@ -90,7 +80,7 @@ export class WithdrawalResolver {
   async reinstateWithdrawal(
     @Args('reinstateWithdrawalInput')
     reinstateWithdrawalInput: ReinstateWithdrawalInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return await this.service.reinstateWithdrawal(reinstateWithdrawalInput);
   }
 
@@ -99,7 +89,7 @@ export class WithdrawalResolver {
   async individualWithdrawal(
     @Args('individualWithdrawalInput')
     individualWithdrawalInput: IndividualWithdrawalInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return await this.service.individualWithdrawal(individualWithdrawalInput);
   }
 
@@ -108,7 +98,7 @@ export class WithdrawalResolver {
   async deleteWithdrawal(
     @Args('student_id', { type: () => Int })
     student_id: number,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.delete(student_id);
   }
 
@@ -117,7 +107,7 @@ export class WithdrawalResolver {
   async updateWithdrawal(
     @Args('updateWithdrawalInput')
     updateWithdrawalInput: UpdateWithdrawalInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return await this.service.update(updateWithdrawalInput);
   }
 }

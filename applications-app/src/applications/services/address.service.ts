@@ -9,7 +9,7 @@ export class AddressService {
   constructor(
     @InjectRepository(Address)
     private addressRepository: Repository<Address>,
-  ) { }
+  ) {}
 
   async create(address: CreateAddressInput): Promise<Address> {
     return this.addressRepository.save(address);

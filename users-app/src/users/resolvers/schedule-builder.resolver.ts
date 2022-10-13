@@ -11,15 +11,13 @@ export class ScheduleBuilderResolver {
 
   @Query((returns) => ScheduleBuilder, { name: 'getScheduleBuilder' })
   @UseGuards(new AuthGuard())
-  get(
-    @Args({ name: 'schoolYearId', type: () => ID }) schoolYearId: number,
-  ): Promise<ScheduleBuilder> {
+  get(@Args({ name: 'schoolYearId', type: () => ID }) schoolYearId: number): Promise<ScheduleBuilder> {
     return this.service.findOneById(schoolYearId);
   }
 
   @Mutation((returns) => ScheduleBuilder, { name: 'createOrUpdateScheduleBuilder' })
   async createOrUpdateScheduleBuilder(
-    @Args({ name: 'scheduleBuilderInput'}) scheduleBuilderInput: CreateScheduleBuilderInput,
+    @Args({ name: 'scheduleBuilderInput' }) scheduleBuilderInput: CreateScheduleBuilderInput,
   ): Promise<ScheduleBuilder> {
     return this.service.createOrUpdate(scheduleBuilderInput);
   }

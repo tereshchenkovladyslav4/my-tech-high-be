@@ -13,9 +13,7 @@ export class CreateEventTable1655063344049 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_event\` DROP FOREIGN KEY \`FK_ba92ff037a3adc96509cb164c81\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_event\` DROP FOREIGN KEY \`FK_ba92ff037a3adc96509cb164c81\``);
     await queryRunner.query(`DROP TABLE \`mth_event\``);
   }
 }

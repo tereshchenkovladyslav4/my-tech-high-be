@@ -5,8 +5,8 @@ import * as Moment from 'moment';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "id, user_id, email")')
-@Entity({ name: 'mth_emailverifier'})
-export class EmailVerifier extends BaseEntity{
+@Entity({ name: 'mth_emailverifier' })
+export class EmailVerifier extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
@@ -18,21 +18,21 @@ export class EmailVerifier extends BaseEntity{
 
   @Column()
   @Field(() => String, { nullable: true })
-  email?: string
+  email?: string;
 
   @Column()
-  @Field({nullable: true, defaultValue: Moment().format('YYYY-MM-DD HH:mm:ss')})
-  date_created?: Date
+  @Field({ nullable: true, defaultValue: Moment().format('YYYY-MM-DD HH:mm:ss') })
+  date_created?: Date;
 
   @Column()
-  @Field({nullable: true})
-  date_verified?: Date
-
-  @Column()
-  @Field(() => Int, { nullable: true })
-  verified?: number
+  @Field({ nullable: true })
+  date_verified?: Date;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  verification_type?: number
+  verified?: number;
+
+  @Column()
+  @Field(() => Int, { nullable: true })
+  verification_type?: number;
 }

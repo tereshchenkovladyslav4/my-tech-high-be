@@ -16,9 +16,7 @@ export class CreateWithdrawalTable31652429609269 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`withdrawal\` DROP FOREIGN KEY \`FK_f1832392e1a6485b1efc1d06893\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`withdrawal\` DROP FOREIGN KEY \`FK_f1832392e1a6485b1efc1d06893\``);
     await queryRunner.query(
       `ALTER TABLE \`mth_student\` CHANGE \`student_id\` \`student_id\` int UNSIGNED NOT NULL AUTO_INCREMENT`,
     );

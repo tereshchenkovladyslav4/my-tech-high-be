@@ -3,7 +3,6 @@ import { IsEmail } from 'class-validator';
 
 @InputType()
 export class CreateEmailVerifierInput {
- 
   @Field(() => Int)
   user_id?: number;
 
@@ -11,6 +10,6 @@ export class CreateEmailVerifierInput {
   @IsEmail()
   email?: string;
 
-  @Field(() => Int, {defaultValue: 0})
-  verification_type?: number
+  @Field(() => Int, { defaultValue: 0 })
+  verification_type?: number;
 }

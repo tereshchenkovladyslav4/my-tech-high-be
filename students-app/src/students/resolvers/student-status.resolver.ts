@@ -7,9 +7,7 @@ export class StudentStatusResolver {
   constructor(private readonly studentStatusService: StudentStatusService) {}
 
   @Query((returns) => StudentStatus, { name: 'status' })
-  async getParent(
-    @Args({ name: 'student_id', type: () => ID }) student_id: number,
-  ): Promise<StudentStatus> {
+  async getParent(@Args({ name: 'student_id', type: () => ID }) student_id: number): Promise<StudentStatus> {
     return this.studentStatusService.findOneById(student_id);
   }
 }

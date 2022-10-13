@@ -5,15 +5,9 @@ import { RoleService } from './services/role-service';
 
 @Global()
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            Role
-        ]),
-    ],
-    providers: [RoleService],
-    exports: [RoleService],
+  imports: [TypeOrmModule.forFeature([Role])],
+  providers: [RoleService],
+  exports: [RoleService],
 })
-class RoleRepoModule {
-
-}
+class RoleRepoModule {}
 export default RoleRepoModule;

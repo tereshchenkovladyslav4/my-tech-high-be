@@ -87,9 +87,9 @@ export class StudentStatusService {
     GROUP BY ss.status ORDER BY ss.status`);
 
     queryRunner.release();
-    let students = [];
-    let sped = [];
-    let parents = [];
+    const students = [];
+    const sped = [];
+    const parents = [];
     const status = ['Pending', 'Active', 'Total', 'Withdrawn', 'Graduated'];
 
     const studentTotal = studentResult.reduce((accumulator, object) => {

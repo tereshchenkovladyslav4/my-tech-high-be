@@ -15,12 +15,12 @@ import { SchoolYearsService } from '../services/schoolyears.service';
 @Resolver((of) => StudentGradeLevel)
 export class StudentGradeLevelsResolver {
   constructor(
-    private studentsService: StudentsService, 
+    private studentsService: StudentsService,
     private personsService: PersonsService,
     private parentsService: ParentsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private schoolYearsService: SchoolYearsService,
-    ) {}
+  ) {}
 
   @Query((returns) => [StudentGradeLevel], { name: 'student_grade_levels' })
   async getStudentGradeLevels(@Args() studentGradeLevelsArgs: StudentGradeLevelsArgs): Promise<StudentGradeLevel[]> {
@@ -31,5 +31,4 @@ export class StudentGradeLevelsResolver {
   public async getStudentGradeLevelSchoolYear(@TypeParent() studentGradeLevel: StudentGradeLevel): Promise<SchoolYear> {
     return this.schoolYearsService.findOneById(studentGradeLevel.school_year_id);
   }
-
 }

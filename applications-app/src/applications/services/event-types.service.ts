@@ -3,10 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EventType } from '../models/event-type.entity';
 import { CreateEventTypeInput } from '../dto/new-event-type.inputs';
-import {
-  UpdateEventTypeInput,
-  UpdateEventTypeInputs,
-} from '../dto/update-event-type.inputs';
+import { UpdateEventTypeInput, UpdateEventTypeInputs } from '../dto/update-event-type.inputs';
 @Injectable()
 export class EventTypesService {
   constructor(
@@ -44,9 +41,7 @@ export class EventTypesService {
     }
   }
 
-  async updates(
-    updateEventTypeInputs: UpdateEventTypeInputs,
-  ): Promise<EventType[]> {
+  async updates(updateEventTypeInputs: UpdateEventTypeInputs): Promise<EventType[]> {
     try {
       const { updateEventTypes } = updateEventTypeInputs;
       return await this.eventTypesRepository.save(updateEventTypes);

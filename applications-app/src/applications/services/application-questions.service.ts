@@ -23,9 +23,7 @@ export class ApplicationQuestionsService {
     return await this.repo.find();
   }
 
-  async findExist(
-    input?: ApplicatinQuestionsInput,
-  ): Promise<ApplicationQuestion[]> {
+  async findExist(input?: ApplicatinQuestionsInput): Promise<ApplicationQuestion[]> {
     if (input) {
       return await this.repo.find({
         where: {
@@ -37,9 +35,7 @@ export class ApplicationQuestionsService {
     return await this.repo.find();
   }
 
-  async createOrUpdate(
-    input: NewApplicationQuestionsInput,
-  ): Promise<ApplicationQuestion> {
+  async createOrUpdate(input: NewApplicationQuestionsInput): Promise<ApplicationQuestion> {
     return this.repo.save(input);
   }
   async deleteApplication(id: number): Promise<number> {

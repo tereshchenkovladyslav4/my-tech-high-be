@@ -48,8 +48,7 @@ export class ObserversService {
   }
 
   async create(observerInput: ObserverInput): Promise<Observer[]> {
-    const { student_ids, parent_id, first_name, last_name, email, regions } =
-      observerInput;
+    const { student_ids, parent_id, first_name, last_name, email, regions } = observerInput;
     const hasUser = await this.usersService.findOneByEmail(email);
     if (hasUser) throw new ServiceUnavailableException('Email Already Exist!');
 
@@ -75,7 +74,7 @@ export class ObserversService {
     if (!user) throw new ServiceUnavailableException('User Not Created');
     console.log('regions-------------------', regions);
     const { user_id } = user;
-    if(regions) {
+    if (regions) {
       const regionPayload = {
         user_id: user_id,
         region_id: regions,
@@ -87,8 +86,7 @@ export class ObserversService {
       user_id,
     });
 
-    if (!updatedPerson)
-      throw new ServiceUnavailableException('Person User ID Not been Updated');
+    if (!updatedPerson) throw new ServiceUnavailableException('Person User ID Not been Updated');
     console.log('Updated Person: ', updatedPerson);
     const emailVerifier = await this.emailVerifierService.create({
       user_id: user_id,
@@ -96,13 +94,17 @@ export class ObserversService {
       verification_type: 0,
     });
 
-    if (!emailVerifier)
-      throw new ServiceUnavailableException('EmailVerifier Not Created');
+    if (!emailVerifier) throw new ServiceUnavailableException('EmailVerifier Not Created');
     console.log('EmailVerifier: ', emailVerifier);
 
-    await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
-      recipients: email,
-    }, parent_id, []);
+    await this.emailsService.sendAccountVerificationEmail(
+      emailVerifier,
+      {
+        recipients: email,
+      },
+      parent_id,
+      [],
+    );
     return await Promise.all(
       student_ids.map(async (student) => {
         const observer = await this.observersRepository.save({

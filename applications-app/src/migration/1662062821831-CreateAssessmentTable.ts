@@ -13,9 +13,7 @@ export class CreateAssessmentTable1662062821831 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_assessment\` DROP FOREIGN KEY \`FK_938d576f2a5cc034d39a13361e5\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_assessment\` DROP FOREIGN KEY \`FK_938d576f2a5cc034d39a13361e5\``);
     await queryRunner.query(`DROP TABLE \`mth_assessment\``);
   }
 }

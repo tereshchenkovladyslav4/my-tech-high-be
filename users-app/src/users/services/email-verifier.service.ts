@@ -5,24 +5,22 @@ import { CreateEmailVerifierInput } from 'src/users/dto/new-email-verifier.input
 import { EmailVerifier } from 'src/models/email-verifier.entity';
 @Injectable()
 export class EmailVerifierService {
-	constructor(
-		@InjectRepository(EmailVerifier)
-		private readonly emailVerifiersRepository: Repository<EmailVerifier>,
-	) {}
+  constructor(
+    @InjectRepository(EmailVerifier)
+    private readonly emailVerifiersRepository: Repository<EmailVerifier>,
+  ) {}
 
-	async create(
-		emailVerifier: CreateEmailVerifierInput,
-	): Promise<EmailVerifier> {
-		return this.emailVerifiersRepository.save(emailVerifier);
-	}
+  async create(emailVerifier: CreateEmailVerifierInput): Promise<EmailVerifier> {
+    return this.emailVerifiersRepository.save(emailVerifier);
+  }
 
-	async delete(emailVerifier: CreateEmailVerifierInput): Promise<void> {
-		this.emailVerifiersRepository.delete({
-      email: emailVerifier.email
-		});
-	}
+  async delete(emailVerifier: CreateEmailVerifierInput): Promise<void> {
+    this.emailVerifiersRepository.delete({
+      email: emailVerifier.email,
+    });
+  }
 
-	async getEmailVerificationStatus(username: string): Promise<EmailVerifier> {
-		return this.emailVerifiersRepository.findOne({ email: username });
-	}
+  async getEmailVerificationStatus(username: string): Promise<EmailVerifier> {
+    return this.emailVerifiersRepository.findOne({ email: username });
+  }
 }

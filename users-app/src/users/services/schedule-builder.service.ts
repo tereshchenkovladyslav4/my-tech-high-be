@@ -4,7 +4,6 @@ import { ScheduleBuilder } from 'src/models/scheduler-builder.entity';
 import { Repository } from 'typeorm';
 import { CreateScheduleBuilderInput } from '../dto/create-or-update-schedule-builder.inputs';
 
-
 @Injectable()
 export class ScheduleBuilderService {
   constructor(
@@ -12,13 +11,13 @@ export class ScheduleBuilderService {
     private scheduleBuilderRepository: Repository<ScheduleBuilder>,
   ) {}
 
-	findOneById(school_year_id: number): Promise<ScheduleBuilder> {
+  findOneById(school_year_id: number): Promise<ScheduleBuilder> {
     return this.scheduleBuilderRepository.findOne({
-			where: { school_year_id },
-		});
+      where: { school_year_id },
+    });
   }
 
-	async createOrUpdate(schedule: CreateScheduleBuilderInput): Promise<ScheduleBuilder> {
+  async createOrUpdate(schedule: CreateScheduleBuilderInput): Promise<ScheduleBuilder> {
     return this.scheduleBuilderRepository.save(schedule);
   }
 }

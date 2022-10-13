@@ -1,4 +1,4 @@
-import { Directive, Field, ID, Int, ObjectType, } from '@nestjs/graphql';
+import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { Region } from './region.entity';
 import { SchoolYear } from './schoolyear.entity';
@@ -22,17 +22,17 @@ export class SchoolPartner extends BaseEntity {
   name: string;
 
   @Column()
-	@Field(() => String)
+  @Field(() => String)
   @Directive('@external')
   abbreviation: string;
 
-	@Column()
-	@Field(() => String, {nullable: true})
+  @Column()
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   photo?: string;
 
   @Column()
-	@Field(() => Number)
+  @Field(() => Number)
   @Directive('@external')
   active: number;
 

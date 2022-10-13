@@ -10,7 +10,6 @@ import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [UsersGraphqlModule, AuthGraphqlModule, RoleGraphqlModule],
   controllers: [AppController],
-  providers: [AppService
-  ],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

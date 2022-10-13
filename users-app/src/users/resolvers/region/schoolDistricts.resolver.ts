@@ -10,9 +10,7 @@ export class SchoolDistrictsResolver {
 
   @Query(() => [SchoolDistrict], { name: 'schoolDistrict', nullable: true })
   // @UseGuards(new AuthGuard())
-  getSchoolDistricts(
-    @Args({ name: 'id', type: () => ID }) id: number,
-  ): Promise<SchoolDistrict[]> {
+  getSchoolDistricts(@Args({ name: 'id', type: () => ID }) id: number): Promise<SchoolDistrict[]> {
     return this.schoolDistrictService.findSchoolDistrictaById(id);
   }
 }

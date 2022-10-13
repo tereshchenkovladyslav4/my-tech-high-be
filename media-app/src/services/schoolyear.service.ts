@@ -16,11 +16,11 @@ export class SchoolYearService {
 
   getCurrent(): Promise<SchoolYear> {
     return this.schoolYearsRepository.findOne({
-      where: { 
+      where: {
         date_begin: LessThanOrEqual(new Date()),
-        date_end: MoreThanOrEqual( new Date() )
-      }
-   });
+        date_end: MoreThanOrEqual(new Date()),
+      },
+    });
   }
 
   findAll(): Promise<SchoolYear[]> {
@@ -29,12 +29,22 @@ export class SchoolYearService {
 
   findThisYear(): Promise<SchoolYear> {
     const today = new Date();
-    return this.schoolYearsRepository.createQueryBuilder('year')
-      .where('date_begin BETWEEN :startDate AND :endDate', { startDate: today.getFullYear() + '-01-01', endDate: today.getFullYear() + '-12-31' }).getOne()
+    return this.schoolYearsRepository
+      .createQueryBuilder('year')
+      .where('date_begin BETWEEN :startDate AND :endDate', {
+        startDate: today.getFullYear() + '-01-01',
+        endDate: today.getFullYear() + '-12-31',
+      })
+      .getOne();
   }
   findNextYear(): Promise<SchoolYear> {
     const today = new Date();
-    return this.schoolYearsRepository.createQueryBuilder('year')
-      .where('date_begin BETWEEN :startDate AND :endDate', { startDate: today.getFullYear() + 1 + '-01-01', endDate: today.getFullYear() + 1 + '-12-31' }).getOne()
+    return this.schoolYearsRepository
+      .createQueryBuilder('year')
+      .where('date_begin BETWEEN :startDate AND :endDate', {
+        startDate: today.getFullYear() + 1 + '-01-01',
+        endDate: today.getFullYear() + 1 + '-12-31',
+      })
+      .getOne();
   }
 }

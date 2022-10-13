@@ -1,15 +1,5 @@
 import { UnauthorizedException, UseGuards } from '@nestjs/common';
-import {
-  Args,
-  ID,
-  Query,
-  Resolver,
-  ResolveReference,
-  ResolveField,
-  Parent,
-	Mutation,
-	Context,
-} from '@nestjs/graphql';
+import { Args, ID, Query, Resolver, ResolveReference, ResolveField, Parent, Mutation, Context } from '@nestjs/graphql';
 import { SchoolPartnerInput } from '../dto/school-partner.input';
 import { UpdateSchoolPartnerInput } from '../dto/update-school-partner.input';
 import { AuthGuard } from '../guards/auth.guard';
@@ -28,20 +18,19 @@ export class SchoolPartnerResolver {
 
   @Query((returns) => [SchoolPartner])
   async getSchoolsOfEnrollmentByRegion(
-    @Args
-    ('schoolPartnerArgs') 
+    @Args('schoolPartnerArgs')
     schoolPartnerArgs: SchoolPartnerArgs,
   ): Promise<SchoolPartner[]> {
     return this.schoolPartnerService.findByRegion(schoolPartnerArgs);
   }
 
-	@Mutation(() => SchoolPartner, { name: 'createSchoolPartner' })
+  @Mutation(() => SchoolPartner, { name: 'createSchoolPartner' })
   @UseGuards(new AuthGuard())
   async createSchoolPartner(
     @Args('schoolPartnerInput')
     schoolPartnerInput: SchoolPartnerInput,
   ): Promise<SchoolPartner> {
-    return await this.schoolPartnerService.createSchoolPartner(schoolPartnerInput)
+    return await this.schoolPartnerService.createSchoolPartner(schoolPartnerInput);
   }
 
   @Mutation(() => SchoolPartner, { name: 'updateSchoolPartner' })
@@ -50,7 +39,6 @@ export class SchoolPartnerResolver {
     @Args('updateSchoolPartnerInput')
     updateSchoolPartnerInput: UpdateSchoolPartnerInput,
   ): Promise<SchoolPartner> {
-
     const { school_partner_id } = updateSchoolPartnerInput;
     const schoolPartner = await this.schoolPartnerService.findOneById(school_partner_id);
 
@@ -58,11 +46,7 @@ export class SchoolPartnerResolver {
       throw new UnauthorizedException();
     }
 
-    return await this.schoolPartnerService.updateSchoolPartner(
-      schoolPartner,
-      updateSchoolPartnerInput,
-    );
-    
+    return await this.schoolPartnerService.updateSchoolPartner(schoolPartner, updateSchoolPartnerInput);
   }
 
   @Mutation(() => SchoolPartner, { name: 'toggleSchoolPartnerArchive' })
@@ -71,16 +55,12 @@ export class SchoolPartnerResolver {
     @Args('schoolPartnerId')
     schoolPartnerId: number,
   ): Promise<SchoolPartner> {
-
     const schoolPartner = await this.schoolPartnerService.findOneById(schoolPartnerId);
 
     if (!schoolPartner) {
       throw new UnauthorizedException();
     }
 
-    return await this.schoolPartnerService.toggleSchoolPartnerArchive(
-      schoolPartner
-    );
-    
+    return await this.schoolPartnerService.toggleSchoolPartnerArchive(schoolPartner);
   }
 }

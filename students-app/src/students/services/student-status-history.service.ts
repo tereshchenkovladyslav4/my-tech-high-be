@@ -20,9 +20,7 @@ export class StudentStatusHistoryService {
     });
   }
 
-  async updateOrCreate(
-    studentStatusHistory: StudentStatusHistory,
-  ): Promise<boolean> {
+  async updateOrCreate(studentStatusHistory: StudentStatusHistory): Promise<boolean> {
     const result = this.StudentStatusHistoryRepository.insert({
       student_id: studentStatusHistory.student_id,
       school_year_id: studentStatusHistory.school_year_id,

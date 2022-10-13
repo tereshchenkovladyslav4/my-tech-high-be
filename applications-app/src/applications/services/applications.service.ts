@@ -142,7 +142,7 @@ export class ApplicationsService {
       // &&
       // !filter.grades.includes('all')
     ) {
-      let grades = [];
+      const grades = [];
       filter.grades
         .filter((item) => item.indexOf('-') > -1)
         .map((item) => {
@@ -175,9 +175,7 @@ export class ApplicationsService {
           filter.schoolYear.map((item) => {
             if (item.indexOf('midyear') > 0) {
               return sub.orWhere(
-                `application.school_year_id = ${
-                  item.split('-')[0]
-                } AND application.midyear_application = 1`,
+                `application.school_year_id = ${item.split('-')[0]} AND application.midyear_application = 1`,
               );
             } else {
               return sub.orWhere(`application.school_year_id = ${item}`);
@@ -204,16 +202,10 @@ export class ApplicationsService {
       qb.andWhere('application.hidden != 1');
     }
     if (filter && filter.accountStatus && filter.accountStatus.length > 0) {
-      if (
-        filter.accountStatus.length !== 2 &&
-        filter.accountStatus.includes('Verified')
-      ) {
+      if (filter.accountStatus.length !== 2 && filter.accountStatus.includes('Verified')) {
         qb.andWhere('email_verifier.verified = :status', { status: 1 });
       }
-      if (
-        filter.accountStatus.length !== 2 &&
-        filter.accountStatus.includes('Unverified')
-      ) {
+      if (filter.accountStatus.length !== 2 && filter.accountStatus.includes('Unverified')) {
         qb.andWhere('email_verifier.verified = :status', { status: 0 });
       }
     }
@@ -243,10 +235,7 @@ export class ApplicationsService {
         if (_sortBy[0] === 'verified') {
           qb.orderBy('email_verifier.verified', 'DESC');
         } else if (_sortBy[0] === 'grade') {
-          qb.addSelect(
-            'ABS(grade_levels.grade_level + 0)',
-            'student_grade_level',
-          );
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
           qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy(`(${userEmails}).created_at`, 'DESC');
@@ -258,16 +247,10 @@ export class ApplicationsService {
         } else if (_sortBy[0] === 'sped') {
           qb.orderBy('student.special_ed', 'DESC');
         } else if (_sortBy[0] === 'student') {
-          qb.addSelect(
-            "CONCAT(person.last_name, ' ', person.first_name)",
-            'student_name',
-          );
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
           qb.orderBy('student_name', 'DESC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect(
-            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
-            'parent_name',
-          );
+          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
           qb.orderBy('parent_name', 'DESC');
         } else if (_sortBy[0] === 'relation') {
           qb.orderBy('application.relation_status', 'DESC');
@@ -278,10 +261,7 @@ export class ApplicationsService {
         if (_sortBy[0] === 'verified') {
           qb.orderBy('email_verifier.verified', 'ASC');
         } else if (_sortBy[0] === 'grade') {
-          qb.addSelect(
-            'ABS(grade_levels.grade_level + 0)',
-            'student_grade_level',
-          );
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
           qb.orderBy('student_grade_level', 'ASC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy(`(${userEmails}).created_at`, 'ASC');
@@ -293,16 +273,10 @@ export class ApplicationsService {
         } else if (_sortBy[0] === 'sped') {
           qb.orderBy('student.special_ed', 'ASC');
         } else if (_sortBy[0] === 'student') {
-          qb.addSelect(
-            "CONCAT(person.last_name, ' ', person.first_name)",
-            'student_name',
-          );
+          qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
           qb.orderBy('student_name', 'ASC');
         } else if (_sortBy[0] === 'parent') {
-          qb.addSelect(
-            "CONCAT(p_person.last_name, ' ', p_person.first_name)",
-            'parent_name',
-          );
+          qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
           qb.orderBy('parent_name', 'ASC');
         } else if (_sortBy[0] === 'relation') {
           qb.orderBy('application.relation_status', 'ASC');
@@ -330,9 +304,7 @@ export class ApplicationsService {
     });
   }
 
-  async create(
-    application: CreateStudentApplicationInput,
-  ): Promise<Application> {
+  async create(application: CreateStudentApplicationInput): Promise<Application> {
     return this.applicationsRepository.save({
       ...application,
       status: 'Submitted',
@@ -347,9 +319,7 @@ export class ApplicationsService {
     return application;
   }
 
-  async acceptApplication(
-    acceptApplicationInput: AcceptApplicationInput,
-  ): Promise<Application[]> {
+  async acceptApplication(acceptApplicationInput: AcceptApplicationInput): Promise<Application[]> {
     const { application_ids } = acceptApplicationInput;
 
     const promise = Promise.all(
@@ -362,32 +332,23 @@ export class ApplicationsService {
           date_accepted: new Date(),
         });
 
-        const application = await this.applicationsRepository.findOne(
-          application_id,
-        );
+        const application = await this.applicationsRepository.findOne(application_id);
         const { student_id } = application;
 
-        const existingPacket = await this.packetsService.findOneByStudentId(
-          student_id,
-        );
+        const existingPacket = await this.packetsService.findOneByStudentId(student_id);
 
-        const existingPerson = await this.studentService.findOneById(
-          student_id,
-        );
+        const existingPerson = await this.studentService.findOneById(student_id);
         const {
           parent: { person_id },
         } = existingPerson;
 
-        const existingPersonAddress =
-          await this.personAddressService.findOneById(person_id);
+        const existingPersonAddress = await this.personAddressService.findOneById(person_id);
 
         let existingSchoolDistrict = '';
         if (existingPersonAddress) {
           const { address_id } = existingPersonAddress;
 
-          const existingAddress = await this.addressService.findOneById(
-            address_id,
-          );
+          const existingAddress = await this.addressService.findOneById(address_id);
           existingSchoolDistrict = existingAddress.school_district;
         }
 
@@ -395,32 +356,24 @@ export class ApplicationsService {
         // const deadline = new Date();
         const student = await this.studentService.findOneById(student_id);
 
-        const regions: UserRegion[] =
-          await this.userRegionService.findUserRegionByUserId(
-            student.parent?.person?.user_id,
-          );
+        const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
+          student.parent?.person?.user_id,
+        );
 
         let region_id = 1;
         if (regions.length != 0) {
           region_id = regions[0].region_id;
         }
 
-        const region = await this.userRegionService.userRegionByRegionId(
-          region_id,
-        );
-        const deadlineDays =
-          region[0].regionDetail.enrollment_packet_deadline_num_days;
-        const deadline = new Date().setDate(
-          new Date().getDate() + deadlineDays,
-        );
+        const region = await this.userRegionService.userRegionByRegionId(region_id);
+        const deadlineDays = region[0].regionDetail.enrollment_packet_deadline_num_days;
+        const deadline = new Date().setDate(new Date().getDate() + deadlineDays);
 
         const UTCDeadline = new Date(deadline).toISOString();
 
-        let default_meta = {};
+        const default_meta = {};
         if (student.special_ed != 0) {
-          default_meta['meta_special_education'] = this.getSpeicalEdValue(
-            student.special_ed,
-          );
+          default_meta['meta_special_education'] = this.getSpeicalEdValue(student.special_ed);
         }
 
         // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
@@ -439,9 +392,7 @@ export class ApplicationsService {
           meta: JSON.stringify(default_meta),
         });
 
-        const gradeLevels = await this.studentGradeLevelsService.forStudents(
-          student.student_id,
-        );
+        const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
         const statudUpdated = this.studentStatusService.update({
           student_id: student_id,
@@ -449,33 +400,21 @@ export class ApplicationsService {
           status: 0,
         });
 
-        const emailTemplate =
-          await this.emailTemplateService.findByTemplateAndRegion(
-            'Application Accepted',
-            region_id,
-          );
-
-        const school_year = await this.schoolYearService.findOneById(
-          gradeLevels[0].school_year_id,
+        const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+          'Application Accepted',
+          region_id,
         );
 
+        const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id);
+
         if (!school_year.enrollment_packet) {
-          await this.studentRecordService.createStudentRecord(
-            student.student_id,
-            school_year.RegionId,
-            0,
-            null,
-          );
+          await this.studentRecordService.createStudentRecord(student.student_id, school_year.RegionId, 0, null);
         }
 
         if (emailTemplate) {
           const setAdditionalLinksInfo = (content, student, school_year) => {
-            const yearbegin = new Date(school_year.date_begin)
-              .getFullYear()
-              .toString();
-            const yearend = new Date(school_year.date_end)
-              .getFullYear()
-              .toString();
+            const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+            const yearend = new Date(school_year.date_end).getFullYear().toString();
             const yearText = application.midyear_application
               ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
               : `${yearbegin}-${yearend.substring(2, 4)}`;
@@ -486,13 +425,10 @@ export class ApplicationsService {
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
               .replace(/\[YEAR\]/g, yearText)
               .replace(/\[APPLICATION_YEAR\]/g, yearText)
-              .replace(
-                /\[DEADLINE\]/g,
-                `${Moment.utc(UTCDeadline).format('MM/DD/yy')}`,
-              );
+              .replace(/\[DEADLINE\]/g, `${Moment.utc(UTCDeadline).format('MM/DD/yy')}`);
           };
           const body = setAdditionalLinksInfo(emailTemplate.body, student, school_year);
-          const emailSubject= setAdditionalLinksInfo(emailTemplate.subject, student, school_year);
+          const emailSubject = setAdditionalLinksInfo(emailTemplate.subject, student, school_year);
 
           await this.sesEmailService.sendEmail({
             email: student.parent?.person?.email,
@@ -511,15 +447,11 @@ export class ApplicationsService {
   }
 
   async findByIds(application_ids: string[]): Promise<Application[]> {
-    const applications = await this.applicationsRepository.findByIds(
-      application_ids,
-    );
+    const applications = await this.applicationsRepository.findByIds(application_ids);
     return applications;
   }
 
-  async sendEmail(
-    emailApplicationInput: EmailApplicationInput,
-  ): Promise<ApplicationEmail[]> {
+  async sendEmail(emailApplicationInput: EmailApplicationInput): Promise<ApplicationEmail[]> {
     const { application_ids, subject, body } = emailApplicationInput;
     const [results, total] = await this.applicationsRepository
       .createQueryBuilder('application')
@@ -532,25 +464,16 @@ export class ApplicationsService {
       .getManyAndCount();
 
     const user_id = results[0].student.parent.person.user_id;
-    const regions: UserRegion[] =
-      await this.userRegionService.findUserRegionByUserId(user_id);
+    const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(user_id);
 
     let region_id = 1;
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
 
-    let emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-      'Application Page',
-      region_id,
-    );
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Application Page', region_id);
     if (emailTemplate) {
-      await this.emailTemplateService.updateEmailTemplate(
-        emailTemplate.id,
-        emailTemplate.from,
-        subject,
-        body,
-      );
+      await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
     }
 
     const setEmailBodyInfo = (student, school_year, application) => {
@@ -616,9 +539,7 @@ export class ApplicationsService {
     return applicationEmails;
   }
 
-  async moveThisYearApplication(
-    deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Boolean> {
+  async moveThisYearApplication(deleteApplicationInput: DeleteApplicationInput): Promise<boolean> {
     const { application_ids } = deleteApplicationInput;
     const thisSchoolYear = await this.schoolYearService.findThisYear();
     const result = await this.applicationsRepository.update(application_ids, {
@@ -627,9 +548,7 @@ export class ApplicationsService {
     return true;
   }
 
-  async moveNextYearApplication(
-    deleteApplicationInput: DeleteApplicationInput,
-  ): Promise<Boolean> {
+  async moveNextYearApplication(deleteApplicationInput: DeleteApplicationInput): Promise<boolean> {
     const { application_ids } = deleteApplicationInput;
     const thisSchoolYear = await this.schoolYearService.findNextYear();
     const result = await this.applicationsRepository.update(application_ids, {
@@ -642,22 +561,17 @@ export class ApplicationsService {
     return this.schoolYearService.findAll();
   }
 
-  async updateApplication(
-    updateApplicationInput: UpdateApplicationInput,
-  ): Promise<Application> {
-    const { application_id, midyear_application, status, school_year_id } =
-      updateApplicationInput;
+  async updateApplication(updateApplicationInput: UpdateApplicationInput): Promise<Application> {
+    const { application_id, midyear_application, status, school_year_id } = updateApplicationInput;
 
     if (status == 'Accepted') {
-      let application_ids = [];
+      const application_ids = [];
       application_ids.push(application_id);
       const acceptApplicationInput = {
         application_ids,
         midyear_application,
       };
-      const acceptApplication = await this.acceptApplication(
-        acceptApplicationInput,
-      );
+      const acceptApplication = await this.acceptApplication(acceptApplicationInput);
     }
 
     const application = await this.applicationsRepository.save({
@@ -669,9 +583,7 @@ export class ApplicationsService {
     return application;
   }
 
-  async toggleHideApplication(
-    updateApplicationInput: UpdateApplicationInput,
-  ): Promise<Application> {
+  async toggleHideApplication(updateApplicationInput: UpdateApplicationInput): Promise<Application> {
     const { application_id, midyear_application } = updateApplicationInput;
     const application = await this.applicationsRepository.save({
       application_id,
@@ -680,11 +592,8 @@ export class ApplicationsService {
     return application;
   }
 
-  async updateApplicationSchoolYearByIds(
-    updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,
-  ): Promise<Boolean> {
-    const { application_ids, school_year_id, midyear_application } =
-      updateApplicationSchoolYearInput;
+  async updateApplicationSchoolYearByIds(updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput): Promise<boolean> {
+    const { application_ids, school_year_id, midyear_application } = updateApplicationSchoolYearInput;
     Promise.all(
       application_ids.map(async (id) => {
         const application_id = Number(id);
@@ -700,10 +609,7 @@ export class ApplicationsService {
     return true;
   }
 
-  async findBySchoolYearAndStudent({
-    student_id,
-    school_year_id,
-  }): Promise<Application> {
+  async findBySchoolYearAndStudent({ student_id, school_year_id }): Promise<Application> {
     const applications = await this.applicationsRepository.findOne({
       where: {
         student_id,

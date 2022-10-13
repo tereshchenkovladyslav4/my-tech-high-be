@@ -1,6 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 
-
 @InputType()
 export class EmailReminderInput {
   @Field(() => String, { nullable: true })

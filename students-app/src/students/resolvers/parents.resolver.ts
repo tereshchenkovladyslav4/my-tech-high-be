@@ -1,12 +1,4 @@
-import {
-  Args,
-  ID,
-  Query,
-  Resolver,
-  ResolveReference,
-  ResolveField,
-  Parent as TypeParent,
-} from '@nestjs/graphql';
+import { Args, ID, Query, Resolver, ResolveReference, ResolveField, Parent as TypeParent } from '@nestjs/graphql';
 import { Person } from '../models/person.entity';
 import { PersonsArgs } from '../dto/persons.args';
 import { PersonsService } from '../services/persons.service';
@@ -27,9 +19,7 @@ export class ParentsResolver {
   ) {}
 
   @Query((returns) => Parent, { name: 'parent' })
-  async getParent(
-    @Args({ name: 'parent_id', type: () => ID }) parent_id: number,
-  ): Promise<Parent> {
+  async getParent(@Args({ name: 'parent_id', type: () => ID }) parent_id: number): Promise<Parent> {
     return this.parentsService.findOneById(parent_id);
   }
 
@@ -44,10 +34,7 @@ export class ParentsResolver {
   }
 
   @ResolveReference()
-  resolveReference(reference: {
-    __typename: string;
-    parent_id: number;
-  }): Promise<Parent> {
+  resolveReference(reference: { __typename: string; parent_id: number }): Promise<Parent> {
     return this.parentsService.findOneById(reference.parent_id);
   }
 }

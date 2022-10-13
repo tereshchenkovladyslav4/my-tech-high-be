@@ -7,7 +7,7 @@ export class SavePersonUserIdInput {
   @IsInt()
   person_id?: number;
 
-  @Field(() => Int, {nullable: true})
+  @Field(() => Int, { nullable: true })
   @IsInt()
   user_id?: number;
 }

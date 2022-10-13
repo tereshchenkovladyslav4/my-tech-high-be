@@ -10,12 +10,12 @@ export class PacketFile extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  file_id?: number
+  file_id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  packet_id?: number
-  
+  packet_id?: number;
+
   @Column()
   @Field(() => Int, { nullable: true })
   mth_file_id?: number;

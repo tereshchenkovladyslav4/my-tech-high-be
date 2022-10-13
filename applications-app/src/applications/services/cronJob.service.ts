@@ -129,25 +129,25 @@ export class CronJobService {
           filter_grades,
           filter_users,
           filter_program_years,
-          filter_school_partners
+          filter_school_partners,
         } = announcement;
 
-          const userEmailList = await this.announcementsService.getAnnouncementUsersByFilters({
-            RegionId,
-            filter_grades,
-            filter_users,
-            filter_program_years,
-            filter_school_partners
-          })
-          userEmailList.map( async(user) => {
-            await this.sesEmailService.sendAnnouncementEmail({
-              body,
-              subject,
-              sender:posted_by,
-              user,
-              announcementId: announcement_id,
-            });
-          })
+        const userEmailList = await this.announcementsService.getAnnouncementUsersByFilters({
+          RegionId,
+          filter_grades,
+          filter_users,
+          filter_program_years,
+          filter_school_partners,
+        });
+        userEmailList.map(async (user) => {
+          await this.sesEmailService.sendAnnouncementEmail({
+            body,
+            subject,
+            sender: posted_by,
+            user,
+            announcementId: announcement_id,
+          });
+        });
         const queryRunner = await getConnection().createQueryRunner();
         await queryRunner.query(
           `UPDATE infocenter.announcement SET status = 'Published' WHERE announcement_id = ${announcement_id}`,

@@ -50,7 +50,7 @@ export class UsersService {
 
   async updateAccount(user: User, verifyInput: VerifyInput): Promise<User> {
     const { password } = verifyInput;
-    let pattern = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})');
+    const pattern = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})');
     if (!pattern.test(password))
       throw new BadRequestException(
         'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character',
@@ -70,7 +70,7 @@ export class UsersService {
     return crypto.createHash('md5').update(`${password}${salt}`).digest('hex');
   }
 
-  async createZendeskAccount(email: string, user: User): Promise<Boolean> {
+  async createZendeskAccount(email: string, user: User): Promise<boolean> {
     const createZendeskAPI = process.env.ZENDESK_URL + '/users';
     const zendeskToken = process.env.ZENDESK_TOKEN;
 

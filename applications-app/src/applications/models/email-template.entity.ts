@@ -1,12 +1,5 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  JoinColumn,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 @ObjectType()
 @Directive('@key(fields: "id")')
 @Entity({ name: 'email_templates' })
@@ -50,11 +43,11 @@ export class ApplicationEmailTemplate extends BaseEntity {
 
   @Column()
   @Field(() => String, { nullable: true })
-  template?: string
+  template?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
-  inserts?: string
+  inserts?: string;
 
   @Column()
   @Field(() => Int, { nullable: false })

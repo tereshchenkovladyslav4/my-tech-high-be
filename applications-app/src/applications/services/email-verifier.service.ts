@@ -11,8 +11,7 @@ export class EmailVerifierService {
     private readonly emailVerifiersRepository: Repository<EmailVerifier>,
   ) {}
 
-  async create( emailVerifier: CreateEmailVerifierInput ): Promise<EmailVerifier> {
-      
-      return this.emailVerifiersRepository.save(emailVerifier);
+  async create(emailVerifier: CreateEmailVerifierInput): Promise<EmailVerifier> {
+    return this.emailVerifiersRepository.save(emailVerifier);
   }
 }

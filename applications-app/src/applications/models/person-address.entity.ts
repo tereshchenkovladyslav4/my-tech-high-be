@@ -1,13 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  PrimaryColumn,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
 import { Student } from './student.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { Address } from './address.entity';

@@ -54,10 +54,7 @@ export class StudentRecord extends BaseEntity {
   @Field(() => Region, { nullable: true })
   Region: Region;
 
-  @OneToMany(
-    () => StudentRecordFile,
-    (studentRecordFile) => studentRecordFile.StudentRecord,
-  )
+  @OneToMany(() => StudentRecordFile, (studentRecordFile) => studentRecordFile.StudentRecord)
   @Field(() => [StudentRecordFile], { nullable: true })
   StudentRecordFiles: StudentRecordFile[];
 }

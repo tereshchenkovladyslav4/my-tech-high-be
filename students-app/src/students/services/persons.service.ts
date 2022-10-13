@@ -19,9 +19,7 @@ export class PersonsService {
     return this.personsRepository.findOne(person_id);
   }
 
-  async updateUserId(
-    savePersonUserIdInput: SavePersonUserIdInput,
-  ): Promise<Person> {
+  async updateUserId(savePersonUserIdInput: SavePersonUserIdInput): Promise<Person> {
     return this.personsRepository.save(savePersonUserIdInput);
   }
 }

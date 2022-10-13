@@ -4,9 +4,8 @@ import { File } from './file.entity';
 
 @ObjectType()
 export class FileData {
-
   @Field((type) => [File])
-  results?: File[]
+  results?: File[];
 }
 
 @ArgsType()

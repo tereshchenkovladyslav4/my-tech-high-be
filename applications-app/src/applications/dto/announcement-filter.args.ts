@@ -22,5 +22,4 @@ export class AnnouncementFilterArgs {
   status?: 'Draft' | 'Scheduled' | 'Published' | 'Republished';
 }
 
-
 //AnnouncementEmailArgs

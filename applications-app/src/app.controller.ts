@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, UploadedFile, UseInterceptors, UseGuards, Req } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
 import { S3Service } from './applications/services/s3.service';
@@ -69,8 +61,7 @@ export class AppController {
     { 'application/vnd.oasis.opendocument.text': 'odt' },
     { 'application/vnd.oasis.opendocument.spreadsheet': 'ods' },
     {
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-        'xlsx',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
     },
   ];
 
@@ -84,27 +75,16 @@ export class AppController {
   @UseInterceptors(FileInterceptor('file'))
   async upload(@Req() request: any, @UploadedFile() file) {
     try {
-      if (!file)
-        throw new HttpException(
-          'File Upload is Required!',
-          HttpStatus.CONFLICT,
-        );
+      if (!file) throw new HttpException('File Upload is Required!', HttpStatus.CONFLICT);
 
-      const username =
-        (request && request.user && request.user.username) || null;
-      if (!username)
-        throw new HttpException('Username Not Defined!', HttpStatus.CONFLICT);
+      const username = (request && request.user && request.user.username) || null;
+      if (!username) throw new HttpException('Username Not Defined!', HttpStatus.CONFLICT);
 
       const user = await this.usersService.findOneByEmail(username);
-      if (!user)
-        throw new HttpException(
-          "You don't have permission to upload a file to storage!",
-          HttpStatus.CONFLICT,
-        );
+      if (!user) throw new HttpException("You don't have permission to upload a file to storage!", HttpStatus.CONFLICT);
 
       const { body } = request;
-      if (!body.region)
-        throw new HttpException('Region is requied!', HttpStatus.CONFLICT);
+      if (!body.region) throw new HttpException('Region is requied!', HttpStatus.CONFLICT);
       let currentSchoolYear = 0;
       if (body.year) {
         currentSchoolYear = await this.getCurrentSchoolYear(body.year);
@@ -118,46 +98,19 @@ export class AppController {
         if (typeof item[mimetype] !== 'undefined') extension = item[mimetype];
       });
 
-      if (!extension)
-        throw new HttpException(
-          'Filetype ' + mimetype + ' is not allowed!',
-          HttpStatus.CONFLICT,
-        );
+      if (!extension) throw new HttpException('Filetype ' + mimetype + ' is not allowed!', HttpStatus.CONFLICT);
       let file_name = '';
       if (body.directory) {
-        file_name =
-          body.directory +
-          '/' +
-          this.encryptFileName(originalname) +
-          '/' +
-          originalname +
-          '.' +
-          extension;
+        file_name = body.directory + '/' + this.encryptFileName(originalname) + '/' + originalname + '.' + extension;
       } else {
-        file_name =
-          body.region +
-          '/' +
-          currentSchoolYear +
-          '/' +
-          this.encryptFileName(originalname) +
-          '.' +
-          extension;
+        file_name = body.region + '/' + currentSchoolYear + '/' + this.encryptFileName(originalname) + '.' + extension;
       }
 
-      const upload = await this.s3Service.s3_upload(
-        buffer,
-        null,
-        file_name,
-        mimetype,
-      );
+      const upload = await this.s3Service.s3_upload(buffer, null, file_name, mimetype);
 
       const userFile = await this.fileService.create({
         name: originalname,
-        type:
-          mimetype ==
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            ? 'text/csv'
-            : mimetype,
+        type: mimetype == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ? 'text/csv' : mimetype,
         item1: upload.Key,
         item2: upload.ServerSideEncryption,
         item3: upload.ETag,
@@ -210,9 +163,9 @@ export class AppController {
   }
 
   private getFileExtension(filename) {
-    var dot = filename.lastIndexOf('.');
+    const dot = filename.lastIndexOf('.');
     if (dot == -1) return '';
-    var extension = filename.substr(dot, filename.length);
+    const extension = filename.substr(dot, filename.length);
     return extension;
   }
 }

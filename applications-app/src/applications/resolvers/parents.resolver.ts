@@ -42,13 +42,10 @@ export class ParentsResolver {
     private addressService: AddressService,
     private personAddressService: PersonAddressService,
     private observersService: ObserversService,
-  ) { }
+  ) {}
 
   @ResolveReference()
-  resolveReference(reference: {
-    __typename: string;
-    address_id: number;
-  }): Promise<Address> {
+  resolveReference(reference: { __typename: string; address_id: number }): Promise<Address> {
     return this.addressService.findOneById(reference.address_id);
   }
 
@@ -64,17 +61,13 @@ export class ParentsResolver {
 
   @Query((returns) => Parent, { name: 'parentDetail' })
   @UseGuards(new AuthGuard())
-  async getApplication(
-    @Args({ name: 'id', type: () => ID }) parent_id: number,
-  ): Promise<Parent> {
+  async getApplication(@Args({ name: 'id', type: () => ID }) parent_id: number): Promise<Parent> {
     return this.parentsService.findOneById(parent_id);
   }
 
   @Query((returns) => Parent, { name: 'parentDetailByEmail' })
   @UseGuards(new AuthGuard())
-  async getParent(
-    @Args({ name: 'email', type: () => String }) parent_email: string,
-  ): Promise<Parent> {
+  async getParent(@Args({ name: 'email', type: () => String }) parent_email: string): Promise<Parent> {
     return this.parentsService.findOneByEmail(parent_email);
   }
 

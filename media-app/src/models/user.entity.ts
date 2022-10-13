@@ -7,23 +7,23 @@ export class User extends BaseEntity {
   user_id?: number;
 
   @Column()
-  email?: string
+  email?: string;
 
   @Column()
-  password?: string
+  password?: string;
 
   @Column()
-  firstName?: string
+  firstName?: string;
 
   @Column()
-  lastName?: string
+  lastName?: string;
 
   @Column()
-  level?: number
+  level?: number;
 
   @UpdateDateColumn()
   updated_at!: Date;
 
   @Column()
-  avatarUrl?: string
+  avatarUrl?: string;
 }

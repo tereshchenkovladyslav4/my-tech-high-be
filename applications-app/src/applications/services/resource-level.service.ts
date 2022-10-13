@@ -26,7 +26,7 @@ export class ResourceLevelService {
     }
   }
 
-  async delete(resourceLevelId: number): Promise<Boolean> {
+  async delete(resourceLevelId: number): Promise<boolean> {
     try {
       await this.repo.delete(resourceLevelId);
       return true;

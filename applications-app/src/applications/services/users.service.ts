@@ -17,21 +17,19 @@ export class UsersService {
     return this.usersRepository.findOne(user_id);
   }
 
-  private encryptPassword(password:string) {
-    return crypto
-    .createHash('md5')
-    .update(`${password}${salt}`)
-    .digest('hex');
+  private encryptPassword(password: string) {
+    return crypto.createHash('md5').update(`${password}${salt}`).digest('hex');
   }
 
-  async findOneByEmail( email: string ): Promise<User> {
+  async findOneByEmail(email: string): Promise<User> {
     return this.usersRepository.findOne({ email });
   }
 
-  async create( user: CreateParentUserInput ): Promise<User> {
-      const password = user.password && this.encryptPassword(user.password) || this.encryptPassword( (new Date()).toString() );
-      const userInput = {...user, password};
-      console.log(userInput);
-      return this.usersRepository.save(userInput);
+  async create(user: CreateParentUserInput): Promise<User> {
+    const password =
+      (user.password && this.encryptPassword(user.password)) || this.encryptPassword(new Date().toString());
+    const userInput = { ...user, password };
+    console.log(userInput);
+    return this.usersRepository.save(userInput);
   }
 }

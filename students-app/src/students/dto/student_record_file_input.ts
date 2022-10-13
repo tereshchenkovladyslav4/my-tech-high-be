@@ -17,8 +17,7 @@ export class StudentRecordFileInput {
 
   @Field((type) => Number, {
     nullable: true,
-    description:
-      'This is FileId of mth_student_record_file table. This is related with file_id of mth_file table',
+    description: 'This is FileId of mth_student_record_file table. This is related with file_id of mth_file table',
   })
   FileId: number;
 

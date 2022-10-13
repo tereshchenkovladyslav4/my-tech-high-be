@@ -11,13 +11,13 @@ export class PersonAddress extends BaseEntity {
   @Field(() => ID, { nullable: true })
   @PrimaryColumn()
   @Directive('@external')
-  person_id?: number
+  person_id?: number;
 
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryColumn()
   @Directive('@external')
-  address_id?: number
+  address_id?: number;
 
   @OneToOne((type) => Address, (address) => address.address_id)
   @JoinColumn({ name: 'address_id', referencedColumnName: 'address_id' })

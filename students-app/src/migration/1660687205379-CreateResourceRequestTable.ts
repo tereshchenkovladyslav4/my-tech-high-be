@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateResourceRequestTable1660687205379
-  implements MigrationInterface
-{
+export class CreateResourceRequestTable1660687205379 implements MigrationInterface {
   name = 'CreateResourceRequestTable1660687205379';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -18,12 +16,8 @@ export class CreateResourceRequestTable1660687205379
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_resource_request\` DROP FOREIGN KEY \`FK_102c2ccc67887e6ee64698fad57\``,
-    );
-    await queryRunner.query(
-      `ALTER TABLE \`mth_resource_request\` DROP FOREIGN KEY \`FK_58442ed566b2767b173c2464e7d\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_resource_request\` DROP FOREIGN KEY \`FK_102c2ccc67887e6ee64698fad57\``);
+    await queryRunner.query(`ALTER TABLE \`mth_resource_request\` DROP FOREIGN KEY \`FK_58442ed566b2767b173c2464e7d\``);
     await queryRunner.query(`DROP TABLE \`mth_resource_request\``);
   }
 }

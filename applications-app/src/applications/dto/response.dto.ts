@@ -13,5 +13,4 @@ export class ResponseDTO {
   @Field((type) => GraphQLJSON, { nullable: true })
   @IsOptional()
   results: any;
-
 }

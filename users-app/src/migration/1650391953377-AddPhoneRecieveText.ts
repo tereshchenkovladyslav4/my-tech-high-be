@@ -8,8 +8,6 @@ export class AddPhoneRecieveText1650391953377 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE \`mth_phone\` DROP COLUMN \`recieve_text\``,
-    );
+    await queryRunner.query(`ALTER TABLE \`mth_phone\` DROP COLUMN \`recieve_text\``);
   }
 }

@@ -9,31 +9,30 @@ export class EmailVerifier extends BaseEntity {
   @Column()
   @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
-  id?: number
+  id?: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  user_id?: number
+  user_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
   @IsEmail()
-  email: string
+  email: string;
 
   @Column()
   @Field(() => Date, { nullable: true })
-  date_created: Date
+  date_created: Date;
 
   @Column()
   @Field(() => Date, { nullable: true })
-  date_verified: Date
+  date_verified: Date;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  verified: number
+  verified: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
-  verification_type: number
-
+  verification_type: number;
 }

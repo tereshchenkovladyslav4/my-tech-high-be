@@ -10,9 +10,7 @@ export class QuickLinkResolver {
   constructor(private quickLinkService: QuickLinkService) {}
 
   @Query(() => [QuickLink], { name: 'getQuickLinksByRegion' })
-  getQuickLinksByRegion(
-    @Args({ name: 'regionId', type: () => ID }) regionId: number,
-  ): Promise<QuickLink[]> {
+  getQuickLinksByRegion(@Args({ name: 'regionId', type: () => ID }) regionId: number): Promise<QuickLink[]> {
     return this.quickLinkService.findByRegion(regionId);
   }
 
@@ -22,9 +20,7 @@ export class QuickLinkResolver {
     quickLinkInput: QuickLinkInput,
   ): Promise<QuickLink> {
     const { quickLink } = quickLinkInput;
-    const response = this.quickLinkService.createQuickLink(
-      quickLink,
-    );
+    const response = this.quickLinkService.createQuickLink(quickLink);
     return response;
   }
 
@@ -34,16 +30,12 @@ export class QuickLinkResolver {
     quickLinkInput: QuickLinkInput,
   ): Promise<QuickLink> {
     const { quickLink } = quickLinkInput;
-    const response = await this.quickLinkService.updateQuickLink(
-      quickLink,
-    );
+    const response = await this.quickLinkService.updateQuickLink(quickLink);
     return response;
   }
 
   @Mutation((of) => QuickLink, { name: 'removeQuickLinkPhoto' })
-  async removeQuickLinkPhoto(
-    @Args({ name: 'id', type: () => ID }) id: number,
-  ): Promise<QuickLink> {
+  async removeQuickLinkPhoto(@Args({ name: 'id', type: () => ID }) id: number): Promise<QuickLink> {
     const quickLink = await this.quickLinkService.findById(id);
     if (!quickLink) throw new BadRequestException();
 

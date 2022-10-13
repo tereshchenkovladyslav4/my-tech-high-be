@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql'
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -6,10 +6,10 @@ import {
   BaseEntity,
   UpdateDateColumn,
   CreateDateColumn,
-  OneToMany
-} from 'typeorm'
+  OneToMany,
+} from 'typeorm';
 
-import { UserRegion } from './user-region.entity'
+import { UserRegion } from './user-region.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -20,44 +20,44 @@ export class User extends BaseEntity {
   @Field((type) => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  user_id?: number
+  user_id?: number;
 
   @Column()
   @Field(() => String)
   @Directive('@external')
-  email?: string
+  email?: string;
 
   @Column()
-  firstName?: string
+  firstName?: string;
 
   @Column()
-  lastName?: string
+  lastName?: string;
 
   @Column()
-  password?: string
+  password?: string;
 
   @Column()
-  level?: number
+  level?: number;
 
   @Column()
-  cookie?: string
+  cookie?: string;
 
   @Column()
-  lastLogin?: Date
+  lastLogin?: Date;
 
   @Column()
-  avatarUrl?: string
+  avatarUrl?: string;
 
   @Column()
-  status?: string
+  status?: string;
 
   @CreateDateColumn()
-  created_at!: Date
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at!: Date
+  updated_at!: Date;
 
   @OneToMany(() => UserRegion, (userRegion) => userRegion.user)
   // @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
-  userRegion?: UserRegion[]
+  userRegion?: UserRegion[];
 }

@@ -16,9 +16,7 @@ export class EnrollmentQuestionTabService {
     private emailTemplateService: EmailTemplatesService,
   ) {}
 
-  async find(
-    input?: EnrollmentQuestionsInput,
-  ): Promise<EnrollmentQuestionTab[]> {
+  async find(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionTab[]> {
     if (input) {
       return await this.repo.find({
         where: {
@@ -29,23 +27,7 @@ export class EnrollmentQuestionTabService {
     return await this.repo.find();
   }
 
-  async findByActive(
-    input?: EnrollmentQuestionsInput,
-  ): Promise<EnrollmentQuestionTab[]> {
-    if (input) {
-      return await this.repo.find({
-        where: {
-          region_id: input.region_id,
-          is_active: 1,
-        },
-      });
-    }
-    return await this.repo.find();
-  }
-
-  async findByAdmin(
-    input?: EnrollmentQuestionsInput,
-  ): Promise<EnrollmentQuestionTab[]> {
+  async findByActive(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionTab[]> {
     if (input) {
       return await this.repo.find({
         where: {
@@ -57,9 +39,19 @@ export class EnrollmentQuestionTabService {
     return await this.repo.find();
   }
 
-  async createOrUpdate(
-    input: NewEnrollmentQuestionTabInput,
-  ): Promise<EnrollmentQuestionTab> {
+  async findByAdmin(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionTab[]> {
+    if (input) {
+      return await this.repo.find({
+        where: {
+          region_id: input.region_id,
+          is_active: 1,
+        },
+      });
+    }
+    return await this.repo.find();
+  }
+
+  async createOrUpdate(input: NewEnrollmentQuestionTabInput): Promise<EnrollmentQuestionTab> {
     const { id, is_active, tab_name, region_id, groups } = input;
     const tabData = await this.repo.save({
       id,
@@ -79,27 +71,21 @@ export class EnrollmentQuestionTabService {
 
     //  Update the standard responses of Missing Info email template
     if (tab_name == 'Documents') {
-      const template = await this.emailTemplateService.findByTemplateAndRegion(
-        'Missing Information',
-        region_id,
-      );
+      const template = await this.emailTemplateService.findByTemplateAndRegion('Missing Information', region_id);
       if (template.standard_responses != '') {
         const oldresponses = JSON.parse(template.standard_responses);
 
         if (groups.length) {
-          let newresponses = [];
+          const newresponses = [];
           groups[0].questions.forEach((group) => {
-            let response = oldresponses.find((x) => x.id == group.id);
+            const response = oldresponses.find((x) => x.id == group.id);
             if (response != null) {
               newresponses.push(response);
             }
           });
           const tmp = JSON.stringify(newresponses);
           if (tmp != template.standard_responses) {
-            await this.emailTemplateService.updateStandardResponses(
-              template.id,
-              tmp,
-            );
+            await this.emailTemplateService.updateStandardResponses(template.id, tmp);
           }
         }
       }

@@ -45,7 +45,7 @@ export class DiplomaService {
     });
   }
 
-  async saveQuestionGrades(diplomaQuestionInput: DiplomaQuestionInput): Promise<Boolean> {
+  async saveQuestionGrades(diplomaQuestionInput: DiplomaQuestionInput): Promise<boolean> {
     const { schoolYearId, grades, title, description } = diplomaQuestionInput;
     const question = await this.diplomaRepository.findOne({ school_year_id: schoolYearId });
 

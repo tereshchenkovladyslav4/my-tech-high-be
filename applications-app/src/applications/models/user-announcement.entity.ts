@@ -1,13 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, UpdateDateColumn, ManyToOne, JoinColumn, BaseEntity, PrimaryGeneratedColumn } from 'typeorm';
 import { Announcement } from './announcement.entity';
 import { Region } from './region.entity';
 import { User } from './user.entity';
@@ -39,14 +31,10 @@ export class UserAnnouncement extends BaseEntity {
   @UpdateDateColumn()
   updated_at?: Date;
 
-  @ManyToOne(
-    () => Announcement,
-    (announcement) => announcement.UserAnnouncements,
-    {
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    },
-  )
+  @ManyToOne(() => Announcement, (announcement) => announcement.UserAnnouncements, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({
     name: 'AnnouncementId',
     referencedColumnName: 'announcement_id',

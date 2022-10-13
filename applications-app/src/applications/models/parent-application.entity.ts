@@ -6,10 +6,9 @@ import { Student } from './student.entity';
 
 @ObjectType()
 export class ParentApplication {
-
   @Field((type) => Parent)
-  parent?: Parent
+  parent?: Parent;
 
   @Field((type) => [Student])
-  students?: Student[]
+  students?: Student[];
 }

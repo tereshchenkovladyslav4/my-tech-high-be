@@ -1,10 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,  
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @ObjectType()
 @Directive('@extends')
@@ -18,38 +13,38 @@ export class EmailRecord extends BaseEntity {
   id?: number;
 
   @Column()
-  @Field(() => String, { nullable: true })  
+  @Field(() => String, { nullable: true })
   from_email: string;
 
   @Column()
-  @Field(() => String)  
-  to_email: string
+  @Field(() => String)
+  to_email: string;
 
   @Column()
-  @Field(() => String)  
+  @Field(() => String)
   subject: string;
 
   @Column()
-  @Field(() => String)  
-  template_name: string; 
+  @Field(() => String)
+  template_name: string;
 
   @Column()
-  @Field(() => Int, {nullable: true, defaultValue: 1})  
-  region_id: number; 
+  @Field(() => Int, { nullable: true, defaultValue: 1 })
+  region_id: number;
 
   @Column()
-  @Field(() => String)  
+  @Field(() => String)
   bcc: string;
 
   @Column()
-  @Field(() => String)  
-  status: string; 
+  @Field(() => String)
+  status: string;
 
   @Column('text', { name: 'body', nullable: true })
-  @Field(() => String, { nullable: true })  
+  @Field(() => String, { nullable: true })
   body: string;
 
   @Column()
-  @Field(() => Date, { nullable: true })  
+  @Field(() => Date, { nullable: true })
   created_at?: Date;
 }

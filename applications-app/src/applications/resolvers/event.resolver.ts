@@ -28,9 +28,7 @@ export class EventsResolver {
   }
 
   @Mutation((of) => Boolean, { name: 'removeEventById' })
-  async removeWithdrawal(
-    @Args('event_id', { type: () => Int }) event_id: number,
-  ): Promise<boolean> {
+  async removeWithdrawal(@Args('event_id', { type: () => Int }) event_id: number): Promise<boolean> {
     return await this.eventsService.deleteById(event_id);
   }
 }

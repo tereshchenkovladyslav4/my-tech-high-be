@@ -1,14 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  In,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Student } from './student.entity';
 import { PacketFile } from './packet-file.entity';
 import { PacketEmail } from './packet-email.entity';
@@ -256,10 +247,10 @@ export class Packet extends BaseEntity {
   @Field(() => String, { nullable: true })
   missing_files?: string;
 
-  @OneToMany(type => PacketEmail, packet_email => packet_email.packet)
+  @OneToMany((type) => PacketEmail, (packet_email) => packet_email.packet)
   @JoinColumn({ name: 'packet_id', referencedColumnName: 'packet_id' })
   packet_emails: PacketEmail[];
-  
+
   @Column()
   @Field(() => String, { nullable: true })
   meta?: string;

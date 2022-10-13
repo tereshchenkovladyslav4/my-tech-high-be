@@ -19,9 +19,7 @@ export class AnnouncementsResolver {
 
   @Query((returns) => [Announcement], { name: 'announcements' })
   @UseGuards(new AuthGuard())
-  async getAnnouncements(
-    @Args('region_id', { type: () => Int }) region_id: number,
-  ): Promise<Announcement[]> {
+  async getAnnouncements(@Args('region_id', { type: () => Int }) region_id: number): Promise<Announcement[]> {
     return this.announcementsService.findAll(region_id);
   }
 
@@ -34,9 +32,7 @@ export class AnnouncementsResolver {
   }
 
   @Mutation((returns) => ResponseDTO)
-  deleteAnnouncementsById(
-    @Args('id', { type: () => Int }) id: number,
-  ): Promise<ResponseDTO> {
+  deleteAnnouncementsById(@Args('id', { type: () => Int }) id: number): Promise<ResponseDTO> {
     return this.announcementsService.deleteById(id);
   }
 
@@ -49,23 +45,17 @@ export class AnnouncementsResolver {
   }
 
   @Mutation((returns) => ResponseDTO)
-  deleteUserAnnouncementsByUserId(
-    @Args('user_id', { type: () => Int }) user_id: number,
-  ): Promise<ResponseDTO> {
+  deleteUserAnnouncementsByUserId(@Args('user_id', { type: () => Int }) user_id: number): Promise<ResponseDTO> {
     return this.userAnnouncementService.deleteAll(user_id);
   }
 
   @Mutation((returns) => ResponseDTO)
-  deleteUserAnnouncementById(
-    @Args('id', { type: () => Int }) id: number,
-  ): Promise<ResponseDTO> {
+  deleteUserAnnouncementById(@Args('id', { type: () => Int }) id: number): Promise<ResponseDTO> {
     return this.userAnnouncementService.deleteById(id);
   }
 
   @Mutation((returns) => UserAnnouncement)
-  markRead(
-    @Args('id', { type: () => Int }) id: number,
-  ): Promise<UserAnnouncement> {
+  markRead(@Args('id', { type: () => Int }) id: number): Promise<UserAnnouncement> {
     return this.userAnnouncementService.markRead(id);
   }
 

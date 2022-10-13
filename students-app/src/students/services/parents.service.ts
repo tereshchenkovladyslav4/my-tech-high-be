@@ -9,7 +9,6 @@ export class ParentsService {
     private parentsRepository: Repository<Parent>,
   ) {}
 
-
   findOneById(parent_id: number): Promise<Parent> {
     return this.parentsRepository.findOne(parent_id);
   }

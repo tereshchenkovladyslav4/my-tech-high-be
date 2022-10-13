@@ -14,14 +14,8 @@ export class EmailReminderService {
     return await this.emailReminderRepository.save(emailReminderInput);
   }
 
-  async update(
-    reminder_id: number,
-    emailReminderInput: EmailReminderInput,
-  ): Promise<any> {
-    return await this.emailReminderRepository.update(
-      reminder_id,
-      emailReminderInput,
-    );
+  async update(reminder_id: number, emailReminderInput: EmailReminderInput): Promise<any> {
+    return await this.emailReminderRepository.update(reminder_id, emailReminderInput);
   }
 
   async findByTemplateId(templateId: number): Promise<EmailReminder[]> {
@@ -30,10 +24,7 @@ export class EmailReminderService {
     });
   }
 
-  async findByTemplateIdAndReminder(
-    templateId: number,
-    reminder: number,
-  ): Promise<EmailReminder[]> {
+  async findByTemplateIdAndReminder(templateId: number, reminder: number): Promise<EmailReminder[]> {
     return await this.emailReminderRepository.find({
       email_template_id: templateId,
       reminder: reminder,

@@ -13,10 +13,10 @@ export class AddressService {
 
   async findOneByPersonId(person_id: number): Promise<Address> {
     return await createQueryBuilder(Address)
-    .innerJoin(PersonAddress, "personaddress", "personaddress.address_id = `Address`.address_id")
-    .where("personaddress.person_id = :id", { id: person_id })
-    .printSql()
-    .getOne();
+      .innerJoin(PersonAddress, 'personaddress', 'personaddress.address_id = `Address`.address_id')
+      .where('personaddress.person_id = :id', { id: person_id })
+      .printSql()
+      .getOne();
 
     //return this.addressRepository.findOne(address.address_id);
   }

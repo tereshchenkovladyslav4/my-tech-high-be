@@ -1,28 +1,28 @@
-import { Field, InputType, Int } from "@nestjs/graphql";
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
-export class CreateScheduleBuilderInput{
-	@Field(() => Int)
-	max_num_periods: number;
+export class CreateScheduleBuilderInput {
+  @Field(() => Int)
+  max_num_periods: number;
 
-	@Field(() => Int)
-	custom_built: number;
+  @Field(() => Int)
+  custom_built: number;
 
-	@Field(() => Int)
-	split_enrollment: number
-	
-	@Field(() => Int)
-	always_unlock: number;
-	
-	@Field(() => String)
-	parent_tooltip: string;
+  @Field(() => Int)
+  split_enrollment: number;
 
-	@Field(() => Int)
-	third_party_provider: number;
+  @Field(() => Int)
+  always_unlock: number;
 
-	@Field(() => Int)
-	school_year_id?: number;
+  @Field(() => String)
+  parent_tooltip: string;
 
-	@Field(() => Int, {nullable: true})
-	id?: number;
+  @Field(() => Int)
+  third_party_provider: number;
+
+  @Field(() => Int)
+  school_year_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  id?: number;
 }
