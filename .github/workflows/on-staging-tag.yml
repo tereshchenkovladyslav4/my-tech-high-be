@@ -37,10 +37,13 @@ jobs:
 
       - name: Build and Push Applications App
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:applications-app ./applications-app/
+          docker build -t $REGISTRY/$REPOSITORY:applications-app --build-arg ENVIRONMENT="staging" --build-arg DB_HOST=$DB_HOST --build-arg DB_USER=$DB_USER --build-arg DB_PASS=$DB_PASS ./applications-app/
           docker push $REGISTRY/$REPOSITORY:applications-app
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
+          DB_HOST: ${{ secrets.STAGING_DB_HOST}}
+          DB_USER: ${{ secrets.STAGING_DB_USER}}
+          DB_PASS: ${{ secrets.STAGING_DB_PASS}}
           ECS_CLUSTER: infocenter-v2-be--staging
           ECS_SERVICE: staging-applications-app
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -80,7 +83,7 @@ jobs:
 
       - name: Build and Push Authentication App
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:authentication ./authentication/
+          docker build -t $REGISTRY/$REPOSITORY:authentication --build-arg ENVIRONMENT="staging" ./authentication/
           docker push $REGISTRY/$REPOSITORY:authentication
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
@@ -123,10 +126,13 @@ jobs:
 
       - name: Build and Push Students App
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:students-app ./students-app/
+          docker build -t $REGISTRY/$REPOSITORY:students-app --build-arg ENVIRONMENT="staging" --build-arg DB_HOST=$DB_HOST --build-arg DB_USER=$DB_USER --build-arg DB_PASS=$DB_PASS ./students-app/
           docker push $REGISTRY/$REPOSITORY:students-app
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
+          DB_HOST: ${{ secrets.STAGING_DB_HOST}}
+          DB_USER: ${{ secrets.STAGING_DB_USER}}
+          DB_PASS: ${{ secrets.STAGING_DB_PASS}}
           ECS_CLUSTER: infocenter-v2-be--staging
           ECS_SERVICE: staging-students-app
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -166,10 +172,13 @@ jobs:
 
       - name: Build and Push Users App
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:users-app ./users-app/
+          docker build -t $REGISTRY/$REPOSITORY:users-app --build-arg ENVIRONMENT="staging" --build-arg DB_HOST=$DB_HOST --build-arg DB_USER=$DB_USER --build-arg DB_PASS=$DB_PASS ./users-app/
           docker push $REGISTRY/$REPOSITORY:users-app
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
+          DB_HOST: ${{ secrets.STAGING_DB_HOST}}
+          DB_USER: ${{ secrets.STAGING_DB_USER}}
+          DB_PASS: ${{ secrets.STAGING_DB_PASS}}
           ECS_CLUSTER: infocenter-v2-be--staging
           ECS_SERVICE: staging-users
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -209,7 +218,7 @@ jobs:
 
       - name: Build and Push Media App
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:media-app ./media-app/
+          docker build -t $REGISTRY/$REPOSITORY:media-app --build-arg ENVIRONMENT="staging" ./media-app/
           docker push $REGISTRY/$REPOSITORY:media-app
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
@@ -253,7 +262,7 @@ jobs:
 
       - name: Build and Push Gateway App
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:gateway ./gateway/
+          docker build -t $REGISTRY/$REPOSITORY:gateway --build-arg ENVIRONMENT="staging" ./gateway/
           docker push $REGISTRY/$REPOSITORY:gateway
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
         env:
