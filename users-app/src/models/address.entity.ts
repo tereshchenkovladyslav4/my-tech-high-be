@@ -32,4 +32,7 @@ export class Address extends BaseEntity {
 
   @Column()
   county_id?: number;
+
+  @Column()
+  country_id?: string;
 }

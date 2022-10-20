@@ -98,8 +98,10 @@ export class WithdrawalResolver {
   async deleteWithdrawal(
     @Args('student_id', { type: () => Int })
     student_id: number,
+    @Args('active_option', { type: () => Int })
+    active_option: number,
   ): Promise<boolean> {
-    return this.service.delete(student_id);
+    return this.service.delete(student_id, active_option);
   }
 
   @Mutation((returns) => Boolean, { name: 'updateWithdrawal' })

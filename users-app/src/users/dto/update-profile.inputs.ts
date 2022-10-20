@@ -55,4 +55,7 @@ export class UpdateProfileInput {
 
   @Field({ nullable: true })
   county_id?: number;
+
+  @Field({ nullable: true })
+  country_id?: string;
 }

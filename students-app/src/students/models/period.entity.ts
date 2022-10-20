@@ -1,20 +1,10 @@
-import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
-  ManyToMany,
-} from 'typeorm';
-import { REDUCE_FUNDS, SEMESTER_TYPE } from '../enums';
-import { SchoolYear } from './schoolyear.entity';
+import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Provider } from './provider.entity';
 
 @ObjectType()
+@Directive('@extends')
 @Directive(
   '@key(fields: "id, school_year_id, period, category, grade_level_min, grade_level_max, message_period, notify_period, archived, Subjects, Providers")',
 )
@@ -23,80 +13,55 @@ export class Period extends BaseEntity {
   @Column()
   @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
+  @Directive('@external')
   id: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   school_year_id: number;
 
   @Column()
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   period: number;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   category: string;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   grade_level_min: string;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   grade_level_max: string;
 
-  @Column({
-    type: 'enum',
-    enum: REDUCE_FUNDS,
-    comment: 'NONE: NONE(default), SUPPLEMENTAL: SUPPLEMENTAL, TECHNOLOGY: TECHNOLOGY',
-  })
-  @Field(() => REDUCE_FUNDS, { nullable: true })
-  reduce_funds?: REDUCE_FUNDS;
-
-  @Column()
-  @Field(() => Int, { nullable: true })
-  price?: number;
-
-  @Column({
-    type: 'enum',
-    enum: SEMESTER_TYPE,
-    comment: 'NONE: NONE(default), PERIOD: PERIOD, SUBJECT: SUBJECT',
-  })
-  @Field(() => SEMESTER_TYPE, { nullable: true })
-  semester?: SEMESTER_TYPE;
-
   @Column()
   @Field(() => String, { nullable: true })
-  message_semester?: string;
-
-  @Column()
-  @Field(() => String, { nullable: true })
+  @Directive('@external')
   message_period?: string;
 
   @Column()
   @Field(() => Boolean, { nullable: true })
-  notify_semester?: boolean;
-
-  @Column()
-  @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   notify_period?: boolean;
 
   @Column({ default: 0 })
   @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   archived?: boolean;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Periods)
-  @JoinColumn([{ name: 'school_year_id', referencedColumnName: 'school_year_id' }])
-  SchoolYear: SchoolYear;
 
   @ManyToMany(() => Subject, (subject) => subject.Periods, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @Field(() => [Subject], { nullable: true })
+  @Directive('@external')
   Subjects: Subject[];
 
   @ManyToMany(() => Provider, (provider) => provider.Periods, {
@@ -104,5 +69,6 @@ export class Period extends BaseEntity {
     onUpdate: 'CASCADE',
   })
   @Field(() => [Provider], { nullable: true })
+  @Directive('@external')
   Providers: Provider[];
 }

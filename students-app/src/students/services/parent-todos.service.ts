@@ -10,7 +10,7 @@ import { Packet } from '../models/packet.entity';
 import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
-import { WithdrawalStatus } from '../enums';
+import { StudentStatusEnum, WithdrawalStatus } from '../enums';
 import { TimezoneService } from './timezone.service';
 import { SchoolYear } from '../models/schoolyear.entity';
 
@@ -236,6 +236,7 @@ export class ParentToDosService {
     }
 
     const students = await createQueryBuilder(Student)
+      .leftJoin('Student.status', 'studentStatus')
       .innerJoin(
         Application,
         'application',
@@ -248,9 +249,10 @@ export class ParentToDosService {
       .innerJoin(
         Packet,
         'packet',
-        "packet.student_id = `Student`.student_id AND ( packet.status <> 'Submitted' AND packet.status <> 'Resubmitted' ) AND packet.deleted = 0",
+        "packet.student_id = `Student`.student_id AND packet.status = 'Accepted' AND packet.deleted = 0",
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
+      .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
       .orderBy('application.application_id', 'DESC')
       .printSql()
       .getMany();
@@ -396,7 +398,7 @@ export class ParentToDosService {
       .leftJoinAndSelect('student.StudentWithdrawals', 'withdrawal')
       .leftJoin('student.status', 'studentStatus')
       .where(`student.parent_id=${Parent_parent_id}`)
-      .andWhere(`studentStatus.status=${2}`)
+      .andWhere(`studentStatus.status=${StudentStatusEnum.WITHDRAWN}`)
       .andWhere(`withdrawal.status='${WithdrawalStatus.NOTIFIED}'`)
       .getMany();
     return defaultResponse;

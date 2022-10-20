@@ -173,10 +173,16 @@ export class WithdrawalService {
     }
   }
 
-  async delete(student_id: number): Promise<boolean> {
+  async delete(student_id: number, active_option: number): Promise<boolean> {
+    //active_option 1: Delete Withdraw Form from Records 2: Keep Withdraw Form
     try {
       const queryRunner = await getConnection().createQueryRunner();
       await queryRunner.query(`DELETE FROM infocenter.withdrawal WHERE StudentId=${student_id}`);
+      if (active_option == 1) {
+        await queryRunner.query(
+          `DELETE FROM infocenter.mth_student_record_file WHERE RecordId IN (SELECT record_id FROM infocenter.mth_student_record WHERE StudentId = ${student_id}) AND file_kind = '${StudentRecordFileKind.WITHDRAWAL_FORM}';`,
+        );
+      }
       await queryRunner.release();
       return true;
     } catch (error) {

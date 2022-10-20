@@ -45,6 +45,12 @@ import { S3Service } from './services/s3.service';
 import { StudentRecordFileService } from './services/student-record-file.service';
 import { ResourceLevel } from './models/resource-level.entity';
 import { TimezoneService } from './services/timezone.service';
+import { PeriodService } from './services/period.service';
+import { Period } from './models/period.entity';
+import { Subject } from './models/subject.entity';
+import { Provider } from './models/provider.entity';
+import { Title } from './models/title.entity';
+import { Course } from './models/course.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -67,6 +73,7 @@ const servicesImports = [
   FilesService,
   S3Service,
   TimezoneService,
+  PeriodService,
 ];
 
 @Global()
@@ -97,6 +104,11 @@ const servicesImports = [
       Resource,
       SchoolEnrollment,
       ResourceLevel,
+      Period,
+      Subject,
+      Title,
+      Provider,
+      Course,
     ]),
   ],
   providers: [...servicesImports],

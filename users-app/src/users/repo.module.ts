@@ -57,6 +57,10 @@ import { AssessmentService } from './services/assessment.service';
 import { AssessmentOptionService } from './services/assessment-option.service';
 import { ResourceService } from './services/resource.service';
 import { ResourceLevelService } from './services/resource-level.service';
+import { Subject } from '../models/subject.entity';
+import { Title } from '../models/title.entity';
+import { Course } from '../models/course.entity';
+import { Provider } from '../models/provider.entity';
 
 const RepoServices = [
   UsersService,
@@ -125,6 +129,10 @@ const RepoServices = [
       ResourceLevel,
       Assessment,
       AssessmentOption,
+      Subject,
+      Title,
+      Provider,
+      Course,
     ]),
   ],
   providers: RepoServices,

@@ -69,6 +69,9 @@ export class CreateOrUpdateTitleInput {
   state_course_codes?: string;
 
   @Field(() => Boolean, { nullable: true })
+  allow_request: boolean;
+
+  @Field(() => Boolean, { nullable: true })
   is_active: boolean;
 
   @Field(() => Boolean, { nullable: true })

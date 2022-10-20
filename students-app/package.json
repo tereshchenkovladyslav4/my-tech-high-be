@@ -38,7 +38,6 @@
     "@nestjs/graphql": "9.1.1",
     "@nestjs/platform-express": "8.2.0",
     "@nestjs/typeorm": "^8.0.2",
-    "@t00nday/nestjs-pdf": "^3.0.5",
     "adm-zip": "^0.5.9",
     "apollo-server-core": "^3.5.0",
     "apollo-server-express": "3.5.0",

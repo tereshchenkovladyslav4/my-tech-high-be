@@ -47,6 +47,7 @@ export class PersonAddressService {
             state: addressInputs.state,
             zip: addressInputs.zip,
             county_id: addressInputs.county_id || null,
+            country_id: addressInputs.country_id || null,
             school_district: addressInputs.school_district || null,
           },
         ])
@@ -79,6 +80,7 @@ export class PersonAddressService {
           state: addressInputs.state,
           zip: addressInputs.zip,
           county_id: addressInputs.county_id || null,
+          country_id: addressInputs.country_id || null,
           school_district: addressInputs.school_district || null,
         })
         .where('address_id = :id', { id: hasAddress.address_id })

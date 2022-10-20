@@ -109,9 +109,9 @@ export class StudentRecordService {
         );
       } else if (statusList.includes('New')) {
         qb.andWhere('(student_status.status = 0 OR student_status.status = 1) AND status_history.student_id IS NULL');
-      } else {
-        qb.andWhere('student_status.status = 0 OR student_status.status = 1');
       }
+    } else {
+      qb.andWhere('(student_status.status = 0 OR student_status.status = 1)');
     }
 
     if (search_key) {

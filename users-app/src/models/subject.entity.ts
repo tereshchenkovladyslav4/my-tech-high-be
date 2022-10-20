@@ -10,12 +10,12 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { SchoolYear } from './schoolyear.entity';
 import { Title } from './title.entity';
 import { Period } from './period.entity';
 import { Course } from './course.entity';
 
 @ObjectType()
+@Directive('@extends')
 @Directive(
   '@key(fields: "subject_id, SchoolYearId, name, priority, allow_request, is_active, deleted, Titles, Periods, Courses")',
 )
@@ -24,42 +24,42 @@ export class Subject extends BaseEntity {
   @Column('int', { name: 'subject_id', nullable: true })
   @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
+  @Directive('@external')
   subject_id?: number;
 
   @Column('int', { name: 'SchoolYearId', nullable: true })
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   SchoolYearId: number | null;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   name: string;
 
   @Column('int', { name: 'priority', nullable: true })
   @Field(() => Int, { nullable: true })
+  @Directive('@external')
   priority: number | null;
 
   @Column('tinyint', { name: 'allow_request', default: false })
   @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   allow_request: boolean;
 
   @Column('tinyint', { name: 'is_active', default: true })
   @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   is_active: boolean;
 
   @Column('tinyint', { name: 'deleted', default: false })
   @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   deleted: boolean;
-
-  @ManyToOne(() => SchoolYear, (schoolyear) => schoolyear.Subjects, {
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
-  @Field(() => SchoolYear, { nullable: true })
-  SchoolYear: SchoolYear;
 
   @OneToMany(() => Title, (title) => title.Subject)
   @Field(() => [Title], { nullable: true })
+  @Directive('@external')
   Titles: Title[];
 
   @ManyToMany(() => Period, (period) => period.Subjects)
@@ -69,9 +69,11 @@ export class Subject extends BaseEntity {
     inverseJoinColumn: { name: 'period_id', referencedColumnName: 'id' },
   })
   @Field(() => [Period], { nullable: true })
+  @Directive('@external')
   Periods: Period[];
 
   @OneToMany(() => Course, (course) => course.Subject)
   @Field(() => [Course], { nullable: true })
+  @Directive('@external')
   Courses: Course[];
 }

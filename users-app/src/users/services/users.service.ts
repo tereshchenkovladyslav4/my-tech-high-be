@@ -464,6 +464,7 @@ export class UsersService {
             state: updateProfileInput.state,
             zip: updateProfileInput.zipcode,
             county_id: updateProfileInput.county_id,
+            country_id: updateProfileInput.country_id,
           },
         ])
         .execute();
@@ -495,6 +496,7 @@ export class UsersService {
           state: updateProfileInput.state,
           zip: updateProfileInput.zipcode,
           county_id: updateProfileInput.county_id,
+          country_id: updateProfileInput.country_id,
         })
         .where('address_id = :id', { id: hasAddress.address_id })
         .execute();

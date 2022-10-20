@@ -336,7 +336,6 @@ export class ApplicationsService {
         const { student_id } = application;
 
         const existingPacket = await this.packetsService.findOneByStudentId(student_id);
-
         const existingPerson = await this.studentService.findOneById(student_id);
         const {
           parent: { person_id },
@@ -392,12 +391,10 @@ export class ApplicationsService {
           meta: JSON.stringify(default_meta),
         });
 
-        const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
-
         const statudUpdated = this.studentStatusService.update({
           student_id: student_id,
-          school_year_id: gradeLevels[0].school_year_id,
-          status: 0,
+          school_year_id: application.school_year_id,
+          status: 6,
         });
 
         const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
@@ -405,10 +402,10 @@ export class ApplicationsService {
           region_id,
         );
 
-        const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id);
+        const school_year = await this.schoolYearService.findOneById(application.school_year_id);
 
         if (!school_year.enrollment_packet) {
-          await this.studentRecordService.createStudentRecord(student.student_id, school_year.RegionId, 0, null);
+          await this.studentRecordService.createStudentRecord(student.student_id, school_year.RegionId, 6, null);
         }
 
         if (emailTemplate) {
@@ -416,7 +413,7 @@ export class ApplicationsService {
             const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
             const yearend = new Date(school_year.date_end).getFullYear().toString();
             const yearText = application.midyear_application
-              ? `${yearbegin}-${yearend.substring(2, 4)} Mid-Year`
+              ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
               : `${yearbegin}-${yearend.substring(2, 4)}`;
 
             return content

@@ -325,9 +325,8 @@ export class EnrollmentsService {
         person_id: studentPersonId,
         ...enrollmentPacketContactInput.student,
       });
-      console.log('Student Person: ', studentPerson);
 
-      const personAddress = this.personAddressService.createOrUpdate(
+      const personAddress = await this.personAddressService.createOrUpdate(
         studentPerson,
         enrollmentPacketContactInput.student.address,
       );
@@ -341,14 +340,11 @@ export class EnrollmentsService {
       //     address_id
       // });
 
-      console.log('Student Person Address: ', personAddress);
-
       const phone = await this.phonesService.create({
         person_id: studentPerson.person_id,
         number: enrollmentPacketContactInput.student.phone_number,
       });
       if (!phone) throw new ServiceUnavailableException('Student Phone Not Created');
-      console.log('Student Phone: ', phone);
 
       const { grade_level } = enrollmentPacketContactInput.student;
       if (school_year_id && grade_level) {
@@ -373,7 +369,7 @@ export class EnrollmentsService {
         meta: packet.meta,
         special_ed: String(special_ed),
       });
-      console.log('Student Packet: ', studentPacket);
+      const studentInfo = await this.studentsService.findOneById(student_id);
 
       return {
         student,

@@ -27,5 +27,8 @@ export class CreateAddressInput {
   county_id?: number;
 
   @Field(() => String, { nullable: true })
+  country_id?: string;
+
+  @Field(() => String, { nullable: true })
   school_district?: string;
 }

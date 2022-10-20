@@ -5,7 +5,9 @@ import { Provider } from './provider.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "id, school_year_id, period, category, archived")')
+@Directive(
+  '@key(fields: "id, school_year_id, period, category, grade_level_min, grade_level_max, message_period, notify_period, archived, Subjects, Providers")',
+)
 @Entity({ name: 'mth_period' })
 export class Period extends BaseEntity {
   @Column()
@@ -29,6 +31,26 @@ export class Period extends BaseEntity {
   @Directive('@external')
   category: string;
 
+  @Column()
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  grade_level_min: string;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  grade_level_max: string;
+
+  @Column()
+  @Field((type) => String, { nullable: true })
+  @Directive('@external')
+  message_period?: string;
+
+  @Column()
+  @Field((type) => Boolean, { nullable: true })
+  @Directive('@external')
+  notify_period?: boolean;
+
   @Column({ default: 0 })
   @Field((type) => Boolean, { nullable: true })
   @Directive('@external')
@@ -39,6 +61,7 @@ export class Period extends BaseEntity {
     onUpdate: 'CASCADE',
   })
   @Field(() => [Subject], { nullable: true })
+  @Directive('@external')
   Subjects: Subject[];
 
   @ManyToMany(() => Provider, (provider) => provider.Periods, {
@@ -46,5 +69,6 @@ export class Period extends BaseEntity {
     onUpdate: 'CASCADE',
   })
   @Field(() => [Provider], { nullable: true })
+  @Directive('@external')
   Providers: Provider[];
 }

@@ -15,6 +15,9 @@ export class CreateOrUpdateSubjectInput {
   priority: number | null;
 
   @Field(() => Boolean, { nullable: true })
+  allow_request: boolean;
+
+  @Field(() => Boolean, { nullable: true })
   is_active: boolean;
 
   @Field(() => String, { nullable: true })
