@@ -586,7 +586,7 @@ export class PacketsService {
               : question?.type == 4 && packetPdfInfo[keyName][fieldName]
               ? 'Checked'
               : question?.type == 3 && packetPdfInfo[keyName][fieldName]
-              ? packetPdfInfo[keyName][fieldName]?.map((item) => item?.label)?.join(',')
+              ? packetPdfInfo[keyName][fieldName]?.map((item) => item?.label)?.join(', ')
               : packetPdfInfo[keyName][fieldName];
 
           if (answer) {

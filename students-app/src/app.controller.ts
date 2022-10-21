@@ -36,12 +36,21 @@ export class AppController {
 
           for (let i = 0; i < downloadItems.length; i++) {
             const files = await this.fileService.findByIds(downloadItems[i].fileIds.join(','));
-
             files.results?.map((file, index) => {
-              const fielName = file.name?.replace('.', `_${index}.`);
+              let fileName = file.name?.replace('.', `_${index}.`);
+              if (!fileName?.includes('.')) {
+                switch (file.type) {
+                  case 'application/pdf':
+                    fileName = `${fileName}.pdf`;
+                    break;
+                  case 'image/png':
+                    fileName = `${fileName}.png`;
+                    break;
+                }
+              }
               dataToArchive.push({
                 url: file.signedUrl,
-                fileName: `${downloadItems[i].studentName}/${fielName}`,
+                fileName: `${downloadItems[i].studentName}/${fileName}`,
               });
             });
           }
@@ -59,7 +68,6 @@ export class AppController {
         throw new HttpException("You don't have permission to download files at storage!", HttpStatus.BAD_REQUEST);
       }
     } catch (err) {
-      //console.log(err);
       throw new HttpException("You don't have permission to download files at storage!", HttpStatus.NOT_ACCEPTABLE);
     }
   }

@@ -110,6 +110,7 @@ import { ProviderService } from './services/provider.service';
 import { Provider } from './models/provider.entity';
 import { CourseService } from './services/course.service';
 import { Course } from './models/course.entity';
+import { TimezonesService } from './services/timezones.service';
 
 const servicesImports = [
   UsersService,
@@ -170,6 +171,7 @@ const servicesImports = [
   PeriodService,
   ProviderService,
   CourseService,
+  TimezonesService,
 ];
 
 @Global()

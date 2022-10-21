@@ -64,6 +64,7 @@ import { ProviderResolver } from './resolvers/provider.resolver';
 import { Provider } from './models/provider.entity';
 import { CourseResolver } from './resolvers/course.resolver';
 import { Course } from './models/course.entity';
+import { TimezonesService } from './services/timezones.service';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -91,6 +92,7 @@ const graphQLImports = [
   TitleResolver,
   ProviderResolver,
   CourseResolver,
+  TimezonesService,
 ];
 @Module({
   imports: [

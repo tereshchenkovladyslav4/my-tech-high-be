@@ -401,7 +401,7 @@ export class WithdrawalService {
 					person.email AS parent_email,
 					templates.id AS email_templates_id,
 					templates.bcc AS email_bcc,
-					templates.from AS email_from
+					templates.from AS email_from,
           studentInfo.first_name AS student_name,
           person.first_name AS parent_name,
           schoolYear.date_begin AS date_begin,

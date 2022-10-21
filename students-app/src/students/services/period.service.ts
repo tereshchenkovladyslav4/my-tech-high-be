@@ -12,7 +12,7 @@ export class PeriodService {
     private studentGradeLevelService: StudentGradeLevelsService,
   ) {}
 
-  async find(studentId: number, schoolYearId: number): Promise<Period[]> {
+  async find(studentId: number, schoolYearId: number, diplomaSeekingPath: string): Promise<Period[]> {
     const studentGradeLevel = await this.studentGradeLevelService.findByStudentID(studentId);
 
     if (!studentGradeLevel) {
@@ -20,11 +20,17 @@ export class PeriodService {
     }
 
     const grade = studentGradeLevel.grade_level;
+    const diplomaQuery = (alias: string, diploma: string) => {
+      if (diploma) return ` AND ${alias}.diploma_seeking_path in ('both', '${diploma}')`;
+      else return '';
+    };
     const courseQuery = (alias: string, isAlt = false) => {
       const altString = isAlt ? 'alt_' : '';
-      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${alias}.min_${altString}grade <= ${grade} AND ${alias}.max_${altString}grade >= ${grade}`;
+      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${alias}.min_${altString}grade <= ${grade} AND ${alias}.max_${altString}grade >= ${grade}${diplomaQuery(
+        alias,
+        diplomaSeekingPath,
+      )}`;
     };
-
     const result = await this.repo
       .createQueryBuilder('period')
       .leftJoinAndSelect(
@@ -35,14 +41,17 @@ export class PeriodService {
       .leftJoinAndSelect(
         'Subjects.Titles',
         'Titles',
-        `Titles.allow_request = ${true} AND Titles.is_active = ${true} AND Titles.min_grade <= ${grade} AND Titles.max_grade >= ${grade}`,
+        `Titles.allow_request = ${true} AND Titles.is_active = ${true} AND Titles.min_grade <= ${grade} AND Titles.max_grade >= ${grade}${diplomaQuery(
+          'Titles',
+          diplomaSeekingPath,
+        )}`,
       )
       .leftJoinAndSelect(
         'Subjects.AltTitles',
         'AltTitles',
         `AltTitles.allow_request = ${true} AND AltTitles.is_active = ${true} AND AltTitles.min_alt_grade <= ${grade} AND AltTitles.max_alt_grade >= ${grade}`,
       )
-      .leftJoinAndSelect('Titles.Courses', 'Courses', courseQuery('Courses'))
+      .leftJoinAndSelect('Titles.Courses', 'Courses', `${courseQuery('Courses')}`)
       .leftJoinAndSelect('AltTitles.Courses', 'AltTitlesCourses', courseQuery('AltTitlesCourses'))
       .leftJoinAndSelect('Titles.AltCourses', 'AltCourses', courseQuery('AltCourses', true))
       .leftJoinAndSelect('AltTitles.AltCourses', 'AltTitlesAltCourses', courseQuery('AltTitlesAltCourses', true))

@@ -13,7 +13,8 @@ export class PeriodResolver {
   get(
     @Args({ name: 'studentId', type: () => ID }) studentId: number,
     @Args({ name: 'schoolYearId', type: () => ID }) schoolYearId: number,
+    @Args({ name: 'diplomaSeekingPath', type: () => String, nullable: true }) diplomaSeekingPath: string,
   ): Promise<Period[]> {
-    return this.service.find(studentId, schoolYearId);
+    return this.service.find(studentId, schoolYearId, diplomaSeekingPath);
   }
 }
