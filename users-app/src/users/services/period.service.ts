@@ -33,6 +33,7 @@ export class PeriodService {
         }),
       );
     }
+    qb.orderBy('period', 'ASC');
     return await qb.getMany();
   }
   // find all saved period indexes for validation
@@ -67,23 +68,6 @@ export class PeriodService {
     if (setting.max_num_periods < args.period) {
       throw new UnprocessableEntityException('Period must be less than max period number from scheduleBuilderService');
     }
-    // -------------------------------------
-    // validation - unique period per school_year_id
-    // -------------------------------------
-    let periodExist;
-    if (!args.id) {
-      periodExist = await this.periodRepository.findOne({
-        school_year_id: args.school_year_id,
-        period: args.period,
-      });
-    } else {
-      periodExist = await this.periodRepository.findOne({
-        school_year_id: args.school_year_id,
-        period: args.period,
-        id: Not(args.id),
-      });
-    }
-    if (periodExist) throw new UnprocessableEntityException('A record with same period and school year already exist');
 
     // -------------------------------------
     // validation - max/min grade levels
