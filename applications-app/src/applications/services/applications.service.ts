@@ -372,7 +372,7 @@ export class ApplicationsService {
 
         const default_meta = {};
         if (student.special_ed != 0) {
-          default_meta['meta_special_education'] = this.getSpeicalEdValue(student.special_ed);
+          default_meta['meta_special_education'] = student.special_ed;
         }
 
         // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
@@ -614,12 +614,5 @@ export class ApplicationsService {
       },
     });
     return applications;
-  }
-
-  getSpeicalEdValue(special_ed) {
-    if (special_ed == 1) return 'IEP';
-    if (special_ed == 2) return '504';
-    if (special_ed == 3) return 'Test';
-    return '';
   }
 }

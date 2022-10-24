@@ -40,4 +40,7 @@ export class UpdateAnnouncementInput {
 
   @Field(() => String, { nullable: true })
   filter_school_partners?: string;
+
+  @Field(() => String, { nullable: true })
+  filter_others?: string;
 }

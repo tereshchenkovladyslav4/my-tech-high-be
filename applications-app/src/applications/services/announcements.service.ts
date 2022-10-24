@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, Repository, createQueryBuilder } from 'typeorm';
+import { getConnection, Repository, createQueryBuilder, Brackets } from 'typeorm';
 import { Announcement } from '../models/announcement.entity';
 import { CreateAnnouncementInput } from '../dto/new-announcement.inputs';
 import { ResponseDTO } from '../dto/response.dto';
@@ -21,6 +21,9 @@ import { SchoolYear } from '../models/schoolyear.entity';
 import { Observer } from '../models/observer.entity';
 import { SchoolPartner } from '../models/school-partner.entity';
 import { AnnouncementFilterArgs } from '../dto/announcement-filter.args';
+import { StudentAssessmentOption } from '../models/student-assessment-option.entity';
+import { AssessmentOption } from '../models/assessment-option.entity';
+import { StudentStatus } from '../models/student-status.entity';
 @Injectable()
 export class AnnouncementsService {
   constructor(
@@ -61,6 +64,7 @@ export class AnnouncementsService {
           filter_users,
           filter_program_years,
           filter_school_partners,
+          filter_others,
         } = announcement;
         // get users
         const userEmailList = await this.getAnnouncementUsersByFilters({
@@ -69,6 +73,7 @@ export class AnnouncementsService {
           filter_users,
           filter_program_years,
           filter_school_partners,
+          filter_others,
         });
         userEmailList.map(async (user) => {
           await this.sesEmailService.sendAnnouncementEmail({
@@ -99,6 +104,7 @@ export class AnnouncementsService {
       isArchived,
       filter_program_years,
       filter_school_partners,
+      filter_others,
     } = updateAnnouncementInput;
     const announcementData = await this.announcementsRepository.findOne({
       announcement_id,
@@ -111,6 +117,7 @@ export class AnnouncementsService {
           filter_users,
           filter_program_years,
           filter_school_partners,
+          filter_others,
         });
         if ((status == 'Published' && !isArchived) || status === 'Republished') {
           userEmailList.map(async (user) => {
@@ -150,7 +157,7 @@ export class AnnouncementsService {
 
   async getAnnouncementUsersByFilters(announcementEmailInputs: AnnouncementFilterArgs): Promise<User[]> {
     {
-      const { RegionId, filter_grades, filter_users, filter_program_years, filter_school_partners } =
+      const { RegionId, filter_grades, filter_users, filter_program_years, filter_school_partners, filter_others } =
         announcementEmailInputs;
 
       const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
@@ -190,6 +197,8 @@ export class AnnouncementsService {
       const schoolPartnerTypes = JSON.parse(filter_school_partners);
       const schoolPartners = schoolPartnerTypes;
 
+      const filterOther = JSON.parse(filter_others);
+
       //console.log('SchoolPartners: ', schoolPartners);
 
       let parentResults = [];
@@ -203,6 +212,11 @@ export class AnnouncementsService {
           .leftJoin(StudentGradeLevel, 'studentGradeLevel', 'studentGradeLevel.student_id = student.student_id')
           .leftJoin(SchoolYear, 'schoolYear', 'schoolYear.school_year_id = application.school_year_id')
           .leftJoin(SchoolPartner, 'schoolPartner', 'schoolPartner.school_year_id = schoolYear.school_year_id')
+          // test preference
+          .leftJoin(StudentAssessmentOption, 'student_assessment', 'student_assessment.StudentId = student.student_id')
+          .leftJoin(AssessmentOption, 'assessment_option', 'assessment_option.option_id = student_assessment.OptionId')
+          .leftJoin(StudentStatus, 'studentStatus', 'studentStatus.student_id = student.student_id')
+
           .select('person.user_id', 'user_id')
           .addSelect('person.email', 'email')
           .distinct(true)
@@ -211,6 +225,7 @@ export class AnnouncementsService {
           .where('studentGradeLevel.grade_level IN(:...grades)', {
             grades: gradeTypes,
           })
+          .andWhere('studentStatus.status != 2') // withdraw student
           // .andWhere(
           //   'IFNULL( application.midyear_application, 0 ) = :isMidYear',
           //   {
@@ -228,10 +243,22 @@ export class AnnouncementsService {
             isMidYear,
           });
 
-        if (Array.isArray(schoolPartners)) {
+        if (Array.isArray(schoolPartners) && schoolPartners.length > 0) {
           parentQuery.andWhere('schoolPartner.school_partner_id IN(:...schoolPartnerIds)', {
             schoolPartnerIds: schoolPartners,
           });
+        }
+
+        if (filterOther.indexOf('testing-opt-in') !== -1 && filterOther.indexOf('testing-opt-out') !== -1) {
+          parentQuery.andWhere(
+            new Brackets((sub) => {
+              sub.orWhere("assessment_option.method = 'Opt-in'").orWhere("assessment_option.method = 'Opt-out'");
+            }),
+          );
+        } else if (filterOther.indexOf('testing-opt-in') !== -1) {
+          parentQuery.andWhere("assessment_option.method = 'Opt-in'");
+        } else if (filterOther.indexOf('testing-opt-out') !== -1) {
+          parentQuery.andWhere("assessment_option.method = 'Opt-out'");
         }
 
         // if (schoolYearId > 0)

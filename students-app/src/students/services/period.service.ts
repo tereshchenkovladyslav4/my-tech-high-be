@@ -20,13 +20,14 @@ export class PeriodService {
     }
 
     const grade = studentGradeLevel.grade_level;
+    const numericGrade = grade.startsWith('K') ? -1 : +grade;
     const diplomaQuery = (alias: string, diploma: string) => {
       if (diploma) return ` AND ${alias}.diploma_seeking_path in ('both', '${diploma}')`;
       else return '';
     };
     const courseQuery = (alias: string, isAlt = false) => {
       const altString = isAlt ? 'alt_' : '';
-      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${alias}.min_${altString}grade <= ${grade} AND ${alias}.max_${altString}grade >= ${grade}${diplomaQuery(
+      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${alias}.min_${altString}grade <= ${numericGrade} AND ${alias}.max_${altString}grade >= ${numericGrade}${diplomaQuery(
         alias,
         diplomaSeekingPath,
       )}`;
@@ -41,7 +42,7 @@ export class PeriodService {
       .leftJoinAndSelect(
         'Subjects.Titles',
         'Titles',
-        `Titles.allow_request = ${true} AND Titles.is_active = ${true} AND Titles.min_grade <= ${grade} AND Titles.max_grade >= ${grade}${diplomaQuery(
+        `Titles.allow_request = ${true} AND Titles.is_active = ${true} AND Titles.min_grade <= ${numericGrade} AND Titles.max_grade >= ${numericGrade}${diplomaQuery(
           'Titles',
           diplomaSeekingPath,
         )}`,
@@ -49,7 +50,7 @@ export class PeriodService {
       .leftJoinAndSelect(
         'Subjects.AltTitles',
         'AltTitles',
-        `AltTitles.allow_request = ${true} AND AltTitles.is_active = ${true} AND AltTitles.min_alt_grade <= ${grade} AND AltTitles.max_alt_grade >= ${grade}`,
+        `AltTitles.allow_request = ${true} AND AltTitles.is_active = ${true} AND AltTitles.min_alt_grade <= ${numericGrade} AND AltTitles.max_alt_grade >= ${numericGrade}`,
       )
       .leftJoinAndSelect('Titles.Courses', 'Courses', `${courseQuery('Courses')}`)
       .leftJoinAndSelect('AltTitles.Courses', 'AltTitlesCourses', courseQuery('AltTitlesCourses'))

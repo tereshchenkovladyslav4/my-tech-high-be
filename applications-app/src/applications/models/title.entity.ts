@@ -23,20 +23,20 @@ export class Title {
   name: string;
 
   @Column()
-  @Field(() => String, { nullable: true })
-  min_grade: string;
+  @Field(() => Int, { nullable: true })
+  min_grade: number;
 
   @Column()
-  @Field(() => String, { nullable: true })
-  max_grade: string;
+  @Field(() => Int, { nullable: true })
+  max_grade: number;
 
-  @Column()
-  @Field(() => String, { nullable: true })
-  min_alt_grade: string;
+  @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
+  min_alt_grade: number;
 
-  @Column()
-  @Field(() => String, { nullable: true })
-  max_alt_grade: string;
+  @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
+  max_alt_grade: number;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })

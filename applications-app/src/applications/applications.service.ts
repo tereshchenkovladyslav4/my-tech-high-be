@@ -67,13 +67,6 @@ export class ApplicationsService {
     return password;
   }
 
-  getSpeicalEdOption(special_ed) {
-    if (special_ed == 'None') return 0;
-    if (special_ed == 'IEP') return 1;
-    if (special_ed == '504') return 2;
-    return 3;
-  }
-
   async createNewApplication(newApplication: CreateApplicationInput): Promise<ParentApplication> {
     const parent = await this.createParentPerson(newApplication.parent, Number(newApplication.state));
     const parent_id = parent && (await parent).parent_id;
@@ -156,7 +149,6 @@ export class ApplicationsService {
           .replace(/\[YEAR\]/g, yearText)
           .replace(/\[APPLICATION_YEAR\]/g, yearText);
       };
-      let emailBody = emailTemplate.body;
 
       if (students.length > 0) {
         students.forEach(async (student) => {
@@ -164,7 +156,7 @@ export class ApplicationsService {
 
           const school_year = await this.schoolYearService.findOneById(gradeLevels[0]?.school_year_id);
 
-          emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
+          const emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
           const emailSubject = await setAdditionalLinksInfo(emailTemplate.subject, school_year, student);
           const result = await this.emailsService.sendEmail({
             email: email,
@@ -242,14 +234,14 @@ export class ApplicationsService {
           .replace(/\[YEAR\]/g, yearText)
           .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
       };
-      let emailBody = emailTemplate.body;
+
       if (students.length > 0) {
         students.forEach(async (student) => {
           const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
           const school_year = await this.schoolYearService.findOneById(gradeLevels[0]?.school_year_id);
 
-          emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
+          const emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
           const emailSubject = await setAdditionalLinksInfo(emailTemplate.subject, school_year, student);
 
           await this.emailsService.sendEmail({
@@ -366,9 +358,8 @@ export class ApplicationsService {
     let special_ed = 0;
     const student_meta = JSON.parse(studentMeta);
     if ('meta_special_education' in student_meta) {
-      special_ed = this.getSpeicalEdOption(student_meta['meta_special_education']);
+      special_ed = Number(student_meta['meta_special_education']);
     }
-    console.log('Student Special Ed: ', special_ed);
 
     const student = await this.studentsService.create({
       parent_id,

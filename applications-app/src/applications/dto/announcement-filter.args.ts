@@ -18,6 +18,9 @@ export class AnnouncementFilterArgs {
   @Field(() => String, { nullable: true })
   filter_school_partners?: string;
 
+  @Field(() => String, { nullable: true })
+  filter_others?: string;
+
   @Field(() => String)
   status?: 'Draft' | 'Scheduled' | 'Published' | 'Republished';
 }

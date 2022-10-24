@@ -28,24 +28,24 @@ export class Course {
   name: string;
 
   @Column()
-  @Field(() => String, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
-  min_grade: string;
+  min_grade: number;
 
   @Column()
-  @Field(() => String, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
-  max_grade: string;
+  max_grade: number;
 
-  @Column()
-  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
-  min_alt_grade: string;
+  min_alt_grade: number;
 
-  @Column()
-  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
-  max_alt_grade: string;
+  max_alt_grade: number;
 
   @Column('tinyint', { name: 'always_unlock', default: false })
   @Field(() => Boolean, { nullable: true })

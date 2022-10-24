@@ -11,17 +11,17 @@ export class CreateOrUpdateCourseInput {
   @Field(() => String, { nullable: true })
   name?: string;
 
-  @Field(() => String, { nullable: true })
-  min_grade?: string;
+  @Field(() => Int, { nullable: true })
+  min_grade?: number;
 
-  @Field(() => String, { nullable: true })
-  max_grade?: string;
+  @Field(() => Int, { nullable: true })
+  max_grade?: number;
 
-  @Field(() => String, { nullable: true })
-  min_alt_grade?: string;
+  @Field(() => Int, { nullable: true })
+  min_alt_grade?: number;
 
-  @Field(() => String, { nullable: true })
-  max_alt_grade?: string;
+  @Field(() => Int, { nullable: true })
+  max_alt_grade?: number;
 
   @Field(() => Boolean, { nullable: true })
   always_unlock: boolean;
