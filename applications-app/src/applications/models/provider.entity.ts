@@ -13,6 +13,7 @@ import {
 import { SchoolYear } from './schoolyear.entity';
 import { Period } from './period.entity';
 import { Course } from './course.entity';
+import { SchedulePeriod } from './schedule-period.entity';
 
 @ObjectType()
 @Directive(
@@ -94,4 +95,8 @@ export class Provider extends BaseEntity {
   })
   @Field(() => [Period], { nullable: true })
   Periods: Period[];
+
+  @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Provider)
+  @Field(() => [SchedulePeriod], { nullable: true })
+  SchedulePeriods: SchedulePeriod[];
 }

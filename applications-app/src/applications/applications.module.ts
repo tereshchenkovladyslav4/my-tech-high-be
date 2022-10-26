@@ -65,6 +65,10 @@ import { Provider } from './models/provider.entity';
 import { CourseResolver } from './resolvers/course.resolver';
 import { Course } from './models/course.entity';
 import { TimezonesService } from './services/timezones.service';
+import { ScheduleResolver } from './resolvers/schedule.resolver';
+import { Schedule } from './models/schedule.entity';
+import { SchedulePeriod } from './models/schedule-period.entity';
+import { SchedulePeriodResolver } from './resolvers/schedule-period.resolver';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -93,6 +97,8 @@ const graphQLImports = [
   ProviderResolver,
   CourseResolver,
   TimezonesService,
+  ScheduleResolver,
+  SchedulePeriodResolver,
 ];
 @Module({
   imports: [
@@ -142,6 +148,8 @@ const graphQLImports = [
           Subject,
           Provider,
           Course,
+          Schedule,
+          SchedulePeriod,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

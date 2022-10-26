@@ -298,7 +298,14 @@ export class StudentsService {
         }
       }
 
-      const [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
+      let total = 0,
+        results = [];
+
+      if (take !== -1) {
+        [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
+      } else {
+        [results, total] = await qb.printSql().getManyAndCount();
+      }
 
       return new Pagination<Student>({
         results,

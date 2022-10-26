@@ -13,6 +13,7 @@ import { UserRegion } from '../models/user-region.entity';
 import { StudentStatusEnum, WithdrawalStatus } from '../enums';
 import { TimezoneService } from './timezone.service';
 import { SchoolYear } from '../models/schoolyear.entity';
+import { Schedule } from '../models/schedule.entity';
 
 @Injectable()
 export class ParentToDosService {
@@ -251,8 +252,14 @@ export class ParentToDosService {
         'packet',
         "packet.student_id = `Student`.student_id AND packet.status = 'Accepted' AND packet.deleted = 0",
       )
+      .leftJoinAndSelect(
+        Schedule,
+        'schedule',
+        "schedule.StudentId = `application`.student_id AND schedule.SchoolYearId = `application`.school_year_id AND schedule.status = 'Submitted'",
+      )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
+      .andWhere('schedule.schedule_id IS NULL')
       .orderBy('application.application_id', 'DESC')
       .printSql()
       .getMany();

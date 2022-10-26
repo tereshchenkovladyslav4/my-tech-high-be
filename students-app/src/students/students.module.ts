@@ -31,6 +31,7 @@ import { StudentRecord } from './models/student-record.entity';
 import { StudentRecordFile } from './models/student-record-file.entity';
 import { File } from './models/file.entity';
 import { PeriodResolver } from './resolvers/period.resolver';
+import { Schedule } from './models/schedule.entity';
 
 const graphQLImports = [
   StudentsResolver,
@@ -83,6 +84,7 @@ const graphQLImports = [
           StudentStatusHistory,
           Resource,
           SchoolEnrollment,
+          Schedule,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

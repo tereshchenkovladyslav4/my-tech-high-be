@@ -9,6 +9,7 @@ import { StudentStatus } from './student-status.entity';
 import { Withdrawal } from './withdrawal.entity';
 import { StudentReenrollmentStatus } from './student-reenrollment-status.entity';
 import { SchoolEnrollment } from './school-enrollment.entity';
+import { Schedule } from './schedule.entity';
 
 @InputType('student')
 @ObjectType()
@@ -94,6 +95,10 @@ export class Student extends BaseEntity {
   @JoinColumn({ name: 'student_id', referencedColumnName: 'StudentId' })
   @Field(() => [Withdrawal], { nullable: true })
   Withdrawals: Withdrawal[];
+
+  @OneToMany(() => Schedule, (schedule) => schedule.ScheduleStudent)
+  @Field(() => [Schedule], { nullable: true })
+  Schedules: Schedule[];
 
   @OneToOne(() => Person, (person) => person.Student, {
     onDelete: 'SET NULL',

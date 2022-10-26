@@ -1,7 +1,8 @@
 import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Course } from './course.entity';
+import { SchedulePeriod } from './schedule-period.entity';
 
 @ObjectType()
 @Directive(
@@ -129,4 +130,8 @@ export class Title {
   })
   @Field(() => [Course], { nullable: true })
   Courses: Course[];
+
+  @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Title)
+  @Field(() => [SchedulePeriod], { nullable: true })
+  SchedulePeriods: SchedulePeriod[];
 }

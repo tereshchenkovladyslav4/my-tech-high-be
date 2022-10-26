@@ -1,7 +1,8 @@
 import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany, JoinTable } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Provider } from './provider.entity';
+import { SchedulePeriod } from './schedule-period.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -71,4 +72,8 @@ export class Period extends BaseEntity {
   @Field(() => [Provider], { nullable: true })
   @Directive('@external')
   Providers: Provider[];
+
+  @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Period)
+  @Field(() => [SchedulePeriod], { nullable: true })
+  SchedulePeriods: SchedulePeriod[];
 }

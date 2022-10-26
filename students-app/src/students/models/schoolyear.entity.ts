@@ -1,6 +1,7 @@
 import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, OneToOne } from 'typeorm';
 import { Resource } from './resource.entity';
+import { Schedule } from './schedule.entity';
 import { ScheduleBuilder } from './scheduler-builder.entity';
 import { SchoolPartner } from './school-partner.entity';
 
@@ -231,4 +232,8 @@ export class SchoolYear extends BaseEntity {
   @Field(() => ScheduleBuilder, { nullable: true })
   @Directive('@external')
   ScheduleBuilder: ScheduleBuilder;
+
+  // @OneToMany(() => Schedule, (schedule) => schedule.SchoolYear)
+  // @Field(() => [Schedule], { nullable: true })
+  // SchoolYearSchedules: Schedule[];
 }

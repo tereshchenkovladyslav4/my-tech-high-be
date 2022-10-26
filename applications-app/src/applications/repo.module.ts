@@ -111,6 +111,10 @@ import { Provider } from './models/provider.entity';
 import { CourseService } from './services/course.service';
 import { Course } from './models/course.entity';
 import { TimezonesService } from './services/timezones.service';
+import { ScheduleService } from './services/schedule.service';
+import { Schedule } from './models/schedule.entity';
+import { SchedulePeriod } from './models/schedule-period.entity';
+import { SchedulePeriodService } from './services/schedule-period.service';
 
 const servicesImports = [
   UsersService,
@@ -172,6 +176,8 @@ const servicesImports = [
   ProviderService,
   CourseService,
   TimezonesService,
+  ScheduleService,
+  SchedulePeriodService,
 ];
 
 @Global()
@@ -232,6 +238,8 @@ const servicesImports = [
       Subject,
       Provider,
       Course,
+      Schedule,
+      SchedulePeriod,
     ]),
   ],
   providers: [...servicesImports],

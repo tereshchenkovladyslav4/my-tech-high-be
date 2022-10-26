@@ -14,6 +14,7 @@ import { SchoolYear } from './schoolyear.entity';
 import { Title } from './title.entity';
 import { Period } from './period.entity';
 import { Course } from './course.entity';
+import { SchedulePeriod } from './schedule-period.entity';
 
 @ObjectType()
 @Directive(
@@ -74,4 +75,8 @@ export class Subject extends BaseEntity {
   @OneToMany(() => Course, (course) => course.Subject)
   @Field(() => [Course], { nullable: true })
   Courses: Course[];
+
+  @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Subject)
+  @Field(() => [SchedulePeriod], { nullable: true })
+  SchedulePeriods: SchedulePeriod[];
 }

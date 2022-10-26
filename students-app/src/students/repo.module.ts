@@ -51,6 +51,7 @@ import { Subject } from './models/subject.entity';
 import { Provider } from './models/provider.entity';
 import { Title } from './models/title.entity';
 import { Course } from './models/course.entity';
+import { Schedule } from './models/schedule.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -109,6 +110,7 @@ const servicesImports = [
       Title,
       Provider,
       Course,
+      Schedule,
     ]),
   ],
   providers: [...servicesImports],

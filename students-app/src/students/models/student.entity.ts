@@ -15,6 +15,7 @@ import { SchoolEnrollment } from './school-enrollment.entity';
 import { ResourceCart } from './resource-cart.entity';
 import { StudentRecord } from './student-record.entity';
 import { ResourceRequest } from './resource-request.entity';
+import { Schedule } from './schedule.entity';
 
 @ObjectType()
 @Directive(
@@ -138,4 +139,8 @@ export class Student extends BaseEntity {
   @OneToMany(() => StudentRecord, (record) => record.Student)
   @Field(() => [StudentRecord], { nullable: true })
   Records: StudentRecord[];
+
+  @OneToMany(() => Schedule, (schedule) => schedule.Student)
+  @Field(() => [Schedule], { nullable: true })
+  StudentSchedules: Schedule[];
 }
