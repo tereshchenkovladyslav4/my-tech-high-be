@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { StudentStatus } from '../models/student-status.entity';
+import { StudentStatusEnum } from '../enums';
 
 @Injectable()
 export class StudentStatusService {
@@ -17,6 +18,12 @@ export class StudentStatusService {
   async findAllById(student_id: number): Promise<StudentStatus[]> {
     return this.StudentStatusRepository.find({
       where: { student_id: student_id },
+    });
+  }
+
+  async findActive(student_id: number): Promise<StudentStatus[]> {
+    return this.StudentStatusRepository.find({
+      where: { student_id: student_id, status: In([StudentStatusEnum.PENDING, StudentStatusEnum.ACTIVE]) },
     });
   }
 

@@ -7,7 +7,6 @@ import { RequestResourcesInput } from '../dto/request-resources.input';
 import { Resource } from '../models/resource.entity';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { ResourceRequestStatus, StudentStatusEnum } from '../enums';
-import { TimezoneService } from './timezone.service';
 
 @Injectable()
 export class ResourceService {
@@ -15,11 +14,10 @@ export class ResourceService {
     @InjectRepository(Resource)
     private readonly repo: Repository<Resource>,
     private studentGradeLevelService: StudentGradeLevelsService,
-    private timezoneService: TimezoneService,
   ) {}
 
-  async find(studentId: number): Promise<Resource[]> {
-    const studentGradeLevel = await this.studentGradeLevelService.findByStudentID(studentId);
+  async find(studentId: number, schoolYearId: number): Promise<Resource[]> {
+    const studentGradeLevel = await this.studentGradeLevelService.find(studentId, schoolYearId);
 
     if (!studentGradeLevel) {
       return [];
@@ -28,22 +26,18 @@ export class ResourceService {
     const { grade_level: gradeLevel } = studentGradeLevel;
 
     const queryRunner = await getConnection().createQueryRunner();
-    const now = await this.timezoneService.getTimezoneDate(1);
     // TODO Total requests should be calculated for only accepted requests
-    // TODO Have to filter by active school years for the student
+
     const data = await this.repo
       .createQueryBuilder('resource')
       .leftJoinAndSelect('resource.HiddenStudents', 'HiddenStudents', `HiddenStudents.student_id=${studentId}`)
       .leftJoinAndSelect('resource.StudentsInCart', 'StudentsInCart', `StudentsInCart.student_id=${studentId}`)
       .leftJoinAndSelect('resource.ResourceRequests', 'ResourceRequests', `ResourceRequests.student_id=${studentId}`)
       .leftJoinAndSelect('resource.ResourceLevels', 'ResourceLevels')
-      .leftJoinAndSelect('resource.SchoolYear', 'SchoolYear')
       .loadRelationCountAndMap('resource.TotalRequests', 'resource.ResourceRequests')
       .loadRelationCountAndMap('ResourceLevels.TotalRequests', 'ResourceLevels.ResourceRequests')
-      .where({ is_active: 1 })
+      .where({ is_active: 1, SchoolYearId: schoolYearId })
       .andWhere(`find_in_set('${gradeLevel}',resource.grades) <> 0`)
-      .andWhere(`SchoolYear.homeroom_resource_open <= '${now}'`)
-      .andWhere(`SchoolYear.homeroom_resource_close >= '${now}'`)
       .orderBy({
         'HiddenStudents.resource_id': 'ASC',
         'resource.priority': 'ASC',

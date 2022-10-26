@@ -30,10 +30,7 @@ export class ProviderService {
       )
       .leftJoinAndSelect('Courses.Titles', 'Titles')
       .where({ school_year_id: schoolYearId, deleted: false })
-      .orderBy({
-        'provider.is_active': 'DESC',
-        'provider.id': 'ASC',
-      });
+      .orderBy({ 'provider.id': 'ASC' });
 
     const subQuery = `EXISTS (
       SELECT * FROM mth_course course 
