@@ -1,9 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { map } from 'lodash';
-import { ScheduleBuilder } from 'src/models/scheduler-builder.entity';
 import { SchoolPartner } from 'src/models/school-partner.entity';
-import { Repository, LessThanOrEqual, MoreThanOrEqual, getConnection } from 'typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { SchoolYear } from '../../models/schoolyear.entity';
 import { CreateSchoolYearInput } from '../dto/schoolYear/create-schoolyear.input';
 import { UpdateSchoolYearInput } from '../dto/schoolYear/update-schoolyear.input';
@@ -13,6 +12,11 @@ import { ScheduleBuilderService } from './schedule-builder.service';
 import { SchoolPartnerService } from './school-partner.service';
 import { AssessmentService } from './assessment.service';
 import { ResourceService } from './resource.service';
+import { SubjectService } from './subject.service';
+import { TitleService } from './title.service';
+import { ProviderService } from './provider.service';
+import { CourseService } from './course.service';
+import { PeriodService } from './period.service';
 
 @Injectable()
 export class SchoolYearsService {
@@ -25,6 +29,11 @@ export class SchoolYearsService {
     private diplomaService: DiplomaService,
     private assessmentService: AssessmentService,
     private resourceService: ResourceService,
+    private subjectService: SubjectService,
+    private titleService: TitleService,
+    private providerService: ProviderService,
+    private courseService: CourseService,
+    private periodService: PeriodService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -144,6 +153,44 @@ export class SchoolYearsService {
       await this.resourceService.cloneForSchoolYear(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
       await this.assessmentService.cloneForSchoolYear(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
       await this.diplomaService.cloneDiplomaQuestion(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
+      const periodIdMap = await this.periodService.cloneForSchoolYear(
+        createSchoolYearInput.cloneSchoolYearId,
+        newSchoolYearId,
+      );
+      const subjectIdMap = await this.subjectService.cloneForSchoolYear(
+        createSchoolYearInput.cloneSchoolYearId,
+        newSchoolYearId,
+        periodIdMap,
+      );
+
+      const titleIdMap: { [key: number]: number } = {};
+      const subjectIds = Object.keys(subjectIdMap);
+      for (let index = 0; index < subjectIds.length; index++) {
+        const cloneSubjectId = +subjectIds[index];
+        const newSubjectId = subjectIdMap[cloneSubjectId];
+        const idMap = await this.titleService.cloneForSubject(cloneSubjectId, newSubjectId);
+        Object.assign(titleIdMap, titleIdMap, idMap);
+      }
+
+      const providerIdMap = await this.providerService.cloneForSchoolYear(
+        createSchoolYearInput.cloneSchoolYearId,
+        newSchoolYearId,
+        periodIdMap,
+      );
+
+      const courseIdMap: { [key: number]: number } = {};
+      const providerIds = Object.keys(providerIdMap);
+      for (let index = 0; index < providerIds.length; index++) {
+        const cloneProviderId = +providerIds[index];
+        const newProviderId = providerIdMap[cloneProviderId];
+        const idMap = await this.courseService.cloneForProvider(
+          cloneProviderId,
+          newProviderId,
+          subjectIdMap,
+          titleIdMap,
+        );
+        Object.assign(courseIdMap, courseIdMap, idMap);
+      }
     }
     return updatedRecord;
   }

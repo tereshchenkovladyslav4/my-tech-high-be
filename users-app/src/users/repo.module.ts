@@ -61,6 +61,10 @@ import { Subject } from '../models/subject.entity';
 import { Title } from '../models/title.entity';
 import { Course } from '../models/course.entity';
 import { Provider } from '../models/provider.entity';
+import { SubjectService } from './services/subject.service';
+import { TitleService } from './services/title.service';
+import { ProviderService } from './services/provider.service';
+import { CourseService } from './services/course.service';
 
 const RepoServices = [
   UsersService,
@@ -90,6 +94,10 @@ const RepoServices = [
   AssessmentOptionService,
   ResourceService,
   ResourceLevelService,
+  SubjectService,
+  TitleService,
+  ProviderService,
+  CourseService,
 ];
 
 @Global()

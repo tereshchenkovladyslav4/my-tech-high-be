@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AssessmentOptionService } from './assessment-option.service';
@@ -28,7 +28,7 @@ export class AssessmentService {
         SchoolYearId: newSchoolYearId,
       });
 
-      await this.assessmentOptionService.cloneForAssessment(result.assessment_id, assessmentId);
+      await this.assessmentOptionService.cloneForAssessment(assessmentId, result.assessment_id);
     }
   }
 }

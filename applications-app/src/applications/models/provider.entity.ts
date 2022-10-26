@@ -16,7 +16,7 @@ import { Course } from './course.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id, school_year_id, name, is_display, reduce_funds, price, reduce_funds_notification, multiple_periods, multi_periods_notification, is_active, deleted, Courses, Periods")',
+  '@key(fields: "id, school_year_id, name, is_display, reduce_funds, price, reduce_funds_notification, multiple_periods, multi_periods_notification, allow_request, is_active, deleted, Courses, Periods")',
 )
 @Entity({ name: 'mth_provider' })
 export class Provider extends BaseEntity {

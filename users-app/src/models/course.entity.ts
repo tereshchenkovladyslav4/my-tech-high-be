@@ -7,7 +7,7 @@ import { Provider } from './provider.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "id, provider_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, always_unlock, software_reimbursement, display_notification, course_notification, launchpad_course, course_id, website, diploma_seeking_path, limit, reduce_funds, price, reduce_funds_notification, subject_id, is_active, deleted, Provider, Subject, Titles")',
+  '@key(fields: "id, provider_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, always_unlock, software_reimbursement, display_notification, course_notification, launchpad_course, course_id, website, diploma_seeking_path, limit, reduce_funds, price, reduce_funds_notification, subject_id, allow_request, is_active, deleted, Provider, Subject, Titles")',
 )
 @Entity('mth_course')
 export class Course {
@@ -116,6 +116,11 @@ export class Course {
   @Field(() => ID, { nullable: true })
   @Directive('@external')
   subject_id?: number;
+
+  @Column('tinyint', { name: 'allow_request', default: false })
+  @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
+  allow_request: boolean;
 
   @Column('tinyint', { name: 'is_active', default: true })
   @Field(() => Boolean, { nullable: true })

@@ -1,11 +1,11 @@
-import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Course } from './course.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "title_id, subject_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, diploma_seeking_path, reduce_funds, price, reduce_funds_notification, custom_built_description, subject_notification, always_unlock, custom_built, third_party_provider, split_enrollment, software_reimbursement, display_notification, launchpad_course, course_id, state_course_codes, is_active, deleted, Subject, Courses")',
+  '@key(fields: "title_id, subject_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, diploma_seeking_path, reduce_funds, price, reduce_funds_notification, custom_built_description, subject_notification, always_unlock, custom_built, third_party_provider, split_enrollment, software_reimbursement, display_notification, launchpad_course, course_id, state_course_codes, allow_request, is_active, deleted, Subject, Courses")',
 )
 @Entity('mth_title')
 export class Title {

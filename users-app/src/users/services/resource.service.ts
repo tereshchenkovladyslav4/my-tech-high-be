@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resource } from '../../models/resource.entity';
@@ -26,7 +26,7 @@ export class ResourceService {
         SchoolYearId: newSchoolYearId,
       });
 
-      await this.resourceLevelService.cloneForResource(result.resource_id, resourceId);
+      await this.resourceLevelService.cloneForResource(resourceId, result.resource_id);
     }
   }
 }

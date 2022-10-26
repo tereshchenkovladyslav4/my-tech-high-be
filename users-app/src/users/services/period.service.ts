@@ -1,19 +1,24 @@
 import { Injectable, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Period } from 'src/models/period.entity';
-import { Repository, createQueryBuilder, Brackets, DeleteResult, Not } from 'typeorm';
+import { Repository, createQueryBuilder, Brackets, DeleteResult } from 'typeorm';
 import { PeriodInput } from '../dto/period.inputs';
-import { SchoolYearsService } from './schoolyear.service';
 import { ScheduleBuilderService } from './schedule-builder.service';
+import { SchoolYear } from '../../models/schoolyear.entity';
 
 @Injectable()
 export class PeriodService {
   constructor(
     @InjectRepository(Period)
     private periodRepository: Repository<Period>,
-    private schoolYearsService: SchoolYearsService,
+    @InjectRepository(SchoolYear)
+    private schoolYearsRepository: Repository<SchoolYear>,
     private scheduleBuilderService: ScheduleBuilderService,
   ) {}
+
+  async findByIds(periodIds: (number | string)[]): Promise<Period[]> {
+    return await this.periodRepository.findByIds(periodIds);
+  }
 
   // ===========================================================================================================
   // find all
@@ -36,14 +41,6 @@ export class PeriodService {
     qb.orderBy('period', 'ASC');
     return await qb.getMany();
   }
-  // find all saved period indexes for validation
-  async findPeriodByIds(school_year_id: number): Promise<Period[]> {
-    const items = await createQueryBuilder(Period)
-      .where('school_year_id = :school_year_id', { school_year_id })
-      .getMany();
-
-    return items;
-  }
 
   // ===========================================================================================================
   // find all saved period indexes for validation
@@ -59,7 +56,7 @@ export class PeriodService {
   // upsert
   async upsert(args: PeriodInput): Promise<Period> {
     // -------------------------------------
-    // validation - max_num_periods from from scheduleBuilderService
+    // validation - max_num_periods from scheduleBuilderService
     // -------------------------------------
     const setting = await this.scheduleBuilderService.findOneById(args.school_year_id);
     if (!setting) {
@@ -72,9 +69,13 @@ export class PeriodService {
     // -------------------------------------
     // validation - max/min grade levels
     // -------------------------------------
-    const schoolyear = await this.schoolYearsService.findOneById(args.school_year_id);
+    const schoolYear = await this.schoolYearsRepository.findOne({
+      where: {
+        school_year_id: args.school_year_id,
+      },
+    });
     const grades =
-      (schoolyear.grades.split(',') || [])
+      (schoolYear.grades.split(',') || [])
         .sort((a: string, b: string) => (parseInt(a) > parseInt(b) ? 1 : -1))
         .sort((a: string) => (a === 'Kindergarten' ? -1 : 0)) || [];
 
@@ -115,5 +116,25 @@ export class PeriodService {
     } catch (error) {
       throw new ServiceUnavailableException('Error');
     }
+  }
+
+  async cloneForSchoolYear(cloneSchoolYearId: number, newSchoolYearId: number): Promise<{ [key: number]: number }> {
+    const periods = await this.periodRepository.find({ where: { school_year_id: cloneSchoolYearId } });
+    const idMap: { [key: number]: number } = {};
+    for (let index = 0; index < periods.length; index++) {
+      const period = periods[index];
+      const periodId = period.id;
+
+      delete period.id;
+      delete period.school_year_id;
+      delete period.created_at;
+
+      const result = await this.periodRepository.save({
+        ...period,
+        school_year_id: newSchoolYearId,
+      });
+      idMap[periodId] = result.id;
+    }
+    return idMap;
   }
 }

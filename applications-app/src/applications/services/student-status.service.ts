@@ -18,6 +18,9 @@ export class StudentStatusService {
   async update(updateStudentInput: UpdateStudentInput): Promise<boolean> {
     try {
       const { student_id, status, school_year_id } = updateStudentInput;
+
+      await this.studentStatussRepository.delete({ student_id: student_id });
+
       await this.studentStatussRepository.save({
         student_id,
         school_year_id,

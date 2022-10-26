@@ -559,7 +559,7 @@ export class ApplicationsService {
   }
 
   async updateApplication(updateApplicationInput: UpdateApplicationInput): Promise<Application> {
-    const { application_id, midyear_application, status, school_year_id } = updateApplicationInput;
+    const { application_id, midyear_application, status, school_year_id, relation_status } = updateApplicationInput;
 
     if (status == 'Accepted') {
       const application_ids = [];
@@ -576,6 +576,7 @@ export class ApplicationsService {
       midyear_application,
       status: status,
       school_year_id,
+      relation_status,
     });
     return application;
   }
