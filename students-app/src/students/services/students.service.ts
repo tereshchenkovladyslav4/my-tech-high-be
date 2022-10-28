@@ -435,7 +435,7 @@ export class StudentsService {
       enrollment_packet_date_deadline:
         (student &&
           Moment(student.application_date_accepted)
-            .add(parent.region_application_deadline_num_days, 'd')
+            .add(parent.region_enrollment_packet_deadline_num_days, 'd')
             .format('MM.DD')) ||
         null,
       withdraw_deadline_num_days: parent.region_withdraw_deadline_num_days,

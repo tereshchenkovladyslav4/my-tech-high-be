@@ -85,6 +85,7 @@ export class SchedulePeriod extends BaseEntity {
 
   @ManyToOne(() => Schedule, (schedule) => schedule.SchedulePeriods)
   @JoinColumn([{ name: 'ScheduleId', referencedColumnName: 'schedule_id' }])
+  @Field(() => Schedule, { nullable: true })
   Schedule: Schedule;
 
   @ManyToOne(() => Period, (period) => period.SchedulePeriods)
