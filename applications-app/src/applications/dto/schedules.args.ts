@@ -2,7 +2,7 @@ import { ArgsType, Field, Int, InputType } from '@nestjs/graphql';
 import { Max, Min, IsOptional } from 'class-validator';
 
 @ArgsType()
-export class ApplicationsArgs {
+export class SchedulesArgs {
   @Field((type) => Int)
   @Min(0)
   skip = 0;
@@ -22,7 +22,7 @@ export class ApplicationsArgs {
   @Max(100)
   region_id = 0;
 
-  @Field((type) => ApplicationFilters)
+  @Field((type) => ScheduleFilters)
   filter = null;
 
   @Field((type) => String)
@@ -31,8 +31,8 @@ export class ApplicationsArgs {
   search = '';
 }
 
-@InputType('ApplicationFilters')
-export class ApplicationFilters {
+@InputType('ScheduleFilters')
+export class ScheduleFilters {
   @Field((type) => [String])
   grades = [];
 

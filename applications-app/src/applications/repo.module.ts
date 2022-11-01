@@ -115,6 +115,8 @@ import { ScheduleService } from './services/schedule.service';
 import { Schedule } from './models/schedule.entity';
 import { SchedulePeriod } from './models/schedule-period.entity';
 import { SchedulePeriodService } from './services/schedule-period.service';
+import { ScheduleEmailsService } from './services/schedule-emails.service';
+import { ScheduleEmail } from './models/schedule-email.entity';
 
 const servicesImports = [
   UsersService,
@@ -140,6 +142,7 @@ const servicesImports = [
   ImmunizationSettingsService,
   ApplicationEmailsService,
   PacketEmailsService,
+  ScheduleEmailsService,
   ObserversService,
   StudentImmunizationService,
   StudentStatusService,
@@ -206,6 +209,7 @@ const servicesImports = [
       StudentReenrollmentStatus,
       Withdrawal,
       WithdrawalEmail,
+      ScheduleEmail,
       Announcement,
       EventType,
       ApplicationEvent,

@@ -169,6 +169,12 @@ export class ApplicationsService {
       // qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
       qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
     }
+    if (filter && filter.diplomaSeeking){
+      qb.andWhere(`student.diploma_seeking = ${filter.diplomaSeeking}`);
+    }
+    if (filter && filter.selectedYearId){
+      qb.andWhere(`application.school_year_id = ${filter.selectedYearId}`);
+    }
     if (filter && filter.schoolYear && filter.schoolYear.length > 0) {
       qb.andWhere(
         new Brackets((sub) => {
@@ -286,6 +292,8 @@ export class ApplicationsService {
       }
     }
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+    console.log("result", results[0]);
+    
     return new Pagination<Application>({
       results,
       total,
@@ -454,9 +462,9 @@ export class ApplicationsService {
       .createQueryBuilder('application')
       .leftJoinAndSelect('application.student', 'student')
       .leftJoinAndSelect('application.school_year', 'school_year')
-      .leftJoinAndSelect('student.person', 's_person')
+      .leftJoinAndSelect('student.person', 'person')
       .leftJoinAndSelect('student.parent', 'parent')
-      .leftJoinAndSelect('parent.person', 'person')
+      .leftJoinAndSelect('parent.person', 'p_person')
       .whereInIds(application_ids)
       .getManyAndCount();
 

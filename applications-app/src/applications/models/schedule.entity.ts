@@ -4,6 +4,7 @@ import { IsIn } from 'class-validator';
 import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
 import { SchedulePeriod } from './schedule-period.entity';
+import { ScheduleEmail } from './schedule-email.entity';
 
 @InputType('schedule')
 @ObjectType()
@@ -46,15 +47,21 @@ export class Schedule extends BaseEntity {
   @Field(() => Date, { nullable: true })
   current_submission: Date;
 
-  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Schedules)
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.schedule)
   @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   SchoolYear: SchoolYear;
 
-  @ManyToOne(() => Student, (student) => student.Schedules)
-  @JoinColumn([{ name: 'StudentId', referencedColumnName: 'student_id' }])
+  @ManyToOne((type) => Student, { nullable: true })
+  @Field(() => Student, { nullable: true })
+  @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
   ScheduleStudent: Student;
 
-  @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Schedule)
+  @OneToMany(() => SchedulePeriod, (SchedulePeriod) => SchedulePeriod.Schedule)
   @Field(() => [SchedulePeriod], { nullable: true })
   SchedulePeriods: SchedulePeriod[];
+
+  @OneToMany((type) => ScheduleEmail, (ScheduleEmail) => ScheduleEmail.Schedule)
+  @Field(() => [ScheduleEmail], { nullable: true })
+  ScheduleEmails: ScheduleEmail[];
+  
 }
