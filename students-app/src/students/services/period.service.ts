@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Period } from '../models/period.entity';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
+import { ScheduleService } from './schedule.service';
+import { SchedulePeriod } from '../models/schedule-period.entity';
 
 @Injectable()
 export class PeriodService {
@@ -10,6 +12,7 @@ export class PeriodService {
     @InjectRepository(Period)
     private readonly repo: Repository<Period>,
     private studentGradeLevelService: StudentGradeLevelsService,
+    private scheduleService: ScheduleService,
   ) {}
 
   async find(studentId: number, schoolYearId: number, diplomaSeekingPath: string): Promise<Period[]> {
@@ -19,19 +22,33 @@ export class PeriodService {
       return [];
     }
 
+    const schedule = await this.scheduleService.findOne(studentId, schoolYearId);
+
     const grade = studentGradeLevel.grade_level;
     const numericGrade = grade.startsWith('K') ? -1 : +grade;
     const diplomaQuery = (alias: string, diploma: string) => {
       if (diploma) return ` AND ${alias}.diploma_seeking_path in ('both', '${diploma}')`;
       else return '';
     };
-    const courseQuery = (alias: string, isAlt = false) => {
+
+    const titleCourseQuery = (alias: string, isAlt = false) => {
       const altString = isAlt ? 'alt_' : '';
-      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${alias}.min_${altString}grade <= ${numericGrade} AND ${alias}.max_${altString}grade >= ${numericGrade}${diplomaQuery(
+      const excludeAlt = isAlt
+        ? `AND (${alias}.min_grade > ${numericGrade} OR ${alias}.max_grade < ${numericGrade})`
+        : '';
+      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} ${excludeAlt} AND ${alias}.min_${altString}grade <= ${numericGrade} AND ${alias}.max_${altString}grade >= ${numericGrade}${diplomaQuery(
         alias,
         diplomaSeekingPath,
       )}`;
     };
+
+    const courseRequestsQuery = (qb: SelectQueryBuilder<SchedulePeriod>) => {
+      if (schedule) {
+        qb.where(`ScheduleId <> ${schedule.schedule_id}`);
+      }
+      return qb;
+    };
+
     const result = await this.repo
       .createQueryBuilder('period')
       .leftJoinAndSelect(
@@ -39,30 +56,52 @@ export class PeriodService {
         'Subjects',
         `Subjects.allow_request = ${true} AND Subjects.is_active = ${true}`,
       )
-      .leftJoinAndSelect(
-        'Subjects.Titles',
-        'Titles',
-        `Titles.allow_request = ${true} AND Titles.is_active = ${true} AND Titles.min_grade <= ${numericGrade} AND Titles.max_grade >= ${numericGrade}${diplomaQuery(
-          'Titles',
-          diplomaSeekingPath,
-        )}`,
-      )
-      .leftJoinAndSelect(
-        'Subjects.AltTitles',
-        'AltTitles',
-        `AltTitles.allow_request = ${true} AND AltTitles.is_active = ${true} AND AltTitles.min_alt_grade <= ${numericGrade} AND AltTitles.max_alt_grade >= ${numericGrade}`,
-      )
-      .leftJoinAndSelect('Titles.Courses', 'Courses', `${courseQuery('Courses')}`)
-      .leftJoinAndSelect('AltTitles.Courses', 'AltTitlesCourses', courseQuery('AltTitlesCourses'))
-      .leftJoinAndSelect('Titles.AltCourses', 'AltCourses', courseQuery('AltCourses', true))
-      .leftJoinAndSelect('AltTitles.AltCourses', 'AltTitlesAltCourses', courseQuery('AltTitlesAltCourses', true))
+      .leftJoinAndSelect('Subjects.Titles', 'Titles', `${titleCourseQuery('Titles')}`)
+      .leftJoinAndSelect('Subjects.AltTitles', 'AltTitles', `${titleCourseQuery('AltTitles', true)}`)
+      .leftJoinAndSelect('Titles.Courses', 'Courses', `${titleCourseQuery('Courses')}`)
+      .leftJoinAndSelect('AltTitles.Courses', 'AltTitlesCourses', titleCourseQuery('AltTitlesCourses'))
+      .leftJoinAndSelect('Titles.AltCourses', 'AltCourses', titleCourseQuery('AltCourses', true))
+      .leftJoinAndSelect('AltTitles.AltCourses', 'AltTitlesAltCourses', titleCourseQuery('AltTitlesAltCourses', true))
       .leftJoinAndSelect('Courses.Provider', 'CoursesProvider')
       .leftJoinAndSelect('AltTitlesCourses.Provider', 'AltTitlesCoursesProvider')
       .leftJoinAndSelect('AltCourses.Provider', 'AltCoursesProvider')
       .leftJoinAndSelect('AltTitlesAltCourses.Provider', 'AltTitlesAltCoursesProvider')
+      .loadRelationCountAndMap(
+        'Courses.TotalRequests',
+        'Courses.SchedulePeriods',
+        'CoursesSchedulePeriods',
+        courseRequestsQuery,
+      )
+      .loadRelationCountAndMap(
+        'AltTitlesCourses.TotalRequests',
+        'AltTitlesCourses.SchedulePeriods',
+        'AltTitlesCoursesSchedulePeriods',
+        courseRequestsQuery,
+      )
+      .loadRelationCountAndMap(
+        'AltCourses.TotalRequests',
+        'AltCourses.SchedulePeriods',
+        'AltCoursesSchedulePeriods',
+        courseRequestsQuery,
+      )
+      .loadRelationCountAndMap(
+        'AltTitlesAltCourses.TotalRequests',
+        'AltTitlesAltCourses.SchedulePeriods',
+        'AltTitlesAltCoursesSchedulePeriods',
+        courseRequestsQuery,
+      )
       .where({ school_year_id: schoolYearId, archived: false })
       .getMany();
-    console.log(result);
+
+    result.map((period) => {
+      period.Subjects.map((subject) => {
+        (subject.Titles || subject.AltTitles).map((title) => {
+          title.Courses = title.Courses.filter((course) => !course.limit || course.TotalRequests < course.limit);
+          title.AltCourses = title.AltCourses.filter((course) => !course.limit || course.TotalRequests < course.limit);
+        });
+      });
+    });
+
     return result?.filter(
       (item) =>
         (grade?.includes('K') && item?.grade_level_min == 'Kindergarten') ||

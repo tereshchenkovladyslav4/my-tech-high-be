@@ -10,7 +10,7 @@ RUN apk add --no-cache curl && \
     cp -R usr/lib/x86_64-linux-gnu /usr/lib && \
     cp -R usr/share /usr/share && \
     cp -R etc/fonts /etc && \
-    curl -k -Ls https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -jxf - && \
+    curl -k -Ls https://infocenter-v2-devops.s3.us-west-2.amazonaws.com/phantomjs-2.1.1-linux-x86_64.tar.bz2 | tar -jxf - && \
     cp phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs && \
     rm -fR phantomjs-${PHANTOMJS_VERSION}-linux-x86_64 && \
     apk del curl
@@ -58,7 +58,7 @@ RUN apk add --no-cache curl && \
     cp -R usr/lib/x86_64-linux-gnu /usr/lib && \
     cp -R usr/share /usr/share && \
     cp -R etc/fonts /etc && \
-    curl -k -Ls https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -jxf - && \
+    curl -k -Ls https://infocenter-v2-devops.s3.us-west-2.amazonaws.com/phantomjs-2.1.1-linux-x86_64.tar.bz2 | tar -jxf - && \
     cp phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs && \
     rm -fR phantomjs-${PHANTOMJS_VERSION}-linux-x86_64 && \
     apk del curl

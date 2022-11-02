@@ -65,6 +65,7 @@ import { SubjectService } from './services/subject.service';
 import { TitleService } from './services/title.service';
 import { ProviderService } from './services/provider.service';
 import { CourseService } from './services/course.service';
+import { SchedulePeriod } from '../models/schedule-period.entity';
 
 const RepoServices = [
   UsersService,
@@ -98,6 +99,7 @@ const RepoServices = [
   TitleService,
   ProviderService,
   CourseService,
+  SchedulePeriod,
 ];
 
 @Global()

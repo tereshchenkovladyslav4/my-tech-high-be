@@ -90,6 +90,7 @@ export class WithdrawalService {
         //	Send email
         const webAppUrl = process.env.WEB_APP_URL;
         const student = await this.studentService.findOneById(StudentId);
+        const cur_application = student.applications[0];
         const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
         const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
@@ -120,6 +121,9 @@ export class WithdrawalService {
           const setAdditionalLinksInfo = (content, student, school_year) => {
             const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
             const yearEnd = new Date(school_year.date_end).getFullYear().toString();
+            const yearText = cur_application.midyear_application
+            ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+            : `${yearBegin}-${yearEnd.substring(2, 4)}`;
 
             const link = `${webAppUrl}/parent-link/withdrawal/${StudentId}`;
 
@@ -127,12 +131,12 @@ export class WithdrawalService {
               .toString()
               .replace(/\[STUDENT\]/g, student.person.first_name)
               .replace(/\[PARENT\]/g, student.parent.person.first_name)
-              .replace(/\[YEAR\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`)
+              .replace(/\[YEAR\]/g, yearText)
               .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`)
               .replace(/\[DEADLINE\]/g, `${Moment(deadline).format('MM/DD/yy')}`);
           };
 
-          const school_year = await this.schoolYearService.findOneById(gradeLevels[0].school_year_id);
+          const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
 
           const body = setAdditionalLinksInfo(emailTemplate.body, student, school_year);
           const emailSubject = setAdditionalLinksInfo(emailTemplate.subject, student, school_year);
@@ -246,7 +250,7 @@ export class WithdrawalService {
       main_query += ` AND (
 					date LIKE "%${key}%"
 					OR date_effective LIKE "%${key}%"
-					OR CONCAT(person.first_name, person.last_name) LIKE "%${key}%"
+					OR CONCAT(person.last_name, ", ", person.first_name) LIKE "%${key}%"
 					OR soe LIKE "%${key}%"
 					OR date_emailed LIKE "%${key}%")`;
     }
@@ -270,7 +274,7 @@ export class WithdrawalService {
 
     const select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
     ${WITHDRAWAL_TABLE_NAME}.date_effective, ${WITHDRAWAL_TABLE_NAME}.response,${WITHDRAWAL_TABLE_NAME}.date,
-		CONCAT(person.first_name, ",", person.last_name) student_name,
+		CONCAT(person.last_name, ", ", person.first_name) student_name,
 		gradeLevel.grade_level, emails.email_date AS date_emailed`;
 
     let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
@@ -309,7 +313,7 @@ export class WithdrawalService {
       main_query += ` AND (
 					date LIKE "%${key}%"
 					OR date_effective LIKE "%${key}%"
-					OR CONCAT(person.first_name, person.last_name) LIKE "%${key}%"
+					OR CONCAT(person.last_name, ", ", person.first_name) LIKE "%${key}%"
 					OR soe LIKE "%${key}%"
 					OR date_emailed LIKE "%${key}%")`;
     }
@@ -453,7 +457,7 @@ export class WithdrawalService {
         );
         emailReminders.map(async (emailReminder) => {
           const deadline = new Date();
-          deadline.setDate(deadline.getDate() + remain_date);
+          deadline.setDate(deadline.getDate() + Number(remain_date));
 
           await this.emailService.sendEmail({
             email: parent_email,
@@ -859,7 +863,7 @@ export class WithdrawalService {
         PdfTemplate.WITHDRAWAL,
         {
           stateLogo: schoolYear?.region?.state_logo,
-          studentName: `${withdraw?.Student?.person?.first_name} ${withdraw?.Student?.person?.last_name}`,
+          studentName: `${withdraw?.Student?.person?.last_name} ${withdraw?.Student?.person?.first_name}`,
           birthdate: withdraw?.Student?.person?.date_of_birth
             ? Moment(withdraw?.Student?.person?.date_of_birth).format('MM/DD/YYYY')
             : 'NA',

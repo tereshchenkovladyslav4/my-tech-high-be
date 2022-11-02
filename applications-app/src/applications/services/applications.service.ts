@@ -378,7 +378,10 @@ export class ApplicationsService {
 
         const UTCDeadline = new Date(deadline).toISOString();
 
-        const default_meta = {};
+        const default_meta = {
+          'meta_special_education' : 0
+        };
+
         if (student.special_ed != 0) {
           default_meta['meta_special_education'] = student.special_ed;
         }

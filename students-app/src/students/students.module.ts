@@ -32,6 +32,7 @@ import { StudentRecordFile } from './models/student-record-file.entity';
 import { File } from './models/file.entity';
 import { PeriodResolver } from './resolvers/period.resolver';
 import { Schedule } from './models/schedule.entity';
+import { SchedulePeriod } from './models/schedule-period.entity';
 
 const graphQLImports = [
   StudentsResolver,
@@ -57,27 +58,16 @@ const graphQLImports = [
         dateScalarMode: 'isoDate',
         orphanedTypes: [
           Person,
-
           Parent,
-
           StudentGradeLevel,
-
           Phone,
-
           Address,
-
           PersonAddress,
-
           SchoolYear,
-
           ParentToDo,
-
           ToDoItem,
-
           StudentCurrentStatus,
-
           StudentStatus,
-
           File,
           StudentRecord,
           StudentRecordFile,
@@ -85,6 +75,7 @@ const graphQLImports = [
           Resource,
           SchoolEnrollment,
           Schedule,
+          SchedulePeriod,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

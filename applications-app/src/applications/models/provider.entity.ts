@@ -1,4 +1,4 @@
-import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -22,7 +22,7 @@ import { SchedulePeriod } from './schedule-period.entity';
 @Entity({ name: 'mth_provider' })
 export class Provider extends BaseEntity {
   @Column('int', { name: 'id', nullable: true })
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   id?: number;
 

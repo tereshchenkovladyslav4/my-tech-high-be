@@ -52,6 +52,8 @@ import { Provider } from './models/provider.entity';
 import { Title } from './models/title.entity';
 import { Course } from './models/course.entity';
 import { Schedule } from './models/schedule.entity';
+import { SchedulePeriod } from './models/schedule-period.entity';
+import { ScheduleService } from './services/schedule.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -75,6 +77,7 @@ const servicesImports = [
   S3Service,
   TimezoneService,
   PeriodService,
+  ScheduleService,
 ];
 
 @Global()
@@ -111,6 +114,7 @@ const servicesImports = [
       Provider,
       Course,
       Schedule,
+      SchedulePeriod,
     ]),
   ],
   providers: [...servicesImports],

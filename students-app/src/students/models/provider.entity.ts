@@ -1,4 +1,4 @@
-import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Period } from './period.entity';
 import { Course } from './course.entity';
@@ -11,7 +11,7 @@ import { Course } from './course.entity';
 @Entity({ name: 'mth_provider' })
 export class Provider extends BaseEntity {
   @Column('int', { name: 'id', nullable: true })
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
   id?: number;
