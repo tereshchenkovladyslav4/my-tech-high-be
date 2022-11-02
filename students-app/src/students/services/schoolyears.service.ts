@@ -9,7 +9,7 @@ import { Person } from '../models/person.entity';
 import { User } from '../models/user.entity';
 import { Student } from '../models/student.entity';
 import { UserRegion } from '../models/user-region.entity';
-import { Region } from '../models/region.entity';
+import { ScheduleService } from './schedule.service';
 
 @Injectable()
 export class SchoolYearsService {
@@ -18,6 +18,7 @@ export class SchoolYearsService {
     private schoolYearsRepository: Repository<SchoolYear>,
     private timezoneService: TimezoneService,
     private studentStatusService: StudentStatusService,
+    private scheduleService: ScheduleService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -73,8 +74,20 @@ export class SchoolYearsService {
     });
   }
 
+  async getActiveScheduleSchoolYears(studentId: number): Promise<SchoolYear[]> {
+    // TODO Have to remove gradated schedules
+    const activeScheduleSchoolYearIds = (await this.scheduleService.findActiveSchedules(studentId)).map(
+      (item) => item.SchoolYearId,
+    );
+
+    return this.schoolYearsRepository.find({
+      where: {
+        school_year_id: In(activeScheduleSchoolYearIds),
+      },
+    });
+  }
+
   findNextYear(year: number, regionId: number): Promise<SchoolYear> {
-    const today = new Date();
     return this.schoolYearsRepository
       .createQueryBuilder('year')
       .where('RegionId = :regionId', { regionId })
@@ -83,7 +96,6 @@ export class SchoolYearsService {
   }
 
   findPreviousYear(year: number, regionId: number): Promise<SchoolYear> {
-    const today = new Date();
     return this.schoolYearsRepository
       .createQueryBuilder('year')
       .where('RegionId = :regionId', { regionId })

@@ -23,6 +23,11 @@ export class SchoolYearResolver {
     return this.schoolYearsService.getActiveHomeroomResourceSchoolYears(studentId);
   }
 
+  @Query(() => [SchoolYear], { name: 'activeScheduleSchoolYears' })
+  async getActiveScheduleSchoolYears(@Args('studentId', { type: () => Int }) studentId: number): Promise<SchoolYear[]> {
+    return this.schoolYearsService.getActiveScheduleSchoolYears(studentId);
+  }
+
   @Query(() => SchoolYear, { name: 'schoolyear_getcurrent' })
   async getCurrent(@Args('region_id', { type: () => Int }) region_id: number): Promise<SchoolYear> {
     return this.schoolYearsService.getCurrent(region_id);
