@@ -18,6 +18,9 @@ export class CreateOrUpdateSubjectInput {
   allow_request: boolean;
 
   @Field(() => Boolean, { nullable: true })
+  changeTitlesAllowing: boolean;
+
+  @Field(() => Boolean, { nullable: true })
   is_active: boolean;
 
   @Field(() => String, { nullable: true })

@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-//import { graphqlUploadExpress } from 'graphql-upload';
+import { LoggingInterceptor } from './logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
-
-  //app.use(graphqlUploadExpress({ maxFileSize: 2 * 1000 * 1000 }));
+  app.useGlobalInterceptors(new LoggingInterceptor());
   await app.listen(3004);
   console.log(`>>>>>>applications-app is running in the port 3004`);
 }

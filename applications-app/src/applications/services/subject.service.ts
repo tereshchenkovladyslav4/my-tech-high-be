@@ -34,6 +34,7 @@ export class SubjectService {
       .orderBy({
         'subject.priority': 'ASC',
         'subject.subject_id': 'ASC',
+        'Titles.priority': 'ASC',
         'Titles.title_id': 'ASC',
       });
 
@@ -85,6 +86,16 @@ export class SubjectService {
         const titles = await this.titleService.find(subjectInput.subject_id);
         titles.map(async (title) => {
           await this.titleService.save({ ...title, is_active: subjectInput.is_active } as CreateOrUpdateTitleInput);
+        });
+      }
+
+      if (subjectInput.subject_id && subjectInput.changeTitlesAllowing && subjectInput.allow_request !== undefined) {
+        const titles = await this.titleService.find(subjectInput.subject_id);
+        titles.map(async (title) => {
+          await this.titleService.save({
+            ...title,
+            allow_request: subjectInput.allow_request,
+          } as CreateOrUpdateTitleInput);
         });
       }
 

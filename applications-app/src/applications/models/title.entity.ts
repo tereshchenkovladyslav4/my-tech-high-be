@@ -104,6 +104,10 @@ export class Title {
   @Field(() => String, { nullable: true })
   state_course_codes: string;
 
+  @Column('int', { name: 'priority', nullable: true })
+  @Field(() => Int, { nullable: true })
+  priority: number | null;
+
   @Column('tinyint', { name: 'allow_request', default: false })
   @Field(() => Boolean, { nullable: true })
   allow_request: boolean;
