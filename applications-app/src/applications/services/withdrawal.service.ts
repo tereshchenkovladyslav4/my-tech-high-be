@@ -536,6 +536,7 @@ export class WithdrawalService {
     const [results] = await this.repo
       .createQueryBuilder('withdrawal')
       .leftJoinAndSelect('withdrawal.Student', 'student')
+      .leftJoinAndSelect('student.applications', 'applications')
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
@@ -543,31 +544,38 @@ export class WithdrawalService {
       .whereInIds(withdrawal_ids)
       .getManyAndCount();
 
-    const setAdditionalLinksInfo = (content, student, school_year) => {
+    const setAdditionalLinksInfo = (content, student, school_year, cur_application) => {
       const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearEnd = new Date(school_year.date_end).getFullYear().toString();
+      const yearText = cur_application.midyear_application
+              ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+              : `${yearBegin}-${yearEnd.substring(2, 4)}`;
 
       return content
         .toString()
         .replace(/\[STUDENT\]/g, student.person.first_name)
         .replace(/\[PARENT\]/g, student.parent.person.first_name)
-        .replace(/\[YEAR\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`)
+        .replace(/\[YEAR\]/g, yearText)
         .replace(/\[Student\]/g, student.person.first_name)
         .replace(/\[Parent\]/g, student.parent.person.first_name)
-        .replace(/\[Year\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`);
+        .replace(/\[Year\]/g, yearText);
     };
 
     const emailBody = [];
-    results.map(async (item) => {
-      const school_year = await this.schoolYearService.findOneById(item.Student.grade_levels[0].school_year_id);
+    await Promise.all(results.map(async (item) => {
+
+      const cur_application = item.Student.applications[0];
+      const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
+
       const temp = {
         withdrawal_id: item.withdrawal_id,
         email: item.Student.parent.person.email,
-        body: setAdditionalLinksInfo(body, item.Student, school_year),
-        subject: setAdditionalLinksInfo(subject, item.Student, school_year),
-      };
+        body: setAdditionalLinksInfo(body, item.Student, school_year, cur_application),
+        subject: setAdditionalLinksInfo(subject, item.Student, school_year, cur_application),
+      };      
       emailBody.push(temp);
-    });
+    }));
+
     const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
 
     emailBody.map(async (emailData) => {
@@ -581,6 +589,7 @@ export class WithdrawalService {
         template_name: 'Withdraw Page',
       });
     });
+
     return Promise.all(
       emailBody.map(async (emailData) => {
         return await this.withdrawalEmailService.create({
@@ -613,10 +622,14 @@ export class WithdrawalService {
 
   async quickWithdrawal(param: QuickWithdrawalInput): Promise<boolean> {
     try {
-      const { withdrawal_ids } = param;
+      const { withdrawal_ids, region_id } = param;
       const [results] = await this.repo
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
+        .leftJoinAndSelect('student.applications', 'applications')
+        .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
         .leftJoinAndSelect('student.grade_levels', 'grade')
         .whereInIds(withdrawal_ids)
         .andWhere({ status: WithdrawalStatus.REQUESTED })
@@ -625,11 +638,31 @@ export class WithdrawalService {
       if (!results?.length) throw new ServiceUnavailableException(`Not found Withdrawal data`);
 
       const queryRunner = await getConnection().createQueryRunner();
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Confirmation', region_id);
+
+      const setAdditionalLinksInfo = (content, student, school_year, cur_application) => {
+        const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
+        const yearEnd = new Date(school_year.date_end).getFullYear().toString();
+        const yearText = cur_application.midyear_application
+                ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+                : `${yearBegin}-${yearEnd.substring(2, 4)}`;
+  
+        return content
+          .toString()
+          .replace(/\[STUDENT\]/g, student.person.first_name)
+          .replace(/\[PARENT\]/g, student.parent.person.first_name)
+          .replace(/\[YEAR\]/g, yearText)
+          .replace(/\[Student\]/g, student.person.first_name)
+          .replace(/\[Parent\]/g, student.parent.person.first_name)
+          .replace(/\[Year\]/g, yearText);
+      };
 
       for (let index = 0; index < results.length; index++) {
         const item = results[index];
         const withdrawalId = item.withdrawal_id;
-        const schoolYearId = item.Student.grade_levels[0].school_year_id;
+        const cur_application =  item.Student.applications[0];
+        const schoolYearId = cur_application.school_year_id;
+        const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
         const studentId = item.Student.student_id;
 
         const isPdfGenerated = await this.generateWithdrawalFormPdf(withdrawalId);
@@ -643,6 +676,16 @@ export class WithdrawalService {
             WHERE student_id = ${studentId} AND school_year_id = ${schoolYearId}
           `);
         }
+
+        await this.emailService.sendEmail({
+          email: item.Student.parent.person.email,
+          subject: setAdditionalLinksInfo(emailTemplate.subject, item.Student, school_year, cur_application),
+          content: setAdditionalLinksInfo(emailTemplate.body, item.Student, school_year, cur_application),
+          from: emailTemplate.from,
+          bcc: emailTemplate.bcc,
+          region_id: region_id,
+          template_name: 'Withdraw Confirmation',
+        });
       }
       await queryRunner.release();
 
@@ -687,6 +730,7 @@ export class WithdrawalService {
       const withdraw = await this.repo
         .createQueryBuilder('withdrawal')
         .leftJoinAndSelect('withdrawal.Student', 'student')
+        .leftJoinAndSelect('student.applications', 'applications')
         .leftJoinAndSelect('student.person', 's_person')
         .leftJoinAndSelect('student.parent', 'parent')
         .leftJoinAndSelect('parent.person', 'p_person')
@@ -716,21 +760,27 @@ export class WithdrawalService {
         }
       }
 
+      const cur_application = withdraw.Student.applications[0];
+
       const setAdditionalLinksInfo = (content, student, school_year) => {
         const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
         const yearEnd = new Date(school_year.date_end).getFullYear().toString();
+
+        const yearText = cur_application.midyear_application
+              ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+              : `${yearBegin}-${yearEnd.substring(2, 4)}`;
 
         return content
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
           .replace(/\[PARENT\]/g, student.parent.person.first_name)
-          .replace(/\[YEAR\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`)
+          .replace(/\[YEAR\]/g, yearText)
           .replace(/\[Student\]/g, student.person.first_name)
           .replace(/\[Parent\]/g, student.parent.person.first_name)
-          .replace(/\[Year\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`);
+          .replace(/\[Year\]/g, yearText);
       };
       const emailBody = [];
-      const school_year = await this.schoolYearService.findOneById(withdraw.Student.grade_levels[0].school_year_id);
+      const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
       const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
       const temp = {
         withdrawal_id: withdraw.withdrawal_id,

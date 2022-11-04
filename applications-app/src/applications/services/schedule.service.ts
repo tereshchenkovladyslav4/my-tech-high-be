@@ -23,11 +23,11 @@ export class ScheduleService {
     private emailTemplateService: EmailTemplatesService,
     private sesEmailService: EmailsService,
     private scheduleEmailsService: ScheduleEmailsService,
-  ) {}  
-  
+  ) {}
+
   async findAll(schedulesArgs: SchedulesArgs): Promise<Pagination<Schedule>> {
     const { skip, take, sort, filter, search, region_id } = schedulesArgs;
-    const _sortBy = sort.split('|');    
+    const _sortBy = sort.split('|');
 
     const qb = this.repo
       .createQueryBuilder('schedule')
@@ -41,33 +41,31 @@ export class ScheduleService {
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
       .andWhere(`schoolYear.RegionId = ${region_id}`);
-      
-    if (
-      filter &&
-      filter.grades &&
-      filter.grades.length > 0
-    ) {
+
+    if (filter && filter.status && filter.status.length > 0) {
+      qb.andWhere('schedule.status IN (:status)', { status: filter.status });
+    }
+    if (filter && filter.grades && filter.grades.length > 0) {
       qb.andWhere('student.grade_level IN (:grades)', { grades: filter.grades });
     }
-      
-    if (filter && filter.diplomaSeeking){
+    if (filter && filter.diplomaSeeking) {
       qb.andWhere(`student.diploma_seeking = ${filter.diplomaSeeking}`);
     }
-    if (filter && filter.selectedYearId){
+    if (filter && filter.selectedYearId) {
       qb.andWhere(`schoolYear.school_year_id = ${filter.selectedYearId}`);
     }
-    if (filter && filter.courseType.length>0){
-      qb.andWhere(`SchedulePeriods.course_type IN (:...courseType)`, {courseType: filter.courseType});
+    if (filter && filter.courseType.length > 0) {
+      qb.andWhere(`SchedulePeriods.course_type IN (:...courseType)`, { courseType: filter.courseType });
     }
-    if (filter && filter.curriculumProviders.length>0){
-      qb.andWhere(`Provider.name IN (:...curriculumProvider)`, {curriculumProvider: filter.curriculumProviders});
+    if (filter && filter.curriculumProviders.length > 0) {
+      qb.andWhere(`Provider.name IN (:...curriculumProvider)`, { curriculumProvider: filter.curriculumProviders });
     }
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
-        
+
     return new Pagination<Schedule>({
       results,
       total,
-    }); 
+    });
   }
 
   async sendEmail(emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
@@ -80,7 +78,7 @@ export class ScheduleService {
       .leftJoinAndSelect('ScheduleStudent.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
       .whereInIds(schedule_ids)
-      .getManyAndCount();    
+      .getManyAndCount();
 
     const user_id = results[0].ScheduleStudent.parent.person.user_id;
     const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(user_id);
@@ -91,7 +89,7 @@ export class ScheduleService {
     }
 
     const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Schedules Page', region_id);
-    
+
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
     }
