@@ -64,7 +64,7 @@ export class EnrollmentsService {
     private sesEmailService: EmailsService,
     private emailReminderService: EmailReminderService,
     private userRegionService: UserRegionService,
-  ) {}
+  ) { }
 
   async saveEnrollmentPacket(enrollmentPacketInput: EnrollmentPacketInput): Promise<EnrollmentPacket> {
     const {
@@ -320,7 +320,7 @@ export class EnrollmentsService {
       });
 
       const personAddress = await this.personAddressService.createOrUpdate(
-        studentPerson,
+        parentPerson,
         enrollmentPacketContactInput.student.address,
       );
       // const street2 = enrollmentPacketContactInput.student.address.street2 || "";
@@ -408,7 +408,7 @@ export class EnrollmentsService {
       console.log('Student Person: ', studentPerson);
 
       const personAddress = this.personAddressService.createOrUpdate(
-        studentPerson,
+        parentPerson,
         enrollmentPacketContactInput.student.address,
       );
       // const street2 = enrollmentPacketContactInput.student.address.street2 || "";

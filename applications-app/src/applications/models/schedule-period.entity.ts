@@ -83,6 +83,10 @@ export class SchedulePeriod extends BaseEntity {
   @Field(() => String, { nullable: true })
   osse_school_district_name: string;
 
+  @Column({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
+  update_required: boolean;
+
   @ManyToOne(() => Schedule, (schedule) => schedule.SchedulePeriods)
   @JoinColumn([{ name: 'ScheduleId', referencedColumnName: 'schedule_id' }])
   @Field(() => Schedule, { nullable: true })

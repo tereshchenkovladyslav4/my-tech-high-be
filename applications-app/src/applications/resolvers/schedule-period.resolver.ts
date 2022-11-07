@@ -3,7 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { SchedulePeriod } from '../models/schedule-period.entity';
 import { SchedulePeriodService } from '../services/schedule-period.service';
-import { CreateOrUpdateSchedulePeriodInput, schedulePeriodInput } from '../dto/create-or-update-schedule-period.inputs';
+import { schedulePeriodInput } from '../dto/create-or-update-schedule-period.inputs';
 
 @Resolver(() => SchedulePeriod)
 export class SchedulePeriodResolver {

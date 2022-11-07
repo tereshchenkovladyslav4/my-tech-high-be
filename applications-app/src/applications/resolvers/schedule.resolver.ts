@@ -9,6 +9,7 @@ import { SchedulesArgs } from '../dto/schedules.args';
 import { Pagination } from 'src/paginate';
 import { ScheduleEmail } from '../models/schedule-email.entity';
 import { EmailScheduleInput } from '../dto/email-schedule.input';
+import { EmailUpdateRequiredInput } from '../dto/email-update-required.inputs';
 
 @Resolver(() => Schedule)
 export class ScheduleResolver {
@@ -22,13 +23,19 @@ export class ScheduleResolver {
   }
 
   @Mutation((returns) => [ScheduleEmail], { name: 'emailSchedule' })
-  async emailSchedule(
-    @Args('emailScheduleInput') emailScheduleInput: EmailScheduleInput,
-  ): Promise<ScheduleEmail[]> {
+  async emailSchedule(@Args('emailScheduleInput') emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
     return await this.service.sendEmail(emailScheduleInput);
   }
 
-  @Mutation(() => Schedule, { name: 'createOrUpdateSchedule' }) 
+  @Mutation((returns) => Boolean, { name: 'updateRequiredEmail' })
+  @UseGuards(new AuthGuard())
+  async updateRequiredEmail(
+    @Args('updateRequiredEmail') updateRequiredEmail: EmailUpdateRequiredInput,
+  ): Promise<boolean> {
+    return await this.service.sendUpdateReqiredEmail(updateRequiredEmail);
+  }
+
+  @Mutation(() => Schedule, { name: 'createOrUpdateSchedule' })
   @UseGuards(new AuthGuard())
   async createOrUpdateSchedule(
     @Args('createScheduleInput')

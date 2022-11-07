@@ -13,6 +13,10 @@ import { UserRegionService } from './user-region.service';
 import { EmailTemplatesService } from './email-templates.service';
 import { EmailsService } from './emails.service';
 import { ScheduleEmailsService } from './schedule-emails.service';
+import { EmailUpdateRequiredInput } from '../dto/email-update-required.inputs';
+import { StudentsService } from './students.service';
+import { SchoolYearService } from './schoolyear.service';
+import * as Moment from 'moment';
 
 @Injectable()
 export class ScheduleService {
@@ -23,6 +27,8 @@ export class ScheduleService {
     private emailTemplateService: EmailTemplatesService,
     private sesEmailService: EmailsService,
     private scheduleEmailsService: ScheduleEmailsService,
+    private studentService: StudentsService,
+    private schoolYearService: SchoolYearService,
   ) {}
 
   async findAll(schedulesArgs: SchedulesArgs): Promise<Pagination<Schedule>> {
@@ -66,6 +72,38 @@ export class ScheduleService {
       results,
       total,
     });
+  }
+
+  async sendUpdateReqiredEmail(updateRequiredEmail: EmailUpdateRequiredInput): Promise<boolean> {
+    const { student_id, from, subject, body, region_id } = updateRequiredEmail;
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Updates Required', region_id);
+    const studentInfo = await this.studentService.findOneById(student_id);
+    const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
+    const yearbegin = Moment(schoolYear?.date_begin).format('YYYY');
+    const yearend = Moment(schoolYear?.date_end).format('YYYY');
+    const yearText = schoolYear?.midyear_application
+      ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+      : `${yearbegin}-${yearend.substring(2, 4)}`;
+    await this.sesEmailService.sendEmail({
+      email: studentInfo?.parent?.person?.email,
+      subject: subject
+        .toString()
+        .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
+        .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
+        .replace(/\[YEAR\]/g, yearText)
+        .replace(/\[SCHEDULE_YEAR\]/g, yearText),
+      content: body
+        .toString()
+        .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
+        .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
+        .replace(/\[YEAR\]/g, yearText)
+        .replace(/\[SCHEDULE_YEAR\]/g, yearText),
+      from: from,
+      bcc: emailTemplate.bcc,
+      region_id,
+      template_name: 'Updates Required',
+    });
+    return true;
   }
 
   async sendEmail(emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
@@ -131,7 +169,7 @@ export class ScheduleService {
       const emailBody = setEmailBodyInfo(item.ScheduleStudent, item.SchoolYear, item);
       const emailSubject = setEmailSubjectInfo(item.ScheduleStudent, item.SchoolYear, item);
 
-      const result = await this.sesEmailService.sendEmail({
+      await this.sesEmailService.sendEmail({
         email: item.ScheduleStudent.parent.person.email,
         subject: emailSubject,
         content: emailBody,

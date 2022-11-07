@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SchedulePeriod } from '../models/schedule-period.entity';
-import { CreateOrUpdateSchedulePeriodInput, schedulePeriodInput } from '../dto/create-or-update-schedule-period.inputs';
+import { schedulePeriodInput } from '../dto/create-or-update-schedule-period.inputs';
 
 @Injectable()
 export class SchedulePeriodService {
