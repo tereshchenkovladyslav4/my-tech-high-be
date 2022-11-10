@@ -27,7 +27,10 @@ export class CourseService {
       if (courseInput.titles != undefined) {
         const titleIds = courseInput.titles.split(',');
         const titles = await this.titleService.findByIds(titleIds);
-        await this.repo.save({ id: result.id, Titles: titles });
+        await this.repo.save({
+          id: result.id,
+          Titles: titles.filter((item) => item.subject_id === courseInput.subject_id),
+        });
       }
 
       // Please Note: If a course is unarchived, the provider with this course should also be unarchived if it is archived

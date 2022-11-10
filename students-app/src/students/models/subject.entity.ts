@@ -70,4 +70,8 @@ export class Subject extends BaseEntity {
   @Field(() => [Course], { nullable: true })
   @Directive('@external')
   Courses: Course[];
+
+  @OneToMany(() => Course, (course) => course.Subject)
+  @Field(() => [Course], { nullable: true })
+  AltCourses: Course[];
 }

@@ -62,10 +62,20 @@ export class PeriodService {
       .leftJoinAndSelect('AltTitles.Courses', 'AltTitlesCourses', titleCourseQuery('AltTitlesCourses'))
       .leftJoinAndSelect('Titles.AltCourses', 'AltCourses', titleCourseQuery('AltCourses', true))
       .leftJoinAndSelect('AltTitles.AltCourses', 'AltTitlesAltCourses', titleCourseQuery('AltTitlesAltCourses', true))
+      .leftJoinAndSelect('Subjects.Courses', 'SubjectsCourses', `${titleCourseQuery('SubjectsCourses')}`)
+      .leftJoinAndSelect('Subjects.AltCourses', 'SubjectsAltCourses', `${titleCourseQuery('SubjectsAltCourses', true)}`)
       .leftJoinAndSelect('Courses.Provider', 'CoursesProvider')
       .leftJoinAndSelect('AltTitlesCourses.Provider', 'AltTitlesCoursesProvider')
       .leftJoinAndSelect('AltCourses.Provider', 'AltCoursesProvider')
       .leftJoinAndSelect('AltTitlesAltCourses.Provider', 'AltTitlesAltCoursesProvider')
+      .leftJoinAndSelect('SubjectsCourses.Provider', 'SubjectsCoursesProvider')
+      .leftJoinAndSelect('SubjectsAltCourses.Provider', 'SubjectsAltCoursesProvider')
+      .leftJoinAndSelect('CoursesProvider.Periods', 'CoursesProviderPeriods')
+      .leftJoinAndSelect('AltTitlesCoursesProvider.Periods', 'AltTitlesCoursesProviderPeriods')
+      .leftJoinAndSelect('AltCoursesProvider.Periods', 'AltCoursesProviderPeriods')
+      .leftJoinAndSelect('AltTitlesAltCoursesProvider.Periods', 'AltTitlesAltCoursesProviderPeriods')
+      .leftJoinAndSelect('SubjectsCoursesProvider.Periods', 'SubjectsCoursesProviderPeriods')
+      .leftJoinAndSelect('SubjectsAltCoursesProvider.Periods', 'SubjectsAltCoursesProviderPeriods')
       .loadRelationCountAndMap(
         'Courses.TotalRequests',
         'Courses.SchedulePeriods',
@@ -90,6 +100,18 @@ export class PeriodService {
         'AltTitlesAltCoursesSchedulePeriods',
         courseRequestsQuery,
       )
+      .loadRelationCountAndMap(
+        'SubjectsCourses.TotalRequests',
+        'SubjectsCourses.SchedulePeriods',
+        'SubjectsCoursesSchedulePeriods',
+        courseRequestsQuery,
+      )
+      .loadRelationCountAndMap(
+        'SubjectsAltCourses.TotalRequests',
+        'SubjectsAltCourses.SchedulePeriods',
+        'SubjectsAltCoursesSchedulePeriods',
+        courseRequestsQuery,
+      )
       .where({ school_year_id: schoolYearId, archived: false })
       .getMany();
 
@@ -99,6 +121,10 @@ export class PeriodService {
           title.Courses = title.Courses.filter((course) => !course.limit || course.TotalRequests < course.limit);
           title.AltCourses = title.AltCourses.filter((course) => !course.limit || course.TotalRequests < course.limit);
         });
+        subject.Courses = subject.Courses.filter((course) => !course.limit || course.TotalRequests < course.limit);
+        subject.AltCourses = subject.AltCourses.filter(
+          (course) => !course.limit || course.TotalRequests < course.limit,
+        );
       });
     });
 
