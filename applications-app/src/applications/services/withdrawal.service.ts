@@ -122,8 +122,8 @@ export class WithdrawalService {
             const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
             const yearEnd = new Date(school_year.date_end).getFullYear().toString();
             const yearText = cur_application.midyear_application
-            ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
-            : `${yearBegin}-${yearEnd.substring(2, 4)}`;
+              ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+              : `${yearBegin}-${yearEnd.substring(2, 4)}`;
 
             const link = `${webAppUrl}/parent-link/withdrawal/${StudentId}`;
 
@@ -548,8 +548,8 @@ export class WithdrawalService {
       const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearEnd = new Date(school_year.date_end).getFullYear().toString();
       const yearText = cur_application.midyear_application
-              ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
-              : `${yearBegin}-${yearEnd.substring(2, 4)}`;
+        ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+        : `${yearBegin}-${yearEnd.substring(2, 4)}`;
 
       return content
         .toString()
@@ -562,19 +562,20 @@ export class WithdrawalService {
     };
 
     const emailBody = [];
-    await Promise.all(results.map(async (item) => {
+    await Promise.all(
+      results.map(async (item) => {
+        const cur_application = item.Student.applications[0];
+        const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
 
-      const cur_application = item.Student.applications[0];
-      const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
-
-      const temp = {
-        withdrawal_id: item.withdrawal_id,
-        email: item.Student.parent.person.email,
-        body: setAdditionalLinksInfo(body, item.Student, school_year, cur_application),
-        subject: setAdditionalLinksInfo(subject, item.Student, school_year, cur_application),
-      };      
-      emailBody.push(temp);
-    }));
+        const temp = {
+          withdrawal_id: item.withdrawal_id,
+          email: item.Student.parent.person.email,
+          body: setAdditionalLinksInfo(body, item.Student, school_year, cur_application),
+          subject: setAdditionalLinksInfo(subject, item.Student, school_year, cur_application),
+        };
+        emailBody.push(temp);
+      }),
+    );
 
     const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
 
@@ -644,9 +645,9 @@ export class WithdrawalService {
         const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
         const yearEnd = new Date(school_year.date_end).getFullYear().toString();
         const yearText = cur_application.midyear_application
-                ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
-                : `${yearBegin}-${yearEnd.substring(2, 4)}`;
-  
+          ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+          : `${yearBegin}-${yearEnd.substring(2, 4)}`;
+
         return content
           .toString()
           .replace(/\[STUDENT\]/g, student.person.first_name)
@@ -660,7 +661,7 @@ export class WithdrawalService {
       for (let index = 0; index < results.length; index++) {
         const item = results[index];
         const withdrawalId = item.withdrawal_id;
-        const cur_application =  item.Student.applications[0];
+        const cur_application = item.Student.applications[0];
         const schoolYearId = cur_application.school_year_id;
         const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
         const studentId = item.Student.student_id;
@@ -767,8 +768,8 @@ export class WithdrawalService {
         const yearEnd = new Date(school_year.date_end).getFullYear().toString();
 
         const yearText = cur_application.midyear_application
-              ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
-              : `${yearBegin}-${yearEnd.substring(2, 4)}`;
+          ? `${yearBegin}-${yearEnd.substring(2, 4)} Mid-year`
+          : `${yearBegin}-${yearEnd.substring(2, 4)}`;
 
         return content
           .toString()

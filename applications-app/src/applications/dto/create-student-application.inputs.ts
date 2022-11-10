@@ -11,4 +11,5 @@ export type CreateStudentApplicationInput = {
   address?: CreateAddressInput;
   packet?: NewParentPacketContactInput;
   midyear_application?: boolean;
+  parent_person_id?: number;
 };

@@ -257,6 +257,7 @@ export class PacketsService {
     const [results] = await this.packetsRepository
       .createQueryBuilder('packet')
       .leftJoinAndSelect('packet.student', 'student')
+      .leftJoinAndSelect('student.applications', 'applications')
       .leftJoinAndSelect('student.person', 's_person')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
@@ -277,28 +278,32 @@ export class PacketsService {
       region_id = regions[0].region_id;
     }
 
-    const setAdditionalLinksInfo = (content, student, school_year) => {
+    const setAdditionalLinksInfo = (content, student, school_year, cur_application) => {
       const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
       const yearend = new Date(school_year.date_end).getFullYear().toString();
+      const yearText = cur_application.midyear_application
+        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+        : `${yearbegin}-${yearend.substring(2, 4)}`;
 
       return content
         .toString()
         .replace(/\[STUDENT\]/g, student.person.first_name)
         .replace(/\[PARENT\]/g, student.parent.person.first_name)
-        .replace(/\[YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`)
+        .replace(/\[YEAR\]/g, yearText)
         .replace(/\[Student\]/g, student.person.first_name)
         .replace(/\[Parent\]/g, student.parent.person.first_name)
-        .replace(/\[Year\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
+        .replace(/\[Year\]/g, yearText);
     };
 
     const emailBody = [];
     results.map(async (item) => {
-      const school_year = await this.schoolYearService.findOneById(results[0].student.grade_levels[0].school_year_id);
+      const cur_application = item.student.applications[0];
+      const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
       const temp = {
         packet_id: item.packet_id,
         email: item.student.parent.person.email,
-        body: setAdditionalLinksInfo(body, item.student, school_year),
-        subject: setAdditionalLinksInfo(subject, item.student, school_year),
+        body: setAdditionalLinksInfo(body, item.student, school_year, cur_application),
+        subject: setAdditionalLinksInfo(subject, item.student, school_year, cur_application),
       };
       emailBody.push(temp);
     });

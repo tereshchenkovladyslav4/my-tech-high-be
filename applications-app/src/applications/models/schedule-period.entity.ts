@@ -87,28 +87,46 @@ export class SchedulePeriod extends BaseEntity {
   @Field(() => Boolean, { nullable: true })
   update_required: boolean;
 
-  @ManyToOne(() => Schedule, (schedule) => schedule.SchedulePeriods)
+  @ManyToOne(() => Schedule, (schedule) => schedule.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'ScheduleId', referencedColumnName: 'schedule_id' }])
   @Field(() => Schedule, { nullable: true })
   Schedule: Schedule;
 
-  @ManyToOne(() => Period, (period) => period.SchedulePeriods)
+  @ManyToOne(() => Period, (period) => period.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'PeriodId', referencedColumnName: 'id' }])
   Period: Period;
 
-  @ManyToOne(() => Subject, (schedule) => schedule.SchedulePeriods)
+  @ManyToOne(() => Subject, (schedule) => schedule.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'SubjectId', referencedColumnName: 'subject_id' }])
   Subject: Subject;
 
-  @ManyToOne(() => Title, (schedule) => schedule.SchedulePeriods)
+  @ManyToOne(() => Title, (schedule) => schedule.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'TitleId', referencedColumnName: 'title_id' }])
   Title: Title;
 
-  @ManyToOne(() => Provider, (schedule) => schedule.SchedulePeriods)
+  @ManyToOne(() => Provider, (schedule) => schedule.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'ProviderId', referencedColumnName: 'id' }])
   Provider: Provider;
 
-  @ManyToOne(() => Course, (schedule) => schedule.SchedulePeriods)
+  @ManyToOne(() => Course, (schedule) => schedule.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'CourseId', referencedColumnName: 'id' }])
   Course: Course;
 }

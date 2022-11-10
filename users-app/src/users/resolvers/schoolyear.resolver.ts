@@ -53,6 +53,12 @@ export class SchoolYearResolver {
     return await this.schoolYearsService.updateSchoolYear(updateSchoolYearInput);
   }
 
+  @Mutation(() => Boolean, { name: 'deleteSchoolYear' })
+  @UseGuards(new AuthGuard())
+  async deleteSchoolYear(@Args('school_year_id') school_year_id: number): Promise<boolean> {
+    return await this.schoolYearsService.deleteSchoolYear(school_year_id);
+  }
+
   // @ResolveReference()
   // resolveReference(reference: {
   //   __typename: string;

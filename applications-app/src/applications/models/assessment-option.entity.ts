@@ -48,7 +48,10 @@ export class AssessmentOption extends BaseEntity {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @ManyToOne(() => Assessment, (assessment) => assessment.Options)
+  @ManyToOne(() => Assessment, (assessment) => assessment.Options, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'AssessmentId', referencedColumnName: 'assessment_id' }])
   @Field(() => Assessment, { nullable: true })
   Assessment: Assessment;

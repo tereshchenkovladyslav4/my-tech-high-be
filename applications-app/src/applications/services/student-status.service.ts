@@ -46,14 +46,14 @@ export class StudentStatusService {
       //  await this.withdrawalService.delete(student_id);
       //}
 
-      if (status == 0 || status == 5) {
+      if (status == 0 || status == 5 || status == 6) {
         const queryRunner = await getConnection().createQueryRunner();
         await queryRunner.query(
           `UPDATE 
             infocenter.mth_application 
           SET 
-            status='${status == 0 ? 'Accepted' : 'Submitted'}', 
-            ${status == 0 ? 'date_accepted = NOW()' : 'date_submitted = NOW()'}
+            status='${status == 0 || status == 6 ? 'Accepted' : 'Submitted'}', 
+            ${status == 0 || status == 6 ? 'date_accepted = NOW()' : 'date_submitted = NOW()'}
           WHERE 
             student_id = ${student_id} AND
             school_year_id = ${school_year_id};`,

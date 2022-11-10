@@ -95,7 +95,10 @@ export class SchedulePeriod extends BaseEntity {
   @Directive('@external')
   osse_school_district_name: string;
 
-  @ManyToOne(() => Course, (schedule) => schedule.SchedulePeriods)
+  @ManyToOne(() => Course, (schedule) => schedule.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'CourseId', referencedColumnName: 'id' }])
   @Directive('@external')
   Course: Course;

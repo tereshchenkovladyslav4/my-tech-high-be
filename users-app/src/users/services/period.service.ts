@@ -14,7 +14,7 @@ export class PeriodService {
     @InjectRepository(SchoolYear)
     private schoolYearsRepository: Repository<SchoolYear>,
     private scheduleBuilderService: ScheduleBuilderService,
-  ) {}
+  ) { }
 
   async findByIds(periodIds: (number | string)[]): Promise<Period[]> {
     return await this.periodRepository.findByIds(periodIds);
@@ -88,7 +88,7 @@ export class PeriodService {
     if (indexMax === -1) throw new UnprocessableEntityException('Maximum Grade level does not exist');
 
     // validation - min < max
-    if (indexMin >= indexMax) {
+    if (indexMin > indexMax) {
       throw new UnprocessableEntityException('Maximum Grade level must be greater than Minimum Grade level');
     }
     // -----------------

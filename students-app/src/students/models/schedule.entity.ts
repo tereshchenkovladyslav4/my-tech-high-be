@@ -58,7 +58,10 @@ export class Schedule extends BaseEntity {
   // @Directive('@external')
   // SchoolYear: SchoolYear;
 
-  @ManyToOne(() => Student, (student) => student.StudentSchedules)
+  @ManyToOne(() => Student, (student) => student.StudentSchedules, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'StudentId', referencedColumnName: 'student_id' }])
   Student: Student;
 }

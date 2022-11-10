@@ -49,7 +49,7 @@ export class ApplicationsService {
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
     private emailRecordsService: EmailRecordsService,
-  ) {}
+  ) { }
 
   protected user: User;
 
@@ -86,6 +86,7 @@ export class ApplicationsService {
             address: newApplication.address,
             packet: newApplication.packet,
             midyear_application: newApplication.midyear_application,
+            parent_person_id: parent.person_id
           }),
       ),
     );
@@ -337,7 +338,7 @@ export class ApplicationsService {
   }
 
   async createStudentApplication(createStudentApplicationInput: CreateStudentApplicationInput): Promise<any> {
-    const { parent_id, school_year_id, studentApplication, referred_by, meta, address, packet, midyear_application } =
+    const { parent_id, school_year_id, studentApplication, referred_by, meta, address, packet, midyear_application, parent_person_id } =
       createStudentApplicationInput;
     const { first_name, last_name, grade_level, meta: studentMeta } = studentApplication;
     const studentApplicationInput = omit(studentApplication, ['grade_level', 'meta', 'address', 'packet']);
@@ -345,7 +346,10 @@ export class ApplicationsService {
     if (!person) throw new ServiceUnavailableException('Person Not Created');
     console.log('Person: ', person);
 
-    const personAddress = await this.personAddressService.createOrUpdate(person, {
+    const parentPerson = await this.personsService.findOneById(parent_person_id);
+
+
+    const personAddress = await this.personAddressService.createOrUpdate(parentPerson, {
       ...address,
       ...studentApplication.address,
     });
@@ -440,5 +444,5 @@ export class ApplicationsService {
     return applications;
   }
 
-  async createObserPerson() {}
+  async createObserPerson() { }
 }

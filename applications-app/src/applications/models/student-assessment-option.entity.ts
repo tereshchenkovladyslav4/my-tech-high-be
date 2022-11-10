@@ -43,12 +43,18 @@ export class StudentAssessmentOption extends BaseEntity {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @ManyToOne(() => Assessment, (assessment) => assessment.StudentAssessments)
+  @ManyToOne(() => Assessment, (assessment) => assessment.StudentAssessments, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'AssessmentId', referencedColumnName: 'assessment_id' }])
   @Field(() => Assessment, { nullable: true })
   Assessment: Assessment;
 
-  @ManyToOne(() => AssessmentOption, (assessmentOption) => assessmentOption.StudentAssessments)
+  @ManyToOne(() => AssessmentOption, (assessmentOption) => assessmentOption.StudentAssessments, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'OptionId', referencedColumnName: 'option_id' }])
   @Field(() => AssessmentOption, { nullable: true })
   AssessmentOption: AssessmentOption;

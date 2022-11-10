@@ -47,11 +47,17 @@ export class Schedule extends BaseEntity {
   @Field(() => Date, { nullable: true })
   current_submission: Date;
 
-  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.schedule)
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.schedule, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   SchoolYear: SchoolYear;
 
-  @ManyToOne((type) => Student, { nullable: true })
+  @ManyToOne((type) => Student, (student) => student.Schedules, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @Field(() => Student, { nullable: true })
   @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
   ScheduleStudent: Student;
@@ -63,5 +69,4 @@ export class Schedule extends BaseEntity {
   @OneToMany((type) => ScheduleEmail, (ScheduleEmail) => ScheduleEmail.Schedule)
   @Field(() => [ScheduleEmail], { nullable: true })
   ScheduleEmails: ScheduleEmail[];
-  
 }

@@ -55,7 +55,10 @@ export class Assessment extends BaseEntity {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Assessments)
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Assessments, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   @Field(() => SchoolYear, { nullable: true })
   SchoolYear: SchoolYear;

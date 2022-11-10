@@ -432,12 +432,13 @@ export class StudentsService {
       packet_status: (student && student.packet_status) || null,
       application_deadline_num_days: parent.region_application_deadline_num_days,
       enrollment_packet_deadline_num_days: parent.region_enrollment_packet_deadline_num_days,
-      enrollment_packet_date_deadline:
-        (student &&
-          Moment(student.application_date_accepted)
-            .add(parent.region_enrollment_packet_deadline_num_days, 'd')
-            .format('MM.DD')) ||
-        null,
+      enrollment_packet_date_deadline: student?.packet_deadline
+        ? Moment(student.packet_deadline).format('MM.DD')
+        : (student &&
+            Moment(student.application_date_accepted)
+              .add(parent.region_enrollment_packet_deadline_num_days, 'd')
+              .format('MM.DD')) ||
+          null,
       withdraw_deadline_num_days: parent.region_withdraw_deadline_num_days,
       midyear_application: (student && student.application_midyear_application) || false,
       schedule_builder_close: schoolYear.schedule_builder_close || '0000-00-00',

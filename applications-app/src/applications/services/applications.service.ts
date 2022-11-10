@@ -169,10 +169,10 @@ export class ApplicationsService {
       // qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
       qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
     }
-    if (filter && filter.diplomaSeeking){
+    if (filter && filter.diplomaSeeking) {
       qb.andWhere(`student.diploma_seeking = ${filter.diplomaSeeking}`);
     }
-    if (filter && filter.selectedYearId){
+    if (filter && filter.selectedYearId) {
       qb.andWhere(`application.school_year_id = ${filter.selectedYearId}`);
     }
     if (filter && filter.schoolYear && filter.schoolYear.length > 0) {
@@ -292,8 +292,8 @@ export class ApplicationsService {
       }
     }
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
-    console.log("result", results[0]);
-    
+    console.log('result', results[0]);
+
     return new Pagination<Application>({
       results,
       total,
@@ -379,7 +379,7 @@ export class ApplicationsService {
         const UTCDeadline = new Date(deadline).toISOString();
 
         const default_meta = {
-          'meta_special_education' : 0
+          meta_special_education: 0,
         };
 
         if (student.special_ed != 0) {

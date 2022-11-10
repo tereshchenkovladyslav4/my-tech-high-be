@@ -204,4 +204,13 @@ export class SchoolYearsService {
       throw new HttpException('There is an error updating record', 422);
     }
   }
+
+  async deleteSchoolYear(school_year_id: number): Promise<boolean> {
+    try {
+      await this.schoolYearsRepository.delete({ school_year_id: school_year_id });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
