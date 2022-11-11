@@ -33,6 +33,7 @@ import { File } from './models/file.entity';
 import { PeriodResolver } from './resolvers/period.resolver';
 import { Schedule } from './models/schedule.entity';
 import { SchedulePeriod } from './models/schedule-period.entity';
+import { ProviderResolver } from './resolvers/provider.resolver';
 
 const graphQLImports = [
   StudentsResolver,
@@ -46,6 +47,7 @@ const graphQLImports = [
   ResourceResolver,
   StudentRecordResolver,
   PeriodResolver,
+  ProviderResolver,
 ];
 @Module({
   imports: [

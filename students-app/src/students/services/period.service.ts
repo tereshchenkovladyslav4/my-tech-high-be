@@ -64,18 +64,6 @@ export class PeriodService {
       .leftJoinAndSelect('AltTitles.AltCourses', 'AltTitlesAltCourses', titleCourseQuery('AltTitlesAltCourses', true))
       .leftJoinAndSelect('Subjects.Courses', 'SubjectsCourses', `${titleCourseQuery('SubjectsCourses')}`)
       .leftJoinAndSelect('Subjects.AltCourses', 'SubjectsAltCourses', `${titleCourseQuery('SubjectsAltCourses', true)}`)
-      .leftJoinAndSelect('Courses.Provider', 'CoursesProvider')
-      .leftJoinAndSelect('AltTitlesCourses.Provider', 'AltTitlesCoursesProvider')
-      .leftJoinAndSelect('AltCourses.Provider', 'AltCoursesProvider')
-      .leftJoinAndSelect('AltTitlesAltCourses.Provider', 'AltTitlesAltCoursesProvider')
-      .leftJoinAndSelect('SubjectsCourses.Provider', 'SubjectsCoursesProvider')
-      .leftJoinAndSelect('SubjectsAltCourses.Provider', 'SubjectsAltCoursesProvider')
-      .leftJoinAndSelect('CoursesProvider.Periods', 'CoursesProviderPeriods')
-      .leftJoinAndSelect('AltTitlesCoursesProvider.Periods', 'AltTitlesCoursesProviderPeriods')
-      .leftJoinAndSelect('AltCoursesProvider.Periods', 'AltCoursesProviderPeriods')
-      .leftJoinAndSelect('AltTitlesAltCoursesProvider.Periods', 'AltTitlesAltCoursesProviderPeriods')
-      .leftJoinAndSelect('SubjectsCoursesProvider.Periods', 'SubjectsCoursesProviderPeriods')
-      .leftJoinAndSelect('SubjectsAltCoursesProvider.Periods', 'SubjectsAltCoursesProviderPeriods')
       .loadRelationCountAndMap(
         'Courses.TotalRequests',
         'Courses.SchedulePeriods',
