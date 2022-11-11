@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Brackets } from 'typeorm';
 import { Schedule } from '../models/schedule.entity';
 import { CreateOrUpdateScheduleInput } from '../dto/create-or-update-schedule.inputs';
 import { SchedulesArgs } from '../dto/schedules.args';
@@ -17,6 +17,7 @@ import { EmailUpdateRequiredInput } from '../dto/email-update-required.inputs';
 import { StudentsService } from './students.service';
 import { SchoolYearService } from './schoolyear.service';
 import * as Moment from 'moment';
+import { ResponseDTO } from '../dto/response.dto';
 
 @Injectable()
 export class ScheduleService {
@@ -46,7 +47,8 @@ export class ScheduleService {
       .leftJoinAndSelect('student.grade_levels', 'grade_levels')
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
-      .andWhere(`schoolYear.RegionId = ${region_id}`);
+      .andWhere(`schoolYear.RegionId = ${region_id}`)
+      .andWhere(`schedule.status <> 'Draft'`);
 
     if (filter && filter.status && filter.status.length > 0) {
       qb.andWhere('schedule.status IN (:status)', { status: filter.status });
@@ -66,6 +68,71 @@ export class ScheduleService {
     if (filter && filter.curriculumProviders.length > 0) {
       qb.andWhere(`Provider.name IN (:...curriculumProvider)`, { curriculumProvider: filter.curriculumProviders });
     }
+
+    if (search) {
+      const date = search
+        .split('/')
+        .filter((v) => v)
+        .join('-');
+      qb.andWhere(
+        new Brackets((sub) => {
+          if (
+            search.indexOf('st') > -1 ||
+            search.indexOf('th') > -1 ||
+            search.indexOf('rd') > -1 ||
+            search.indexOf('nd') > -1
+          ) {
+            sub.where('grade_levels.grade_level like :text', {
+              text: `%${search.match(/\d+/)[0]}%`,
+            });
+          } else {
+            sub
+              .orWhere('schedule.status like :text', { text: `%${search}%` })
+              .orWhere('person.first_name like :text', {
+                text: `%${search}%`,
+              })
+              .orWhere('person.last_name like :text', { text: `%${search}%` })
+              .orWhere('p_person.first_name like :text', {
+                text: `%${search}%`,
+              })
+              .orWhere('p_person.last_name like :text', { text: `%${search}%` })
+              .orWhere('ScheduleEmails.created_at like :text', { text: `%${date}%` });
+            if (Moment(search, 'MM/DD/YY', true).isValid()) {
+              sub.orWhere('ScheduleEmails.created_at like :text', {
+                text: `%${Moment(search).format('YYYY-MM-DD')}%`,
+              });
+            }
+          }
+        }),
+      );
+    }
+
+    if (sort) {
+      if (_sortBy[1].toLocaleLowerCase() === 'desc') {
+        if (_sortBy[0] === 'grade') {
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+          qb.orderBy('grade_levels.grade_level', 'DESC');
+        } else if (_sortBy[0] === 'emailed') {
+          qb.orderBy(`ScheduleEmails.created_at`, 'DESC');
+        } else if (_sortBy[0] === 'diploma') {
+          qb.orderBy(`student.diploma_seeking`, 'DESC');
+        } else {
+          qb.orderBy('schedule.status', 'DESC');
+        }
+      } else {
+        if (_sortBy[0] === 'grade') {
+          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+          qb.orderBy('student_grade_level', 'ASC');
+        } else if (_sortBy[0] === 'emailed') {
+          qb.orderBy(`ScheduleEmails.created_at`, 'ASC');
+        } else if (_sortBy[0] === 'diploma') {
+          qb.orderBy(`student.diploma_seeking`, 'ASC');
+        } else {
+          qb.orderBy('schedule.status', 'ASC');
+        }
+      }
+    }
+
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
 
     return new Pagination<Schedule>({
@@ -214,5 +281,57 @@ export class ScheduleService {
     } catch (error) {
       return false;
     }
+  }
+
+  async getScheduleCountGroup(): Promise<ResponseDTO> {
+    const qb = await this.repo.query(
+      `SELECT status , COUNT(*) AS count FROM mth_schedule WHERE status <> "Draft" GROUP BY status`,
+    );
+    const statusArray = {
+      'Updates Required': 0,
+      'Updates Requested': 0,
+      Submitted: 0,
+      Resubmitted: 0,
+      'Not Submitted': 0,
+      Accepted: 0,
+    };
+    qb.map((item) => {
+      statusArray[item.status] = +item.count;
+    });
+    return <ResponseDTO>{
+      error: false,
+      results: statusArray,
+    };
+  }
+
+  async getScheduleCountByRegionId(region_id: number): Promise<ResponseDTO> {
+    const qb = await this.repo.query(
+      `SELECT
+          t1.status AS status,
+          COUNT(*) AS count 
+        FROM
+          ( SELECT * FROM infocenter.mth_schedule WHERE status <> "Draft" ) AS t1
+          LEFT JOIN infocenter.mth_application application ON ( application.student_id = t1.StudentId )
+          LEFT JOIN infocenter.mth_schoolyear schoolYear ON ( schoolYear.school_year_id = application.school_year_id ) 
+        WHERE
+          schoolYear.RegionId = ${region_id}
+        GROUP BY
+          t1.status`,
+    );
+    const statusArray = {
+      'Updates Required': 0,
+      'Updates Requested': 0,
+      Submitted: 0,
+      Resubmitted: 0,
+      'Not Submitted': 0,
+      Accepted: 0,
+    };
+    qb.map((item) => {
+      statusArray[item.status] = +item.count;
+    });
+    return <ResponseDTO>{
+      error: false,
+      results: statusArray,
+    };
   }
 }

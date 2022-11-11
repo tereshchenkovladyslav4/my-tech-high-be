@@ -108,6 +108,8 @@ export class SchoolYearsService {
       // Clone grades
       if (cloneSchoolYear?.grades) data.grades = cloneSchoolYear.grades;
       data.enrollment_packet = false;
+      data.special_ed = cloneSchoolYear.special_ed;
+      data.special_ed_options = cloneSchoolYear.special_ed_options;
     }
 
     const updatedRecord = await this.schoolYearsRepository.save(data);

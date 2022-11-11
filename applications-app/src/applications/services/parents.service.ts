@@ -22,7 +22,7 @@ export class ParentsService {
     private personAddressService: PersonAddressService,
     private observerService: ObserversService,
     private usersService: UsersService,
-  ) {}
+  ) { }
 
   async findOneById(parent_id: number): Promise<Parent> {
     // return await createQueryBuilder(Parent)
@@ -83,9 +83,7 @@ export class ParentsService {
       phone.phone_id = Number(phone.phone_id);
 
       const personData = await this.personService.update(data);
-      if (!phone.phone_id) {
-        phone.person_id = personData.person_id;
-      }
+
       const addressData = await this.addressService.update(address);
       const phoneData = await this.phoneService.create(phone);
 

@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { Schedule } from '../models/schedule.entity';
@@ -10,6 +10,7 @@ import { Pagination } from 'src/paginate';
 import { ScheduleEmail } from '../models/schedule-email.entity';
 import { EmailScheduleInput } from '../dto/email-schedule.input';
 import { EmailUpdateRequiredInput } from '../dto/email-update-required.inputs';
+import { ResponseDTO } from '../dto/response.dto';
 
 @Resolver(() => Schedule)
 export class ScheduleResolver {
@@ -51,5 +52,19 @@ export class ScheduleResolver {
     scheduleId: number,
   ): Promise<boolean> {
     return this.service.delete(scheduleId);
+  }
+
+  @Query((returns) => ResponseDTO, { name: 'scheduleCount' })
+  @UseGuards(new AuthGuard())
+  async getScheduleCountGroup(): Promise<ResponseDTO> {
+    return this.service.getScheduleCountGroup();
+  }
+
+  @Query((returns) => ResponseDTO, { name: 'scheduleCountByRegionId' })
+  @UseGuards(new AuthGuard())
+  async getScheduleCountByRegionId(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+  ): Promise<ResponseDTO> {
+    return this.service.getScheduleCountByRegionId(region_id);
   }
 }
