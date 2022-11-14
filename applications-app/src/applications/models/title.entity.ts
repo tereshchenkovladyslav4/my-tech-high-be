@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, OneToMany, ManyToMany, ManyToOne, PrimaryGe
 import { Subject } from './subject.entity';
 import { Course } from './course.entity';
 import { SchedulePeriod } from './schedule-period.entity';
+import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
 @ObjectType()
 @Directive(
@@ -138,4 +139,8 @@ export class Title {
   @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Title)
   @Field(() => [SchedulePeriod], { nullable: true })
   SchedulePeriods: SchedulePeriod[];
+
+  @OneToMany(() => SchedulePeriodHistory, (schedulePeriodHistory) => schedulePeriodHistory.Title)
+  @Field(() => [SchedulePeriodHistory], { nullable: true })
+  SchedulePeriodHistories: SchedulePeriodHistory[];
 }

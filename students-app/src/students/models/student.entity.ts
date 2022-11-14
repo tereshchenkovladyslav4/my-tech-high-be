@@ -16,6 +16,7 @@ import { ResourceCart } from './resource-cart.entity';
 import { StudentRecord } from './student-record.entity';
 import { ResourceRequest } from './resource-request.entity';
 import { Schedule } from './schedule.entity';
+import { ScheduleHistory } from './schedule-history.entity';
 
 @ObjectType()
 @Directive(
@@ -143,4 +144,8 @@ export class Student extends BaseEntity {
   @OneToMany(() => Schedule, (schedule) => schedule.Student)
   @Field(() => [Schedule], { nullable: true })
   StudentSchedules: Schedule[];
+
+  @OneToMany(() => ScheduleHistory, (scheduleHistory) => scheduleHistory.Student)
+  @Field(() => [ScheduleHistory], { nullable: true })
+  StudentScheduleHistories: ScheduleHistory[];
 }

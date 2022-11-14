@@ -15,6 +15,7 @@ import { Title } from './title.entity';
 import { Period } from './period.entity';
 import { Course } from './course.entity';
 import { SchedulePeriod } from './schedule-period.entity';
+import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
 @ObjectType()
 @Directive(
@@ -79,4 +80,8 @@ export class Subject extends BaseEntity {
   @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Subject)
   @Field(() => [SchedulePeriod], { nullable: true })
   SchedulePeriods: SchedulePeriod[];
+
+  @OneToMany(() => SchedulePeriodHistory, (schedulePeriod) => schedulePeriod.Subject)
+  @Field(() => [SchedulePeriodHistory], { nullable: true })
+  SchedulePeriodHistories: SchedulePeriodHistory[];
 }

@@ -12,6 +12,7 @@ import {
 import { Assessment } from './assessment.entity';
 import { Region } from './region.entity';
 import { Resource } from './resource.entity';
+import { ScheduleHistory } from './schedule-history.entity';
 import { Schedule } from './schedule.entity';
 import { ScheduleBuilder } from './scheduler-builder.entity';
 import { SchoolPartner } from './school-partner.entity';
@@ -208,6 +209,10 @@ export class SchoolYear extends BaseEntity {
   @OneToMany(() => Schedule, (schedule) => schedule.SchoolYear)
   @Field(() => [Schedule], { nullable: true })
   Schedules: Schedule[];
+
+  @OneToMany(() => ScheduleHistory, (scheduleHistory) => scheduleHistory.SchoolYear)
+  @Field(() => [ScheduleHistory], { nullable: true })
+  ScheduleHistories: ScheduleHistory[];
 
   @OneToMany(() => Subject, (subject) => subject.SchoolYear)
   @Field(() => [Subject], { nullable: true })

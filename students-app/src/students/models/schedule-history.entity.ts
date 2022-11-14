@@ -1,21 +1,18 @@
 import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BaseEntity } from 'typeorm';
 import { IsIn } from 'class-validator';
-import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive(
-  '@key(fields: "schedule_id, StudentId, SchoolYearId, status, date_accepted, last_modified, date_submitted, current_submission, is_second_semester")',
-)
-@Entity('mth_schedule')
-export class Schedule extends BaseEntity {
-  @Column('int', { name: 'schedule_id', nullable: true })
+@Directive('@key(fields: "schedule_history_id, StudentId, SchoolYearId, status, date_accepted, is_second_semester")')
+@Entity('mth_schedule_history')
+export class ScheduleHistory extends BaseEntity {
+  @Column('int', { name: 'schedule_history_id', nullable: true })
   @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
-  schedule_id: number;
+  schedule_history_id: number;
 
   @Column('int', { name: 'StudentId', nullable: true })
   @Field(() => Int, { nullable: true })
@@ -43,27 +40,7 @@ export class Schedule extends BaseEntity {
   @Directive('@external')
   date_accepted: Date;
 
-  @Column()
-  @Field(() => Date, { nullable: true })
-  @Directive('@external')
-  last_modified: Date;
-
-  @Column()
-  @Field(() => Date, { nullable: true })
-  @Directive('@external')
-  date_submitted: Date;
-
-  @Column()
-  @Field(() => Date, { nullable: true })
-  @Directive('@external')
-  current_submission: Date;
-
-  // @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Schedules)
-  // @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
-  // @Directive('@external')
-  // SchoolYear: SchoolYear;
-
-  @ManyToOne(() => Student, (student) => student.StudentSchedules, {
+  @ManyToOne(() => Student, (student) => student.StudentScheduleHistories, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })

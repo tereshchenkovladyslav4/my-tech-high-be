@@ -3,6 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany, JoinTab
 import { Subject } from './subject.entity';
 import { Provider } from './provider.entity';
 import { SchedulePeriod } from './schedule-period.entity';
+import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -76,4 +77,8 @@ export class Period extends BaseEntity {
   @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Period)
   @Field(() => [SchedulePeriod], { nullable: true })
   SchedulePeriods: SchedulePeriod[];
+
+  @OneToMany(() => SchedulePeriodHistory, (schedulePeriodHistory) => schedulePeriodHistory.Period)
+  @Field(() => [SchedulePeriodHistory], { nullable: true })
+  SchedulePeriodHistories: SchedulePeriodHistory[];
 }

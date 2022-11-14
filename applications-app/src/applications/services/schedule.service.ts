@@ -18,12 +18,16 @@ import { StudentsService } from './students.service';
 import { SchoolYearService } from './schoolyear.service';
 import * as Moment from 'moment';
 import { ResponseDTO } from '../dto/response.dto';
+import { ScheduleHistory } from '../models/schedule-history.entity';
+import { ScheduleStatus } from '../enums';
 
 @Injectable()
 export class ScheduleService {
   constructor(
     @InjectRepository(Schedule)
     private readonly repo: Repository<Schedule>,
+    @InjectRepository(ScheduleHistory)
+    private readonly historyRepo: Repository<ScheduleHistory>,
     private userRegionService: UserRegionService,
     private emailTemplateService: EmailTemplatesService,
     private sesEmailService: EmailsService,
@@ -265,9 +269,39 @@ export class ScheduleService {
     return await qb.getMany();
   }
 
+  async findOneByScheduleId(scheduleId: number): Promise<Schedule> {
+    const result = await this.repo.findOne({ schedule_id: scheduleId });
+    return result;
+  }
+
+  async findHistory(studentId: number, schoolYearId: number): Promise<ScheduleHistory> {
+    const result = this.historyRepo
+      .createQueryBuilder('ScheduleHistory')
+      .where({ StudentId: studentId, SchoolYearId: schoolYearId })
+      .orderBy('schedule_history_id', 'DESC')
+      .getOne();
+    return result;
+  }
+
   async save(scheduleInput: CreateOrUpdateScheduleInput): Promise<Schedule> {
     try {
-      const result = await this.repo.save(scheduleInput);
+      let result: Schedule = null;
+      if (scheduleInput.status === ScheduleStatus.ACCEPTED) {
+        result = await this.repo.save({
+          ...scheduleInput,
+          date_accepted: new Date(),
+        });
+        await this.historyRepo.save({
+          ...scheduleInput,
+          date_accepted: new Date(),
+        });
+      } else {
+        result = await this.repo.save({
+          ...scheduleInput,
+          date_submitted: scheduleInput?.status === ScheduleStatus.SUBMITTED ? new Date() : null,
+        });
+      }
+
       return result;
     } catch (error) {
       return error;

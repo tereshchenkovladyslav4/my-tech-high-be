@@ -5,18 +5,17 @@ import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
 import { SchedulePeriod } from './schedule-period.entity';
 import { ScheduleEmail } from './schedule-email.entity';
+import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
-@InputType('schedule')
+@InputType('schedule_history')
 @ObjectType()
-@Directive(
-  '@key(fields: "schedule_id, StudentId, SchoolYearId, status, date_accepted, last_modified, date_submitted, current_submission, is_second_semester")',
-)
-@Entity({ name: 'mth_schedule' })
-export class Schedule extends BaseEntity {
-  @Column('int', { name: 'schedule_id', nullable: true })
+@Directive('@key(fields: "schedule_history_id, StudentId, SchoolYearId, status, date_accepted, is_second_semester")')
+@Entity({ name: 'mth_schedule_history' })
+export class ScheduleHistory extends BaseEntity {
+  @Column('int', { name: 'schedule_history_id', nullable: true })
   @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
-  schedule_id: number;
+  schedule_history_id: number;
 
   @Column('int', { name: 'StudentId', nullable: true })
   @Field(() => Int, { nullable: true })
@@ -39,26 +38,14 @@ export class Schedule extends BaseEntity {
   @Field(() => Date, { nullable: true })
   date_accepted: Date;
 
-  @Column({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  last_modified: Date;
-
-  @Column({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  date_submitted: Date;
-
-  @Column({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  current_submission: Date;
-
-  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Schedules, {
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.ScheduleHistories, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   SchoolYear: SchoolYear;
 
-  @ManyToOne((type) => Student, (student) => student.Schedules, {
+  @ManyToOne((type) => Student, (student) => student.ScheduleHistories, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
@@ -66,11 +53,7 @@ export class Schedule extends BaseEntity {
   @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
   ScheduleStudent: Student;
 
-  @OneToMany(() => SchedulePeriod, (SchedulePeriod) => SchedulePeriod.Schedule)
-  @Field(() => [SchedulePeriod], { nullable: true })
-  SchedulePeriods: SchedulePeriod[];
-
-  @OneToMany((type) => ScheduleEmail, (ScheduleEmail) => ScheduleEmail.Schedule)
-  @Field(() => [ScheduleEmail], { nullable: true })
-  ScheduleEmails: ScheduleEmail[];
+  @OneToMany(() => SchedulePeriodHistory, (SchedulePeriod) => SchedulePeriod.ScheduleHistory)
+  @Field(() => [SchedulePeriodHistory], { nullable: true })
+  SchedulePeriodHistories: SchedulePeriodHistory[];
 }

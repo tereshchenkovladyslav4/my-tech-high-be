@@ -69,6 +69,8 @@ import { ScheduleResolver } from './resolvers/schedule.resolver';
 import { Schedule } from './models/schedule.entity';
 import { SchedulePeriod } from './models/schedule-period.entity';
 import { SchedulePeriodResolver } from './resolvers/schedule-period.resolver';
+import { ScheduleHistory } from './models/schedule-history.entity';
+import { SchedulePeriodHistory } from './models/schedule-period-history.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -150,6 +152,8 @@ const graphQLImports = [
           Course,
           Schedule,
           SchedulePeriod,
+          ScheduleHistory,
+          SchedulePeriodHistory,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

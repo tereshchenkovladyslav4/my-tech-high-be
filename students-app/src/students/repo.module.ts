@@ -54,6 +54,8 @@ import { Course } from './models/course.entity';
 import { Schedule } from './models/schedule.entity';
 import { SchedulePeriod } from './models/schedule-period.entity';
 import { ScheduleService } from './services/schedule.service';
+import { ScheduleHistory } from './models/schedule-history.entity';
+import { SchedulePeriodHistory } from './models/schedule-period-history.entity';
 import { ProviderService } from './services/provider.service';
 const servicesImports = [
   UsersService,
@@ -117,6 +119,8 @@ const servicesImports = [
       Course,
       Schedule,
       SchedulePeriod,
+      ScheduleHistory,
+      SchedulePeriodHistory,
     ]),
   ],
   providers: [...servicesImports],
