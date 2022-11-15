@@ -66,6 +66,40 @@ export class SchedulePeriodService {
     }
   }
 
+  async restoreScheduleHistory(scheduleHistoryId: number): Promise<boolean> {
+    try {
+      const scheduleId = await this.scheduleService.getScheduleIdByScheduleHistoryId(scheduleHistoryId);
+      const schedulePeriodHistories = await this.historyRepo.find({ ScheduleHistoryId: scheduleHistoryId });
+      if (scheduleId && schedulePeriodHistories?.length) {
+        await this.repo.delete({ ScheduleId: scheduleId });
+        await this.repo.save(
+          schedulePeriodHistories.map((periodHistory) => ({
+            ScheduleId: scheduleId,
+            PeriodId: periodHistory.PeriodId,
+            SubjectId: periodHistory.SubjectId,
+            TitleId: periodHistory.TitleId,
+            ProviderId: periodHistory.ProviderId,
+            CourseId: periodHistory.CourseId,
+            course_type: periodHistory.course_type,
+            custom_build_description: periodHistory.custom_build_description,
+            tp_provider_name: periodHistory.tp_provider_name,
+            tp_course_name: periodHistory.tp_course_name,
+            tp_phone_number: periodHistory.tp_phone_number,
+            tp_specific_course_website: periodHistory.tp_specific_course_website,
+            tp_addtional_specific_course_website: periodHistory.tp_addtional_specific_course_website,
+            osse_coures_name: periodHistory.osse_coures_name,
+            osse_district_school: periodHistory.osse_district_school,
+            osse_school_district_name: periodHistory.osse_school_district_name,
+            update_required: periodHistory.update_required,
+          })),
+        );
+        return true;
+      }
+    } catch (error) {
+      return error;
+    }
+  }
+
   async delete(schedulePeriodId: number): Promise<boolean> {
     try {
       await this.repo.delete({ schedule_period_id: schedulePeriodId });

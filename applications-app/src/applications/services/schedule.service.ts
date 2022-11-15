@@ -274,6 +274,19 @@ export class ScheduleService {
     return result;
   }
 
+  async getScheduleIdByScheduleHistoryId(scheduleHistoryId: number): Promise<number> {
+    try {
+      const scheduleHistory = await this.historyRepo.findOne({ schedule_history_id: scheduleHistoryId });
+      const schedule = await this.repo.findOne({
+        StudentId: scheduleHistory?.StudentId,
+        SchoolYearId: scheduleHistory?.SchoolYearId,
+      });
+      return schedule?.schedule_id || 0;
+    } catch (error) {
+      return error;
+    }
+  }
+
   async findHistory(studentId: number, schoolYearId: number): Promise<ScheduleHistory> {
     const result = this.historyRepo
       .createQueryBuilder('ScheduleHistory')

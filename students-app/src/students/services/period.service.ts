@@ -5,6 +5,7 @@ import { Period } from '../models/period.entity';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { ScheduleService } from './schedule.service';
 import { SchedulePeriod } from '../models/schedule-period.entity';
+import { DiplomaSeekingPathStatus } from '../enums';
 
 @Injectable()
 export class PeriodService {
@@ -27,8 +28,16 @@ export class PeriodService {
     const grade = studentGradeLevel.grade_level;
     const numericGrade = grade.startsWith('K') ? -1 : +grade;
     const diplomaQuery = (alias: string, diploma: string) => {
-      if (diploma) return ` AND ${alias}.diploma_seeking_path in ('both', '${diploma}')`;
-      else return '';
+      switch (diploma) {
+        case DiplomaSeekingPathStatus.BOTH:
+          return ` AND ${alias}.diploma_seeking_path in ('both', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
+        case DiplomaSeekingPathStatus.DIPLOMA_SEEKING:
+          return ` AND ${alias}.diploma_seeking_path in ('both', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}')`;
+        case DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING:
+          return ` AND ${alias}.diploma_seeking_path in ('both', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
+        default:
+          return '';
+      }
     };
 
     const titleCourseQuery = (alias: string, isAlt = false) => {

@@ -424,7 +424,11 @@ export class WithdrawalService {
 				LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
 				LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Notify of Withdraw' AND templates.region_id = schoolYear.RegionId)
 				WHERE 
-					${remind_date > 0 ? 'withdrawal.diff_date = 0' : 'region.withdraw_deadline_num_days > withdrawal.diff_date'} AND 
+					${
+            remind_date > 0
+              ? 'withdrawal.diff_date = 0'
+              : 'region.withdraw_deadline_num_days > withdrawal.diff_date AND withdrawal.diff_date > 0'
+          } AND 
 					templates.id IS NOT NULL
 			`);
       await queryRunner.release();

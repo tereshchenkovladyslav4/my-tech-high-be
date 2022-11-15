@@ -8,5 +8,5 @@ export enum StudentRecordFileKind {
 }
 
 registerEnumType(StudentRecordFileKind, {
-  name: 'WithdrawalStatus',
+  name: 'StudentRecordFileKindEnum',
 });

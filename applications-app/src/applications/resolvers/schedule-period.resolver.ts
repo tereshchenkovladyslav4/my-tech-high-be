@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { SchedulePeriod } from '../models/schedule-period.entity';
@@ -32,13 +32,22 @@ export class SchedulePeriodResolver {
     return this.service.findAllHistories(schoolYearId, studentId);
   }
 
-  @Mutation(() => SchedulePeriod, { name: 'createOrUpdateSchedulePeriod' })
+  @Mutation(() => [SchedulePeriod], { name: 'createOrUpdateSchedulePeriod' })
   @UseGuards(new AuthGuard())
   async createOrUpdateSchedulePeriod(
     @Args('createSchedulePeriodInput')
     createSchedulePeriodInput: schedulePeriodInput,
   ): Promise<SchedulePeriod[]> {
     return this.service.save(createSchedulePeriodInput);
+  }
+
+  @Mutation(() => Boolean, { name: 'restoreScheduleHistory' })
+  @UseGuards(new AuthGuard())
+  async restoreScheduleHistory(
+    @Args({ name: 'schedule_history_id', type: () => Int })
+    scheduleHistoryId: number,
+  ): Promise<boolean> {
+    return this.service.restoreScheduleHistory(scheduleHistoryId);
   }
 
   @Mutation(() => Boolean, { name: 'deleteSchedulePeriod' })

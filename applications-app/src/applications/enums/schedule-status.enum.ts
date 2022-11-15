@@ -11,5 +11,5 @@ export enum ScheduleStatus {
 }
 
 registerEnumType(ScheduleStatus, {
-  name: 'StudentStatusEnum',
+  name: 'ScheduleStatusEnum',
 });

@@ -69,6 +69,8 @@ import { ScheduleResolver } from './resolvers/schedule.resolver';
 import { Schedule } from './models/schedule.entity';
 import { SchedulePeriod } from './models/schedule-period.entity';
 import { SchedulePeriodResolver } from './resolvers/schedule-period.resolver';
+import { MasterResolver } from './resolvers/master.resolver';
+import { Master } from './models/master.entity';
 import { ScheduleHistory } from './models/schedule-history.entity';
 import { SchedulePeriodHistory } from './models/schedule-period-history.entity';
 
@@ -101,6 +103,7 @@ const graphQLImports = [
   TimezonesService,
   ScheduleResolver,
   SchedulePeriodResolver,
+  MasterResolver
 ];
 @Module({
   imports: [
@@ -152,6 +155,7 @@ const graphQLImports = [
           Course,
           Schedule,
           SchedulePeriod,
+          Master,
           ScheduleHistory,
           SchedulePeriodHistory,
         ],
@@ -164,4 +168,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class ApplicationsGraphqlModule {}
+export class ApplicationsGraphqlModule { }

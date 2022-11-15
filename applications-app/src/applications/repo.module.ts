@@ -117,6 +117,8 @@ import { SchedulePeriod } from './models/schedule-period.entity';
 import { SchedulePeriodService } from './services/schedule-period.service';
 import { ScheduleEmailsService } from './services/schedule-emails.service';
 import { ScheduleEmail } from './models/schedule-email.entity';
+import { MasterService } from './services/master.service';
+import { Master } from './models/master.entity';
 import { ScheduleHistory } from './models/schedule-history.entity';
 import { SchedulePeriodHistory } from './models/schedule-period-history.entity';
 
@@ -183,6 +185,7 @@ const servicesImports = [
   TimezonesService,
   ScheduleService,
   SchedulePeriodService,
+  MasterService
 ];
 
 @Global()
@@ -246,6 +249,7 @@ const servicesImports = [
       Course,
       Schedule,
       SchedulePeriod,
+      Master,
       ScheduleHistory,
       SchedulePeriodHistory,
     ]),
@@ -253,5 +257,5 @@ const servicesImports = [
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule {}
+class RepoModule { }
 export default RepoModule;
