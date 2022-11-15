@@ -16,6 +16,34 @@ export class PeriodService {
     private scheduleService: ScheduleService,
   ) {}
 
+  private filterCourses(originalCourses, numericGrade) {
+    const courses = [];
+    const altCourses = [];
+    originalCourses
+      .filter((course) => !course.limit || course.TotalRequests < course.limit)
+      .forEach((course) => {
+        if (course.min_grade <= numericGrade && course.max_grade >= numericGrade) {
+          courses.push(course);
+        } else {
+          altCourses.push(course);
+        }
+      });
+    return { courses, altCourses };
+  }
+
+  private filterTitles(originalTitles, numericGrade) {
+    const titles = [];
+    const altTitles = [];
+    originalTitles.forEach((title) => {
+      if (title.min_grade <= numericGrade && title.max_grade >= numericGrade) {
+        titles.push(title);
+      } else {
+        altTitles.push(title);
+      }
+    });
+    return { titles, altTitles };
+  }
+
   async find(studentId: number, schoolYearId: number, diplomaSeekingPath: string): Promise<Period[]> {
     const studentGradeLevel = await this.studentGradeLevelService.findByStudentID(studentId);
 
@@ -30,22 +58,19 @@ export class PeriodService {
     const diplomaQuery = (alias: string, diploma: string) => {
       switch (diploma) {
         case DiplomaSeekingPathStatus.BOTH:
-          return ` AND ${alias}.diploma_seeking_path in ('both', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
+          return ` AND ${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
         case DiplomaSeekingPathStatus.DIPLOMA_SEEKING:
-          return ` AND ${alias}.diploma_seeking_path in ('both', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}')`;
+          return ` AND ${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}')`;
         case DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING:
-          return ` AND ${alias}.diploma_seeking_path in ('both', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
+          return ` AND ${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
         default:
           return '';
       }
     };
 
     const titleCourseQuery = (alias: string, isAlt = false) => {
-      const altString = isAlt ? 'alt_' : '';
-      const excludeAlt = isAlt
-        ? `AND (${alias}.min_grade > ${numericGrade} OR ${alias}.max_grade < ${numericGrade})`
-        : '';
-      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} ${excludeAlt} AND ${alias}.min_${altString}grade <= ${numericGrade} AND ${alias}.max_${altString}grade >= ${numericGrade}${diplomaQuery(
+      const gradeQuery = `((${alias}.min_grade <= ${numericGrade} AND ${alias}.max_grade >= ${numericGrade}) OR (${alias}.min_alt_grade <= ${numericGrade} AND ${alias}.max_alt_grade >= ${numericGrade}))`;
+      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${gradeQuery} ${diplomaQuery(
         alias,
         diplomaSeekingPath,
       )}`;
@@ -66,35 +91,12 @@ export class PeriodService {
         `Subjects.allow_request = ${true} AND Subjects.is_active = ${true}`,
       )
       .leftJoinAndSelect('Subjects.Titles', 'Titles', `${titleCourseQuery('Titles')}`)
-      .leftJoinAndSelect('Subjects.AltTitles', 'AltTitles', `${titleCourseQuery('AltTitles', true)}`)
       .leftJoinAndSelect('Titles.Courses', 'Courses', `${titleCourseQuery('Courses')}`)
-      .leftJoinAndSelect('AltTitles.Courses', 'AltTitlesCourses', titleCourseQuery('AltTitlesCourses'))
-      .leftJoinAndSelect('Titles.AltCourses', 'AltCourses', titleCourseQuery('AltCourses', true))
-      .leftJoinAndSelect('AltTitles.AltCourses', 'AltTitlesAltCourses', titleCourseQuery('AltTitlesAltCourses', true))
       .leftJoinAndSelect('Subjects.Courses', 'SubjectsCourses', `${titleCourseQuery('SubjectsCourses')}`)
-      .leftJoinAndSelect('Subjects.AltCourses', 'SubjectsAltCourses', `${titleCourseQuery('SubjectsAltCourses', true)}`)
       .loadRelationCountAndMap(
         'Courses.TotalRequests',
         'Courses.SchedulePeriods',
         'CoursesSchedulePeriods',
-        courseRequestsQuery,
-      )
-      .loadRelationCountAndMap(
-        'AltTitlesCourses.TotalRequests',
-        'AltTitlesCourses.SchedulePeriods',
-        'AltTitlesCoursesSchedulePeriods',
-        courseRequestsQuery,
-      )
-      .loadRelationCountAndMap(
-        'AltCourses.TotalRequests',
-        'AltCourses.SchedulePeriods',
-        'AltCoursesSchedulePeriods',
-        courseRequestsQuery,
-      )
-      .loadRelationCountAndMap(
-        'AltTitlesAltCourses.TotalRequests',
-        'AltTitlesAltCourses.SchedulePeriods',
-        'AltTitlesAltCoursesSchedulePeriods',
         courseRequestsQuery,
       )
       .loadRelationCountAndMap(
@@ -103,25 +105,23 @@ export class PeriodService {
         'SubjectsCoursesSchedulePeriods',
         courseRequestsQuery,
       )
-      .loadRelationCountAndMap(
-        'SubjectsAltCourses.TotalRequests',
-        'SubjectsAltCourses.SchedulePeriods',
-        'SubjectsAltCoursesSchedulePeriods',
-        courseRequestsQuery,
-      )
       .where({ school_year_id: schoolYearId, archived: false })
       .getMany();
 
     result.map((period) => {
       period.Subjects.map((subject) => {
-        (subject.Titles || subject.AltTitles).map((title) => {
-          title.Courses = title.Courses.filter((course) => !course.limit || course.TotalRequests < course.limit);
-          title.AltCourses = title.AltCourses.filter((course) => !course.limit || course.TotalRequests < course.limit);
+        subject.Titles.map((title) => {
+          const filteredCourses = this.filterCourses(title.Courses, numericGrade);
+          title.Courses = filteredCourses.courses;
+          title.AltCourses = filteredCourses.altCourses;
         });
-        subject.Courses = subject.Courses.filter((course) => !course.limit || course.TotalRequests < course.limit);
-        subject.AltCourses = subject.AltCourses.filter(
-          (course) => !course.limit || course.TotalRequests < course.limit,
-        );
+        const filteredCourses = this.filterCourses(subject.Courses, numericGrade);
+        subject.Courses = filteredCourses.courses;
+        subject.AltCourses = filteredCourses.altCourses;
+
+        const filteredTitles = this.filterTitles(subject.Titles, numericGrade);
+        subject.Titles = filteredTitles.titles;
+        subject.AltTitles = filteredTitles.altTitles;
       });
     });
 

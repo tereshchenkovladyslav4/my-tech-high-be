@@ -37,7 +37,7 @@ export class ScheduleBuilder extends BaseEntity {
   @Field(() => ID)
   school_year_id: number;
 
-  @Column()
+  @Column('text', { nullable: true })
   @Field()
   parent_tooltip: string;
 
