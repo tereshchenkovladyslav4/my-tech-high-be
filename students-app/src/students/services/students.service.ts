@@ -372,6 +372,7 @@ export class StudentsService {
       midyear_schedule_open: '0000-00-00',
       second_semester_open: '0000-00-00',
       second_semester_close: '0000-00-00',
+      special_ed_options: '',
     };
 
     const parent = await createQueryBuilder(Parent)
@@ -447,6 +448,7 @@ export class StudentsService {
       midyear_schedule_open: schoolYear.midyear_schedule_open || '0000-00-00',
       second_semester_open: schoolYear.second_semester_open || '0000-00-00',
       second_semester_close: schoolYear.second_semester_close || '0000-00-00',
+      special_ed_options: schoolYear.special_ed_options,
     };
   }
 

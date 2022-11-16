@@ -255,7 +255,7 @@ export class ParentToDosService {
       .leftJoinAndSelect(
         Schedule,
         'schedule',
-        "schedule.StudentId = `application`.student_id AND schedule.SchoolYearId = `application`.school_year_id AND schedule.status = 'Submitted'",
+        "schedule.StudentId = `application`.student_id AND schedule.SchoolYearId = `application`.school_year_id AND schedule.status <> 'Draft'",
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)

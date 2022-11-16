@@ -70,4 +70,7 @@ export class StudentCurrentStatus {
 
   @Field(() => String, { nullable: true })
   second_semester_close?: string;
+
+  @Field(() => String, { nullable: true })
+  special_ed_options?: string;
 }
