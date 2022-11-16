@@ -16,11 +16,11 @@ export class PeriodInput {
   @Field(() => String)
   category: string;
 
-  @Field(() => String)
-  grade_level_min: string;
+  @Field(() => Int)
+  min_grade: number;
 
-  @Field(() => String)
-  grade_level_max: string;
+  @Field(() => Int)
+  max_grade: number;
 
   @Field(() => REDUCE_FUNDS, { nullable: true })
   reduce_funds: REDUCE_FUNDS;

@@ -309,9 +309,11 @@ export class ScheduleService {
           date_accepted: new Date(),
         });
       } else {
+        const existingSchedule = scheduleInput.schedule_id ? await this.repo.findOne(scheduleInput.schedule_id) : null;
         result = await this.repo.save({
           ...scheduleInput,
-          date_submitted: scheduleInput?.status === ScheduleStatus.SUBMITTED ? new Date() : null,
+          date_submitted:
+            scheduleInput?.status === ScheduleStatus.SUBMITTED ? existingSchedule?.date_submitted || new Date() : null,
         });
       }
 

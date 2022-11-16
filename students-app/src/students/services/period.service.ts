@@ -68,7 +68,7 @@ export class PeriodService {
       }
     };
 
-    const titleCourseQuery = (alias: string, isAlt = false) => {
+    const titleCourseQuery = (alias: string) => {
       const gradeQuery = `((${alias}.min_grade <= ${numericGrade} AND ${alias}.max_grade >= ${numericGrade}) OR (${alias}.min_alt_grade <= ${numericGrade} AND ${alias}.max_alt_grade >= ${numericGrade}))`;
       return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${gradeQuery} ${diplomaQuery(
         alias,
@@ -106,6 +106,7 @@ export class PeriodService {
         courseRequestsQuery,
       )
       .where({ school_year_id: schoolYearId, archived: false })
+      .andWhere(`period.min_grade <= ${numericGrade} AND period.max_grade >= ${numericGrade}`)
       .getMany();
 
     result.map((period) => {
@@ -125,12 +126,7 @@ export class PeriodService {
       });
     });
 
-    return result?.filter(
-      (item) =>
-        (grade?.includes('K') && item?.grade_level_min == 'Kindergarten') ||
-        ((item?.grade_level_min == 'Kindergarten' || Number(item?.grade_level_min) <= Number(grade)) &&
-          Number(item?.grade_level_max) >= Number(grade)),
-    );
+    return result;
   }
 
   async findByIds(periodIds: (number | string)[]): Promise<Period[]> {

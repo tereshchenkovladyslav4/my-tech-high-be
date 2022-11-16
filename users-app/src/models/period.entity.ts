@@ -16,7 +16,7 @@ import { Provider } from './provider.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id, school_year_id, period, category, grade_level_min, grade_level_max, message_period, notify_period, archived, Subjects, Providers")',
+  '@key(fields: "id, school_year_id, period, category, min_grade, max_grade, message_period, notify_period, archived, Subjects, Providers")',
 )
 @Entity({ name: 'mth_period' })
 export class Period extends BaseEntity {
@@ -38,12 +38,12 @@ export class Period extends BaseEntity {
   category: string;
 
   @Column()
-  @Field(() => String, { nullable: true })
-  grade_level_min: string;
+  @Field(() => Int, { nullable: true })
+  min_grade: number;
 
   @Column()
-  @Field(() => String, { nullable: true })
-  grade_level_max: string;
+  @Field(() => Int, { nullable: true })
+  max_grade: number;
 
   @Column({
     type: 'enum',

@@ -14,7 +14,7 @@ export class PeriodService {
     @InjectRepository(SchoolYear)
     private schoolYearsRepository: Repository<SchoolYear>,
     private scheduleBuilderService: ScheduleBuilderService,
-  ) { }
+  ) {}
 
   async findByIds(periodIds: (number | string)[]): Promise<Period[]> {
     return await this.periodRepository.findByIds(periodIds);
@@ -76,15 +76,15 @@ export class PeriodService {
     });
     const grades =
       (schoolYear.grades.split(',') || [])
-        .sort((a: string, b: string) => (parseInt(a) > parseInt(b) ? 1 : -1))
-        .sort((a: string) => (a === 'Kindergarten' ? -1 : 0)) || [];
+        .map((item) => (item === 'Kindergarten' ? -1 : parseInt(item)))
+        .sort((a, b) => (a > b ? 1 : -1)) || [];
 
-    // validation - grade_level_min
-    const indexMin = grades.findIndex((el) => el === args.grade_level_min);
+    // validation - min_grade
+    const indexMin = grades.findIndex((el) => el === args.min_grade);
     if (indexMin === -1) throw new UnprocessableEntityException('Minimum Grade level does not exist');
 
-    // validation - grade_level_max
-    const indexMax = grades.findIndex((el) => el === args.grade_level_max);
+    // validation - max_grade
+    const indexMax = grades.findIndex((el) => el === args.max_grade);
     if (indexMax === -1) throw new UnprocessableEntityException('Maximum Grade level does not exist');
 
     // validation - min < max
