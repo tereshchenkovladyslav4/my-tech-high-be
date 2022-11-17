@@ -337,6 +337,7 @@ export class StudentsService {
       return await this.studentsRepository
         .createQueryBuilder('student')
         .leftJoinAndSelect('student.person', 'person')
+        .leftJoinAndSelect('student.StudentSchedules', 'StudentSchedules')
         .where('student.parent_id = :parentId', {
           parentId: parent.parent_id,
         })
