@@ -16,7 +16,7 @@ import { Provider } from './provider.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id, school_year_id, period, category, min_grade, max_grade, message_period, notify_period, archived, Subjects, Providers")',
+  '@key(fields: "id, school_year_id, period, category, min_grade, max_grade, semester, message_period, notify_period, archived, Subjects, Providers")',
 )
 @Entity({ name: 'mth_period' })
 export class Period extends BaseEntity {

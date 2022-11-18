@@ -18,7 +18,13 @@ export class ParentToDo {
   submit_schedule?: ToDoItem;
 
   @Field((type) => ToDoItem)
+  submit_second_semester_schedule?: ToDoItem;
+
+  @Field((type) => ToDoItem)
   resubmit_schedule?: ToDoItem;
+
+  @Field((type) => ToDoItem)
+  resubmit_second_semester_schedule?: ToDoItem;
 
   @Field((type) => ToDoItem)
   resubmit_direct_order?: ToDoItem;

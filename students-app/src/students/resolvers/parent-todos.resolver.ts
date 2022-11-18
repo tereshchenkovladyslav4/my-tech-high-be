@@ -37,9 +37,19 @@ export class ParentToDosResolver {
     return this.parentToDosService.submitSchedule(user);
   }
 
+  @ResolveField((of) => ToDoItem, { name: 'submit_second_semester_schedule' })
+  public async getSubmitSecondSemesterSchedule(@Parent() user: User): Promise<ToDoItem> {
+    return this.parentToDosService.submitSecondSemesterSchedule(user);
+  }
+
   @ResolveField((of) => ToDoItem, { name: 'resubmit_schedule' })
   public async getResubmitSchedule(@Parent() user: User): Promise<ToDoItem> {
     return this.parentToDosService.resubmitSchedule(user);
+  }
+
+  @ResolveField((of) => ToDoItem, { name: 'resubmit_second_semester_schedule' })
+  public async getResubmitSecondSemesterSchedule(@Parent() user: User): Promise<ToDoItem> {
+    return this.parentToDosService.resubmitSecondSemesterSchedule(user);
   }
 
   @ResolveField((of) => ToDoItem, { name: 'resubmit_direct_order' })

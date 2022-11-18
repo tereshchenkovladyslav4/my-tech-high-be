@@ -19,6 +19,9 @@ export class UpdateProfileInput {
   last_name?: string;
 
   @Field({ nullable: true })
+  avatar_url?: string;
+
+  @Field({ nullable: true })
   @MaxLength(60)
   @IsOptional()
   preferred_first_name?: string;

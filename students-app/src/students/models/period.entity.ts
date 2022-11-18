@@ -2,11 +2,12 @@ import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Provider } from './provider.entity';
+import { SEMESTER_TYPE } from '../enums';
 
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "id, school_year_id, period, category, min_grade, max_grade, message_period, notify_period, archived, Subjects, Providers")',
+  '@key(fields: "id, school_year_id, period, category, min_grade, max_grade, semester, message_period, notify_period, archived, Subjects, Providers")',
 )
 @Entity({ name: 'mth_period' })
 export class Period extends BaseEntity {
@@ -40,6 +41,15 @@ export class Period extends BaseEntity {
   @Field(() => Int, { nullable: true })
   @Directive('@external')
   max_grade: number;
+
+  @Column({
+    type: 'enum',
+    enum: SEMESTER_TYPE,
+    comment: 'NONE: NONE(default), PERIOD: PERIOD, SUBJECT: SUBJECT',
+  })
+  @Field(() => SEMESTER_TYPE, { nullable: true })
+  @Directive('@external')
+  semester?: SEMESTER_TYPE;
 
   @Column()
   @Field(() => String, { nullable: true })

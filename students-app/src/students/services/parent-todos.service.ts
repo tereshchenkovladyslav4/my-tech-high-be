@@ -10,10 +10,11 @@ import { Packet } from '../models/packet.entity';
 import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
-import { StudentStatusEnum, WithdrawalStatus } from '../enums';
+import { ScheduleStatus, StudentStatusEnum, WithdrawalStatus } from '../enums';
 import { TimezoneService } from './timezone.service';
 import { SchoolYear } from '../models/schoolyear.entity';
 import { Schedule } from '../models/schedule.entity';
+import { Period } from '../models/period.entity';
 
 @Injectable()
 export class ParentToDosService {
@@ -66,7 +67,7 @@ export class ParentToDosService {
     return _activeSchoolYears;
   }
 
-  async getScheduleActiveSchoolYears(region_id: number): Promise<any> {
+  async getScheduleActiveSchoolYears(region_id: number, is_second_semester: boolean): Promise<any> {
     const activeSchoolYears = await this.schoolYearsService.getAllActive(region_id);
     let _activeSchoolYears = [];
     const nowDate = await this.timeZoneService.getTimezoneDate(region_id);
@@ -75,9 +76,14 @@ export class ParentToDosService {
       _activeSchoolYears = activeSchoolYears
         .filter(
           (schoolYear) =>
-            schoolYear.schedule &&
-            schoolYear.schedule_builder_open <= nowDate &&
-            schoolYear.schedule_builder_close >= nowDate,
+            (schoolYear.schedule &&
+              !is_second_semester &&
+              schoolYear.schedule_builder_open <= nowDate &&
+              schoolYear.schedule_builder_close >= nowDate) ||
+            (schoolYear.schedule &&
+              is_second_semester &&
+              schoolYear.second_semester_open <= nowDate &&
+              schoolYear.second_semester_close >= nowDate),
         )
         .map(function (a) {
           return a.school_year_id;
@@ -229,7 +235,7 @@ export class ParentToDosService {
     }
 
     const { userRegion_region_id, Parent_parent_id } = parent;
-    const scheduledActiveSchoolYears = await this.getScheduleActiveSchoolYears(userRegion_region_id);
+    const scheduledActiveSchoolYears = await this.getScheduleActiveSchoolYears(userRegion_region_id, false);
     const scheduleActiveMidSchoolYears = await this.getScheduleActiveMidSchoolYears(userRegion_region_id);
 
     if (scheduledActiveSchoolYears.length == 0 && scheduleActiveMidSchoolYears.length == 0) {
@@ -255,11 +261,69 @@ export class ParentToDosService {
       .leftJoinAndSelect(
         Schedule,
         'schedule',
-        "schedule.StudentId = `application`.student_id AND schedule.SchoolYearId = `application`.school_year_id AND schedule.status <> 'Draft'",
+        `schedule.StudentId = application.student_id AND (schedule.is_second_semester = 0 OR schedule.is_second_semester IS NULL) AND schedule.SchoolYearId = application.school_year_id AND schedule.status <> '${ScheduleStatus.DRAFT}'`,
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
       .andWhere('schedule.schedule_id IS NULL')
+      .orderBy('application.application_id', 'DESC')
+      .printSql()
+      .getMany();
+
+    defaultResponse.students = students;
+
+    return defaultResponse;
+  }
+
+  async submitSecondSemesterSchedule(user: User): Promise<ToDoItem> {
+    const parent = await this.getParent(user.user_id);
+    const defaultResponse = {
+      category: ToDoCategory.SUBMIT_SECOND_SEMESTER_SCHEDULE,
+      phrase: 'Submit 2nd Semester Schedule',
+      button: 'Submit Now',
+      icon: '',
+      dashboard: 1, // yes
+      homeroom: 1, // yes
+      students: [],
+    };
+    if (!parent) {
+      return defaultResponse;
+    }
+
+    const { userRegion_region_id, Parent_parent_id } = parent;
+    const scheduledActiveSchoolYears = await this.getScheduleActiveSchoolYears(userRegion_region_id, true);
+    const scheduleActiveMidSchoolYears = await this.getScheduleActiveMidSchoolYears(userRegion_region_id);
+
+    if (scheduledActiveSchoolYears.length == 0 && scheduleActiveMidSchoolYears.length == 0) {
+      return defaultResponse;
+    }
+
+    const students = await createQueryBuilder(Student)
+      .leftJoin('Student.status', 'studentStatus')
+      .innerJoin(
+        Application,
+        'application',
+        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND (application.midyear_application = 0 AND application.school_year_id IN (:schoolYears) || application.midyear_application = 1 AND application.school_year_id IN (:midSchoolYears))",
+        {
+          schoolYears: scheduledActiveSchoolYears.length ? scheduledActiveSchoolYears : [0],
+          midSchoolYears: scheduleActiveMidSchoolYears.length ? scheduleActiveMidSchoolYears : [0],
+        },
+      )
+      .innerJoin(
+        Packet,
+        'packet',
+        "packet.student_id = `Student`.student_id AND packet.status = 'Accepted' AND packet.deleted = 0",
+      )
+      .leftJoinAndSelect(
+        Schedule,
+        'schedule',
+        `schedule.StudentId = application.student_id AND schedule.is_second_semester = 1 AND schedule.SchoolYearId = application.school_year_id AND schedule.status <> '${ScheduleStatus.DRAFT}'`,
+      )
+      .innerJoin(Period, 'period', "period.school_year_id = application.school_year_id AND period.semester <> 'None'")
+      .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
+      .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
+      .andWhere('schedule.schedule_id IS NULL')
+      .andWhere('period.id IS NOT NULL')
       .orderBy('application.application_id', 'DESC')
       .printSql()
       .getMany();
@@ -281,6 +345,64 @@ export class ParentToDosService {
       homeroom: 1, // yes
       students: students,
     };
+  }
+
+  async resubmitSecondSemesterSchedule(user: User): Promise<ToDoItem> {
+    const parent = await this.getParent(user.user_id);
+    const defaultResponse = {
+      category: ToDoCategory.RESUBMIT_SECOND_SEMESTER_SCHEDULE,
+      phrase: 'Resubmit 2nd Semester Schedule',
+      button: 'Resubmit Now',
+      icon: '',
+      dashboard: 1, // yes
+      homeroom: 1, // yes
+      students: [],
+    };
+    if (!parent) {
+      return defaultResponse;
+    }
+
+    const { userRegion_region_id, Parent_parent_id } = parent;
+    const scheduledActiveSchoolYears = await this.getScheduleActiveSchoolYears(userRegion_region_id, true);
+    const scheduleActiveMidSchoolYears = await this.getScheduleActiveMidSchoolYears(userRegion_region_id);
+
+    if (scheduledActiveSchoolYears.length == 0 && scheduleActiveMidSchoolYears.length == 0) {
+      return defaultResponse;
+    }
+
+    const students = await createQueryBuilder(Student)
+      .leftJoin('Student.status', 'studentStatus')
+      .innerJoin(
+        Application,
+        'application',
+        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND (application.midyear_application = 0 AND application.school_year_id IN (:schoolYears) || application.midyear_application = 1 AND application.school_year_id IN (:midSchoolYears))",
+        {
+          schoolYears: scheduledActiveSchoolYears.length ? scheduledActiveSchoolYears : [0],
+          midSchoolYears: scheduleActiveMidSchoolYears.length ? scheduleActiveMidSchoolYears : [0],
+        },
+      )
+      .innerJoin(
+        Packet,
+        'packet',
+        "packet.student_id = `Student`.student_id AND packet.status = 'Accepted' AND packet.deleted = 0",
+      )
+      .leftJoinAndSelect(
+        Schedule,
+        'schedule',
+        `schedule.StudentId = application.student_id AND schedule.is_second_semester = 1 AND schedule.SchoolYearId = application.school_year_id AND schedule.status = '${ScheduleStatus.UPDATES_REQUIRED}'`,
+      )
+      .innerJoin(Period, 'period', "period.school_year_id = application.school_year_id AND period.semester <> 'None'")
+      .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
+      .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
+      .andWhere('schedule.schedule_id IS NOT NULL')
+      .andWhere('period.id IS NOT NULL')
+      .orderBy('application.application_id', 'DESC')
+      .printSql()
+      .getMany();
+
+    defaultResponse.students = students;
+
+    return defaultResponse;
   }
 
   async resubmitReimbursement(user: User): Promise<ToDoItem> {

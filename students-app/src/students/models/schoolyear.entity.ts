@@ -233,7 +233,15 @@ export class SchoolYear extends BaseEntity {
   @Directive('@external')
   ScheduleBuilder: ScheduleBuilder;
 
-  // @OneToMany(() => Schedule, (schedule) => schedule.SchoolYear)
-  // @Field(() => [Schedule], { nullable: true })
-  // SchoolYearSchedules: Schedule[];
+  @Field(() => Boolean, { nullable: true })
+  IsCurrentYear: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  IsScheduleBuilderOpen: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  IsSecondSemesterOpen: boolean;
+
+  @Field(() => String, { nullable: true })
+  ScheduleStatus: string;
 }

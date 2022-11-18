@@ -371,6 +371,7 @@ export class UsersService {
       .update(User)
       .set({
         email: updateProfileInput.email,
+        avatar_url: updateProfileInput.avatar_url,
       })
       .where('user_id = :id', { id: user.user_id })
       .execute();

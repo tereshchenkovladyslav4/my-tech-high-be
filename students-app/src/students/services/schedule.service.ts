@@ -15,7 +15,7 @@ export class ScheduleService {
     return this.repo.findOne({ StudentId: studentId, SchoolYearId: schoolYearId });
   }
 
-  async findActiveSchedules(studentId: number): Promise<Schedule[]> {
-    return this.repo.find({ StudentId: studentId, status: In([ScheduleStatus.SUBMITTED, ScheduleStatus.ACCEPTED]) });
+  async findAllSchedules(studentId: number): Promise<Schedule[]> {
+    return this.repo.find({ StudentId: studentId });
   }
 }

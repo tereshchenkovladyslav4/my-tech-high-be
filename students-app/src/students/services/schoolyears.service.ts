@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, MoreThanOrEqual, In, createQueryBuilder } from 'typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual, In, createQueryBuilder, Not } from 'typeorm';
 import { Parent } from '../models/parent.entity';
 import { SchoolYear } from '../models/schoolyear.entity';
 import { TimezoneService } from './timezone.service';
@@ -49,11 +49,7 @@ export class SchoolYearsService {
     });
   }
 
-  async getActiveHomeroomResourceSchoolYears(studentId: number): Promise<SchoolYear[]> {
-    const activeSchoolYearIds = (await this.studentStatusService.findActive(studentId)).map(
-      (item) => item.school_year_id,
-    );
-
+  private async getRegionId(studentId: number): Promise<number> {
     const parent = await createQueryBuilder(Student)
       .innerJoinAndSelect(Parent, 'Parent', 'Parent.parent_id = `Student`.parent_id')
       .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
@@ -63,6 +59,15 @@ export class SchoolYearsService {
       .getRawOne();
 
     const regionId = (parent && parent.userRegion_region_id) || null;
+    return regionId;
+  }
+
+  async getActiveHomeroomResourceSchoolYears(studentId: number): Promise<SchoolYear[]> {
+    const activeSchoolYearIds = (await this.studentStatusService.findActive(studentId)).map(
+      (item) => item.school_year_id,
+    );
+
+    const regionId = await this.getRegionId(studentId);
 
     const now = await this.timezoneService.getTimezoneDate(regionId);
     return this.schoolYearsRepository.find({
@@ -76,15 +81,39 @@ export class SchoolYearsService {
 
   async getActiveScheduleSchoolYears(studentId: number): Promise<SchoolYear[]> {
     // TODO Have to remove gradated schedules
-    const activeScheduleSchoolYearIds = (await this.scheduleService.findActiveSchedules(studentId)).map(
-      (item) => item.SchoolYearId,
-    );
+    const schedules = await this.scheduleService.findAllSchedules(studentId);
+    const activeScheduleSchoolYearIds = schedules.map((item) => item.SchoolYearId);
 
-    return this.schoolYearsRepository.find({
+    const activeScheduleSchoolYears = await this.schoolYearsRepository.find({
       where: {
         school_year_id: In(activeScheduleSchoolYearIds),
       },
     });
+    activeScheduleSchoolYears.map((item) => {
+      item.ScheduleStatus = schedules.find(
+        (schedule) => schedule.SchoolYearId === item.school_year_id && !schedule.is_second_semester,
+      )?.status;
+    });
+
+    const regionId = await this.getRegionId(studentId);
+
+    const now = await this.timezoneService.getTimezoneDate(regionId);
+    const openScheduleSchoolYears = await this.schoolYearsRepository.find({
+      where: {
+        RegionId: regionId,
+        school_year_id: Not(In(activeScheduleSchoolYearIds)),
+        schedule_builder_open: LessThanOrEqual(now),
+        schedule_builder_close: MoreThanOrEqual(now),
+      },
+    });
+
+    const result = activeScheduleSchoolYears.concat(openScheduleSchoolYears);
+    result.map((item) => {
+      item.IsCurrentYear = item.date_begin <= now && item.date_end >= now;
+      item.IsScheduleBuilderOpen = item.schedule_builder_open <= now && item.schedule_builder_close >= now;
+      item.IsSecondSemesterOpen = item.second_semester_open <= now && item.second_semester_close >= now;
+    });
+    return result;
   }
 
   findNextYear(year: number, regionId: number): Promise<SchoolYear> {
