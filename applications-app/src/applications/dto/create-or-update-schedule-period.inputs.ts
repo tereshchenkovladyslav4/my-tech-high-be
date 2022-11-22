@@ -1,4 +1,5 @@
 import { Field, Float, InputType, Int } from '@nestjs/graphql';
+import { SchedulePeriodStatus } from '../enums';
 
 @InputType()
 export class CreateOrUpdateSchedulePeriodInput {
@@ -42,10 +43,10 @@ export class CreateOrUpdateSchedulePeriodInput {
   tp_specific_course_website: string;
 
   @Field(() => String, { nullable: true })
-  tp_addtional_specific_course_website: string;
+  tp_additional_specific_course_website: string;
 
   @Field(() => String, { nullable: true })
-  osse_coures_name: string;
+  osse_course_name: string;
 
   @Field(() => String, { nullable: true })
   osse_district_school: string;
@@ -55,6 +56,9 @@ export class CreateOrUpdateSchedulePeriodInput {
 
   @Field(() => Boolean, { nullable: true })
   update_required?: boolean;
+
+  @Field(() => SchedulePeriodStatus, { nullable: true })
+  status: SchedulePeriodStatus;
 }
 
 @InputType()

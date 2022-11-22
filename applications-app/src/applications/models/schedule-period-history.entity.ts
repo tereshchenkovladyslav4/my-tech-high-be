@@ -11,7 +11,7 @@ import { ScheduleHistory } from './schedule-history.entity';
 @InputType('schedule_period_history')
 @ObjectType()
 @Directive(
-  '@key(fields: "schedule_period_history_id, ScheduleHistoryId, PeriodId, SubjectId, TitleId, ProviderId, CourseId, course_type, custom_build_description, tp_provider_name, tp_course_name, tp_phone_number, tp_specific_course_website, tp_addtional_specific_course_website, osse_coures_name, osse_district_school, osse_school_district_name")',
+  '@key(fields: "schedule_period_history_id, ScheduleHistoryId, PeriodId, SubjectId, TitleId, ProviderId, CourseId, course_type, custom_build_description, tp_provider_name, tp_course_name, tp_phone_number, tp_specific_course_website, tp_additional_specific_course_website, osse_course_name, osse_district_school, osse_school_district_name")',
 )
 @Entity({ name: 'mth_schedule_period_history' })
 export class SchedulePeriodHistory extends BaseEntity {
@@ -70,11 +70,11 @@ export class SchedulePeriodHistory extends BaseEntity {
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
-  tp_addtional_specific_course_website: string;
+  tp_additional_specific_course_website: string;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
-  osse_coures_name: string;
+  osse_course_name: string;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })

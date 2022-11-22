@@ -6,11 +6,12 @@ import { Subject } from './subject.entity';
 import { Title } from './title.entity';
 import { Provider } from './provider.entity';
 import { Course } from './course.entity';
+import { SchedulePeriodStatus } from '../enums';
 
 @InputType('schedule_period')
 @ObjectType()
 @Directive(
-  '@key(fields: "schedule_period_id, ScheduleId, PeriodId, SubjectId, TitleId, ProviderId, CourseId, course_type, custom_build_description, tp_provider_name, tp_course_name, tp_phone_number, tp_specific_course_website, tp_addtional_specific_course_website, osse_coures_name, osse_district_school, osse_school_district_name")',
+  '@key(fields: "schedule_period_id, ScheduleId, PeriodId, SubjectId, TitleId, ProviderId, CourseId, course_type, custom_build_description, tp_provider_name, tp_course_name, tp_phone_number, tp_specific_course_website, tp_additional_specific_course_website, osse_course_name, osse_district_school, osse_school_district_name")',
 )
 @Entity({ name: 'mth_schedule_period' })
 export class SchedulePeriod extends BaseEntity {
@@ -69,11 +70,11 @@ export class SchedulePeriod extends BaseEntity {
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
-  tp_addtional_specific_course_website: string;
+  tp_additional_specific_course_website: string;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
-  osse_coures_name: string;
+  osse_course_name: string;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
@@ -86,6 +87,15 @@ export class SchedulePeriod extends BaseEntity {
   @Column({ nullable: true })
   @Field(() => Boolean, { nullable: true })
   update_required: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: SchedulePeriodStatus,
+    comment: 'UPDATE_REQUESTED: Update Requested by Parent',
+    default: null,
+  })
+  @Field(() => SchedulePeriodStatus, { nullable: true })
+  status: SchedulePeriodStatus;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.SchedulePeriods, {
     onDelete: 'SET NULL',
