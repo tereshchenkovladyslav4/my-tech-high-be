@@ -16,6 +16,12 @@ export class MasterResolver {
     return this.service.getAll(schoolYearId);
   }
 
+  @Query((returns) => Master, { name: 'getMastersById' })
+  @UseGuards(new AuthGuard())
+  async getMastersById(@Args('masterId', { type: () => Int }) masterId: number): Promise<Master> {
+    return this.service.getById(masterId);
+  }
+
   @Mutation((returns) => Boolean, { name: 'createNewMaster' })
   @UseGuards(new AuthGuard())
   async createNewMaster(

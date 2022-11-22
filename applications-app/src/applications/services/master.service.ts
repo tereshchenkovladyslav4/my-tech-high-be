@@ -18,6 +18,13 @@ export class MasterService {
         return result;
     }
 
+    async getById(masterId: number): Promise<Master> {
+        const result = await this.masterRepository.findOne({
+            master_id: masterId
+        });
+        return result;
+    }
+
     async save(createNewMasterInput: CreateNewMasterInput): Promise<Boolean> {
         await this.masterRepository.save(createNewMasterInput);
         return true;

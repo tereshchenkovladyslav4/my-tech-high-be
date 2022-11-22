@@ -88,6 +88,7 @@ export class SchoolYearsService {
       where: {
         school_year_id: In(activeScheduleSchoolYearIds),
       },
+      relations: ['ScheduleBuilder'],
     });
     activeScheduleSchoolYears.map((item) => {
       item.ScheduleStatus = schedules.find(
@@ -105,6 +106,7 @@ export class SchoolYearsService {
         schedule_builder_open: LessThanOrEqual(now),
         schedule_builder_close: MoreThanOrEqual(now),
       },
+      relations: ['ScheduleBuilder'],
     });
 
     const result = activeScheduleSchoolYears.concat(openScheduleSchoolYears);

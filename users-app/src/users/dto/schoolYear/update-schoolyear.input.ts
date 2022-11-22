@@ -1,6 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsNotEmpty } from 'class-validator';
-import { Column } from 'typeorm';
+import { ReduceFunds } from '../../../enums';
 
 @InputType()
 export class UpdateSchoolYearInput {
@@ -88,4 +88,19 @@ export class UpdateSchoolYearInput {
 
   @Field(() => String, { nullable: true })
   homeroom_resource_close?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  learning_logs?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  learning_logs_first_second_semesters?: boolean;
+
+  @Field(() => ReduceFunds, { nullable: true })
+  reimbursements?: ReduceFunds;
+
+  @Field(() => Boolean, { nullable: true })
+  require_software?: boolean;
+
+  @Field(() => ReduceFunds, { nullable: true })
+  direct_orders?: ReduceFunds;
 }
