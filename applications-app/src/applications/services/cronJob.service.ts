@@ -21,7 +21,6 @@ export class CronJobService {
     private announcementsService: AnnouncementsService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
   //async findScheduledAnnouncements2() {
   //  try {
   //    const queryRunner = await getConnection().createQueryRunner();
@@ -98,7 +97,7 @@ export class CronJobService {
   //  }
   //}
 
-  //@Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE)
   async findScheduledAnnouncements() {
     try {
       const queryRunner = await getConnection().createQueryRunner();
@@ -111,6 +110,9 @@ export class CronJobService {
           RegionId,
           filter_grades,
           filter_users,
+          filter_program_years,
+          filter_school_partners,
+          filter_others,
           schedule_time AS scheduleTime
         FROM infocenter.announcement
         WHERE
@@ -130,6 +132,7 @@ export class CronJobService {
           filter_users,
           filter_program_years,
           filter_school_partners,
+          filter_others,
         } = announcement;
 
         const userEmailList = await this.announcementsService.getAnnouncementUsersByFilters({
@@ -138,6 +141,7 @@ export class CronJobService {
           filter_users,
           filter_program_years,
           filter_school_partners,
+          filter_others,
         });
         userEmailList.map(async (user) => {
           await this.sesEmailService.sendAnnouncementEmail({

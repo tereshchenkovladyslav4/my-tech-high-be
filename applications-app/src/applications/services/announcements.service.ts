@@ -24,6 +24,7 @@ import { AnnouncementFilterArgs } from '../dto/announcement-filter.args';
 import { StudentAssessmentOption } from '../models/student-assessment-option.entity';
 import { AssessmentOption } from '../models/assessment-option.entity';
 import { StudentStatus } from '../models/student-status.entity';
+import { SchoolEnrollment } from '../models/school-enrollment.entity';
 @Injectable()
 export class AnnouncementsService {
   constructor(
@@ -206,6 +207,7 @@ export class AnnouncementsService {
         const parentQuery = this.applicationsRepository
           .createQueryBuilder('application')
           .leftJoin(Student, 'student', 'student.student_id = application.student_id')
+          .leftJoin(SchoolEnrollment, 'schoolEnrollment', 'schoolEnrollment.student_id = student.student_id')
           .leftJoin(Observer, 'observer', 'observer.student_id = student.student_id')
           .leftJoin(Parent, 'parent', 'parent.parent_id = student.parent_id')
           .leftJoinAndSelect(Person, 'person', 'person.person_id = parent.person_id')
@@ -247,6 +249,21 @@ export class AnnouncementsService {
           parentQuery.andWhere('schoolPartner.school_partner_id IN(:...schoolPartnerIds)', {
             schoolPartnerIds: schoolPartners,
           });
+
+          if (schoolPartners.includes('Unassigned')) {
+            const filteredOutUnassigned = schoolPartners.filter((item) => item !== 'Unassigned');
+            parentQuery.andWhere(
+              new Brackets((qb) => {
+                qb.where('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
+                  schoolPartnerIds: filteredOutUnassigned,
+                }).orWhere('schoolEnrollment.school_partner_id IS NULL');
+              }),
+            );
+          } else {
+            parentQuery.andWhere('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
+              schoolPartnerIds: schoolPartners,
+            });
+          }
         }
 
         if (filterOther.indexOf('testing-opt-in') !== -1 && filterOther.indexOf('testing-opt-out') !== -1) {
