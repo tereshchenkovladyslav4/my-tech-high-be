@@ -31,7 +31,7 @@ export class UsersService {
     private emailService: EmailsService,
     private emailVerifierService: EmailVerifierService,
     private userRegionService: UserRegionService,
-  ) {}
+  ) { }
 
   saltPassword(password: string) {
     return crypto.createHash('md5').update(`${password}${salt}`).digest('hex');
@@ -552,5 +552,29 @@ export class UsersService {
       avatar_url: null,
       updated_at,
     });
+  }
+
+  async getTeachersBySearch(searchPrimaryTeacher: GetPersonInfoArgs): Promise<User[]> {
+    const { region_id, search } = searchPrimaryTeacher;
+
+
+    let qb = this.usersRepository
+      .createQueryBuilder('users')
+      .innerJoinAndSelect('users.userRegion', 'userRegion')
+      .where('userRegion.region_id = :region_id', { region_id: region_id })
+      .andWhere('users.level = 16')
+      .andWhere('users.status = 1');
+
+    if (search) {
+      qb.andWhere(
+        new Brackets((sub) => {
+          sub.where('users.first_name like :text', { text: `%${search}%` });
+          sub.orWhere('users.last_name like :text', { text: `%${search}%` });
+        }),
+      )
+    }
+
+    const [results] = await qb.getManyAndCount();
+    return results;
   }
 }

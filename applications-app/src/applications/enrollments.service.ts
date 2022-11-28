@@ -64,7 +64,7 @@ export class EnrollmentsService {
     private sesEmailService: EmailsService,
     private emailReminderService: EmailReminderService,
     private userRegionService: UserRegionService,
-  ) { }
+  ) {}
 
   async saveEnrollmentPacket(enrollmentPacketInput: EnrollmentPacketInput): Promise<EnrollmentPacket> {
     const {
@@ -348,19 +348,35 @@ export class EnrollmentsService {
         });
       }
 
+      const parseGradeLevel = (value: number | string): number => {
+        if (!value) return 0;
+        if (value === 'OR-K') return 0;
+        if (['K', 'Kindergarten', 'Kin'].indexOf(value + '') !== -1) return 5;
+        return Number(value) + 5;
+      };
+
+      const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
+      const grade_age = parseGradeLevel(grade_level);
+      let is_age_issue = false;
+
+      if (age != 0 && grade_age != 0) {
+        is_age_issue = age < grade_age;
+      }
+
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
         status: 'Started',
-        deadline: new Date().toISOString(),
+        deadline: packetData ? packetData.deadline.toISOString() : new Date().toISOString(),
         date_accepted: null,
-        date_submitted: null,
-        date_last_submitted: null,
+        date_submitted: new Date(),
+        date_last_submitted: new Date(),
         secondary_contact_first: packet.secondary_contact_first,
         secondary_contact_last: packet.secondary_contact_last,
         school_district: packet.school_district,
         meta: packet.meta,
         special_ed: String(special_ed),
+        is_age_issue: is_age_issue,
       });
       const studentInfo = await this.studentsService.findOneById(student_id);
 
@@ -448,19 +464,35 @@ export class EnrollmentsService {
         status = 'Resubmitted';
       }
 
+      const parseGradeLevel = (value: number | string): number => {
+        if (!value) return 0;
+        if (value === 'OR-K') return 0;
+        if (['K', 'Kindergarten', 'Kin'].indexOf(value + '') !== -1) return 5;
+        return Number(value) + 5;
+      };
+
+      const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
+      const grade_age = parseGradeLevel(grade_level);
+      let is_age_issue = false;
+
+      if (age != 0 && grade_age != 0) {
+        is_age_issue = age < grade_age;
+      }
+
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id: g_packet_id,
         student_id,
-        deadline: new Date().toISOString(),
+        deadline: packetData ? packetData.deadline.toISOString() : new Date().toISOString(),
         date_accepted: null,
-        date_submitted: null,
-        date_last_submitted: null,
+        date_submitted: new Date(),
+        date_last_submitted: new Date(),
         secondary_contact_first: packet.secondary_contact_first,
         secondary_contact_last: packet.secondary_contact_last,
         school_district: packet.school_district,
         meta: packet.meta,
         signature_file_id,
         status: status,
+        is_age_issue: is_age_issue,
       });
       console.log('Student Packet: ', studentPacket);
 
@@ -527,6 +559,8 @@ export class EnrollmentsService {
         student_id,
         birth_place,
         birth_country,
+        date_submitted: new Date(),
+        date_last_submitted: new Date(),
         race,
         hispanic,
         language,
@@ -574,6 +608,8 @@ export class EnrollmentsService {
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
+        date_submitted: new Date(),
+        date_last_submitted: new Date(),
         school_district: enrollmentPacketEducationInput.school_district,
         special_ed: enrollmentPacketEducationInput.special_ed,
         last_school_type: enrollmentPacketEducationInput.last_school_type,
@@ -647,6 +683,8 @@ export class EnrollmentsService {
     try {
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id,
+        date_submitted: new Date(),
+        date_last_submitted: new Date(),
         agrees_to_policy,
         approves_enrollment,
         photo_permission,

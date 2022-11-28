@@ -90,7 +90,7 @@ export class SchedulePeriodService {
             osse_course_name: periodHistory.osse_course_name,
             osse_district_school: periodHistory.osse_district_school,
             osse_school_district_name: periodHistory.osse_school_district_name,
-            update_required: periodHistory.update_required,
+            status: periodHistory.status,
           })),
         );
         return true;

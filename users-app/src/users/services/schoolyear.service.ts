@@ -41,7 +41,7 @@ export class SchoolYearsService {
       where: {
         school_year_id: school_year_id,
       },
-      relations: ['Region', 'ScheduleBuilder', 'Periods'],
+      relations: ['Region', 'ScheduleBuilder', 'Periods', 'ReimbursementSetting'],
     });
   }
 
@@ -110,6 +110,11 @@ export class SchoolYearsService {
       data.enrollment_packet = false;
       data.special_ed = cloneSchoolYear.special_ed;
       data.special_ed_options = cloneSchoolYear.special_ed_options;
+      data.learning_logs = cloneSchoolYear.learning_logs;
+      data.learning_logs_first_second_semesters = cloneSchoolYear.learning_logs_first_second_semesters;
+      data.reimbursements = cloneSchoolYear.reimbursements;
+      data.require_software = cloneSchoolYear.require_software;
+      data.direct_orders = cloneSchoolYear.direct_orders;
     }
 
     const updatedRecord = await this.schoolYearsRepository.save(data);

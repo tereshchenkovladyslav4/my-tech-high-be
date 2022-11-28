@@ -5,9 +5,12 @@ import {
   PrimaryGeneratedColumn,
   BaseEntity,
   CreateDateColumn,
+  OneToMany,
+  JoinColumn,
 } from 'typeorm';
+import { Classes } from './classes.entity';
 @ObjectType()
-@Directive('@key(fields: "master_id,school_year_id,master_name")')
+@Directive('@key(fields: "master_id")')
 @Entity('mth_master')
 export class Master extends BaseEntity {
   @Column()
@@ -22,6 +25,11 @@ export class Master extends BaseEntity {
   @Column()
   @Field(() => String)
   master_name: string;
+
+  @OneToMany(() => Classes, (classes) => classes.master)
+  @JoinColumn({ name: 'master_id', referencedColumnName: 'master_id' })
+  @Field(() => [Classes], { nullable: true })
+  masterClasses: Classes[];
 
   @Field(() => Date, { nullable: true })
   @CreateDateColumn()

@@ -4,10 +4,15 @@ import { AuthGuard } from '../guards/auth.guard';
 import { Master } from '../models/master.entity';
 import { MasterService } from '../services/master.service';
 import { CreateNewMasterInput } from '../dto/create-new-master.input';
+import { CreateNewClassInput } from '../dto/create-new-class.input';
+import { ClassesService } from '../services/classes.service';
 
 @Resolver((of) => Master)
 export class MasterResolver {
-  constructor(private service: MasterService) { }
+  constructor(
+    private service: MasterService,
+    private classesService: ClassesService
+  ) { }
 
 
   @Query((returns) => [Master], { name: 'getMastersBySchoolId' })
@@ -29,5 +34,14 @@ export class MasterResolver {
     createNewMasterInput: CreateNewMasterInput,
   ): Promise<Boolean> {
     return this.service.save(createNewMasterInput);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'createNewClass' })
+  @UseGuards(new AuthGuard())
+  async createNewClass(
+    @Args('createNewClassInput')
+    createNewClassInput: CreateNewClassInput,
+  ): Promise<Boolean> {
+    return this.classesService.saveClass(createNewClassInput);
   }
 }

@@ -84,14 +84,10 @@ export class SchedulePeriod extends BaseEntity {
   @Field(() => String, { nullable: true })
   osse_school_district_name: string;
 
-  @Column({ nullable: true })
-  @Field(() => Boolean, { nullable: true })
-  update_required: boolean;
-
   @Column({
     type: 'enum',
     enum: SchedulePeriodStatus,
-    comment: 'UPDATE_REQUESTED: Update Requested by Parent',
+    comment: 'UPDATE_REQUESTED: Update Requested by Parent, UPDATE_REQUIRED: Update Required by Admin',
     default: null,
   })
   @Field(() => SchedulePeriodStatus, { nullable: true })

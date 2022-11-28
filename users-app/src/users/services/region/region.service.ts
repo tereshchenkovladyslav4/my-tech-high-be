@@ -26,12 +26,17 @@ export class RegionService {
   }
 
   async findRegionById(region_id: number): Promise<Region> {
-    return await this.regionRepository.findOne({
+    const result = await this.regionRepository.findOne({
       where: {
         id: region_id,
       },
       relations: ['region', 'SchoolYears', 'SchoolYears.SchoolPartners', 'SchoolYears.ScheduleBuilder'],
     });
+    const now = await this.getTimezoneDate(region_id);
+    result.SchoolYears.map((item) => {
+      item.IsCurrentYear = item.date_begin <= now && item.date_end >= now;
+    });
+    return result;
   }
 
   getAllRegions(): Promise<Region[]> {
@@ -165,7 +170,6 @@ export class RegionService {
   }
 
   async saveRegionDeadlines(region_id: number, deadline: number, category: string): Promise<any> {
-    console.log('region: ', region_id);
     if (category == 'Applications')
       return await getConnection()
         .createQueryBuilder()

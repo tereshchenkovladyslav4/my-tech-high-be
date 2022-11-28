@@ -73,6 +73,11 @@ import { MasterResolver } from './resolvers/master.resolver';
 import { Master } from './models/master.entity';
 import { ScheduleHistory } from './models/schedule-history.entity';
 import { SchedulePeriodHistory } from './models/schedule-period-history.entity';
+import { Classes } from './models/classes.entity';
+import { ChecklistResolver } from './resolvers/checklist.resolver';
+import { Checklist } from './models/checklist.entity';
+import { ReimbursementSetting } from './models/reimbursement-setting.entity';
+import { ReimbursementSettingResolver } from './resolvers/reimbursement-setting.resolver';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -103,7 +108,9 @@ const graphQLImports = [
   TimezonesService,
   ScheduleResolver,
   SchedulePeriodResolver,
-  MasterResolver
+  MasterResolver,
+  ChecklistResolver,
+  ReimbursementSettingResolver,
 ];
 @Module({
   imports: [
@@ -158,6 +165,9 @@ const graphQLImports = [
           Master,
           ScheduleHistory,
           SchedulePeriodHistory,
+          Classes,
+          Checklist,
+          ReimbursementSetting
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

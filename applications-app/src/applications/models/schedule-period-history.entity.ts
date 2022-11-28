@@ -7,6 +7,7 @@ import { Title } from './title.entity';
 import { Provider } from './provider.entity';
 import { Course } from './course.entity';
 import { ScheduleHistory } from './schedule-history.entity';
+import { SchedulePeriodStatus } from '../enums';
 
 @InputType('schedule_period_history')
 @ObjectType()
@@ -84,9 +85,14 @@ export class SchedulePeriodHistory extends BaseEntity {
   @Field(() => String, { nullable: true })
   osse_school_district_name: string;
 
-  @Column({ nullable: true })
-  @Field(() => Boolean, { nullable: true })
-  update_required: boolean;
+  @Column({
+    type: 'enum',
+    enum: SchedulePeriodStatus,
+    comment: 'UPDATE_REQUESTED: Update Requested by Parent, UPDATE_REQUIRED: Update Required by Admin',
+    default: null,
+  })
+  @Field(() => SchedulePeriodStatus, { nullable: true })
+  status: SchedulePeriodStatus;
 
   @ManyToOne(() => ScheduleHistory, (schedule) => schedule.SchedulePeriodHistories, {
     onDelete: 'SET NULL',

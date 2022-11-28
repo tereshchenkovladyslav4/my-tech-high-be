@@ -10,9 +10,9 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { Announcement } from './announcement.entity';
 import { UserRegion } from './user-region.entity';
 import { Role } from './role.entity';
+import { Classes } from './classes.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "user_id, email")')
@@ -33,9 +33,11 @@ export class User extends BaseEntity {
   password?: string;
 
   @Column()
+  @Field(() => String)
   firstName?: string;
 
   @Column()
+  @Field(() => String)
   lastName?: string;
 
   @Column()
@@ -55,4 +57,8 @@ export class User extends BaseEntity {
   @ManyToOne(() => Role, (role) => role.level)
   @JoinColumn({ name: 'level', referencedColumnName: 'id' })
   role: Role;
+
+  @OneToMany((type) => Classes, (classes) => classes.primaryTeacher)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'primary_id' })
+  classes: Classes[];
 }

@@ -33,7 +33,7 @@ export class UsersResolver {
     private userRegionService: UserRegionService,
     private userAccessService: UserAccessService,
     private parentService: ParentUserService,
-  ) {}
+  ) { }
 
   @Query(() => User || null)
   @UseGuards(new AuthGuard())
@@ -120,6 +120,12 @@ export class UsersResolver {
     } else {
       return this.usersService.findUsersByRegions(userRegionArgs);
     }
+  }
+
+  @Query((returns) => [User], { name: 'getTeacherListBySearchField' })
+  @UseGuards(new AuthGuard())
+  async getTeacherListBySearchField(@Args('searchPrimaryTeacher') searchPrimaryTeacher: GetPersonInfoArgs): Promise<User[]> {
+    return this.usersService.getTeachersBySearch(searchPrimaryTeacher);
   }
 
   @UseGuards(new AuthGuard())

@@ -317,12 +317,17 @@ export class ParentToDosService {
       .leftJoinAndSelect(
         Schedule,
         'schedule',
-        `schedule.StudentId = application.student_id AND schedule.is_second_semester = 1 AND schedule.SchoolYearId = application.school_year_id AND schedule.status <> '${ScheduleStatus.DRAFT}'`,
+        `schedule.StudentId = application.student_id AND schedule.SchoolYearId = application.school_year_id AND schedule.is_second_semester = 1  AND schedule.status <> '${ScheduleStatus.DRAFT}'`,
+      )
+      .innerJoin(
+        Schedule,
+        'regularSchedule',
+        `regularSchedule.StudentId = application.student_id AND regularSchedule.SchoolYearId = application.school_year_id AND (regularSchedule.is_second_semester = 0 OR regularSchedule.is_second_semester IS NULL)  AND regularSchedule.status = '${ScheduleStatus.ACCEPTED}'`,
       )
       .innerJoin(Period, 'period', "period.school_year_id = application.school_year_id AND period.semester <> 'None'")
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
-      .andWhere('schedule.schedule_id IS NULL')
+      .andWhere('(schedule.schedule_id IS NULL AND regularSchedule.schedule_id IS NOT NULL)')
       .andWhere('period.id IS NOT NULL')
       .orderBy('application.application_id', 'DESC')
       .printSql()
@@ -335,16 +340,59 @@ export class ParentToDosService {
 
   async resubmitSchedule(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
-    const students = [];
-    return {
+    const parent = await this.getParent(user.user_id);
+    const defaultResponse = {
       category: ToDoCategory.RESUBMIT_SCHEDULE,
       phrase: 'Resubmit Schedule',
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
       homeroom: 1, // yes
-      students: students,
+      students: [],
     };
+    if (!parent) {
+      return defaultResponse;
+    }
+
+    const { userRegion_region_id, Parent_parent_id } = parent;
+    const scheduledActiveSchoolYears = await this.getScheduleActiveSchoolYears(userRegion_region_id, false);
+    const scheduleActiveMidSchoolYears = await this.getScheduleActiveMidSchoolYears(userRegion_region_id);
+
+    if (scheduledActiveSchoolYears.length == 0 && scheduleActiveMidSchoolYears.length == 0) {
+      return defaultResponse;
+    }
+
+    const students = await createQueryBuilder(Student)
+      .leftJoin('Student.status', 'studentStatus')
+      .innerJoin(
+        Application,
+        'application',
+        "application.student_id = `Student`.student_id AND application.status = 'Accepted' AND (application.midyear_application = 0 AND application.school_year_id IN (:schoolYears) || application.midyear_application = 1 AND application.school_year_id IN (:midSchoolYears))",
+        {
+          schoolYears: scheduledActiveSchoolYears.length ? scheduledActiveSchoolYears : [0],
+          midSchoolYears: scheduleActiveMidSchoolYears.length ? scheduleActiveMidSchoolYears : [0],
+        },
+      )
+      .innerJoin(
+        Packet,
+        'packet',
+        "packet.student_id = `Student`.student_id AND packet.status = 'Accepted' AND packet.deleted = 0",
+      )
+      .leftJoinAndSelect(
+        Schedule,
+        'schedule',
+        `schedule.StudentId = application.student_id AND (schedule.is_second_semester = 0 OR schedule.is_second_semester IS NULL) AND schedule.SchoolYearId = application.school_year_id AND schedule.status = '${ScheduleStatus.UPDATES_REQUIRED}'`,
+      )
+      .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
+      .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
+      .andWhere('schedule.schedule_id IS NOT NULL')
+      .orderBy('application.application_id', 'DESC')
+      .printSql()
+      .getMany();
+
+    defaultResponse.students = students;
+
+    return defaultResponse;
   }
 
   async resubmitSecondSemesterSchedule(user: User): Promise<ToDoItem> {

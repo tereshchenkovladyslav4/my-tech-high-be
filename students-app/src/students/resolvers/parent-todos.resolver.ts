@@ -1,6 +1,5 @@
 import { Parent, ResolveField, Resolver, Query, Context } from '@nestjs/graphql';
 import { User } from '../models/user.entity';
-import { StudentsService } from '../services/students.service';
 import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { ParentToDo } from '../models/parent-todo.entity';

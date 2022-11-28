@@ -54,9 +54,6 @@ export class CreateOrUpdateSchedulePeriodInput {
   @Field(() => String, { nullable: true })
   osse_school_district_name: string;
 
-  @Field(() => Boolean, { nullable: true })
-  update_required?: boolean;
-
   @Field(() => SchedulePeriodStatus, { nullable: true })
   status: SchedulePeriodStatus;
 }

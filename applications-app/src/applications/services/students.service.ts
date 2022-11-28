@@ -7,12 +7,14 @@ import { StudentGradeLevel } from '../models/student-grade-level.entity';
 import { StudentStatus } from '../models/student-status.entity';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { StudentStatusService } from './student-status.service';
+import { StudentGradeLevelsService } from './student-grade-levels.service';
 @Injectable()
 export class StudentsService {
   constructor(
     @InjectRepository(Student)
     private readonly studentsRepository: Repository<Student>,
     private studentStatusService: StudentStatusService,
+    private studentGradeLevelsService: StudentGradeLevelsService,
   ) {}
 
   async findOneById(student_id: number): Promise<Student> {
@@ -68,11 +70,19 @@ export class StudentsService {
       const {
         student_id,
         special_ed,
+        grade_level,
         diploma_seeking,
         testing_preference,
         opt_out_form_signature_name,
         opt_out_form_signature_file_id,
       } = updateStudentInput;
+      if (grade_level != null) {
+        const studentGradeLevels = await this.studentGradeLevelsService.forStudents(student_id);
+        const current_grade_level = studentGradeLevels[0];
+        current_grade_level.grade_level = grade_level;
+        await this.studentGradeLevelsService.createOrUpdate(current_grade_level)
+      }
+
       await this.studentsRepository.save({
         student_id,
         special_ed,

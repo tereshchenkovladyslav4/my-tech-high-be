@@ -121,6 +121,12 @@ import { MasterService } from './services/master.service';
 import { Master } from './models/master.entity';
 import { ScheduleHistory } from './models/schedule-history.entity';
 import { SchedulePeriodHistory } from './models/schedule-period-history.entity';
+import { ClassesService } from './services/classes.service';
+import { Classes } from './models/classes.entity';
+import { Checklist } from './models/checklist.entity';
+import { ChecklistService } from './services/checklist.service';
+import { ReimbursementSetting } from './models/reimbursement-setting.entity';
+import { ReimbursementSettingService } from './services/reimbursement-setting.service';
 
 const servicesImports = [
   UsersService,
@@ -185,7 +191,10 @@ const servicesImports = [
   TimezonesService,
   ScheduleService,
   SchedulePeriodService,
-  MasterService
+  MasterService,
+  ClassesService,
+  ChecklistService,
+  ReimbursementSettingService,
 ];
 
 @Global()
@@ -252,6 +261,9 @@ const servicesImports = [
       Master,
       ScheduleHistory,
       SchedulePeriodHistory,
+      Classes,
+      Checklist,
+      ReimbursementSetting
     ]),
   ],
   providers: [...servicesImports],

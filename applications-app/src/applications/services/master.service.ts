@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { Master } from '../models/master.entity';
 import { CreateNewMasterInput } from '../dto/create-new-master.input';
 
@@ -12,9 +12,14 @@ export class MasterService {
     ) { }
 
     async getAll(schoolYearId: number): Promise<Master[]> {
-        const result = await this.masterRepository.find({
-            school_year_id: schoolYearId
-        });
+
+        const result = await this.masterRepository
+            .createQueryBuilder('master')
+            .leftJoinAndSelect('master.masterClasses', 'masterClasses')
+            .leftJoinAndSelect('masterClasses.primaryTeacher', 'primaryTeacher')
+            .where('master.school_year_id = :schoolYearId', { schoolYearId: schoolYearId })
+            .getMany();
+
         return result;
     }
 

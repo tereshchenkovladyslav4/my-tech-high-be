@@ -7,7 +7,6 @@ export class GetPersonInfoArgs {
   @IsNotEmpty()
   region_id: number;
 
-  @Field()
-  @IsNotEmpty()
-  search: string;
+  @Field(() => String, { nullable: true })
+  search?: string;
 }

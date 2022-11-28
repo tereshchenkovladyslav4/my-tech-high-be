@@ -5,11 +5,12 @@ import { Schedule } from './schedule.entity';
 import { ScheduleBuilder } from './scheduler-builder.entity';
 import { SchoolPartner } from './school-partner.entity';
 import { ReduceFunds } from '../enums';
+import { ReimbursementSetting } from './reimbursement-setting.entity';
 
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description, schedule, diploma_seeking, testing_preference, schedule_builder_open, schedule_builder_close, second_semester_open, second_semester_close, midyear_schedule_open, midyear_schedule_close, homeroom_resource_open, homeroom_resource_close, learning_logs, learning_logs_first_second_semesters, reimbursements, require_software, direct_orders, ScheduleBuilder, Resources")',
+  '@key(fields: "school_year_id, date_begin, date_end, date_reg_open, date_reg_close, RegionId, grades, special_ed, special_ed_options, birth_date_cut, enrollment_packet, SchoolPartners, midyear_application, midyear_application_open, midyear_application_close, testing_preference_title, testing_preference_description, opt_out_form_title, opt_out_form_description, schedule, diploma_seeking, testing_preference, schedule_builder_open, schedule_builder_close, second_semester_open, second_semester_close, midyear_schedule_open, midyear_schedule_close, homeroom_resource_open, homeroom_resource_close, learning_logs, learning_logs_first_second_semesters, reimbursements, require_software, direct_orders, ScheduleBuilder, Resources, ReimbursementSetting, IsCurrentYear")',
 )
 @Entity({ name: 'mth_schoolyear' })
 export class SchoolYear extends BaseEntity {
@@ -270,6 +271,7 @@ export class SchoolYear extends BaseEntity {
   ScheduleBuilder: ScheduleBuilder;
 
   @Field(() => Boolean, { nullable: true })
+  @Directive('@external')
   IsCurrentYear: boolean;
 
   @Field(() => Boolean, { nullable: true })
@@ -280,4 +282,9 @@ export class SchoolYear extends BaseEntity {
 
   @Field(() => String, { nullable: true })
   ScheduleStatus: string;
+
+  @OneToOne(() => ReimbursementSetting, (reimbursementSetting) => reimbursementSetting.SchoolYear)
+  @Field(() => ReimbursementSetting, { nullable: true })
+  @Directive('@external')
+  ReimbursementSetting: ReimbursementSetting;
 }

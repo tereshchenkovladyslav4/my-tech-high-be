@@ -52,11 +52,9 @@ export class ScheduleService {
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
       .andWhere(`schoolYear.RegionId = ${region_id}`)
-      .andWhere(`schedule.status <> 'Draft'`);
+      .andWhere(`schedule.status <> 'Draft'`)
+      .andWhere('schedule.status IN (:status)', { status: filter.status });
 
-    if (filter && filter.status && filter.status.length > 0) {
-      qb.andWhere('schedule.status IN (:status)', { status: filter.status });
-    }
     if (filter && filter.grades && filter.grades.length > 0) {
       qb.andWhere('student.grade_level IN (:grades)', { grades: filter.grades });
     }
