@@ -19,24 +19,6 @@ export class SchoolYear extends BaseEntity {
   date_reg_close: string;
 
   @Column()
-  reimburse_open: Date;
-
-  @Column()
-  reimburse_close: Date;
-
-  @Column()
-  direct_order_open: Date;
-
-  @Column()
-  direct_order_tech_open: Date;
-
-  @Column()
-  direct_order_close: Date;
-
-  @Column()
-  direct_order_tech_enabled?: number;
-
-  @Column()
   second_sem_start: Date;
 
   @Column()

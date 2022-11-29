@@ -103,4 +103,64 @@ export class UpdateSchoolYearInput {
 
   @Field(() => ReduceFunds, { nullable: true })
   direct_orders?: ReduceFunds;
+
+  @Field(() => String, { nullable: true })
+  direct_order_open?: string;
+
+  @Field(() => String, { nullable: true })
+  direct_order_close?: string;
+
+  @Field(() => String, { nullable: true })
+  reimbursement_open?: string;
+
+  @Field(() => String, { nullable: true })
+  reimbursement_close?: string;
+
+  @Field(() => String, { nullable: true })
+  custom_built_open?: string;
+
+  @Field(() => String, { nullable: true })
+  custom_built_close?: string;
+
+  @Field(() => String, { nullable: true })
+  require_software_open?: string;
+
+  @Field(() => String, { nullable: true })
+  require_software_close?: string;
+
+  @Field(() => String, { nullable: true })
+  third_party_open?: string;
+
+  @Field(() => String, { nullable: true })
+  third_party_close?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_direct_order_open?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_direct_order_close?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_reimbursement_open?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_reimbursement_close?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_custom_built_open?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_custom_built_close?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_require_software_open?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_require_software_close?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_third_party_open?: string;
+
+  @Field(() => String, { nullable: true })
+  mid_third_party_close?: string;
 }
