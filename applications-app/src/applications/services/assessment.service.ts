@@ -11,7 +11,7 @@ export class AssessmentService {
     @InjectRepository(Assessment)
     private readonly repo: Repository<Assessment>,
     private assessmentOptionService: AssessmentOptionService,
-  ) {}
+  ) { }
 
   async find(schoolYearId: number): Promise<Assessment[]> {
     const data = await this.repo.find({
@@ -33,6 +33,7 @@ export class AssessmentService {
       }
       const result = await this.repo.save(createOrUpdateAssessmentInput.assessment);
       if (result?.assessment_id && createOrUpdateAssessmentInput?.options) {
+        await this.assessmentOptionService.deleteByAssessmentId(result?.assessment_id);
         createOrUpdateAssessmentInput?.options?.map(async (option) => {
           await this.assessmentOptionService.save({ ...option, AssessmentId: result?.assessment_id });
         });

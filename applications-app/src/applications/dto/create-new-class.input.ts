@@ -7,6 +7,9 @@ export class CreateNewClassInput {
     @IsNotEmpty()
     master_id?: number;
 
+    @Field(() => Int, { nullable: true })
+    class_id?: number;
+
     @Field(() => String)
     @IsNotEmpty()
     class_name: string;

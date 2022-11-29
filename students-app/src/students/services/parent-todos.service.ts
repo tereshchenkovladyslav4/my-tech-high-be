@@ -10,9 +10,8 @@ import { Packet } from '../models/packet.entity';
 import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
-import { ScheduleStatus, StudentStatusEnum, WithdrawalStatus } from '../enums';
+import { ScheduleStatus, StudentNotification, StudentStatusEnum, WithdrawalStatus } from '../enums';
 import { TimezoneService } from './timezone.service';
-import { SchoolYear } from '../models/schoolyear.entity';
 import { Schedule } from '../models/schedule.entity';
 import { Period } from '../models/period.entity';
 
@@ -119,7 +118,7 @@ export class ParentToDosService {
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
       category: ToDoCategory.SUBMIT_ENROLLMENT_PACKET,
-      phrase: 'Submit Enrollment Packet',
+      phrase: StudentNotification.SUBMIT_ENROLLMENT_PACKET,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
@@ -157,7 +156,7 @@ export class ParentToDosService {
 
     return {
       category: ToDoCategory.SUBMIT_ENROLLMENT_PACKET,
-      phrase: 'Submit Enrollment Packet',
+      phrase: StudentNotification.SUBMIT_ENROLLMENT_PACKET,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
@@ -171,7 +170,7 @@ export class ParentToDosService {
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
       category: ToDoCategory.RESUBMIT_ENROLLMENT_PACKET,
-      phrase: 'Resubmit Enrollment Packet',
+      phrase: StudentNotification.RESUBMIT_ENROLLMENT_PACKET,
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
@@ -210,7 +209,7 @@ export class ParentToDosService {
 
     return {
       category: ToDoCategory.RESUBMIT_ENROLLMENT_PACKET,
-      phrase: 'Resubmit Enrollment Packet',
+      phrase: StudentNotification.RESUBMIT_ENROLLMENT_PACKET,
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
@@ -223,7 +222,7 @@ export class ParentToDosService {
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
       category: ToDoCategory.SUBMIT_SCHEDULE,
-      phrase: 'Submit Schedule',
+      phrase: StudentNotification.SUBMIT_SCHEDULE,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
@@ -279,7 +278,7 @@ export class ParentToDosService {
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
       category: ToDoCategory.SUBMIT_SECOND_SEMESTER_SCHEDULE,
-      phrase: 'Submit 2nd Semester Schedule',
+      phrase: StudentNotification.SUBMIT_SECOND_SEMESTER_SCHEDULE,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
@@ -343,7 +342,7 @@ export class ParentToDosService {
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
       category: ToDoCategory.RESUBMIT_SCHEDULE,
-      phrase: 'Resubmit Schedule',
+      phrase: StudentNotification.RESUBMIT_SCHEDULE,
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
@@ -399,7 +398,7 @@ export class ParentToDosService {
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
       category: ToDoCategory.RESUBMIT_SECOND_SEMESTER_SCHEDULE,
-      phrase: 'Resubmit 2nd Semester Schedule',
+      phrase: StudentNotification.RESUBMIT_SECOND_SEMESTER_SCHEDULE,
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
@@ -458,7 +457,7 @@ export class ParentToDosService {
     const students = [];
     return {
       category: ToDoCategory.RESUBMIT_REIMBURSEMENT,
-      phrase: 'Resubmit Reimbursement',
+      phrase: StudentNotification.RESUBMIT_REIMBURSEMENT,
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
@@ -472,7 +471,7 @@ export class ParentToDosService {
     const students = [];
     return {
       category: ToDoCategory.RESUBMIT_DIRECT_ORDER,
-      phrase: 'Resubmit Direct Order',
+      phrase: StudentNotification.RESUBMIT_DIRECT_ORDER,
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
@@ -486,7 +485,7 @@ export class ParentToDosService {
     const students = [];
     return {
       category: ToDoCategory.TESTING_PREFERNCE,
-      phrase: 'Testing Prefernce',
+      phrase: StudentNotification.TESTING_PREFERNCE,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
@@ -500,7 +499,7 @@ export class ParentToDosService {
     const students = [];
     return {
       category: ToDoCategory.MISSING_LEARNING_LOG,
-      phrase: 'Missing Learning Log',
+      phrase: StudentNotification.MISSING_LEARNING_LOG,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
@@ -514,7 +513,7 @@ export class ParentToDosService {
     const students = [];
     return {
       category: ToDoCategory.RESUBMIT_LEARNING_LOG,
-      phrase: 'Resubmit Learning Log',
+      phrase: StudentNotification.RESUBMIT_LEARNING_LOG,
       button: 'Resubmit Now',
       icon: '',
       dashboard: 1, // yes
@@ -528,7 +527,7 @@ export class ParentToDosService {
     const students = [];
     return {
       category: ToDoCategory.INTENT_TO_RE_ENROLL,
-      phrase: 'Intent to Re-enroll',
+      phrase: StudentNotification.INTENT_TO_RE_ENROLL,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes
@@ -542,7 +541,7 @@ export class ParentToDosService {
     const students = [];
     return {
       category: ToDoCategory.REQUEST_HOMEROOM_RESOURCES,
-      phrase: 'Request Homeroom Resources',
+      phrase: StudentNotification.REQUEST_HOMEROOM_RESOURCES,
       button: 'Request Now',
       icon: '',
       dashboard: 1, // yes
@@ -556,7 +555,7 @@ export class ParentToDosService {
     const parent = await this.getParent(user.user_id);
     const defaultResponse = {
       category: ToDoCategory.SUBMIT_WITHDRAW,
-      phrase: 'Submit Withdraw',
+      phrase: StudentNotification.SUBMIT_WITHDRAW,
       button: 'Submit Now',
       icon: '',
       dashboard: 1, // yes

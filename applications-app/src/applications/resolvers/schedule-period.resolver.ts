@@ -28,8 +28,10 @@ export class SchedulePeriodResolver {
     schoolYearId: number,
     @Args('studentId')
     studentId: number,
+    @Args('isSecondSemester')
+    isSecondSemester: boolean,
   ): Promise<SchedulePeriodHistory[]> {
-    return this.service.findAllHistories(schoolYearId, studentId);
+    return this.service.findAllHistories(schoolYearId, studentId, isSecondSemester);
   }
 
   @Mutation(() => [SchedulePeriod], { name: 'createOrUpdateSchedulePeriod' })

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, getConnection, Repository } from 'typeorm';
 import { StudentRecordSearchInput } from '../dto/student_record_search_input';
-import { StudentRecordFileKind } from '../enums';
+import { StudentRecordFileKind, StudentStatusEnum } from '../enums';
 import { StudentRecord } from '../models/student-record.entity';
 import { Pagination } from '../paginate';
 @Injectable()
@@ -101,17 +101,24 @@ export class StudentRecordService {
 
     if (status) {
       const statusList = JSON.parse(status);
-      if (statusList.includes('Withdrawn')) {
-        qb.andWhere('student_status.status = 2');
-      } else if (statusList.includes('Returning')) {
-        qb.andWhere(
-          '(student_status.status = 0 OR student_status.status = 1) AND status_history.student_id IS NOT NULL AND (status_history.status = 0 OR status_history.status = 1)',
-        );
-      } else if (statusList.includes('New')) {
-        qb.andWhere('(student_status.status = 0 OR student_status.status = 1) AND status_history.student_id IS NULL');
-      }
+      qb.andWhere(
+        new Brackets((sub) => {
+          if (statusList.includes('Withdrawn')) sub.orWhere(`student_status.status = ${StudentStatusEnum.WITHDRAWN}`);
+          if (statusList.includes('Returning'))
+            sub.orWhere(
+              `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE}) AND status_history.student_id IS NOT NULL AND (status_history.status = ${StudentStatusEnum.PENDING} OR status_history.status = ${StudentStatusEnum.ACTIVE})`,
+            );
+          if (statusList.includes('New'))
+            sub.orWhere(
+              `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE}) AND status_history.student_id IS NULL`,
+            );
+          return sub;
+        }),
+      );
     } else {
-      qb.andWhere('(student_status.status = 0 OR student_status.status = 1)');
+      qb.andWhere(
+        `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE})`,
+      );
     }
 
     if (search_key) {

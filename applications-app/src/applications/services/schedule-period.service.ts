@@ -25,11 +25,17 @@ export class SchedulePeriodService {
     return await qb.getMany();
   }
 
-  async findAllHistories(schoolYearId: number, studentId: number): Promise<SchedulePeriodHistory[]> {
+  async findAllHistories(
+    schoolYearId: number,
+    studentId: number,
+    isSecondSemester: boolean,
+  ): Promise<SchedulePeriodHistory[]> {
     const qb = this.historyRepo
       .createQueryBuilder('SchedulePeriodHistory')
       .leftJoinAndSelect('SchedulePeriodHistory.ScheduleHistory', 'ScheduleHistory')
-      .where(`ScheduleHistory.StudentId = ${studentId} AND ScheduleHistory.SchoolYearId = ${schoolYearId}`);
+      .where(
+        `ScheduleHistory.StudentId = ${studentId} AND ScheduleHistory.SchoolYearId = ${schoolYearId} AND ScheduleHistory.is_second_semester=${isSecondSemester}`,
+      );
     return await qb.getMany();
   }
 
@@ -39,7 +45,7 @@ export class SchedulePeriodService {
       const scheduleId = schedulePeriodInput.param[0].ScheduleId;
       const schedule = await this.scheduleService.findOneByScheduleId(scheduleId);
       if (schedule) {
-        await this.repo.delete({ ScheduleId: scheduleId });
+        if (!schedulePeriodInput?.param[0]?.schedule_period_id) await this.repo.delete({ ScheduleId: scheduleId });
         result = await this.repo.save(schedulePeriodInput.param);
         if (schedule.status === ScheduleStatus.ACCEPTED) {
           const scheduleHistory = await this.scheduleService.findHistory(schedule.StudentId, schedule.SchoolYearId);
