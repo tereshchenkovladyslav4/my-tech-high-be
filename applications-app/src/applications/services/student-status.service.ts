@@ -18,38 +18,20 @@ export class StudentStatusService {
   async update(updateStudentInput: UpdateStudentInput): Promise<boolean> {
     try {
       const { student_id, status, school_year_id } = updateStudentInput;
+      if (student_id && school_year_id) {
+        await this.studentStatussRepository.delete({ student_id: student_id });
 
-      await this.studentStatussRepository.delete({ student_id: student_id });
+        await this.studentStatussRepository.save({
+          student_id,
+          school_year_id,
+          status,
+          date_updated: new Date(),
+        });
 
-      await this.studentStatussRepository.save({
-        student_id,
-        school_year_id,
-        status,
-        date_updated: new Date(),
-      });
-
-      //if (status == 2 && withdrawOption > 0) {
-      //	TODO : Update Status
-      //const updateWithdrawalInput: UpdateWithdrawalInput = {
-      //  StudentId: student_id,
-      //  status:
-      //    withdrawOption == 1
-      //      ? 'Notified'
-      //      : withdrawOption < 5
-      //      ? 'Withdrawn'
-      //      : '',
-      //};
-      //await this.withdrawalService.update(updateWithdrawalInput);
-      //}
-
-      //if ((status == 1 || status == 0) && activeOption == 1) {
-      //  await this.withdrawalService.delete(student_id);
-      //}
-
-      if (status == 0 || status == 5 || status == 6) {
-        const queryRunner = await getConnection().createQueryRunner();
-        await queryRunner.query(
-          `UPDATE 
+        if (status == 0 || status == 5 || status == 6) {
+          const queryRunner = await getConnection().createQueryRunner();
+          await queryRunner.query(
+            `UPDATE 
             infocenter.mth_application 
           SET 
             status='${status == 0 || status == 6 ? 'Accepted' : 'Submitted'}', 
@@ -57,8 +39,9 @@ export class StudentStatusService {
           WHERE 
             student_id = ${student_id} AND
             school_year_id = ${school_year_id};`,
-        );
-        queryRunner.release();
+          );
+          queryRunner.release();
+        }
       }
       return true;
     } catch (error) {

@@ -43,4 +43,8 @@ export class Address extends BaseEntity {
   @Column()
   @Field({ nullable: true })
   country_id?: string;
+
+  @Column()
+  @Field({ nullable: true })
+  school_district?: string;
 }

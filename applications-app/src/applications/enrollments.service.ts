@@ -359,7 +359,7 @@ export class EnrollmentsService {
       const grade_age = parseGradeLevel(grade_level);
       let is_age_issue = false;
 
-      if (age != 0 && grade_age != 0) {
+      if (studentPerson.date_of_birth && grade_age != 0) {
         is_age_issue = age < grade_age;
       }
 
@@ -475,7 +475,7 @@ export class EnrollmentsService {
       const grade_age = parseGradeLevel(grade_level);
       let is_age_issue = false;
 
-      if (age != 0 && grade_age != 0) {
+      if (studentPerson.date_of_birth && grade_age != 0) {
         is_age_issue = age < grade_age;
       }
 

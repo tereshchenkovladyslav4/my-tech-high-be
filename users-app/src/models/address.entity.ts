@@ -35,4 +35,7 @@ export class Address extends BaseEntity {
 
   @Column()
   country_id?: string;
+
+  @Column()
+  school_district?: string;
 }

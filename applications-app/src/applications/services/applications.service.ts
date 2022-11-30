@@ -397,7 +397,7 @@ export class ApplicationsService {
         const grade_age = student.grade_levels.length > 0 ? parseGradeLevel(student.grade_levels[0].grade_level) : 0;
         let is_age_issue = false;
 
-        if (age != 0 && grade_age != 0) {
+        if (student.person.date_of_birth && grade_age != 0) {
           is_age_issue = age < grade_age;
         }
 

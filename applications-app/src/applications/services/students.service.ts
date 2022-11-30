@@ -76,11 +76,11 @@ export class StudentsService {
         opt_out_form_signature_name,
         opt_out_form_signature_file_id,
       } = updateStudentInput;
-      if (grade_level != null) {
+      if (grade_level != null && grade_level != 'undefined') {
         const studentGradeLevels = await this.studentGradeLevelsService.forStudents(student_id);
         const current_grade_level = studentGradeLevels[0];
         current_grade_level.grade_level = grade_level;
-        await this.studentGradeLevelsService.createOrUpdate(current_grade_level)
+        await this.studentGradeLevelsService.createOrUpdate(current_grade_level);
       }
 
       await this.studentsRepository.save({

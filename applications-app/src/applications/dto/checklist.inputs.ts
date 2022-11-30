@@ -2,10 +2,10 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class ChecklistInput {
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   id?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   region_id?: number;
 
   @Field(() => String, { nullable: true })

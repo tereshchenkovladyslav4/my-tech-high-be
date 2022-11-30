@@ -15,6 +15,7 @@ import { EmailsService } from './emails.service';
 import { ScheduleEmailsService } from './schedule-emails.service';
 import { EmailUpdateRequiredInput } from '../dto/email-update-required.inputs';
 import { StudentsService } from './students.service';
+import { StudentStatusService } from './student-status.service';
 import { SchoolYearService } from './schoolyear.service';
 import * as Moment from 'moment';
 import { ResponseDTO } from '../dto/response.dto';
@@ -33,6 +34,7 @@ export class ScheduleService {
     private sesEmailService: EmailsService,
     private scheduleEmailsService: ScheduleEmailsService,
     private studentService: StudentsService,
+    private studentStatusService: StudentStatusService,
     private schoolYearService: SchoolYearService,
   ) {}
 
@@ -305,6 +307,15 @@ export class ScheduleService {
         await this.historyRepo.save({
           ...scheduleInput,
           date_accepted: new Date(),
+        });
+
+        const student_id = scheduleInput.StudentId ? scheduleInput.StudentId : result.StudentId;
+        const school_year_id = scheduleInput.SchoolYearId ? scheduleInput.StudentId : result.SchoolYearId;
+
+        await this.studentStatusService.update({
+          student_id: student_id,
+          status: 1,
+          school_year_id: school_year_id,
         });
       } else {
         const existingSchedule = scheduleInput.schedule_id ? await this.repo.findOne(scheduleInput.schedule_id) : null;
