@@ -25,7 +25,7 @@ export class PeriodInput {
   @Field(() => REDUCE_FUNDS, { nullable: true })
   reduce_funds: REDUCE_FUNDS;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Number, { nullable: true })
   price: number;
 
   @Field(() => SEMESTER_TYPE, { nullable: true })

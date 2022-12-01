@@ -52,4 +52,8 @@ export class ApplicationEmailTemplate extends BaseEntity {
   @Column()
   @Field(() => Int, { nullable: false })
   region_id?: number;
+
+  @Column()
+  @Field((type) => Int, { nullable: true })
+  priority: number;
 }

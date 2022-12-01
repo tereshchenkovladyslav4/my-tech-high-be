@@ -54,7 +54,7 @@ export class Period extends BaseEntity {
   reduce_funds?: REDUCE_FUNDS;
 
   @Column()
-  @Field(() => Int, { nullable: true })
+  @Field(() => Number, { nullable: true })
   price?: number;
 
   @Column({
