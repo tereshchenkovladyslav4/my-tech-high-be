@@ -57,7 +57,7 @@ export class ScheduleFilters {
   @Field((type) => [String])
   courseType = [];
 
-  @Field((type) => [String])
+  @Field((type) => [Int])
   curriculumProviders = [];
 
   @Field((type) => Int)

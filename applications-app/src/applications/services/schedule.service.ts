@@ -21,6 +21,7 @@ import * as Moment from 'moment';
 import { ResponseDTO } from '../dto/response.dto';
 import { ScheduleHistory } from '../models/schedule-history.entity';
 import { ScheduleStatus } from '../enums';
+import { SchedulesGroupCountArgs } from '../dto/schedules-group-count.args';
 
 @Injectable()
 export class ScheduleService {
@@ -70,9 +71,8 @@ export class ScheduleService {
       qb.andWhere(`SchedulePeriods.course_type IN (:...courseType)`, { courseType: filter.courseType });
     }
     if (filter && filter.curriculumProviders.length > 0) {
-      qb.andWhere(`Provider.name IN (:...curriculumProvider)`, { curriculumProvider: filter.curriculumProviders });
+      qb.andWhere(`Provider.id IN (:...curriculumProvider)`, { curriculumProvider: filter.curriculumProviders });
     }
-
     if (search) {
       const date = search
         .split('/')
@@ -146,7 +146,7 @@ export class ScheduleService {
   }
 
   async sendUpdateReqiredEmail(updateRequiredEmail: EmailUpdateRequiredInput): Promise<boolean> {
-    const { student_id, from, subject, body, region_id } = updateRequiredEmail;
+    const { student_id, from, subject, body, region_id, schedule_id } = updateRequiredEmail;
     const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Updates Required', region_id);
     const studentInfo = await this.studentService.findOneById(student_id);
     const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
@@ -155,24 +155,32 @@ export class ScheduleService {
     const yearText = schoolYear?.midyear_application
       ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
       : `${yearbegin}-${yearend.substring(2, 4)}`;
+    const email_subject = subject
+      .toString()
+      .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
+      .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
+      .replace(/\[YEAR\]/g, yearText)
+      .replace(/\[SCHEDULE_YEAR\]/g, yearText);
+    const email_body = body
+      .toString()
+      .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
+      .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
+      .replace(/\[YEAR\]/g, yearText)
+      .replace(/\[SCHEDULE_YEAR\]/g, yearText);
     await this.sesEmailService.sendEmail({
       email: studentInfo?.parent?.person?.email,
-      subject: subject
-        .toString()
-        .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
-        .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
-        .replace(/\[YEAR\]/g, yearText)
-        .replace(/\[SCHEDULE_YEAR\]/g, yearText),
-      content: body
-        .toString()
-        .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
-        .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
-        .replace(/\[YEAR\]/g, yearText)
-        .replace(/\[SCHEDULE_YEAR\]/g, yearText),
+      subject: email_subject,
+      content: email_body,
       from: from,
       bcc: emailTemplate.bcc,
       region_id,
       template_name: 'Updates Required',
+    });
+    await this.scheduleEmailsService.create({
+      schedule_id: schedule_id,
+      subject: email_subject,
+      body: email_body,
+      from_email: from,
     });
     return true;
   }
@@ -321,8 +329,7 @@ export class ScheduleService {
         const existingSchedule = scheduleInput.schedule_id ? await this.repo.findOne(scheduleInput.schedule_id) : null;
         result = await this.repo.save({
           ...scheduleInput,
-          date_submitted:
-            scheduleInput?.status === ScheduleStatus.SUBMITTED ? existingSchedule?.date_submitted || new Date() : null,
+          date_submitted: existingSchedule?.date_submitted || new Date(),
         });
       }
 
@@ -362,17 +369,18 @@ export class ScheduleService {
     };
   }
 
-  async getScheduleCountByRegionId(region_id: number): Promise<ResponseDTO> {
+  async getScheduleCountByRegionId(scheduleGroup: SchedulesGroupCountArgs): Promise<ResponseDTO> {
+    console.log(scheduleGroup, '&&&#&&#&#&#&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
     const qb = await this.repo.query(
       `SELECT
           t1.status AS status,
           COUNT(*) AS count 
         FROM
           ( SELECT * FROM infocenter.mth_schedule WHERE status <> "Draft" ) AS t1
-          LEFT JOIN infocenter.mth_application application ON ( application.student_id = t1.StudentId )
-          LEFT JOIN infocenter.mth_schoolyear schoolYear ON ( schoolYear.school_year_id = application.school_year_id ) 
+          LEFT JOIN infocenter.mth_student student ON ( student.student_id = t1.StudentId )
+          LEFT JOIN infocenter.mth_schoolyear schoolYear ON ( schoolYear.school_year_id = t1.SchoolYearId ) 
         WHERE
-          schoolYear.RegionId = ${region_id}
+          schoolYear.RegionId = ${scheduleGroup.region_id} and schoolYear.school_year_id = ${scheduleGroup.school_year_id}
         GROUP BY
           t1.status`,
     );

@@ -11,6 +11,7 @@ import { ScheduleEmail } from '../models/schedule-email.entity';
 import { EmailScheduleInput } from '../dto/email-schedule.input';
 import { EmailUpdateRequiredInput } from '../dto/email-update-required.inputs';
 import { ResponseDTO } from '../dto/response.dto';
+import { SchedulesGroupCountArgs } from '../dto/schedules-group-count.args';
 
 @Resolver(() => Schedule)
 export class ScheduleResolver {
@@ -63,8 +64,8 @@ export class ScheduleResolver {
   @Query((returns) => ResponseDTO, { name: 'scheduleCountByRegionId' })
   @UseGuards(new AuthGuard())
   async getScheduleCountByRegionId(
-    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+    @Args('scheduleGroupCountArgs') scheduleGroupCountArgs: SchedulesGroupCountArgs,
   ): Promise<ResponseDTO> {
-    return this.service.getScheduleCountByRegionId(region_id);
+    return this.service.getScheduleCountByRegionId(scheduleGroupCountArgs);
   }
 }

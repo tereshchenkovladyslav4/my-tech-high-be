@@ -1,5 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { Schedule } from './schedule.entity';
 
 @InputType('schedule_email')
@@ -28,7 +28,7 @@ export class ScheduleEmail extends BaseEntity {
   @Field(() => String, { nullable: true })
   from_email: string;
 
-  @Column()
+  @CreateDateColumn()
   @Field(() => Date, { nullable: true })
   created_at?: Date;
 

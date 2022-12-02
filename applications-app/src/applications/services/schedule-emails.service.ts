@@ -11,6 +11,6 @@ export class ScheduleEmailsService {
   ) {}
 
   async create(scheduleEmail: CreateScheduleEmailInput): Promise<ScheduleEmail> {
-    return this.scheduleEmailsRepository.save(scheduleEmail);
+    return this.scheduleEmailsRepository.save({ ...scheduleEmail, created_at: new Date() });
   }
 }

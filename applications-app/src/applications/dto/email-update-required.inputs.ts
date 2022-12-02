@@ -16,4 +16,7 @@ export class EmailUpdateRequiredInput {
 
   @Field(() => Number)
   student_id: number;
+
+  @Field(() => Number)
+  schedule_id: number;
 }
