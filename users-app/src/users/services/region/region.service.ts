@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getConnection } from 'typeorm';
 import * as Moment from 'moment';
 import { MYSQL_DATE_FORMAT } from 'src/constants';
+import { EmailCategoryEnum } from 'src/enums';
 
 @Injectable()
 export class RegionService {
@@ -170,7 +171,7 @@ export class RegionService {
   }
 
   async saveRegionDeadlines(region_id: number, deadline: number, category: string): Promise<any> {
-    if (category == 'Applications')
+    if (category == EmailCategoryEnum.APPLICATIONS)
       return await getConnection()
         .createQueryBuilder()
         .update(Region)
@@ -179,7 +180,7 @@ export class RegionService {
         })
         .where('id = :id', { id: region_id })
         .execute();
-    else if (category == 'Withdraw')
+    else if (category == EmailCategoryEnum.WITHDRAWAL)
       return await getConnection()
         .createQueryBuilder()
         .update(Region)

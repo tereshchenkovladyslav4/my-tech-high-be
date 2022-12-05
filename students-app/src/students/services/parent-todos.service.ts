@@ -61,7 +61,6 @@ export class ParentToDosService {
         return a.school_year_id;
       });
     }
-    console.log('ActiveSchoolYears: ', _activeSchoolYears);
 
     return _activeSchoolYears;
   }

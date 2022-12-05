@@ -91,7 +91,6 @@ export class EmailTemplatesService {
 
     const deadline = emailTemplate?.deadline;
     delete emailTemplate.deadline;
-
     await this.emailTemplateRepository.update(template, emailTemplate);
 
     if (deadline) {
