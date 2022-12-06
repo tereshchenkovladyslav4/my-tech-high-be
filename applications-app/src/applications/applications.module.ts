@@ -78,6 +78,8 @@ import { ChecklistResolver } from './resolvers/checklist.resolver';
 import { Checklist } from './models/checklist.entity';
 import { ReimbursementSetting } from './models/reimbursement-setting.entity';
 import { ReimbursementSettingResolver } from './resolvers/reimbursement-setting.resolver';
+import { Assignment } from './models/assignment.entity';
+import { AssignmentResolver } from './resolvers/assignemtn.resolver';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -111,6 +113,7 @@ const graphQLImports = [
   MasterResolver,
   ChecklistResolver,
   ReimbursementSettingResolver,
+  AssignmentResolver
 ];
 @Module({
   imports: [
@@ -167,7 +170,8 @@ const graphQLImports = [
           SchedulePeriodHistory,
           Classes,
           Checklist,
-          ReimbursementSetting
+          ReimbursementSetting,
+          Assignment
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

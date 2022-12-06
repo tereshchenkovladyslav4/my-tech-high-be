@@ -8,3 +8,4 @@ export * from './student-status.enum';
 export * from './withdrawal-option.enum';
 export * from './withdrawal-status.enum';
 export * from './checklist-status.enum';
+export * from './email-template.enum';

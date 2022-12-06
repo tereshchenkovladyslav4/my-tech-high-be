@@ -13,4 +13,7 @@ export class CreateScheduleEmailInput {
 
   @Field(() => String)
   from_email?: string;
+
+  @Field(() => String)
+  template_name?: string;
 }

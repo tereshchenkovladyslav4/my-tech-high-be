@@ -19,6 +19,7 @@ import { StudentsService } from './students.service';
 import { UsersService } from './users.service';
 import { SchoolYearService } from './schoolyear.service';
 import { EmailRecordsService } from './email-records.service';
+import { EmailTemplateEnum } from '../enums';
 //import { AnnouncementsService } from './announcements.service';
 
 const base64 = require('base-64');
@@ -54,7 +55,10 @@ export class EmailsService {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Email Verification', region_id);
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.EMAIL_VERIFICATION,
+      region_id,
+    );
 
     // const siteSettings = this.coreSettingsService.getSiteSettings();
 

@@ -23,6 +23,7 @@ export class ProviderService {
     const qb = this.repo
       .createQueryBuilder('provider')
       .leftJoinAndSelect('provider.Periods', 'Periods')
+      .leftJoinAndSelect('provider.SchedulePeriods', 'SchedulePeriods')
       .leftJoinAndSelect(
         'provider.Courses',
         'Courses',

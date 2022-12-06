@@ -23,7 +23,14 @@ import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentsService } from './students.service';
 import { UserRegionService } from './user-region.service';
 import { WithdrawalEmailsService } from './withdrawal-emails.service';
-import { PdfTemplate, StudentRecordFileKind, WithdrawalStatus, WithdrawalOption, StudentStatusEnum } from '../enums';
+import {
+  PdfTemplate,
+  StudentRecordFileKind,
+  WithdrawalStatus,
+  WithdrawalOption,
+  StudentStatusEnum,
+  EmailTemplateEnum,
+} from '../enums';
 import { WithdrawalInput } from '../dto/withdrawal.input';
 import { FilesService } from './files.service';
 import { StudentRecordService } from './student-record.service';
@@ -103,7 +110,9 @@ export class WithdrawalService {
         }
 
         const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-          withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW ? 'Notify of Withdraw' : 'Undeclared Withdraw',
+          withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW
+            ? EmailTemplateEnum.NOTIFY_OF_WITHDRAW
+            : EmailTemplateEnum.UNDECLARED_WITHDRAW,
           region_id,
         );
 
@@ -581,7 +590,10 @@ export class WithdrawalService {
       }),
     );
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.WITHDRAW_PAGE,
+      region_id,
+    );
 
     emailBody.map(async (emailData) => {
       await this.emailService.sendEmail({
@@ -591,7 +603,7 @@ export class WithdrawalService {
         from: from || emailTemplate.from,
         bcc: emailTemplate.bcc,
         region_id: region_id,
-        template_name: 'Withdraw Page',
+        template_name: EmailTemplateEnum.WITHDRAW_PAGE,
       });
     });
 
@@ -643,7 +655,10 @@ export class WithdrawalService {
       if (!results?.length) throw new ServiceUnavailableException(`Not found Withdrawal data`);
 
       const queryRunner = await getConnection().createQueryRunner();
-      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Confirmation', region_id);
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+        EmailTemplateEnum.WITHDRAW_CONFIRMATION,
+        region_id,
+      );
 
       const setAdditionalLinksInfo = (content, student, school_year, cur_application) => {
         const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
@@ -689,7 +704,7 @@ export class WithdrawalService {
           from: emailTemplate.from,
           bcc: emailTemplate.bcc,
           region_id: region_id,
-          template_name: 'Withdraw Confirmation',
+          template_name: EmailTemplateEnum.WITHDRAW_CONFIRMATION,
         });
       }
       await queryRunner.release();
@@ -786,7 +801,10 @@ export class WithdrawalService {
       };
       const emailBody = [];
       const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
-      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Withdraw Page', region_id);
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+        EmailTemplateEnum.WITHDRAW_PAGE,
+        region_id,
+      );
       const temp = {
         withdrawal_id: withdraw.withdrawal_id,
         email: withdraw.Student.parent.person.email,
@@ -803,7 +821,7 @@ export class WithdrawalService {
           from: emailTemplate.from,
           bcc: emailTemplate.bcc,
           region_id: region_id,
-          template_name: 'Withdraw Page',
+          template_name: EmailTemplateEnum.WITHDRAW_PAGE,
         });
       });
       await Promise.all(

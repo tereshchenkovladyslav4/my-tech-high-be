@@ -90,6 +90,10 @@ export class Resource extends BaseEntity {
   @Field(() => Boolean, { nullable: true })
   deleted: boolean;
 
+  @Column('tinyint', { name: 'software_reimbursement', default: false })
+  @Field(() => Boolean, { nullable: true })
+  software_reimbursement: boolean;
+
   @ManyToOne(() => SchoolYear, (schoolyear) => schoolyear.Resources, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',

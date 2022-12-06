@@ -21,7 +21,7 @@ import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.input
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 import { StudentsService } from './students.service';
-import { PdfTemplate, StudentRecordFileKind } from '../enums';
+import { EmailTemplateEnum, PdfTemplate, StudentRecordFileKind } from '../enums';
 import { FilesService } from './files.service';
 import { StudentRecordService } from './student-record.service';
 import { S3Service } from './s3.service';
@@ -307,7 +307,10 @@ export class PacketsService {
       };
       emailBody.push(temp);
     });
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Enrollment Packet Page', region_id);
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.ENROLLMENT_PACKET_PAGE,
+      region_id,
+    );
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
     }

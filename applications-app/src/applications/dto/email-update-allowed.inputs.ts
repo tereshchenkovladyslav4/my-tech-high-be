@@ -1,16 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class EmailUpdatesRequiredInput {
-  @Field(() => String)
-  from: string;
-
-  @Field(() => String)
-  subject: string;
-
-  @Field(() => String)
-  body: string;
-
+export class EmailUpdatesAllowedInput {
   @Field(() => Number)
   region_id: number;
 

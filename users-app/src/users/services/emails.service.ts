@@ -7,6 +7,7 @@ import { UserRegion } from 'src/models/user-region.entity';
 import { User } from 'src/models/user.entity';
 import { EmailRecordsService } from './email-records.service';
 import { getConnection } from 'typeorm';
+import { EmailTemplateEnum } from 'src/enums';
 
 const base64 = require('base-64');
 @Injectable()
@@ -29,7 +30,10 @@ export class EmailsService {
       region_id = regions[0].region_id;
     }
 
-    const template = await this.emailTemplateService.findByTemplateAndRegion('Email Verification', region_id);
+    const template = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.EMAIL_VERIFICATION,
+      region_id,
+    );
 
     let subject = 'Thank you for submitting an application to the My Tech High program test';
     let content = '<p>We have received your application to participate in the My Tech High program.</p>';
@@ -89,7 +93,10 @@ export class EmailsService {
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
-    const template = await this.emailTemplateService.findByTemplateAndRegion('Email Changed', region_id);
+    const template = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.EMAIL_CHANGED,
+      region_id,
+    );
 
     let subject = 'Email Change';
     let content = '<p>Please click on the link below to verify your new email address.</p>';

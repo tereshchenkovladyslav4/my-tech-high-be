@@ -32,6 +32,10 @@ export class ScheduleEmail extends BaseEntity {
   @Field(() => Date, { nullable: true })
   created_at?: Date;
 
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  template_name: string;
+
   @ManyToOne((type) => Schedule)
   @JoinColumn({
     name: 'schedule_id',

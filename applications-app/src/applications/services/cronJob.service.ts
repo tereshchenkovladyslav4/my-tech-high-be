@@ -9,6 +9,7 @@ import { WithdrawalService } from './withdrawal.service';
 import { CronJobsLogsService } from './cron-jobs-logs.services';
 import { AnnouncementsService } from './announcements.service';
 import { Announcement } from '../models/announcement.entity';
+import { ScheduleService } from './schedule.service';
 
 @Injectable()
 export class CronJobService {
@@ -19,6 +20,7 @@ export class CronJobService {
     private withdrawalsService: WithdrawalService,
     private cronJobsLogsSevice: CronJobsLogsService,
     private announcementsService: AnnouncementsService,
+    private scheduleServices: ScheduleService,
   ) {}
 
   //async findScheduledAnnouncements2() {
@@ -227,6 +229,33 @@ export class CronJobService {
       this.logger.error(error);
       this.cronJobsLogsSevice.save({
         function_name: 'scheduleWithdrawalReminders',
+        log: JSON.stringify({ result: error }),
+        type: 'error',
+      });
+    }
+  }
+
+  @Cron('0 0 0 * * *') // Runs Every day at Midnight
+  //@Cron(CronExpression.EVERY_30_SECONDS)
+  async scheduleSecondSemesterUnlocked() {
+    try {
+      const data = await this.scheduleServices.runSecondSemesterUnlocked();
+      this.logger.log('scheduleSecondSemesterUnlocked: ', data);
+      this.cronJobsLogsSevice.save({
+        function_name: 'scheduleSecondSemesterUnlocked',
+        log: JSON.stringify({ result: data }),
+        type: 'success',
+      });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: data,
+        }),
+      };
+    } catch (error) {
+      this.logger.error(error);
+      this.cronJobsLogsSevice.save({
+        function_name: 'scheduleSecondSemesterUnlocked',
         log: JSON.stringify({ result: error }),
         type: 'error',
       });

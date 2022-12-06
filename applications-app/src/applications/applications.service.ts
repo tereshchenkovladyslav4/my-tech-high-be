@@ -29,6 +29,7 @@ import { PersonAddressService } from './services/person-address.service';
 import { EmailRecordsService } from './services/email-records.service';
 import { SchoolYear } from './models/schoolyear.entity';
 import { CreateStudentApplicationInput } from './dto/create-student-application.inputs';
+import { EmailTemplateEnum } from './enums';
 
 @Injectable()
 export class ApplicationsService {
@@ -49,7 +50,7 @@ export class ApplicationsService {
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
     private emailRecordsService: EmailRecordsService,
-  ) { }
+  ) {}
 
   protected user: User;
 
@@ -86,7 +87,7 @@ export class ApplicationsService {
             address: newApplication.address,
             packet: newApplication.packet,
             midyear_application: newApplication.midyear_application,
-            parent_person_id: parent.person_id
+            parent_person_id: parent.person_id,
           }),
       ),
     );
@@ -123,7 +124,10 @@ export class ApplicationsService {
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Application Received', region_id);
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.APPLICATION_RECEIVED,
+      region_id,
+    );
     if (emailTemplate) {
       const person = await this.personsService.findOneByUserId(user.user_id);
       const parent = await this.parentsService.findOneByEmail(email);
@@ -213,7 +217,10 @@ export class ApplicationsService {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Application Received', region_id);
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.APPLICATION_RECEIVED,
+      region_id,
+    );
 
     if (emailTemplate) {
       const setAdditionalLinksInfo = async (content, school_year, student) => {
@@ -338,8 +345,17 @@ export class ApplicationsService {
   }
 
   async createStudentApplication(createStudentApplicationInput: CreateStudentApplicationInput): Promise<any> {
-    const { parent_id, school_year_id, studentApplication, referred_by, meta, address, packet, midyear_application, parent_person_id } =
-      createStudentApplicationInput;
+    const {
+      parent_id,
+      school_year_id,
+      studentApplication,
+      referred_by,
+      meta,
+      address,
+      packet,
+      midyear_application,
+      parent_person_id,
+    } = createStudentApplicationInput;
     const { first_name, last_name, grade_level, meta: studentMeta } = studentApplication;
     const studentApplicationInput = omit(studentApplication, ['grade_level', 'meta', 'address', 'packet']);
     const person = await this.personsService.create(studentApplicationInput);
@@ -347,7 +363,6 @@ export class ApplicationsService {
     console.log('Person: ', person);
 
     const parentPerson = await this.personsService.findOneById(parent_person_id);
-
 
     const personAddress = await this.personAddressService.createOrUpdate(parentPerson, {
       ...address,
@@ -444,5 +459,5 @@ export class ApplicationsService {
     return applications;
   }
 
-  async createObserPerson() { }
+  async createObserPerson() {}
 }

@@ -58,4 +58,7 @@ export class CreateOrUpdateResourceInput {
 
   @Field(() => Boolean, { nullable: true })
   deleted: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  software_reimbursement: boolean;
 }

@@ -127,6 +127,8 @@ import { Checklist } from './models/checklist.entity';
 import { ChecklistService } from './services/checklist.service';
 import { ReimbursementSetting } from './models/reimbursement-setting.entity';
 import { ReimbursementSettingService } from './services/reimbursement-setting.service';
+import { Assignment } from './models/assignment.entity';
+import { AssignmentService } from './services/assignment.service';
 
 const servicesImports = [
   UsersService,
@@ -195,6 +197,7 @@ const servicesImports = [
   ClassesService,
   ChecklistService,
   ReimbursementSettingService,
+  AssignmentService
 ];
 
 @Global()
@@ -263,7 +266,8 @@ const servicesImports = [
       SchedulePeriodHistory,
       Classes,
       Checklist,
-      ReimbursementSetting
+      ReimbursementSetting,
+      Assignment
     ]),
   ],
   providers: [...servicesImports],

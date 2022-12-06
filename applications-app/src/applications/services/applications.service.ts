@@ -29,6 +29,7 @@ import * as Moment from 'moment';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 import { concatenateTypeDefs } from 'graphql-tools';
 import { StudentRecordService } from './student-record.service';
+import { EmailTemplateEnum } from '../enums';
 
 @Injectable()
 export class ApplicationsService {
@@ -292,7 +293,6 @@ export class ApplicationsService {
       }
     }
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
-    console.log('result', results[0]);
 
     return new Pagination<Application>({
       results,
@@ -423,7 +423,7 @@ export class ApplicationsService {
         });
 
         const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-          'Application Accepted',
+          EmailTemplateEnum.APPLICATION_ACCEPTED,
           region_id,
         );
 
@@ -493,7 +493,10 @@ export class ApplicationsService {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Application Page', region_id);
+    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      EmailTemplateEnum.APPLICATION_PAGE,
+      region_id,
+    );
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
     }
@@ -544,7 +547,7 @@ export class ApplicationsService {
         from: emailTemplate.from,
         bcc: emailTemplate.bcc,
         region_id,
-        template_name: 'Application Page',
+        template_name: EmailTemplateEnum.APPLICATION_PAGE,
       });
     }
 

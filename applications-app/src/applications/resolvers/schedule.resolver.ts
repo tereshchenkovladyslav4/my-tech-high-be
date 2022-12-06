@@ -9,9 +9,10 @@ import { SchedulesArgs } from '../dto/schedules.args';
 import { Pagination } from 'src/paginate';
 import { ScheduleEmail } from '../models/schedule-email.entity';
 import { EmailScheduleInput } from '../dto/email-schedule.input';
-import { EmailUpdateRequiredInput } from '../dto/email-update-required.inputs';
+import { EmailUpdatesRequiredInput } from '../dto/email-update-required.inputs';
 import { ResponseDTO } from '../dto/response.dto';
 import { SchedulesGroupCountArgs } from '../dto/schedules-group-count.args';
+import { EmailUpdatesAllowedInput } from '../dto/email-update-allowed.inputs';
 
 @Resolver(() => Schedule)
 export class ScheduleResolver {
@@ -29,12 +30,20 @@ export class ScheduleResolver {
     return await this.service.sendEmail(emailScheduleInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateRequiredEmail' })
+  @Mutation((returns) => Boolean, { name: 'sendUpdatesRequiredEmail' })
   @UseGuards(new AuthGuard())
-  async updateRequiredEmail(
-    @Args('updateRequiredEmail') updateRequiredEmail: EmailUpdateRequiredInput,
+  async sendUpdatesRequiredEmail(
+    @Args('updateRequiredEmail') updateRequiredEmail: EmailUpdatesRequiredInput,
   ): Promise<boolean> {
-    return await this.service.sendUpdateReqiredEmail(updateRequiredEmail);
+    return await this.service.sendUpdatesReqiredEmail(updateRequiredEmail);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'sendUpdatesAllowedEmail' })
+  @UseGuards(new AuthGuard())
+  async sendUpdatesAllowedEmail(
+    @Args('updatesAllowedEmail') updatesAllowedEmail: EmailUpdatesAllowedInput,
+  ): Promise<boolean> {
+    return await this.service.sendUpdatesAllowedEmail(updatesAllowedEmail);
   }
 
   @Mutation(() => Schedule, { name: 'createOrUpdateSchedule' })

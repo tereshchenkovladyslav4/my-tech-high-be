@@ -6,6 +6,7 @@ import { EnrollmentQuestionsInput } from '../dto/enrollment-question.input';
 import { NewEnrollmentQuestionTabInput } from '../dto/new-enrollment-question-tab.inputs';
 import { EnrollmentQuestionGroupService } from './enrollment-question-group.service';
 import { EmailTemplatesService } from './email-templates.service';
+import { EmailTemplateEnum } from '../enums';
 
 @Injectable()
 export class EnrollmentQuestionTabService {
@@ -71,7 +72,10 @@ export class EnrollmentQuestionTabService {
 
     //  Update the standard responses of Missing Info email template
     if (tab_name == 'Documents') {
-      const template = await this.emailTemplateService.findByTemplateAndRegion('Missing Information', region_id);
+      const template = await this.emailTemplateService.findByTemplateAndRegion(
+        EmailTemplateEnum.MISSING_INFORMATION,
+        region_id,
+      );
       if (template.standard_responses != '') {
         const oldresponses = JSON.parse(template.standard_responses);
 
