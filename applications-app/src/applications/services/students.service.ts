@@ -8,6 +8,7 @@ import { StudentStatus } from '../models/student-status.entity';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { StudentStatusService } from './student-status.service';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
+import { StudentAssessmentService } from './student-assessment.service';
 @Injectable()
 export class StudentsService {
   constructor(
@@ -15,7 +16,8 @@ export class StudentsService {
     private readonly studentsRepository: Repository<Student>,
     private studentStatusService: StudentStatusService,
     private studentGradeLevelsService: StudentGradeLevelsService,
-  ) {}
+    private studentAssessmentService: StudentAssessmentService
+  ) { }
 
   async findOneById(student_id: number): Promise<Student> {
     return await this.studentsRepository.findOne({
@@ -91,6 +93,9 @@ export class StudentsService {
         opt_out_form_signature_name,
         opt_out_form_signature_file_id,
       });
+      // testing_preference update
+      await this.studentAssessmentService.updateTestAnswer(testing_preference);
+
       await this.studentStatusService.update(updateStudentInput);
       return true;
     } catch (error) {

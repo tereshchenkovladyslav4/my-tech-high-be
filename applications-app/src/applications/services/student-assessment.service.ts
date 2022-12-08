@@ -9,7 +9,7 @@ export class StudentAssessmentService {
   constructor(
     @InjectRepository(StudentAssessmentOption)
     private readonly repo: Repository<StudentAssessmentOption>,
-  ) {}
+  ) { }
 
   async find(student_id: number): Promise<StudentAssessmentOption[]> {
     const data = await this.repo.find({
@@ -30,5 +30,17 @@ export class StudentAssessmentService {
     } catch (error) {
       throw new ServiceUnavailableException(error);
     }
+  }
+
+  async updateTestAnswer(testing_preference: string): Promise<boolean> {
+    const testData = JSON.parse(testing_preference);
+    for (let i = 0; i < testData.length; i++) {
+      const testOption = await this.repo.update({
+        assessment_option_id: testData[i].assessmentOptionId
+      }, {
+        OptionId: testData[i].optionId
+      })
+    }
+    return true;
   }
 }

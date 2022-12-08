@@ -34,4 +34,10 @@ export class MasterService {
         await this.masterRepository.save(createNewMasterInput);
         return true;
     }
+
+    async update(updateMasterInput: CreateNewMasterInput): Promise<Boolean> {
+        const { master_id, school_year_id, master_name } = updateMasterInput;
+        await this.masterRepository.update({ master_id: master_id }, { school_year_id, master_name });
+        return true;
+    }
 }

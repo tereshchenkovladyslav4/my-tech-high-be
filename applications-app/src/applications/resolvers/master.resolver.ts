@@ -36,6 +36,15 @@ export class MasterResolver {
     return this.service.save(createNewMasterInput);
   }
 
+  @Mutation((returns) => Boolean, { name: 'updateMaster' })
+  @UseGuards(new AuthGuard())
+  async updateMaster(
+    @Args('updateMaster')
+    updateMasterInput: CreateNewMasterInput,
+  ): Promise<Boolean> {
+    return this.service.update(updateMasterInput);
+  }
+
   @Mutation((returns) => Boolean, { name: 'createNewClass' })
   @UseGuards(new AuthGuard())
   async createNewClass(

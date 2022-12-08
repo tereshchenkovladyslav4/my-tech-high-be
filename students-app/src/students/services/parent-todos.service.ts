@@ -10,7 +10,7 @@ import { Packet } from '../models/packet.entity';
 import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
-import { ScheduleStatus, StudentNotification, StudentStatusEnum, WithdrawalStatus } from '../enums';
+import { ScheduleStatus, SEMESTER_TYPE, StudentNotification, StudentStatusEnum, WithdrawalStatus } from '../enums';
 import { TimezoneService } from './timezone.service';
 import { Schedule } from '../models/schedule.entity';
 import { Period } from '../models/period.entity';
@@ -322,11 +322,12 @@ export class ParentToDosService {
         'regularSchedule',
         `regularSchedule.StudentId = application.student_id AND regularSchedule.SchoolYearId = application.school_year_id AND (regularSchedule.is_second_semester = 0 OR regularSchedule.is_second_semester IS NULL)  AND regularSchedule.status = '${ScheduleStatus.ACCEPTED}'`,
       )
-      .innerJoin(Period, 'period', "period.school_year_id = application.school_year_id AND period.semester <> 'None'")
+      .leftJoin('regularSchedule.SchedulePeriods', 'SchedulePeriods')
+      .leftJoin('SchedulePeriods.Period', 'Period', `Period.semester <> '${SEMESTER_TYPE.NONE}'`)
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
       .andWhere('(schedule.schedule_id IS NULL AND regularSchedule.schedule_id IS NOT NULL)')
-      .andWhere('period.id IS NOT NULL')
+      .andWhere('Period.id IS NOT NULL')
       .orderBy('application.application_id', 'DESC')
       .printSql()
       .getMany();
@@ -437,11 +438,9 @@ export class ParentToDosService {
         'schedule',
         `schedule.StudentId = application.student_id AND schedule.is_second_semester = 1 AND schedule.SchoolYearId = application.school_year_id AND schedule.status = '${ScheduleStatus.UPDATES_REQUIRED}'`,
       )
-      .innerJoin(Period, 'period', "period.school_year_id = application.school_year_id AND period.semester <> 'None'")
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
       .andWhere('schedule.schedule_id IS NOT NULL')
-      .andWhere('period.id IS NOT NULL')
       .orderBy('application.application_id', 'DESC')
       .printSql()
       .getMany();

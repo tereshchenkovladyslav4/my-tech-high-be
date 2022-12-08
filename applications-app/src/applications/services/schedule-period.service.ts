@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SchedulePeriod } from '../models/schedule-period.entity';
@@ -45,8 +45,8 @@ export class SchedulePeriodService {
       const scheduleId = schedulePeriodInput.param[0].ScheduleId;
       const schedule = await this.scheduleService.findOneByScheduleId(scheduleId);
       if (schedule) {
-        if (!schedulePeriodInput?.param[0]?.schedule_period_id) await this.repo.delete({ ScheduleId: scheduleId });
-        result = await this.repo.save(schedulePeriodInput.param);
+        await this.repo.delete({ ScheduleId: scheduleId });
+        result = await this.repo.save(schedulePeriodInput.param.map((item) => ({ ...item, schedule_period_id: 0 })));
         if (schedule.status === ScheduleStatus.ACCEPTED) {
           const scheduleHistory = await this.scheduleService.findHistory(schedule.StudentId, schedule.SchoolYearId);
           const schedulePeriodHistory = await this.historyRepo.findOne({

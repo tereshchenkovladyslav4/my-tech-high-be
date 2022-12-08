@@ -1,6 +1,8 @@
 import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BaseEntity } from 'typeorm';
 import { Course } from './course.entity';
+import { Period } from './period.entity';
+import { Schedule } from './schedule.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -99,4 +101,18 @@ export class SchedulePeriod extends BaseEntity {
   @JoinColumn([{ name: 'CourseId', referencedColumnName: 'id' }])
   @Directive('@external')
   Course: Course;
+
+  @ManyToOne(() => Schedule, (schedule) => schedule.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'ScheduleId', referencedColumnName: 'schedule_id' }])
+  Schedule: Schedule;
+
+  @ManyToOne(() => Period, (period) => period.SchedulePeriods, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'PeriodId', referencedColumnName: 'id' }])
+  Period: Period;
 }

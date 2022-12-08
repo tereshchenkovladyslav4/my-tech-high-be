@@ -9,7 +9,7 @@ import { ScheduleEmail } from './schedule-email.entity';
 @InputType('schedule')
 @ObjectType()
 @Directive(
-  '@key(fields: "schedule_id, StudentId, SchoolYearId, status, date_accepted, last_modified, date_submitted, current_submission, is_second_semester")',
+  '@key(fields: "schedule_id, StudentId, SchoolYearId, status, date_accepted, last_modified, date_submitted, current_submission, is_second_semester, SchedulePeriods")',
 )
 @Entity({ name: 'mth_schedule' })
 export class Schedule extends BaseEntity {

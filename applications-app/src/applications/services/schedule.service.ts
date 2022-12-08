@@ -20,7 +20,7 @@ import { SchoolYearService } from './schoolyear.service';
 import * as Moment from 'moment';
 import { ResponseDTO } from '../dto/response.dto';
 import { ScheduleHistory } from '../models/schedule-history.entity';
-import { EmailTemplateEnum, ScheduleStatus, SEMESTER_TYPE } from '../enums';
+import { EmailTemplateEnum, ScheduleStatus, SEMESTER_TYPE, StudentStatusEnum } from '../enums';
 import { SchedulesGroupCountArgs } from '../dto/schedules-group-count.args';
 import { EmailUpdatesAllowedInput } from '../dto/email-update-allowed.inputs';
 import { TimezonesService } from './timezones.service';
@@ -125,6 +125,7 @@ export class ScheduleService {
           qb.orderBy(`student.diploma_seeking`, 'DESC');
         } else {
           qb.orderBy('schedule.status', 'DESC');
+          qb.addOrderBy('schedule.last_modified', 'ASC');
         }
       } else {
         if (_sortBy[0] === 'grade') {
@@ -136,6 +137,7 @@ export class ScheduleService {
           qb.orderBy(`student.diploma_seeking`, 'ASC');
         } else {
           qb.orderBy('schedule.status', 'ASC');
+          qb.addOrderBy('schedule.last_modified', 'ASC');
         }
       }
     }
@@ -375,18 +377,20 @@ export class ScheduleService {
         result = await this.repo.save({
           ...scheduleInput,
           date_accepted: new Date(),
+          last_modified: new Date(),
         });
         await this.historyRepo.save({
           ...scheduleInput,
           date_accepted: new Date(),
+          last_modified: new Date(),
         });
 
         const student_id = scheduleInput.StudentId ? scheduleInput.StudentId : result.StudentId;
-        const school_year_id = scheduleInput.SchoolYearId ? scheduleInput.StudentId : result.SchoolYearId;
+        const school_year_id = scheduleInput.SchoolYearId ? scheduleInput.SchoolYearId : result.SchoolYearId;
 
         await this.studentStatusService.update({
           student_id: student_id,
-          status: 1,
+          status: StudentStatusEnum.ACTIVE,
           school_year_id: school_year_id,
         });
 
@@ -454,6 +458,7 @@ export class ScheduleService {
         result = await this.repo.save({
           ...scheduleInput,
           date_submitted: existingSchedule?.date_submitted || new Date(),
+          last_modified: new Date(),
         });
       }
 

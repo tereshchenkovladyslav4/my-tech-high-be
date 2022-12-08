@@ -1,13 +1,14 @@
 import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BaseEntity, OneToMany } from 'typeorm';
 import { IsIn } from 'class-validator';
 import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
+import { SchedulePeriod } from './schedule-period.entity';
 
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "schedule_id, StudentId, SchoolYearId, status, date_accepted, last_modified, date_submitted, current_submission, is_second_semester")',
+  '@key(fields: "schedule_id, StudentId, SchoolYearId, status, date_accepted, last_modified, date_submitted, current_submission, is_second_semester, SchedulePeriods")',
 )
 @Entity('mth_schedule')
 export class Schedule extends BaseEntity {
@@ -62,6 +63,11 @@ export class Schedule extends BaseEntity {
   // @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   // @Directive('@external')
   // SchoolYear: SchoolYear;
+
+  @OneToMany(() => SchedulePeriod, (SchedulePeriod) => SchedulePeriod.Schedule)
+  @Field(() => [SchedulePeriod], { nullable: true })
+  @Directive('@external')
+  SchedulePeriods: SchedulePeriod[];
 
   @ManyToOne(() => Student, (student) => student.StudentSchedules, {
     onDelete: 'SET NULL',
