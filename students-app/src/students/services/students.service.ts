@@ -37,7 +37,7 @@ export class StudentsService {
     private personsService: PersonsService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearsService,
-  ) {}
+  ) { }
 
   protected user: User;
   protected NewUser;
@@ -183,6 +183,7 @@ export class StudentsService {
       const allStudent = this.studentsRepository
         .createQueryBuilder('student')
         .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+        .leftJoinAndSelect('student.status', 'status')
         .leftJoinAndSelect('student.person', 'person')
         .leftJoinAndSelect('student.parent', 'parent')
         .leftJoinAndSelect('parent.person', 'p_person')
@@ -228,7 +229,9 @@ export class StudentsService {
 
       const [sqlAll] = allStudent.getQueryAndParameters();
       const [sql1] = qb.getQueryAndParameters();
-      const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} UNION ${sqlAll}) aaa GROUP BY student_id`;
+      const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
+                        UNION ${sqlAll}) aaa GROUP BY student_id`;
+
 
       let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
       const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
@@ -239,18 +242,15 @@ export class StudentsService {
         const currentSoe = [];
         const previousSoe = [];
 
-        if (res.currentPartner_names) {
-          [...new Set(res.currentPartner_names.split(','))].forEach((name) => {
-            currentSoe.push({
-              partner: { name },
-            });
+        if (res.currentPartner_name) {
+          currentSoe.push({
+            partner: { name: res.currentPartner_name, abbreviation: res.currentPartner_abbreviation },
           });
         }
-        if (res.previousPartner_names) {
-          [...new Set(res.previousPartner_names.split(','))].forEach((name) => {
-            previousSoe.push({
-              partner: { name },
-            });
+
+        if (res.previousPartner_name) {
+          previousSoe.push({
+            partner: { name: res.previousPartner_name, abbreviation: res.previousPartner_abbreviation },
           });
         }
 
@@ -437,10 +437,10 @@ export class StudentsService {
       enrollment_packet_date_deadline: student?.packet_deadline
         ? Moment(student.packet_deadline).format('MM.DD')
         : (student &&
-            Moment(student.application_date_accepted)
-              .add(parent.region_enrollment_packet_deadline_num_days, 'd')
-              .format('MM.DD')) ||
-          null,
+          Moment(student.application_date_accepted)
+            .add(parent.region_enrollment_packet_deadline_num_days, 'd')
+            .format('MM.DD')) ||
+        null,
       withdraw_deadline_num_days: parent.region_withdraw_deadline_num_days,
       midyear_application: (student && student.application_midyear_application) || false,
       schedule_builder_close: schoolYear.schedule_builder_close || '0000-00-00',

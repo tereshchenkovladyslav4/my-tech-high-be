@@ -12,16 +12,16 @@ export class UpdatePacketInput {
   status?: string;
 
   @Field(() => Date, { nullable: true })
-  deadline: Date;
+  deadline?: Date;
 
   @Field(() => Date, { nullable: true })
-  date_submitted: Date;
+  date_submitted?: Date;
 
   @Field(() => Date, { nullable: true })
-  date_last_submitted: Date;
+  date_last_submitted?: Date;
 
   @Field(() => Date, { nullable: true })
-  date_accepted: Date;
+  date_accepted?: Date;
 
   @Field(() => String, { nullable: true })
   school_district?: string;

@@ -1,35 +1,21 @@
-import { Injectable, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
-import { ApplicationsService as StudentApplicationsService } from './services/applications.service';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ParentsService } from './services/parents.service';
 import { PersonsService } from './services/persons.service';
 import { PhonesService } from './services/phones.service';
 import { StudentsService } from './services/students.service';
-import { UsersService } from './services/users.service';
-import { ParentApplication } from './models/parent-application.entity';
-import { Parent } from './models/parent.entity';
-import { CreateApplicationInput } from './dto/new-application.inputs';
-import { CreateParentPersonInput } from './dto/new-parent-person.inputs';
-import { omit } from 'lodash';
-import { Student } from './models/student.entity';
 import { StudentGradeLevelsService } from './services/student-grade-levels.service';
 import { PacketsService } from './services/packets.service';
 import { EnrollmentPacketContactInput } from '../applications/dto/enrollment-packet-contact.inputs';
-import { Packet } from './models/packet.entity';
 import { EnrollmentPacketPersonalInput } from './dto/enrollment-packet-personal.inputs';
 import { EnrollmentPacket } from './models/enrollment-packet.entity';
 import { EnrollmentPacketEducationInput } from './dto/enrollment-packet-education.inputs';
-import { AddressService } from './services/address.service';
 import { PersonAddressService } from './services/person-address.service';
-import { S3Service } from './services/s3.service';
 import { EnrollmentPacketInput } from './dto/enrollment-packet.inputs';
 import { EnrollmentPacketDocumentInput } from './dto/enrollment-packet-document.inputs';
-import { createWriteStream } from 'fs';
-import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { SchoolYearService } from './services/schoolyear.service';
 import * as Moment from 'moment';
 import { PacketFilesService } from './services/packet-files.service';
 import { EnrollmentPacketSubmissionInput } from './dto/enrollment-packet-submission.inputs';
-import { PersonAddress } from './models/person-address.entity';
 import { EmailTemplatesService } from './services/email-templates.service';
 import { EmailsService } from './services/emails.service';
 import { EmailReminderService } from './services/email-reminder.service';
@@ -47,17 +33,13 @@ const templates = {
 @Injectable()
 export class EnrollmentsService {
   constructor(
-    private studentApplicationsService: StudentApplicationsService,
     private parentsService: ParentsService,
     private personsService: PersonsService,
     private phonesService: PhonesService,
-    private usersService: UsersService,
     private studentsService: StudentsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private packetsService: PacketsService,
-    private addressService: AddressService,
     private personAddressService: PersonAddressService,
-    private s3Service: S3Service,
     private schoolYearService: SchoolYearService,
     private packetFilesService: PacketFilesService,
     private emailTemplateService: EmailTemplatesService,
@@ -93,12 +75,12 @@ export class EnrollmentsService {
         });
 
         if (student.address) {
-          const personAddress = this.personAddressService.createOrUpdate(studentPerson, student.address);
+          await this.personAddressService.createOrUpdate(studentPerson, student.address);
         }
 
         const { grade_level } = student;
         if (school_year_id && grade_level && student_id) {
-          const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+          await this.studentGradeLevelsService.createOrUpdate({
             student_id,
             school_year_id,
             grade_level,
@@ -107,7 +89,7 @@ export class EnrollmentsService {
       }
 
       if (parent_person_id) {
-        const parentPerson = await this.personsService.update({
+        await this.personsService.update({
           person_id: parent_person_id,
           ...parent,
         });
@@ -134,10 +116,6 @@ export class EnrollmentsService {
         medical_exemption,
         exemption_form_date: exemption_form_date ? new Date(exemption_form_date) : null,
         status: status,
-        deadline: new Date(),
-        date_submitted: new Date(),
-        date_last_submitted: new Date(),
-        date_accepted: new Date(),
         is_age_issue,
         missing_files,
         meta,
@@ -210,8 +188,6 @@ export class EnrollmentsService {
         }
       }
 
-      console.log(studentPacket);
-
       return {
         packet: studentPacket,
       };
@@ -221,62 +197,18 @@ export class EnrollmentsService {
     }
   }
 
-  private allowed_files = [
-    { 'text/plain': 'txt' },
-    { 'application/x-shockwave-flash': 'swf' },
-    { 'video/x-flv': 'flv' },
-
-    // images
-    { 'image/png': 'png' },
-    { 'image/jpeg': 'jpg' },
-    { 'image/gif': 'gif' },
-    { 'image/bmp': 'bmp' },
-    { 'image/vnd.microsoft.icon': 'ico' },
-    { 'image/tiff': 'tiff' },
-    { 'image/svg+xml': 'svg' },
-
-    // archives
-    { 'application/zip': 'zip' },
-    { 'application/x-rar-compressed': 'rar' },
-    { 'application/vnd.ms-cab-compressed': 'cab' },
-
-    // audio/video
-    { 'audio/mpeg': 'mp3' },
-
-    // adobe
-    { 'application/pdf': 'pdf' },
-    { 'image/vnd.adobe.photoshop': 'psd' },
-    { 'application/postscript': 'ai' },
-    // 'application/postscript' : 'eps'},
-    // 'application/postscript' : 'ps'},
-
-    // ms office
-    { 'application/msword': 'doc' },
-    { 'application/rtf': 'rtf' },
-    { 'application/vnd.ms-excel': 'xls' },
-    { 'application/vnd.ms-powerpoint': 'ppt' },
-
-    // open office
-    { 'application/vnd.oasis.opendocument.text': 'odt' },
-    { 'application/vnd.oasis.opendocument.spreadsheet': 'ods' },
-  ];
-
   async saveContacts(enrollmentPacketContactInput: EnrollmentPacketContactInput): Promise<EnrollmentPacket> {
-    console.log('Input: ', enrollmentPacketContactInput);
     const { student_id, packet, school_year_id } = enrollmentPacketContactInput;
     const student = await this.studentsService.findOneById(student_id);
 
     if (!student) throw new ServiceUnavailableException('Student Not Found');
-    console.log('Student: ', student);
 
     const packetData = await this.packetsService.findOneByStudentId(student_id);
-    console.log('Enrollment Packet: ', packetData);
     const packet_id = (packetData && (await packetData).packet_id) || null;
 
     const parentId = (await student).parent_id;
     const parent = this.parentsService.findOneById(parentId);
     if (!parent) throw new ServiceUnavailableException('Parent Not Found');
-    console.log('Parent: ', parent);
 
     const studentPersonId = (await student).person_id;
     const parentPersonId = (await parent).person_id;
@@ -296,7 +228,6 @@ export class EnrollmentsService {
         person_id: parentPersonId,
         ...enrollmentPacketContactInput.parent,
       });
-      console.log('Parent Person: ', parentPerson);
 
       const parentPhone = await this.phonesService.findOneByPersonId(parentPersonId);
       if (!parentPhone) {
@@ -319,10 +250,7 @@ export class EnrollmentsService {
         ...enrollmentPacketContactInput.student,
       });
 
-      const personAddress = await this.personAddressService.createOrUpdate(
-        parentPerson,
-        enrollmentPacketContactInput.student.address,
-      );
+      await this.personAddressService.createOrUpdate(parentPerson, enrollmentPacketContactInput.student.address);
       // const street2 = enrollmentPacketContactInput.student.address.street2 || "";
       // const address = await this.addressService.create({...enrollmentPacketContactInput.student.address, street2});
       // console.log("Address: ", address);
@@ -341,7 +269,7 @@ export class EnrollmentsService {
 
       const { grade_level } = enrollmentPacketContactInput.student;
       if (school_year_id && grade_level) {
-        const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+        await this.studentGradeLevelsService.createOrUpdate({
           student_id,
           school_year_id,
           grade_level,
@@ -378,7 +306,7 @@ export class EnrollmentsService {
         special_ed: String(special_ed),
         is_age_issue: is_age_issue,
       });
-      const studentInfo = await this.studentsService.findOneById(student_id);
+      await this.studentsService.findOneById(student_id);
 
       return {
         student,
@@ -391,21 +319,17 @@ export class EnrollmentsService {
   }
 
   async submitEnrollment(enrollmentPacketContactInput: EnrollmentPacketSubmitInput): Promise<EnrollmentPacket> {
-    console.log('Input: ', enrollmentPacketContactInput);
-    const { student_id, packet, school_year_id, signature_file_id, packet_id } = enrollmentPacketContactInput;
+    const { student_id, packet, school_year_id, signature_file_id } = enrollmentPacketContactInput;
     const student = await this.studentsService.findOneById(student_id);
 
     if (!student) throw new ServiceUnavailableException('Student Not Found');
-    console.log('Student: ', student);
 
     const packetData = await this.packetsService.findOneByStudentId(student_id);
-    console.log('Enrollment Packet: ', packetData);
     const g_packet_id = (packetData && (await packetData).packet_id) || null;
 
     const parentId = (await student).parent_id;
     const parent = this.parentsService.findOneById(parentId);
     if (!parent) throw new ServiceUnavailableException('Parent Not Found');
-    console.log('Parent: ', parent);
 
     const studentPersonId = (await student).person_id;
     const parentPersonId = (await parent).person_id;
@@ -415,18 +339,13 @@ export class EnrollmentsService {
         person_id: parentPersonId,
         ...enrollmentPacketContactInput.parent,
       });
-      console.log('Parent Person: ', parentPerson);
 
       const studentPerson = await this.personsService.update({
         person_id: studentPersonId,
         ...enrollmentPacketContactInput.student,
       });
-      console.log('Student Person: ', studentPerson);
 
-      const personAddress = this.personAddressService.createOrUpdate(
-        parentPerson,
-        enrollmentPacketContactInput.student.address,
-      );
+      await this.personAddressService.createOrUpdate(parentPerson, enrollmentPacketContactInput.student.address);
       // const street2 = enrollmentPacketContactInput.student.address.street2 || "";
       // const address = await this.addressService.create({...enrollmentPacketContactInput.student.address, street2});
       // console.log("Address: ", address);
@@ -437,18 +356,15 @@ export class EnrollmentsService {
       //     address_id
       // });
 
-      console.log('Student Person Address: ', personAddress);
-
       const phone = await this.phonesService.create({
         person_id: studentPerson.person_id,
         number: enrollmentPacketContactInput.student.phone_number,
       });
       if (!phone) throw new ServiceUnavailableException('Student Phone Not Created');
-      console.log('Student Phone: ', phone);
 
       const { grade_level } = enrollmentPacketContactInput.student;
       if (school_year_id) {
-        const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+        await this.studentGradeLevelsService.createOrUpdate({
           student_id,
           school_year_id,
           grade_level,
@@ -494,7 +410,6 @@ export class EnrollmentsService {
         status: status,
         is_age_issue: is_age_issue,
       });
-      console.log('Student Packet: ', studentPacket);
 
       return {
         student,
@@ -507,25 +422,20 @@ export class EnrollmentsService {
   }
 
   async savePersoanl(enrollmentPacketPersonalInput: EnrollmentPacketPersonalInput): Promise<EnrollmentPacket> {
-    console.log(enrollmentPacketPersonalInput);
-
     const { packet_id } = enrollmentPacketPersonalInput;
     const packet = await this.packetsService.findOneById(packet_id);
 
     if (!packet) throw new ServiceUnavailableException('Packet Not Found');
-    console.log('Packet: ', packet);
 
     const { student_id } = packet;
     const student = await this.studentsService.findOneById(student_id);
 
     if (!student) throw new ServiceUnavailableException('Student Not Found');
-    console.log('Student: ', student);
 
     const { person_id } = student;
     const StudentPerson = this.personsService.findOneById(person_id);
 
     if (!StudentPerson) throw new ServiceUnavailableException('StudentPerson Not Found');
-    console.log('StudentPerson: ', StudentPerson);
 
     try {
       await this.personsService.update({
@@ -554,7 +464,7 @@ export class EnrollmentsService {
         lives_with,
       } = enrollmentPacketPersonalInput;
 
-      const studentPacket = await this.packetsService.createOrUpdate({
+      await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
         birth_place,
@@ -577,7 +487,6 @@ export class EnrollmentsService {
         living_location,
         lives_with,
       });
-      console.log('Student Packet: ', studentPacket);
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
       throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
@@ -590,22 +499,18 @@ export class EnrollmentsService {
   }
 
   async saveEducation(enrollmentPacketEducationInput: EnrollmentPacketEducationInput): Promise<EnrollmentPacket> {
-    console.log(enrollmentPacketEducationInput);
-
     const { packet_id } = enrollmentPacketEducationInput;
     const packet = await this.packetsService.findOneById(packet_id);
 
     if (!packet) throw new ServiceUnavailableException('Packet Not Found');
-    console.log('Packet: ', packet);
 
     const { student_id } = packet;
     const student = await this.studentsService.findOneById(student_id);
 
     if (!student) throw new ServiceUnavailableException('Student Not Found');
-    console.log('Student: ', student);
 
     try {
-      const studentPacket = await this.packetsService.createOrUpdate({
+      await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
         date_submitted: new Date(),
@@ -618,16 +523,13 @@ export class EnrollmentsService {
         understands_sped_scheduling: enrollmentPacketEducationInput.understands_special_ed || 0,
         permission_to_request_records: enrollmentPacketEducationInput.permission_to_request_records,
       });
-      console.log('Student Packet: ', studentPacket);
 
       const { school_year_id, grade_level } = enrollmentPacketEducationInput;
-      const studentGradeLevel = await this.studentGradeLevelsService.createOrUpdate({
+      await this.studentGradeLevelsService.createOrUpdate({
         student_id,
         school_year_id,
         grade_level,
       });
-
-      console.log('Student Grade Level: ', studentGradeLevel);
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
       throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
@@ -648,7 +550,6 @@ export class EnrollmentsService {
     const student = await this.studentsService.findOneById(student_id);
 
     if (!student) throw new ServiceUnavailableException('Student Not Found');
-    console.log('Student: ', student);
 
     await this.packetFilesService.createMany(packet_id, documents);
 
@@ -681,7 +582,7 @@ export class EnrollmentsService {
     if (!student) throw new ServiceUnavailableException('Student Not Found');
 
     try {
-      const studentPacket = await this.packetsService.createOrUpdate({
+      await this.packetsService.createOrUpdate({
         packet_id,
         date_submitted: new Date(),
         date_last_submitted: new Date(),
@@ -694,7 +595,6 @@ export class EnrollmentsService {
         signature_file_id,
         status: 'Submitted',
       });
-      console.log('Student Packet: ', studentPacket);
     } catch (err) {
       const message = 'Update error: ' + (err.message || err.name);
       throw new common_1.HttpException(message, common_1.HttpStatus.UNAUTHORIZED);
@@ -781,7 +681,6 @@ export class EnrollmentsService {
       }
       return 'Successfully run schedule reminders.';
     } catch (error) {
-      console.log(error);
       return error;
     }
   }

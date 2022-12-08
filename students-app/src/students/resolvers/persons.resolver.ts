@@ -19,7 +19,7 @@ export class PersonsResolver {
     private phonesService: PhonesService,
     private addressService: AddressService,
     private emailVerifiersService: EmailVerifiersService,
-  ) {}
+  ) { }
 
   @Query((returns) => Person, { name: 'person' })
   async getPerson(@Args({ name: 'person_id', type: () => ID }) person_id: number): Promise<Person> {
@@ -29,6 +29,16 @@ export class PersonsResolver {
   @Query((returns) => [Person], { name: 'persons' })
   async getPersons(@Args() personsArgs: PersonsArgs): Promise<Person[]> {
     return this.personsService.findAll(personsArgs);
+  }
+
+  @Query(() => Boolean)
+  async studentEmailTaken(@Args('email') email: string) {
+    const user = await this.personsService.findOneByEmail(email);
+    if (user) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @ResolveField((of) => Phone, { name: 'phone' })
