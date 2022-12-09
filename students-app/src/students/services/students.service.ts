@@ -25,6 +25,7 @@ import { Region } from '../models/region.entity';
 import { Pagination } from 'src/paginate';
 import { YEAR_STATUS } from '../enums/year-status.enum';
 import { cloneDeep } from 'lodash';
+import { Provider } from '../models/provider.entity';
 
 @Injectable()
 export class StudentsService {
@@ -121,7 +122,6 @@ export class StudentsService {
         });
       qb.andWhere(`grade_levels.grade_level IN (${grades.map((el) => `'${el}'`).join(',')})`);
     }
-
     const schoolDistrict = filter?.schoolDistrict || [];
     const hadFilterSchoolDistrict = schoolDistrict.length && !schoolDistrict.includes('all');
 
@@ -157,6 +157,14 @@ export class StudentsService {
       } else {
         qb.andWhere(`previousSoe.school_partner_id IN (${filterPreviousSOE})`);
       }
+    }
+
+    if (filter && filter.curriculumProviders && filter.curriculumProviders.length > 0) {
+      qb.leftJoinAndSelect('student.StudentSchedules', 'StudentSchedules')
+        .leftJoinAndSelect('StudentSchedules.SchedulePeriods', 'SchedulePeriods')
+        .andWhere(`SchedulePeriods.ProviderId IN (:curriculumProvider)`, {
+          curriculumProvider: filter.curriculumProviders,
+        });
     }
 
     if (search) {

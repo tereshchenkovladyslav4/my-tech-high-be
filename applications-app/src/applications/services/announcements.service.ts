@@ -25,6 +25,9 @@ import { StudentAssessmentOption } from '../models/student-assessment-option.ent
 import { AssessmentOption } from '../models/assessment-option.entity';
 import { StudentStatus } from '../models/student-status.entity';
 import { SchoolEnrollment } from '../models/school-enrollment.entity';
+import { Schedule } from '../models/schedule.entity';
+import { SchedulePeriod } from '../models/schedule-period.entity';
+import { Provider } from '../models/provider.entity';
 @Injectable()
 export class AnnouncementsService {
   constructor(
@@ -66,6 +69,7 @@ export class AnnouncementsService {
           filter_program_years,
           filter_school_partners,
           filter_others,
+          filter_providers,
         } = announcement;
         // get users
         const userEmailList = await this.getAnnouncementUsersByFilters({
@@ -75,6 +79,7 @@ export class AnnouncementsService {
           filter_program_years,
           filter_school_partners,
           filter_others,
+          filter_providers,
         });
         userEmailList.map(async (user) => {
           await this.sesEmailService.sendAnnouncementEmail({
@@ -106,6 +111,7 @@ export class AnnouncementsService {
       filter_program_years,
       filter_school_partners,
       filter_others,
+      filter_providers,
     } = updateAnnouncementInput;
     const announcementData = await this.announcementsRepository.findOne({
       announcement_id,
@@ -119,6 +125,7 @@ export class AnnouncementsService {
           filter_program_years,
           filter_school_partners,
           filter_others,
+          filter_providers,
         });
         if ((status == 'Published' && !isArchived) || status === 'Republished') {
           userEmailList.map(async (user) => {
@@ -158,8 +165,15 @@ export class AnnouncementsService {
 
   async getAnnouncementUsersByFilters(announcementEmailInputs: AnnouncementFilterArgs): Promise<User[]> {
     {
-      const { RegionId, filter_grades, filter_users, filter_program_years, filter_school_partners, filter_others } =
-        announcementEmailInputs;
+      const {
+        RegionId,
+        filter_grades,
+        filter_users,
+        filter_program_years,
+        filter_school_partners,
+        filter_others,
+        filter_providers,
+      } = announcementEmailInputs;
 
       const userTypes = JSON.parse(filter_users); // 0: Admin, 1: Parents/Observers, 2: Students, 3: Teachers & Assistants
       const roleNameFilters = [];
@@ -199,7 +213,7 @@ export class AnnouncementsService {
       const schoolPartners = schoolPartnerTypes;
 
       const filterOther = JSON.parse(filter_others);
-
+      const filterProvider = JSON.parse(filter_providers);
       //console.log('SchoolPartners: ', schoolPartners);
 
       let parentResults = [];
@@ -278,6 +292,13 @@ export class AnnouncementsService {
           parentQuery.andWhere("assessment_option.method = 'Opt-out'");
         }
 
+        if (filterProvider && filterProvider.length > 0) {
+          parentQuery
+            .leftJoin(Schedule, 'schedule', 'student.student_id = schedule.StudentId')
+            .leftJoin(SchedulePeriod, 'schedulePeriod', 'schedule.schedule_id = schedulePeriod.ScheduleId')
+            .leftJoinAndSelect(Provider, 'provider', 'provider.id = schedulePeriod.ProviderId')
+            .andWhere(`provider.id IN (:...curriculumProvider)`, { curriculumProvider: filterProvider });
+        }
         // if (schoolYearId > 0)
         //   parentUsers.andWhere('schoolYear.school_year_id = :schoolYearId', {
         //     schoolYearId,

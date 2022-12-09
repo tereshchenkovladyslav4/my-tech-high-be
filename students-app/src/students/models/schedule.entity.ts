@@ -58,21 +58,17 @@ export class Schedule extends BaseEntity {
   @Field(() => Date, { nullable: true })
   @Directive('@external')
   current_submission: Date;
-
-  // @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Schedules)
-  // @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
-  // @Directive('@external')
-  // SchoolYear: SchoolYear;
-
-  @OneToMany(() => SchedulePeriod, (SchedulePeriod) => SchedulePeriod.Schedule)
-  @Field(() => [SchedulePeriod], { nullable: true })
-  @Directive('@external')
-  SchedulePeriods: SchedulePeriod[];
-
+ 
   @ManyToOne(() => Student, (student) => student.StudentSchedules, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'StudentId', referencedColumnName: 'student_id' }])
   Student: Student;
+
+  @OneToMany(() => SchedulePeriod, (SchedulePeriod) => SchedulePeriod.Schedule)
+  // TODO - Needs confirmation for SchedulePeriods
+  // @Field(() => [SchedulePeriod], { nullable: true })
+  @Directive('@external')
+  SchedulePeriods: SchedulePeriod[];
 }

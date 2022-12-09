@@ -64,7 +64,6 @@ export class ChecklistService {
 
   async update(updateChecklistInput: ChecklistInput): Promise<Boolean> {
     const { id, region_id, school_year_id, checklist_id, goal, subject, grade, status } = updateChecklistInput;
-    console.log(id, region_id, '****************************&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
     await this.checklistRepository.update(id, { goal });
     return true;
   }

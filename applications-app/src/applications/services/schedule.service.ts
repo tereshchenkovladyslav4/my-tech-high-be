@@ -58,7 +58,7 @@ export class ScheduleService {
       .leftJoinAndSelect('student.parent', 'parent')
       .leftJoinAndSelect('parent.person', 'p_person')
       .andWhere(`schoolYear.RegionId = ${region_id}`)
-      .andWhere(`schedule.status <> 'Draft'`)
+      .andWhere(`schedule.status <> '${ScheduleStatus.DRAFT}'`)
       .andWhere('schedule.status IN (:status)', { status: filter.status });
 
     if (filter && filter.grades && filter.grades.length > 0) {
@@ -123,6 +123,14 @@ export class ScheduleService {
           qb.orderBy(`ScheduleEmails.created_at`, 'DESC');
         } else if (_sortBy[0] === 'diploma') {
           qb.orderBy(`student.diploma_seeking`, 'DESC');
+        } else if (_sortBy[0] === 'date') {
+          qb.orderBy(`schedule.date_accepted`, 'DESC').addOrderBy(`schedule.date_submitted`, 'DESC');
+          // qb.addOrderBy(`schedule.date_accepted`, 'DESC');
+        } else if (_sortBy[0] === 'student') {
+          qb.orderBy('person.first_name', 'DESC');
+        } else if (_sortBy[0] === 'parent') {
+          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
+          qb.orderBy('parent_name', 'DESC');
         } else {
           qb.orderBy('schedule.status', 'DESC');
           qb.addOrderBy('schedule.last_modified', 'ASC');
@@ -135,6 +143,13 @@ export class ScheduleService {
           qb.orderBy(`ScheduleEmails.created_at`, 'ASC');
         } else if (_sortBy[0] === 'diploma') {
           qb.orderBy(`student.diploma_seeking`, 'ASC');
+        } else if (_sortBy[0] === 'date') {
+          qb.orderBy(`schedule.date_accepted`, 'ASC').addOrderBy(`schedule.date_submitted`, 'ASC');
+        } else if (_sortBy[0] === 'student') {
+          qb.orderBy('person.first_name', 'ASC');
+        } else if (_sortBy[0] === 'parent') {
+          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
+          qb.orderBy('parent_name', 'DESC');
         } else {
           qb.orderBy('schedule.status', 'ASC');
           qb.addOrderBy('schedule.last_modified', 'ASC');
@@ -373,6 +388,12 @@ export class ScheduleService {
   async save(scheduleInput: CreateOrUpdateScheduleInput): Promise<Schedule> {
     try {
       let result: Schedule = null;
+      if (scheduleInput.status !== ScheduleStatus.DRAFT)
+        await this.repo.delete({
+          StudentId: scheduleInput.StudentId,
+          SchoolYearId: scheduleInput.SchoolYearId,
+          status: ScheduleStatus.NOT_SUBMITTED,
+        });
       if (scheduleInput.status === ScheduleStatus.ACCEPTED) {
         result = await this.repo.save({
           ...scheduleInput,

@@ -46,6 +46,8 @@ export class StudentFilters {
   @Field((type) => [YEAR_STATUS])
   yearStatus = [];
 
+  @Field((type) => [Int])
+  curriculumProviders = [];
   // @Field((type) => [String])
   // status = [];
 }

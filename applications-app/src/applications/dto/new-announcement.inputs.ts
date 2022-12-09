@@ -31,6 +31,9 @@ export class CreateAnnouncementInput {
   @Field(() => String)
   filter_others?: string;
 
+  @Field(() => String)
+  filter_providers?: string;
+
   @Field(() => Boolean, { nullable: true })
   isArchived?: boolean;
 

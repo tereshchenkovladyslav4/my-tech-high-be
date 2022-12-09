@@ -259,7 +259,7 @@ export class ParentToDosService {
       .leftJoinAndSelect(
         Schedule,
         'schedule',
-        `schedule.StudentId = application.student_id AND (schedule.is_second_semester = 0 OR schedule.is_second_semester IS NULL) AND schedule.SchoolYearId = application.school_year_id AND schedule.status <> '${ScheduleStatus.DRAFT}'`,
+        `schedule.StudentId = application.student_id AND (schedule.is_second_semester = 0 OR schedule.is_second_semester IS NULL) AND schedule.SchoolYearId = application.school_year_id AND schedule.status <> '${ScheduleStatus.DRAFT}' AND schedule.status <> '${ScheduleStatus.NOT_SUBMITTED}'`,
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .andWhere(`studentStatus.status <> ${StudentStatusEnum.WITHDRAWN}`)
@@ -315,7 +315,7 @@ export class ParentToDosService {
       .leftJoinAndSelect(
         Schedule,
         'schedule',
-        `schedule.StudentId = application.student_id AND schedule.SchoolYearId = application.school_year_id AND schedule.is_second_semester = 1  AND schedule.status <> '${ScheduleStatus.DRAFT}'`,
+        `schedule.StudentId = application.student_id AND schedule.SchoolYearId = application.school_year_id AND schedule.is_second_semester = 1  AND schedule.status <> '${ScheduleStatus.DRAFT}' AND schedule.status <> '${ScheduleStatus.NOT_SUBMITTED}'`,
       )
       .innerJoin(
         Schedule,
