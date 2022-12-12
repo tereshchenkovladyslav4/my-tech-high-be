@@ -26,6 +26,7 @@ import { Pagination } from 'src/paginate';
 import { YEAR_STATUS } from '../enums/year-status.enum';
 import { cloneDeep } from 'lodash';
 import { Provider } from '../models/provider.entity';
+import { StudentsHomeroomArgs } from '../dto/student-homeroom.args';
 
 @Injectable()
 export class StudentsService {
@@ -299,6 +300,275 @@ export class StudentsService {
           case 'previousSOE':
             qb.orderBy('previousPartner.name', sortBy);
             break;
+          default:
+            qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
+            qb.orderBy('student_name', sortBy);
+            break;
+        }
+      }
+
+      let total = 0,
+        results = [];
+
+      if (take !== -1) {
+        [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
+      } else {
+        [results, total] = await qb.printSql().getManyAndCount();
+      }
+
+      return new Pagination<Student>({
+        results,
+        total,
+      });
+    }
+  }
+
+  async findAllForHomeroom(studentsArgs: StudentsHomeroomArgs): Promise<Pagination<Student>> {
+    // const results = this.studentsRepository.find(studentsArgs);
+    const { skip, take, sort, filter, search } = studentsArgs;
+    const _sortBy = sort.split('|');
+    const currentYear = await this.schoolYearService.findOneById(filter.schoolYear);
+    const previousYearOb = await this.schoolYearService.findPreviousYear(
+      parseInt(Moment(currentYear.date_begin).format('YYYY')),
+      currentYear.RegionId,
+    );
+    const previousSchoolYear = previousYearOb ? previousYearOb.school_year_id : 0;
+
+    let filterSibling = false;
+    let enrolledInStatus = [];
+
+    const studentStatus = filter?.yearStatus || [];
+    if (studentStatus.length) {
+      filterSibling = studentStatus.includes(YEAR_STATUS.SIBLING);
+      enrolledInStatus = studentStatus.filter((el) => el !== YEAR_STATUS.SIBLING);
+    }
+
+    const qb = this.studentsRepository
+      .createQueryBuilder('student')
+      .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+      .leftJoinAndSelect('student.status', 'status')
+      .leftJoinAndSelect('student.person', 'person')
+      .leftJoinAndSelect('student.parent', 'parent')
+      .leftJoinAndSelect('parent.person', 'p_person')
+      .leftJoinAndSelect('p_person.person_address', 'p_address')
+      .leftJoinAndSelect('p_address.address', 'address')
+      // .leftJoinAndSelect('student.currentSoe', 'currentSoe', `currentSoe.school_year_id=${filter.schoolYear}`)
+      // .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
+      // .leftJoinAndSelect('student.previousSoe', 'previousSoe', `previousSoe.school_year_id=${previousSchoolYear}`)
+      // .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+      .leftJoinAndSelect('student.packets', 'packets')
+      .where(`grade_levels.school_year_id = ${filter.schoolYear} AND status.status IN (0, 1)`);
+
+    if (enrolledInStatus.length) {
+      qb.andWhere(`student.reenrolled IN (${enrolledInStatus.join(',')})`);
+    }
+    if (filter && filter.grades && filter.grades.length > 0) {
+      const grades = [];
+
+      filter.grades
+        .filter((item) => item.indexOf('-') > -1)
+        .map((item) => {
+          for (let i = +item.split('-')[0]; i <= +item.split('-')[1]; i++) {
+            if (!grades.includes(i)) {
+              grades.push(i.toString());
+            }
+          }
+        });
+      filter.grades
+        .filter((item) => item.indexOf('-') === -1)
+        .map((item) => {
+          if (!grades.includes(item)) {
+            grades.push(item);
+          }
+          if (item == 'K') {
+            if (!grades.includes('Kin')) grades.push('Kin');
+          }
+          if (item === 'Kindergarten') {
+            if (!grades.includes('Kin')) grades.push('Kin');
+            if (!grades.includes('K')) grades.push('K');
+          }
+        });
+      qb.andWhere(`grade_levels.grade_level IN (${grades.map((el) => `'${el}'`).join(',')})`);
+    }
+    const schoolDistrict = filter?.schoolDistrict || [];
+    const hadFilterSchoolDistrict = schoolDistrict.length && !schoolDistrict.includes('all');
+
+    if (hadFilterSchoolDistrict) {
+      qb.andWhere(`packets.school_district IN (${filter.schoolDistrict.map((el) => `'${el}'`).join(',')})`);
+    }
+
+    // for homeroom
+    // if (filter && filter.schoolOfEnrollments && filter.schoolOfEnrollments.length > 0) {
+    //   const filterSchoolOfEnrollments = filter.schoolOfEnrollments.map((el) => `'${el}'`).join(',');
+    //   if (filter.schoolOfEnrollments.indexOf('unassigned') !== -1) {
+    //     qb.andWhere(
+    //       new Brackets((sub) => {
+    //         sub
+    //           .orWhere(`currentSoe.school_partner_id IN (${filterSchoolOfEnrollments})`)
+    //           .orWhere('currentSoe.school_partner_id IS NULL');
+    //       }),
+    //     );
+    //   } else {
+    //     qb.andWhere(`currentSoe.school_partner_id IN (${filterSchoolOfEnrollments})`);
+    //   }
+    // }
+
+    // for previous homeroom
+    // if (filter && filter.previousSOE && filter.previousSOE.length > 0) {
+    //   const filterPreviousSOE = filter.previousSOE.map((el) => `'${el}'`).join(',');
+    //   if (filter.previousSOE.indexOf('unassigned') !== -1) {
+    //     qb.andWhere(
+    //       new Brackets((sub) => {
+    //         sub
+    //           .orWhere(`previousSoe.school_partner_id IN (${filterPreviousSOE})`)
+    //           .orWhere('previousSoe.school_partner_id IS NULL');
+    //       }),
+    //     );
+    //   } else {
+    //     qb.andWhere(`previousSoe.school_partner_id IN (${filterPreviousSOE})`);
+    //   }
+    // }
+
+    if (filter && filter.curriculumProviders && filter.curriculumProviders.length > 0) {
+      qb.leftJoinAndSelect('student.StudentSchedules', 'StudentSchedules')
+        .leftJoinAndSelect('StudentSchedules.SchedulePeriods', 'SchedulePeriods')
+        .andWhere(`SchedulePeriods.ProviderId IN (:curriculumProvider)`, {
+          curriculumProvider: filter.curriculumProviders,
+        });
+    }
+
+    if (search) {
+      qb.andWhere(
+        new Brackets((sub) => {
+          sub
+            .orWhere(`person.first_name like '%${search}%'`)
+            .orWhere(`person.last_name like '%${search}%'`)
+            .orWhere(`p_person.first_name like '%${search}%'`)
+            .orWhere(`p_person.last_name like '%${search}%'`)
+            .orWhere(`address.city like '%${search}%'`)
+            .orWhere(`grade_levels.grade_level like '%${search}%'`)
+          // .orWhere(`currentPartner.name like '%${search}%'`)
+          // .orWhere(`previousPartner.name like '%${search}%'`);
+        }),
+      );
+    }
+    if (filterSibling) {
+      const queryRunner = await getConnection().createQueryRunner();
+      const qbOnlyParentSelect = cloneDeep(qb);
+      qbOnlyParentSelect.select('student.parent_id');
+      const [parentsIds] = qbOnlyParentSelect.getQueryAndParameters();
+      qb.addSelect('student.*');
+      const allStudent = this.studentsRepository
+        .createQueryBuilder('student')
+        .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+        .leftJoinAndSelect('student.status', 'status')
+        .leftJoinAndSelect('student.person', 'person')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .leftJoinAndSelect('p_person.person_address', 'p_address')
+        .leftJoinAndSelect('p_address.address', 'address')
+        .leftJoinAndSelect('student.currentSoe', 'currentSoe')
+        .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
+        .leftJoinAndSelect('student.previousSoe', 'previousSoe')
+        .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+        .leftJoinAndSelect('student.packets', 'packets')
+        .addSelect('student.*')
+        .where(`student.parent_id IN (${parentsIds})`);
+
+      const sortBy = _sortBy?.[1]?.toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
+      let sortParent = 'ASC';
+      if (sort && _sortBy[0] === 'parent') {
+        sortParent = sortBy;
+      }
+      // RECHECK: parent name order rule
+      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, grade_levels_school_year_id=${filter.schoolYear} DESC`;
+      // Group sorting
+      if (filter?.grades?.length) {
+        const filterGrade = filter.grades;
+        if (sort) {
+          if (_sortBy[0] === 'grade') {
+            filterGrade.sort((a, b) => {
+              if (sortBy === 'DESC') return a > b ? -1 : 1;
+              else return a > b ? -1 : 1;
+            });
+          }
+        }
+        const gradeOrders = filterGrade
+          .map((filterValue) => `grade_levels_grade_level='${filterValue}' DESC`)
+          .join(',');
+        orderByFilter += `, ${gradeOrders}`;
+      } else {
+        if (sort) {
+          if (_sortBy[0] === 'grade') {
+            orderByFilter += `, grade_levels_grade_level ${sortBy}`;
+          }
+        }
+      }
+
+      const [sqlAll] = allStudent.getQueryAndParameters();
+      const [sql1] = qb.getQueryAndParameters();
+      const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
+                        UNION ${sqlAll}) aaa GROUP BY student_id`;
+
+
+      let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
+      const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
+
+      results = results.map((res) => {
+        const rrr = { ...res };
+
+        const currentSoe = [];
+        const previousSoe = [];
+
+        if (res.currentPartner_name) {
+          currentSoe.push({
+            partner: { name: res.currentPartner_name, abbreviation: res.currentPartner_abbreviation },
+          });
+        }
+
+        if (res.previousPartner_name) {
+          previousSoe.push({
+            partner: { name: res.previousPartner_name, abbreviation: res.previousPartner_abbreviation },
+          });
+        }
+
+        rrr.currentSoe = currentSoe;
+        rrr.previousSoe = previousSoe;
+
+        return this.studentsRepository.create(rrr);
+      });
+
+      queryRunner.release();
+
+      return new Pagination<Student>({
+        results,
+        total: totalRes?.[0]?.total || 0,
+      });
+    } else {
+      if (sort) {
+        const sortBy = _sortBy[1].toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
+        switch (_sortBy[0]) {
+          case 'grade':
+            qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level1');
+            qb.orderBy('student_grade_level1', sortBy);
+            break;
+          case 'student':
+            qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
+            qb.orderBy('student_name', sortBy);
+            break;
+          case 'parent':
+            qb.addSelect("CONCAT(p_person.last_name, ' ', p_person.first_name)", 'parent_name');
+            qb.orderBy('parent_name', sortBy);
+            break;
+          case 'city':
+            qb.orderBy('address.city', sortBy);
+            break;
+          // case 'currentSOE':
+          //   qb.orderBy('currentPartner.name', sortBy);
+          //   break;
+          // case 'previousSOE':
+          //   qb.orderBy('previousPartner.name', sortBy);
+          //   break;
           default:
             qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
             qb.orderBy('student_name', sortBy);

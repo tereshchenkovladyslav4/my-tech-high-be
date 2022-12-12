@@ -26,6 +26,7 @@ import { Pagination } from 'src/paginate';
 import { StudentPagination } from '../models/student-pagination.entity';
 import { assignStudentToSOEInput } from '../dto/assign-student-soe.input';
 import { SchoolEnrollmentService } from '../services/school-enrollment-service.service';
+import { StudentsHomeroomArgs } from '../dto/student-homeroom.args';
 
 @Resolver((of) => Student)
 export class StudentsResolver {
@@ -34,7 +35,7 @@ export class StudentsResolver {
     private parentsService: ParentsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private schoolEnrollmentService: SchoolEnrollmentService,
-  ) {}
+  ) { }
 
   @Query((returns) => Student, { name: 'student' })
   async getStudent(@Args({ name: 'student_id', type: () => ID }) student_id: number): Promise<Student> {
@@ -44,6 +45,11 @@ export class StudentsResolver {
   @Query((of) => StudentPagination, { name: 'studentsForSOE' })
   public async getStudentsForSOE(@Args() studentsArgs: StudentsArgs): Promise<Pagination<Student>> {
     return this.studentsService.findAll(studentsArgs);
+  }
+
+  @Query((of) => StudentPagination, { name: 'studentsForHoomeroom' })
+  public async setStudentsForHoomeroom(@Args() studentsArgs: StudentsHomeroomArgs): Promise<Pagination<Student>> {
+    return this.studentsService.findAllForHomeroom(studentsArgs);
   }
 
   @ResolveField((of) => Parent, { name: 'parent' })

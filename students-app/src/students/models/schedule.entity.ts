@@ -67,8 +67,7 @@ export class Schedule extends BaseEntity {
   Student: Student;
 
   @OneToMany(() => SchedulePeriod, (SchedulePeriod) => SchedulePeriod.Schedule)
-  // TODO - Needs confirmation for SchedulePeriods
-  // @Field(() => [SchedulePeriod], { nullable: true })
+  @Field(() => [SchedulePeriod], { nullable: true })
   @Directive('@external')
   SchedulePeriods: SchedulePeriod[];
 }

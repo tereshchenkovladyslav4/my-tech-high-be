@@ -26,6 +26,10 @@ export class Master extends BaseEntity {
   @Field(() => String)
   master_name: string;
 
+  @Column()
+  @Field(() => String, { nullable: true })
+  instructions?: string;
+
   @OneToMany(() => Classes, (classes) => classes.master)
   @JoinColumn({ name: 'master_id', referencedColumnName: 'master_id' })
   @Field(() => [Classes], { nullable: true })

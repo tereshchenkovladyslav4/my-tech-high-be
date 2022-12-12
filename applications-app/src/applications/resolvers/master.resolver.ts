@@ -6,6 +6,7 @@ import { MasterService } from '../services/master.service';
 import { CreateNewMasterInput } from '../dto/create-new-master.input';
 import { CreateNewClassInput } from '../dto/create-new-class.input';
 import { ClassesService } from '../services/classes.service';
+import { CreateOrUpdateInstructions } from '../dto/create-new-master-instruction.input';
 
 @Resolver((of) => Master)
 export class MasterResolver {
@@ -52,5 +53,14 @@ export class MasterResolver {
     createNewClassInput: CreateNewClassInput,
   ): Promise<Boolean> {
     return this.classesService.saveClass(createNewClassInput);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'createOrUpdateInstructions' })
+  @UseGuards(new AuthGuard())
+  async createOrUpdateInstructions(
+    @Args('createOrUpdateInstructions')
+    createOrUpdateInstructions: CreateOrUpdateInstructions,
+  ): Promise<Boolean> {
+    return this.service.createOrUpdateInstructions(createOrUpdateInstructions);
   }
 }

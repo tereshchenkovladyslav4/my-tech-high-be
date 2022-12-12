@@ -88,8 +88,10 @@ export class PacketsService {
       .andWhere(`school_year.RegionId = ${region_id}`);
 
     if (filters.includes('Age Issue')) {
-      qb = qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
+      qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
+      qb.andWhere(`school_year.RegionId = ${region_id}`);
     }
+
     if (search) {
       const date = search
         .split('/')
