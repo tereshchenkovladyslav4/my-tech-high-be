@@ -62,7 +62,7 @@ export class ScheduleService {
       .andWhere('schedule.status IN (:status)', { status: filter.status });
 
     if (filter && filter.grades && filter.grades.length > 0) {
-      qb.andWhere('student.grade_level IN (:grades)', { grades: filter.grades });
+      qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: filter.grades });
     }
     if (filter && filter.diplomaSeeking) {
       qb.andWhere(`student.diploma_seeking = ${filter.diplomaSeeking}`);
@@ -118,7 +118,7 @@ export class ScheduleService {
       if (_sortBy[1].toLocaleLowerCase() === 'desc') {
         if (_sortBy[0] === 'grade') {
           qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
-          qb.orderBy('grade_levels.grade_level', 'DESC');
+          qb.orderBy('student_grade_level', 'DESC');
         } else if (_sortBy[0] === 'emailed') {
           qb.orderBy(`ScheduleEmails.created_at`, 'DESC');
         } else if (_sortBy[0] === 'diploma') {

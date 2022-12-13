@@ -16,8 +16,8 @@ export class StudentsService {
     private readonly studentsRepository: Repository<Student>,
     private studentStatusService: StudentStatusService,
     private studentGradeLevelsService: StudentGradeLevelsService,
-    private studentAssessmentService: StudentAssessmentService
-  ) { }
+    private studentAssessmentService: StudentAssessmentService,
+  ) {}
 
   async findOneById(student_id: number): Promise<Student> {
     return await this.studentsRepository.findOne({
@@ -93,10 +93,11 @@ export class StudentsService {
         opt_out_form_signature_name,
         opt_out_form_signature_file_id,
       });
+
+      await this.studentStatusService.update(updateStudentInput);
       // testing_preference update
       await this.studentAssessmentService.updateTestAnswer(testing_preference);
 
-      await this.studentStatusService.update(updateStudentInput);
       return true;
     } catch (error) {
       return false;

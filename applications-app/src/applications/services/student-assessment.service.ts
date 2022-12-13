@@ -33,14 +33,21 @@ export class StudentAssessmentService {
   }
 
   async updateTestAnswer(testing_preference: string): Promise<boolean> {
-    const testData = JSON.parse(testing_preference);
-    for (let i = 0; i < testData.length; i++) {
-      const testOption = await this.repo.update({
-        assessment_option_id: testData[i].assessmentOptionId
-      }, {
-        OptionId: testData[i].optionId
-      })
+    try {
+      const testData = JSON.parse(testing_preference);
+      for (let i = 0; i < testData.length; i++) {
+        const testOption = await this.repo.update(
+          {
+            assessment_option_id: testData[i].assessmentOptionId,
+          },
+          {
+            OptionId: testData[i].optionId,
+          },
+        );
+      }
+      return true;
+    } catch (error) {
+      return false;
     }
-    return true;
   }
 }
