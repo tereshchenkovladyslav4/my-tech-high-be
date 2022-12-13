@@ -58,142 +58,138 @@ export class PacketsService {
   ) {}
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
-    const { skip, take, sort, filters, search, region_id } = packetsArgs;
-    const _sortBy = sort.split('|');
+    try {
+      const { skip, take, sort, filters, search, region_id } = packetsArgs;
+      const _sortBy = sort.split('|');
 
-    if (filters.length === 0) {
-      return new Pagination<Packet>({
-        results: [],
-        total: 0,
-      });
-    }
+      if (filters.length === 0) {
+        return new Pagination<Packet>({
+          results: [],
+          total: 0,
+        });
+      }
 
-    const userEmails = this.packetEmailsService.findByOrder();
+      const userEmails = this.packetEmailsService.findByOrder();
 
-    let qb = this.packetsRepository
-      .createQueryBuilder('packet')
-      .leftJoinAndSelect('packet.student', 'student')
-      .leftJoinAndSelect('student.applications', 'applications')
-      .leftJoinAndSelect('applications.school_year', 'school_year')
-      .leftJoinAndSelect('student.person', 's_person')
-      .leftJoinAndSelect('student.parent', 'parent')
-      .leftJoinAndSelect('student.status', 'status')
-      .leftJoinAndSelect('student.reenrollment_status', 'r_status')
-      .leftJoinAndSelect('parent.person', 'p_person')
-      .leftJoinAndSelect('student.grade_levels', 'grade_levels')
-      .leftJoinAndSelect('packet.packet_emails', 'packet_emails')
-      .leftJoinAndSelect('packet.packet_emails', '(' + userEmails + ')')
+      const qb = this.packetsRepository
+        .createQueryBuilder('packet')
+        .leftJoinAndSelect('packet.student', 'student')
+        .leftJoinAndSelect('student.applications', 'applications')
+        .leftJoinAndSelect('applications.school_year', 'school_year')
+        .leftJoinAndSelect('student.person', 's_person')
+        .leftJoinAndSelect('student.parent', 'parent')
+        .leftJoinAndSelect('student.status', 'status')
+        .leftJoinAndSelect('student.reenrollment_status', 'r_status')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+        .leftJoinAndSelect('packet.packet_emails', 'packet_emails')
+        .leftJoinAndSelect('packet.packet_emails', '(' + userEmails + ')')
+        .where('packet.status IN (:status)', { status: filters })
+        .andWhere(`school_year.RegionId = ${region_id}`);
 
-      .where('packet.status IN (:status)', { status: filters })
-      .andWhere(`school_year.RegionId = ${region_id}`);
-
-    if (filters.includes('Age Issue')) {
-      qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
-      qb.andWhere(`school_year.RegionId = ${region_id}`);
-    }
-
-    if (search) {
-      const date = search
-        .split('/')
-        .filter((v) => v)
-        .join('-');
-      qb.andWhere(
-        new Brackets((sub) => {
-          if (
-            search.indexOf('st') > -1 ||
-            search.indexOf('th') > -1 ||
-            search.indexOf('rd') > -1 ||
-            search.indexOf('nd') > -1
-          ) {
-            sub.where('grade_levels.grade_level like :text', {
-              text: `%${search.match(/\d+/)[0]}%`,
-            });
-          } else {
-            sub
-              .orWhere('packet.status like :text', { text: `%${search}%` })
-              .orWhere('packet.packet_id like :text', { text: `%${search}%` })
-              .orWhere('s_person.first_name like :text', {
-                text: `%${search}%`,
-              })
-              .orWhere('s_person.last_name like :text', { text: `%${search}%` })
-              .orWhere('p_person.first_name like :text', {
-                text: `%${search}%`,
-              })
-              .orWhere('p_person.last_name like :text', { text: `%${search}%` })
-              .orWhere('packet.deadline like :text', { text: `%${date}%` });
-            if (Moment(search, 'MM/DD/YY', true).isValid()) {
-              sub.orWhere('packet.deadline like :text', {
-                text: `%${Moment(search).format('YYYY-MM-DD')}%`,
+      if (filters.includes('Age Issue')) {
+        qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
+        qb.andWhere(`school_year.RegionId = ${region_id}`);
+      }
+      if (search) {
+        const date = search
+          .split('/')
+          .filter((v) => v)
+          .join('-');
+        qb.andWhere(
+          new Brackets((sub) => {
+            if (
+              search.indexOf('st') > -1 ||
+              search.indexOf('th') > -1 ||
+              search.indexOf('rd') > -1 ||
+              search.indexOf('nd') > -1
+            ) {
+              sub.where('grade_levels.grade_level like :text', {
+                text: `%${search.match(/\d+/)[0]}%`,
               });
+            } else {
+              sub
+                .orWhere('packet.status like :text', { text: `%${search}%` })
+                .orWhere('packet.packet_id like :text', { text: `%${search}%` })
+                .orWhere('s_person.first_name like :text', {
+                  text: `%${search}%`,
+                })
+                .orWhere('s_person.last_name like :text', { text: `%${search}%` })
+                .orWhere('p_person.first_name like :text', {
+                  text: `%${search}%`,
+                })
+                .orWhere('p_person.last_name like :text', { text: `%${search}%` })
+                .orWhere('packet.deadline like :text', { text: `%${date}%` });
+              if (Moment(search, 'MM/DD/YY', true).isValid()) {
+                sub.orWhere('packet.deadline like :text', {
+                  text: `%${Moment(search).format('YYYY-MM-DD')}%`,
+                });
+              }
             }
+          }),
+        );
+      }
+
+      if (sort) {
+        if (_sortBy[1].toLocaleLowerCase() === 'desc') {
+          if (_sortBy[0] === 'student') {
+            qb.orderBy('s_person.first_name', 'DESC');
+          } else if (_sortBy[0] === 'grade') {
+            qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+            qb.orderBy('student_grade_level', 'DESC');
+          } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
+            qb.orderBy('packet.deadline', 'DESC');
+          } else if (_sortBy[0] === 'status') {
+            qb.orderBy('packet.status', 'DESC');
+          } else if (_sortBy[0] === 'studentStatus') {
+            qb.orderBy('status.status', 'DESC');
+          } else if (_sortBy[0] === 'emailed') {
+            qb.orderBy(`(${userEmails}).created_at`, 'DESC');
+          } else if (_sortBy[0] === 'parent') {
+            qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
+            qb.orderBy('parent_name', 'DESC');
+          } else {
+            qb.orderBy('packet.packet_id', 'DESC');
           }
-        }),
-      );
-    }
-
-    if (sort) {
-      if (_sortBy[1].toLocaleLowerCase() === 'desc') {
-        if (_sortBy[0] === 'student') {
-          qb.orderBy('s_person.first_name', 'DESC');
-        } else if (_sortBy[0] === 'grade') {
-          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
-          qb.orderBy('student_grade_level', 'DESC');
-        } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
-          qb.orderBy('packet.deadline', 'DESC');
-        } else if (_sortBy[0] === 'status') {
-          qb.orderBy('packet.status', 'DESC');
-        } else if (_sortBy[0] === 'studentStatus') {
-          qb.orderBy('status.status', 'DESC');
-        } else if (_sortBy[0] === 'emailed') {
-          qb.orderBy(`(${userEmails}).created_at`, 'DESC');
-        } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
-          qb.orderBy('parent_name', 'DESC');
         } else {
-          qb.orderBy('packet.packet_id', 'DESC');
-        }
-      } else {
-        if (_sortBy[0] === 'student') {
-          qb.orderBy('s_person.first_name', 'ASC');
-        } else if (_sortBy[0] === 'grade') {
-          qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
-          qb.orderBy('student_grade_level', 'ASC');
-        } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
-          qb.orderBy('packet.deadline', 'ASC');
-        } else if (_sortBy[0] === 'studentStatus') {
-          qb.orderBy('status.status', 'ASC');
-        } else if (_sortBy[0] === 'emailed') {
-          qb.orderBy(`(${userEmails}).created_at`, 'ASC');
-        } else if (_sortBy[0] === 'status') {
-          qb.orderBy('packet.status', 'ASC');
-        } else if (_sortBy[0] === 'parent') {
-          qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
-          qb.orderBy('parent_name', 'ASC');
-        } else {
-          qb.orderBy('packet.packet_id', 'ASC');
+          if (_sortBy[0] === 'student') {
+            qb.orderBy('s_person.first_name', 'ASC');
+          } else if (_sortBy[0] === 'grade') {
+            qb.addSelect('ABS(grade_levels.grade_level + 0)', 'student_grade_level');
+            qb.orderBy('student_grade_level', 'ASC');
+          } else if (_sortBy[0] === 'submitted' || _sortBy[0] === 'deadline') {
+            qb.orderBy('packet.deadline', 'ASC');
+          } else if (_sortBy[0] === 'studentStatus') {
+            qb.orderBy('status.status', 'ASC');
+          } else if (_sortBy[0] === 'emailed') {
+            qb.orderBy(`(${userEmails}).created_at`, 'ASC');
+          } else if (_sortBy[0] === 'status') {
+            qb.orderBy('packet.status', 'ASC');
+          } else if (_sortBy[0] === 'parent') {
+            qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
+            qb.orderBy('parent_name', 'ASC');
+          } else {
+            qb.orderBy('packet.packet_id', 'ASC');
+          }
         }
       }
-    }
 
-    let result = [];
-    const [results, total] = await qb.getManyAndCount();
-    if (take) {
-      if (total < (skip || 0) + take) {
-        result = results.slice(skip || 0, results.length);
-      } else {
-        result = results.slice(skip || 0, take + (skip || 0));
+      let result = [];
+      const [results, total] = await qb.getManyAndCount();
+      if (take) {
+        if (total < (skip || 0) + take) {
+          result = results.slice(skip || 0, results.length);
+        } else {
+          result = results.slice(skip || 0, take + (skip || 0));
+        }
       }
+      return new Pagination<Packet>({
+        results: result,
+        total,
+      });
+    } catch (error) {
+      return error;
     }
-    return new Pagination<Packet>({
-      results: result,
-      total,
-    });
-
-    // const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
-    // return new Pagination<Packet>({
-    //   results,
-    //   total,
-    // });
   }
 
   async findOneById(packet_id: number): Promise<Packet> {
@@ -317,7 +313,7 @@ export class PacketsService {
       await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
     }
     emailBody.map(async (emailData) => {
-      const result = await this.sesEmailService.sendEmail({
+      await this.sesEmailService.sendEmail({
         email: emailData.email,
         subject: emailData.subject,
         content: emailData.body,
@@ -416,7 +412,6 @@ export class PacketsService {
 
       return packets;
     } catch (error) {
-      console.log(error);
       return [];
     }
   }

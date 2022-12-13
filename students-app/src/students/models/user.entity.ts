@@ -18,7 +18,7 @@ export class User extends BaseEntity {
   students?: Student[];
 
   @Column()
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   email?: string;
 

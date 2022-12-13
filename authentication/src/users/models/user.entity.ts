@@ -23,7 +23,7 @@ export class User extends BaseEntity {
   user_id?: number;
 
   @Column()
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Directive('@external')
   email?: string;
 

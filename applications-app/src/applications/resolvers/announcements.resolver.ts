@@ -10,20 +10,20 @@ import { UserAnnouncementResponse } from '../dto/user-announcement.response';
 import { ResponseDTO } from '../dto/response.dto';
 import { UserAnnouncementRequestParams } from '../dto/user-announcement-request-param';
 import { UserAnnouncement } from '../models/user-announcement.entity';
-@Resolver((of) => Announcement)
+@Resolver(() => Announcement)
 export class AnnouncementsResolver {
   constructor(
     private announcementsService: AnnouncementsService,
     private userAnnouncementService: UserAnnouncementsService,
   ) {}
 
-  @Query((returns) => [Announcement], { name: 'announcements' })
+  @Query(() => [Announcement], { name: 'announcements' })
   @UseGuards(new AuthGuard())
   async getAnnouncements(@Args('region_id', { type: () => Int }) region_id: number): Promise<Announcement[]> {
     return this.announcementsService.findAll(region_id);
   }
 
-  @Query((returns) => Announcement, { name: 'announcement' })
+  @Query(() => Announcement, { name: 'announcement' })
   @UseGuards(new AuthGuard())
   async getAnnouncement(
     @Args({ name: 'announcement_id', type: () => ID }) announcement_id: number,
@@ -31,12 +31,12 @@ export class AnnouncementsResolver {
     return this.announcementsService.findOneById(announcement_id);
   }
 
-  @Mutation((returns) => ResponseDTO)
+  @Mutation(() => ResponseDTO)
   deleteAnnouncementsById(@Args('id', { type: () => Int }) id: number): Promise<ResponseDTO> {
     return this.announcementsService.deleteById(id);
   }
 
-  @Query((returns) => [UserAnnouncementResponse], { name: 'userAnnouncements' })
+  @Query(() => [UserAnnouncementResponse], { name: 'userAnnouncements' })
   @UseGuards(new AuthGuard())
   async getUserAnnouncements(
     @Args('request') request: UserAnnouncementRequestParams,
@@ -44,33 +44,33 @@ export class AnnouncementsResolver {
     return this.userAnnouncementService.findAll(request);
   }
 
-  @Mutation((returns) => ResponseDTO)
+  @Mutation(() => ResponseDTO)
   deleteUserAnnouncementsByUserId(@Args('user_id', { type: () => Int }) user_id: number): Promise<ResponseDTO> {
     return this.userAnnouncementService.deleteAll(user_id);
   }
 
-  @Mutation((returns) => ResponseDTO)
+  @Mutation(() => ResponseDTO)
   deleteUserAnnouncementById(@Args('id', { type: () => Int }) id: number): Promise<ResponseDTO> {
     return this.userAnnouncementService.deleteById(id);
   }
 
-  @Mutation((returns) => UserAnnouncement)
+  @Mutation(() => UserAnnouncement)
   markRead(@Args('id', { type: () => Int }) id: number): Promise<UserAnnouncement> {
     return this.userAnnouncementService.markRead(id);
   }
 
-  @Mutation((returns) => Announcement, { name: 'createAnnoucement' })
+  @Mutation(() => Announcement, { name: 'createAnnouncement' })
   @UseGuards(new AuthGuard())
-  async createAnnoucement(
-    @Args('createAnnoucementInput')
-    createAnnoucementInput: CreateAnnouncementInput,
+  async createAnnouncement(
+    @Args('createAnnouncementInput')
+    createAnnouncementInput: CreateAnnouncementInput,
   ): Promise<Announcement> {
-    return this.announcementsService.create(createAnnoucementInput);
+    return this.announcementsService.create(createAnnouncementInput);
   }
 
-  @Mutation((returns) => Announcement, { name: 'updateAnouncement' })
+  @Mutation(() => Announcement, { name: 'updateAnnouncement' })
   @UseGuards(new AuthGuard())
-  async updateAnouncement(
+  async updateAnnouncement(
     @Args('updateAnnouncementInput')
     updateAnnouncementInput: UpdateAnnouncementInput,
   ): Promise<Announcement> {

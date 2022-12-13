@@ -6,6 +6,7 @@ export enum StudentStatusEnum {
   WITHDRAWN = 2,
   GRADUATED = 3,
   APPLIED = 5,
+  REAPPLIED = 7,
 }
 
 registerEnumType(StudentStatusEnum, {

@@ -25,6 +25,7 @@ export class StudentStatusHistoryService {
       student_id: studentStatusHistory.student_id,
       school_year_id: studentStatusHistory.school_year_id,
       status: studentStatusHistory.status,
+      date_updated: new Date(),
     });
 
     return !!result;
