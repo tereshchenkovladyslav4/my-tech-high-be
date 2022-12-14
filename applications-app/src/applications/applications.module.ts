@@ -80,6 +80,8 @@ import { ReimbursementSetting } from './models/reimbursement-setting.entity';
 import { ReimbursementSettingResolver } from './resolvers/reimbursement-setting.resolver';
 import { Assignment } from './models/assignment.entity';
 import { AssignmentResolver } from './resolvers/assignemtn.resolver';
+import { LearningLogQuestionResolver } from './resolvers/learning-log-question.resolver';
+import { LearningLogQuestion } from './models/learning-log-question.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -113,7 +115,8 @@ const graphQLImports = [
   MasterResolver,
   ChecklistResolver,
   ReimbursementSettingResolver,
-  AssignmentResolver
+  AssignmentResolver,
+  LearningLogQuestionResolver,
 ];
 @Module({
   imports: [
@@ -171,7 +174,8 @@ const graphQLImports = [
           Classes,
           Checklist,
           ReimbursementSetting,
-          Assignment
+          Assignment,
+          LearningLogQuestion,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),
@@ -182,4 +186,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class ApplicationsGraphqlModule { }
+export class ApplicationsGraphqlModule {}

@@ -1,10 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 import { Classes } from './classes.entity';
 @ObjectType()
 @Directive('@key(fields: "master_id")')

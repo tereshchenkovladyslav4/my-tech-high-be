@@ -11,4 +11,7 @@ export class MeConfirmation {
 
   @Field()
   status?: string;
+
+  @Field()
+  level?: number;
 }

@@ -1,22 +1,9 @@
-import { Args, ID, Query, Resolver, GqlExecutionContext, Mutation } from '@nestjs/graphql';
-import { User } from '../models/user.entity';
+import { Args, Query, Resolver, GqlExecutionContext, Mutation } from '@nestjs/graphql';
 import { UsersService } from '../services/users.service';
-import { LoginInput } from '../dto/login.inputs';
-import {
-  createParamDecorator,
-  ExecutionContext,
-  HttpException,
-  HttpStatus,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
-import { LocalAuthGuard } from '../gaurds/local-auth.guard';
+import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../../auth/auth.service';
-import { MePermission } from '../models/me-permission.entity';
-import { AuthPayload } from '../dto/login.payload';
 import { MeConfirmation } from '../models/me-confirmation.entity';
 import { EmailVerifierService } from '../services/email-verifier.service';
-import { EmailVerifier } from '../models/email-verifier.entity';
 import { VerifyInput } from '../dto/verify.inputs';
 import * as Moment from 'moment';
 import { EmailsService } from '../services/emails.service';
@@ -39,11 +26,10 @@ export class UsersResolver {
     private emailService: EmailsService,
   ) {}
 
-  @Query((returns) => MeConfirmation, { name: 'verification' })
+  @Query(() => MeConfirmation, { name: 'verification' })
   async verification(@Args({ name: 'token', type: () => String }) token: string): Promise<MeConfirmation> {
     const decodedToken = base64.decode(token);
     const [user_id, email] = decodedToken.split('-');
-    //console.log(decodedToken);
     const emailVerifier = await this.emailVerifierService.findOneByUser(user_id, email);
 
     return {
@@ -53,7 +39,7 @@ export class UsersResolver {
     };
   }
 
-  @Mutation((returns) => MeConfirmation)
+  @Mutation(() => MeConfirmation)
   async verify(@Args('verifyInput') verifyInput: VerifyInput): Promise<MeConfirmation> {
     const { token } = verifyInput;
     const decodedToken = base64.decode(token);
@@ -88,10 +74,11 @@ export class UsersResolver {
       token: token,
       email: emailVerifier.email,
       status: result.verified ? 'verified' : 'unverified',
+      level: updatedAccount.level,
     };
   }
 
-  @Mutation((returns) => MeConfirmation)
+  @Mutation(() => MeConfirmation)
   async verifyEmail(@Args('verifyInput') verifyInput: VerifyInput): Promise<MeConfirmation> {
     const { token } = verifyInput;
     const decodedToken = base64.decode(token);
@@ -131,17 +118,13 @@ export class UsersResolver {
   //   return this.authService.login(user);
   // }
 
-  @Mutation((of) => Boolean, { name: 'resendVerificationEmail' })
+  @Mutation(() => Boolean, { name: 'resendVerificationEmail' })
   public async resendVerificationEmail(@Args({ name: 'email', type: () => String }) email: string): Promise<boolean> {
     const status = await this.usersService.resendVerificationEmail(email);
-    if (status) {
-      return true;
-    } else {
-      return false;
-    }
+    return !!status;
   }
 
-  @Mutation((returns) => ForgotPasswordResponse, { name: 'forgotPassword' })
+  @Mutation(() => ForgotPasswordResponse, { name: 'forgotPassword' })
   async forgotPassword(
     @Args({ name: 'email', type: () => String }) email: string,
   ): Promise<{ status: boolean; unverified: boolean }> {
@@ -160,11 +143,11 @@ export class UsersResolver {
     return { status: true, unverified: false };
   }
 
-  @Mutation((returns) => MeConfirmation, { name: 'resetPassword' })
+  @Mutation(() => MeConfirmation, { name: 'resetPassword' })
   async resetPassword(@Args('verifyInput') verifyInput: VerifyInput): Promise<MeConfirmation> {
     const { token } = verifyInput;
     const decodedToken = base64.decode(token);
-    const [user_id, email] = decodedToken.split('-');
+    const [user_id] = decodedToken.split('-');
     const user = await this.usersService.findOneById(user_id);
     if (!user) {
       throw new UnauthorizedException();

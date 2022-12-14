@@ -129,6 +129,8 @@ import { ReimbursementSetting } from './models/reimbursement-setting.entity';
 import { ReimbursementSettingService } from './services/reimbursement-setting.service';
 import { Assignment } from './models/assignment.entity';
 import { AssignmentService } from './services/assignment.service';
+import { LearningLogQuestionService } from './services/learning-log-question.service';
+import { LearningLogQuestion } from './models/learning-log-question.entity';
 
 const servicesImports = [
   UsersService,
@@ -197,7 +199,8 @@ const servicesImports = [
   ClassesService,
   ChecklistService,
   ReimbursementSettingService,
-  AssignmentService
+  AssignmentService,
+  LearningLogQuestionService,
 ];
 
 @Global()
@@ -267,11 +270,12 @@ const servicesImports = [
       Classes,
       Checklist,
       ReimbursementSetting,
-      Assignment
+      Assignment,
+      LearningLogQuestion,
     ]),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule { }
+class RepoModule {}
 export default RepoModule;
