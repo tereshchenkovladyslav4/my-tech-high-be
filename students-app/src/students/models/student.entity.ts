@@ -1,5 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { Person } from './person.entity';
 import { Parent } from './parent.entity';
 import { StudentGradeLevel } from './student-grade-level.entity';
@@ -17,6 +17,7 @@ import { StudentRecord } from './student-record.entity';
 import { ResourceRequest } from './resource-request.entity';
 import { Schedule } from './schedule.entity';
 import { ScheduleHistory } from './schedule-history.entity';
+import { MTHHomeroomStudent } from './homeroom-student.entity';
 
 @ObjectType()
 @Directive(
@@ -108,6 +109,16 @@ export class Student extends BaseEntity {
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => [SchoolEnrollment], { nullable: true })
   previousSoe: SchoolEnrollment[];
+
+  @ManyToOne((type) => MTHHomeroomStudent, (homeroom) => homeroom.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  @Field(() => MTHHomeroomStudent, { nullable: true })
+  currentHomeroom: MTHHomeroomStudent;
+
+  @ManyToOne((type) => MTHHomeroomStudent, (homeroom) => homeroom.student)
+  @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  @Field(() => MTHHomeroomStudent, { nullable: true })
+  previousHomeroom: MTHHomeroomStudent;
 
   @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })

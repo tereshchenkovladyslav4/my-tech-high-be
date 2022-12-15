@@ -88,7 +88,6 @@ export class AppController {
       let currentSchoolYear = 0;
       if (body.year) {
         currentSchoolYear = await this.getCurrentSchoolYear(body.year);
-        console.log('CurrentSchoolYear: ', currentSchoolYear);
       }
 
       const { buffer, mimetype, originalname, size } = file;

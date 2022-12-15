@@ -153,17 +153,17 @@ export class StudentRecordService {
           specialEdList.push(Number(item));
         });
       }
-      // TO DO
-    }
-
-    if (enrollment_packet_document) {
-      // TO DO
     }
 
     let fileKinds = [];
 
     if (other) {
       fileKinds = JSON.parse(other);
+    }
+
+    if (enrollment_packet_document) {
+      if (fileKinds.length) fileKinds = fileKinds.concat(JSON.parse(enrollment_packet_document));
+      else fileKinds = JSON.parse(enrollment_packet_document);
     }
 
     if (grades.length == 0) {
@@ -190,6 +190,7 @@ export class StudentRecordService {
         fileKinds: fileKinds,
       });
     }
+
     qb.addSelect("CONCAT(person.last_name, ' ', person.first_name)", 'student_name');
     qb.orderBy('student_name', 'ASC');
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
@@ -223,6 +224,10 @@ export class StudentRecordService {
         `);
         recordId = record.insertId;
       }
+
+      await queryRunner.query(`
+        DELETE FROM infocenter.mth_student_record_file WHERE RecordId = ${recordId} AND file_kind NOT IN ('${StudentRecordFileKind.STUDENT_PACKET}', '${StudentRecordFileKind.OPT_OUT_FORM}', '${StudentRecordFileKind.USIRS}', '${StudentRecordFileKind.WITHDRAWAL_FORM}')
+      `);
 
       await queryRunner.query(`
         INSERT INTO infocenter.mth_student_record_file (RecordId, FileId, file_kind)
@@ -278,7 +283,6 @@ export class StudentRecordService {
       }
       return true;
     } catch (e) {
-      console.log(e);
       return false;
     }
   }

@@ -4,6 +4,7 @@ import { Subject } from './subject.entity';
 import { Course } from './course.entity';
 import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
+import { StateCodes } from './state-codes.entity';
 
 @ObjectType()
 @Directive(
@@ -143,4 +144,8 @@ export class Title {
   @OneToMany(() => SchedulePeriodHistory, (schedulePeriodHistory) => schedulePeriodHistory.Title)
   @Field(() => [SchedulePeriodHistory], { nullable: true })
   SchedulePeriodHistories: SchedulePeriodHistory[];
+
+  @OneToMany(() => StateCodes, (stateCodes) => stateCodes.Title)
+  @Field(() => [StateCodes], { nullable: true })
+  StateCodes: StateCodes[];
 }

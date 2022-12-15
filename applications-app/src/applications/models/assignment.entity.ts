@@ -1,6 +1,8 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { JoinColumn } from 'typeorm/decorator/relations/JoinColumn';
+import { ManyToOne } from 'typeorm/decorator/relations/ManyToOne';
+import { Master } from './master.entity';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
-import { Classes } from './classes.entity';
 @ObjectType()
 @Directive('@key(fields: "master_id")')
 @Entity('mth_assignments')
@@ -37,4 +39,9 @@ export class Assignment extends BaseEntity {
   @Column()
   @Field(() => Int)
   auto_grade_email: number;
+
+  @ManyToOne(() => Master, (master) => master.masterAssignments)
+  @Field(() => Master)
+  @JoinColumn([{ name: 'master_id', referencedColumnName: 'master_id' }])
+  master: Master;
 }

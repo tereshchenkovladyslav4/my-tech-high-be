@@ -30,6 +30,7 @@ export class SubjectService {
           searchField ? 'AND Titles.name LIKE "%' + searchField + '%"' : ''
         } AND Titles.is_active = ${!!isActive}`,
       )
+      .leftJoinAndSelect('Titles.StateCodes', 'stateCodes')
       .where({ SchoolYearId: schoolYearId, deleted: false })
       .orderBy({
         'subject.priority': 'ASC',

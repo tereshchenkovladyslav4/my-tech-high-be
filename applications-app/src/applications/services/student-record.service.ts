@@ -33,6 +33,10 @@ export class StudentRecordService {
       }
 
       await queryRunner.query(`
+        DELETE FROM infocenter.mth_student_record_file WHERE RecordId = ${recordId} AND file_kind NOT IN ('${StudentRecordFileKind.STUDENT_PACKET}', '${StudentRecordFileKind.OPT_OUT_FORM}', '${StudentRecordFileKind.USIRS}', '${StudentRecordFileKind.WITHDRAWAL_FORM}')
+      `);
+
+      await queryRunner.query(`
         INSERT INTO infocenter.mth_student_record_file (RecordId, FileId, file_kind)
         SELECT ${recordId}, mth_file_id, kind
         FROM (

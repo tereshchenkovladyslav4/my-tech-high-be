@@ -8,6 +8,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
+import { Assignment } from './assignment.entity';
 import { Classes } from './classes.entity';
 @ObjectType()
 @Directive('@key(fields: "master_id")')
@@ -34,6 +35,11 @@ export class Master extends BaseEntity {
   @JoinColumn({ name: 'master_id', referencedColumnName: 'master_id' })
   @Field(() => [Classes], { nullable: true })
   masterClasses: Classes[];
+
+  @OneToMany(() => Assignment, (assignment) => assignment.master)
+  @JoinColumn({ name: 'master_id', referencedColumnName: 'master_id' })
+  @Field(() => [Assignment], { nullable: true })
+  masterAssignments: Assignment[];
 
   @Field(() => Date, { nullable: true })
   @CreateDateColumn()

@@ -11,6 +11,7 @@ import { StudentReenrollmentStatus } from './student-reenrollment-status.entity'
 import { SchoolEnrollment } from './school-enrollment.entity';
 import { Schedule } from './schedule.entity';
 import { ScheduleHistory } from './schedule-history.entity';
+import { HomeroomStudent } from './homeroom-student.entity';
 
 @InputType('student')
 @ObjectType()

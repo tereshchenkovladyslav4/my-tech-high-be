@@ -17,6 +17,7 @@ export class MasterService {
         const result = await this.masterRepository
             .createQueryBuilder('master')
             .leftJoinAndSelect('master.masterClasses', 'masterClasses')
+            .leftJoinAndSelect('master.masterAssignments', 'masterAssignments')
             .leftJoinAndSelect('masterClasses.primaryTeacher', 'primaryTeacher')
             .where('master.school_year_id = :schoolYearId', { schoolYearId: schoolYearId })
             .getMany();

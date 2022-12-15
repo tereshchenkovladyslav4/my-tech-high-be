@@ -352,10 +352,10 @@ export class StudentsService {
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('p_person.person_address', 'p_address')
       .leftJoinAndSelect('p_address.address', 'address')
-      // .leftJoinAndSelect('student.currentSoe', 'currentSoe', `currentSoe.school_year_id=${filter.schoolYear}`)
-      // .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
-      // .leftJoinAndSelect('student.previousSoe', 'previousSoe', `previousSoe.school_year_id=${previousSchoolYear}`)
-      // .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+      .leftJoinAndSelect('student.currentHomeroom', 'currentHomeroom', `currentHomeroom.school_year_id=${filter.schoolYear}`)
+      .leftJoinAndSelect('currentHomeroom.teacher', 'currentTeacher')
+      .leftJoinAndSelect('student.previousHomeroom', 'previousHomeroom', `previousHomeroom.school_year_id=${previousSchoolYear}`)
+      .leftJoinAndSelect('previousHomeroom.teacher', 'previousTeacher')
       .leftJoinAndSelect('student.packets', 'packets')
       .where(`grade_levels.school_year_id = ${filter.schoolYear} AND status.status IN (0, 1)`);
 
