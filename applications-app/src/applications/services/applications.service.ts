@@ -123,26 +123,10 @@ export class ApplicationsService {
       .leftJoinAndSelect('application.school_year', 'school_year')
       .leftJoinAndSelect('application.application_emails', 'application_emails')
       .leftJoinAndSelect('application.application_emails', '(' + userEmails + ')')
-
-      // .leftJoinAndSelect(
-      //   qb => qb
-      //      .select()
-      //      .from(ApplicationEmail, 'e')
-      //      .orderBy({ 'e.created_at': 'ASC' })
-      //      .groupBy('e.application_id'),
-      //      .limit(1),
-      //      'e.created_at'
-      // )
-      // .leftJoinAndSelect('application.application_emails', 'application_emails')
       .where('application.status = "Submitted"')
+      .andWhere('student.student_id IS NOT NULL')
       .andWhere(`school_year.RegionId = ${region_id}`);
-    if (
-      filter &&
-      filter.grades &&
-      filter.grades.length > 0
-      // &&
-      // !filter.grades.includes('all')
-    ) {
+    if (filter?.grades?.length > 0) {
       const grades = [];
       filter.grades
         .filter((item) => item.indexOf('-') > -1)
@@ -167,7 +151,6 @@ export class ApplicationsService {
             if (!grades.includes('K')) grades.push('K');
           }
         });
-      // qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
       qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
     }
     if (filter && filter.diplomaSeeking) {

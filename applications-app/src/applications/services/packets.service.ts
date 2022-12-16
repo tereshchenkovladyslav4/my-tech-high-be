@@ -21,13 +21,15 @@ import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.input
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 import { StudentsService } from './students.service';
-import { EmailTemplateEnum, PdfTemplate, StudentRecordFileKind } from '../enums';
+import { EmailTemplateEnum, PdfTemplate, StudentRecordFileKind, StudentStatusEnum } from '../enums';
 import { FilesService } from './files.service';
 import { StudentRecordService } from './student-record.service';
 import { S3Service } from './s3.service';
 import { UserRegion } from '../models/user-region.entity';
 import { UserRegionService } from './user-region.service';
 import { PDFService } from './pdf.service';
+import { PacketsActionInput } from '../dto/packets-action.input';
+import { StudentStatusService } from './student-status.service';
 
 class Question {
   question: string;
@@ -50,6 +52,7 @@ export class PacketsService {
     private emailTemplateService: EmailTemplatesService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private studentService: StudentsService,
+    private studentStatusService: StudentStatusService,
     private filesService: FilesService,
     private studentRecordService: StudentRecordService,
     private userRegionService: UserRegionService,
@@ -183,6 +186,7 @@ export class PacketsService {
           result = results.slice(skip || 0, take + (skip || 0));
         }
       }
+
       return new Pagination<Packet>({
         results: result,
         total,
@@ -201,18 +205,6 @@ export class PacketsService {
       where: { student_id: student_id },
     });
   }
-
-  // async deletePacket(data: DeletePacketArgs, user: any): Promise<ResponseDTO> {
-  //   const { packetIds } = data;
-  //   await this.packetsRepository.delete({
-  //     packet_id: In(packetIds.split(',').map(Number)),
-  //   });
-
-  //   return <ResponseDTO>{
-  //     error: false,
-  //     message: 'Deleted Successfully',
-  //   };
-  // }
 
   async findByStudent(student_id: number): Promise<Packet[]> {
     return this.packetsRepository.find({
@@ -336,11 +328,22 @@ export class PacketsService {
     return packetEmails;
   }
 
-  async deletePacket(deleteApplicationInput: DeleteApplicationInput): Promise<Packet[]> {
-    const { application_ids } = deleteApplicationInput;
-    const applications = await this.packetsRepository.findByIds(application_ids);
-    const result = await this.packetsRepository.delete(application_ids);
-    return applications;
+  async deletePackets(packetsActionInput: PacketsActionInput): Promise<Packet[]> {
+    const { packetIds } = packetsActionInput;
+    const packets = await this.packetsRepository.findByIds(packetIds);
+    packets.map(async (item) => {
+      await this.packetsRepository.delete(item.packet_id);
+      const applications = await this.applicationService.findByStudent(item.student_id);
+      if (applications?.length) {
+        await this.studentService.update({ student_id: item.student_id, status: StudentStatusEnum.DELETED });
+        await this.studentStatusService.update({
+          student_id: item.student_id,
+          school_year_id: applications[0].school_year_id,
+          status: StudentStatusEnum.DELETED,
+        });
+      }
+    });
+    return packets;
   }
 
   async moveThisYearPacket(deleteApplicationInput: DeleteApplicationInput): Promise<boolean> {
@@ -358,7 +361,7 @@ export class PacketsService {
       }
     });
     if (ids.length === 0) return false;
-    const result = await this.applicationService.moveThisYearApplication({
+    await this.applicationService.moveThisYearApplication({
       application_ids: ids,
     });
     return true;
@@ -379,7 +382,7 @@ export class PacketsService {
       }
     });
     if (ids.length === 0) return false;
-    const result = await this.applicationService.moveNextYearApplication({
+    await this.applicationService.moveNextYearApplication({
       application_ids: ids,
     });
     return true;
@@ -440,7 +443,7 @@ export class PacketsService {
     };
   }
 
-  async getpacketCountByRegionId(region_id: number): Promise<ResponseDTO> {
+  async getPacketCountByRegionId(region_id: number): Promise<ResponseDTO> {
     const qb = await this.packetsRepository.query(
       `SELECT
           t1.status AS status,

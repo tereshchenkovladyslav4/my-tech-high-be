@@ -23,7 +23,7 @@ export class EmailRecordResolver {
 
   @Query((returns) => ResponseDTO, { name: 'emailRecordsCountByRegionId' })
   @UseGuards(new AuthGuard())
-  async getpacketCountByRegionId(@Args({ name: 'region_id', type: () => ID }) region_id: number): Promise<ResponseDTO> {
+  async getRecordCountByRegionId(@Args({ name: 'region_id', type: () => ID }) region_id: number): Promise<ResponseDTO> {
     return this.emailRecordsService.getRecordCountByRegionId(region_id);
   }
 

@@ -62,7 +62,6 @@ export class ApplicationsResolver {
   //@UseGuards(new AuthGuard())
   async getApplications(@Args() applicationsArgs: ApplicationsArgs): Promise<Pagination<Application>> {
     const results = await this.applicationsService.findAll(applicationsArgs);
-    console.log(results);
     return results;
   }
 

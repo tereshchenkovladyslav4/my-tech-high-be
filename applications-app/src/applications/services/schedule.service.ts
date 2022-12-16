@@ -133,7 +133,7 @@ export class ScheduleService {
           qb.orderBy('parent_name', 'DESC');
         } else {
           qb.orderBy('schedule.status', 'DESC');
-          qb.addOrderBy('schedule.last_modified', 'ASC');
+          qb.addOrderBy('schedule.last_modified', 'DESC');
         }
       } else {
         if (_sortBy[0] === 'grade') {
@@ -149,7 +149,7 @@ export class ScheduleService {
           qb.orderBy('person.first_name', 'ASC');
         } else if (_sortBy[0] === 'parent') {
           qb.addSelect("CONCAT(p_person.first_name, ' ', p_person.last_name)", 'parent_name');
-          qb.orderBy('parent_name', 'DESC');
+          qb.orderBy('parent_name', 'ASC');
         } else {
           qb.orderBy('schedule.status', 'ASC');
           qb.addOrderBy('schedule.last_modified', 'ASC');
@@ -266,7 +266,7 @@ export class ScheduleService {
   }
 
   async sendEmail(emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
-    const { schedule_ids, subject, body } = emailScheduleInput;
+    const { schedule_ids, subject, body, from } = emailScheduleInput;
     const [results, total] = await this.repo
       .createQueryBuilder('schedule')
       .leftJoinAndSelect('schedule.ScheduleStudent', 'ScheduleStudent')
@@ -284,56 +284,13 @@ export class ScheduleService {
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
-
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion('Schedules Page', region_id);
-
-    if (emailTemplate) {
-      await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
-    }
-
-    const setEmailBodyInfo = (student, school_year, schedule) => {
-      const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
-      const yearend = new Date(school_year.date_end).getFullYear().toString();
-
-      const yearText = schedule.midyear_application
-        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
-        : `${yearbegin}-${yearend.substring(2, 4)}`;
-
-      return emailTemplate.body
-        .toString()
-        .replace(/\[STUDENT\]/g, student.person?.first_name)
-        .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
-        .replace(/\[YEAR\]/g, yearText)
-        .replace(/\[SCHEDULE_YEAR\]/g, yearText);
-    };
-
-    const setEmailSubjectInfo = (student, school_year, schedule) => {
-      const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
-      const yearend = new Date(school_year.date_end).getFullYear().toString();
-
-      const yearText = schedule.midyear_schedule
-        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
-        : `${yearbegin}-${yearend.substring(2, 4)}`;
-
-      return emailTemplate.subject
-        .toString()
-        .replace(/\[STUDENT\]/g, student.person?.first_name)
-        .replace(/\[PARENT\]/g, student.parent?.person?.first_name)
-        .replace(/\[YEAR\]/g, yearText)
-        .replace(/\[SCHEDULE_YEAR\]/g, yearText);
-    };
-
     for (let index = 0; index < results.length; index++) {
       const item = results[index];
-      const emailBody = setEmailBodyInfo(item.ScheduleStudent, item.SchoolYear, item);
-      const emailSubject = setEmailSubjectInfo(item.ScheduleStudent, item.SchoolYear, item);
-
       await this.sesEmailService.sendEmail({
         email: item.ScheduleStudent.parent.person.email,
-        subject: emailSubject,
-        content: emailBody,
-        from: emailTemplate.from,
-        bcc: emailTemplate.bcc,
+        subject: subject.toString(),
+        content: body.toString(),
+        from,
         region_id,
         template_name: 'Schedule Page',
       });
@@ -345,7 +302,7 @@ export class ScheduleService {
           schedule_id: id,
           subject: subject,
           body: body,
-          from_email: emailTemplate.from,
+          from_email: from,
           template_name: 'Schedule Page',
         });
       }),

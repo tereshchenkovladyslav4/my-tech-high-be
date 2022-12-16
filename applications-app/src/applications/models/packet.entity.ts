@@ -1,5 +1,5 @@
-import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Directive, Field, ObjectType, Int, InputType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Student } from './student.entity';
 import { PacketFile } from './packet-file.entity';
 import { PacketEmail } from './packet-email.entity';
@@ -19,8 +19,8 @@ export enum StatusEnum {
 @Directive('@key(fields: "packet_id")')
 @Entity('mth_packet')
 export class Packet extends BaseEntity {
-  @Column()
-  @Field(() => ID, { nullable: true })
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   packet_id?: number;
 

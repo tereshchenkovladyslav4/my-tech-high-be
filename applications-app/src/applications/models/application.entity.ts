@@ -1,14 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Student } from './student.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { ApplicationEmail } from './application-email.entity';
@@ -80,6 +71,7 @@ export class Application extends BaseEntity {
 
   @ManyToOne((type) => Student, { nullable: true })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
+  @Field(() => Student, { nullable: true })
   student?: Student;
 
   @ManyToOne((type) => SchoolYear, { nullable: true })

@@ -39,8 +39,9 @@ import { PacketEmailsService } from '../services/packet-emails.service';
 import { EnrollmentPacketSubmitInput } from '../dto/enrollment-packet-submit.input';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
+import { PacketsActionInput } from '../dto/packets-action.input';
 
-@Resolver((of) => Packet)
+@Resolver(() => Packet)
 export class PacketsResolver {
   constructor(
     private applicationsService: ApplicationsService,
@@ -56,30 +57,30 @@ export class PacketsResolver {
     private packetEmailsService: PacketEmailsService,
   ) {}
 
-  @Query((returns) => PacketPagination, { name: 'packets' })
+  @Query(() => PacketPagination, { name: 'packets' })
   //@UseGuards(new AuthGuard())
   async getPackets(@Args() packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
     return this.packetsService.findAll(packetsArgs);
   }
 
-  @Query((returns) => Packet, { name: 'packet' })
+  @Query(() => Packet, { name: 'packet' })
   @UseGuards(new AuthGuard())
   async getPacket(@Args({ name: 'packet_id', type: () => ID }) packet_id: number): Promise<Packet> {
     return this.packetsService.findOneById(packet_id);
   }
 
-  @Query((returns) => FileData, { name: 'packetFiles' })
-  async getPacketfiles(@Args({ name: 'file_ids', type: () => String }) file_ids: string): Promise<Pagination<File>> {
+  @Query(() => FileData, { name: 'packetFiles' })
+  async getPacketFiles(@Args({ name: 'file_ids', type: () => String }) file_ids: string): Promise<Pagination<File>> {
     return this.fileService.findByIds(file_ids);
   }
 
-  @Query((returns) => File, { name: 'signatureFile' })
+  @Query(() => File, { name: 'signatureFile' })
   async getGetSignatureFile(@Args({ name: 'file_id', type: () => ID }) file_id: number): Promise<File> {
     // return this.packetFilesService.getSignatureFile(file_id);
     return this.fileService.findOneById(file_id);
   }
 
-  @Query((returns) => ImmunizationSettingsData, {
+  @Query(() => ImmunizationSettingsData, {
     name: 'immunizationSettings',
   })
   async getImmunizationSettings(
@@ -88,13 +89,13 @@ export class PacketsResolver {
     return this.immunizationSettingsService.findAll(where);
   }
 
-  @Query((returns) => ResponseDTO, { name: 'packetStatuses' })
+  @Query(() => ResponseDTO, { name: 'packetStatuses' })
   @UseGuards(new AuthGuard())
   async getPacketStatues(): Promise<ResponseDTO> {
     return this.packetsService.getPacketStatues();
   }
 
-  @Mutation((returns) => EnrollmentPacket, {
+  @Mutation(() => EnrollmentPacket, {
     name: 'saveEnrollmentPacketContact',
   })
   //@UseGuards(new AuthGuard())
@@ -106,7 +107,7 @@ export class PacketsResolver {
     return await this.enrollmentsService.saveContacts(enrollmentPacketContactInput);
   }
 
-  @Mutation((returns) => EnrollmentPacket, {
+  @Mutation(() => EnrollmentPacket, {
     name: 'saveEnrollmentPacketSubmit',
   })
   //@UseGuards(new AuthGuard())
@@ -118,14 +119,14 @@ export class PacketsResolver {
     return await this.enrollmentsService.submitEnrollment(enrollmentPacketContactInput);
   }
 
-  @Mutation((returns) => EnrollmentPacket, { name: 'saveEnrollmentPacket' })
+  @Mutation(() => EnrollmentPacket, { name: 'saveEnrollmentPacket' })
   async saveEnrollmentPacket(
     @Args('enrollmentPacketInput') enrollmentPacketInput: EnrollmentPacketInput,
   ): Promise<EnrollmentPacket> {
     return await this.enrollmentsService.saveEnrollmentPacket(enrollmentPacketInput);
   }
 
-  @Mutation((returns) => ResponseDTO, { name: 'sendEmail' })
+  @Mutation(() => ResponseDTO, { name: 'sendEmail' })
   async sendEmail(@Args('emailInput') emailInput: EmailInput): Promise<ResponseDTO> {
     const { content, subject } = emailInput;
     const webAppUrl = process.env.WEB_APP_URL;
@@ -141,7 +142,7 @@ export class PacketsResolver {
     return await this.emailService.sendEmail(emailData);
   }
 
-  @Mutation((returns) => EnrollmentPacket, {
+  @Mutation(() => EnrollmentPacket, {
     name: 'saveEnrollmentPacketPersonal',
   })
   @UseGuards(new AuthGuard())
@@ -153,7 +154,7 @@ export class PacketsResolver {
     return await this.enrollmentsService.savePersoanl(enrollmentPacketPersonalInput);
   }
 
-  @Mutation((returns) => EnrollmentPacket, {
+  @Mutation(() => EnrollmentPacket, {
     name: 'saveEnrollmentPacketEducation',
   })
   @UseGuards(new AuthGuard())
@@ -165,7 +166,7 @@ export class PacketsResolver {
     return await this.enrollmentsService.saveEducation(enrollmentPacketEducationInput);
   }
 
-  @Mutation((returns) => EnrollmentPacket, {
+  @Mutation(() => EnrollmentPacket, {
     name: 'saveEnrollmentPacketDocument',
   })
   @UseGuards(new AuthGuard())
@@ -177,7 +178,7 @@ export class PacketsResolver {
     return await this.enrollmentsService.saveDocument(enrollmentPacketDocumentInput);
   }
 
-  @Mutation((returns) => EnrollmentPacket, {
+  @Mutation(() => EnrollmentPacket, {
     name: 'saveEnrollmentPacketSubmission',
   })
   @UseGuards(new AuthGuard())
@@ -189,12 +190,12 @@ export class PacketsResolver {
     return await this.enrollmentsService.saveSubmission(enrollmentPacketSubmissionInput);
   }
 
-  @ResolveField((of) => Student, { name: 'student' })
+  @ResolveField(() => Student, { name: 'student' })
   async getStudent(@Parent() packet: Packet): Promise<Student | any> {
     return (await this.studentsService.findOneById(packet.student_id)) || {};
   }
 
-  @ResolveField((of) => [PacketFile], { name: 'files' })
+  @ResolveField(() => [PacketFile], { name: 'files' })
   async getFiles(@Parent() packet: Packet): Promise<PacketFile[]> {
     return await this.packetFilesService.findByPacket(packet.packet_id);
   }
@@ -204,34 +205,25 @@ export class PacketsResolver {
     return this.packetsService.findOneById(reference.packet_id);
   }
 
-  // @Mutation((returns) => ResponseDTO)
-  // @UseGuards(new AuthGuard())
-  // deletePacket(
-  //   @Args() input: DeletePacketArgs,
-  //   @Context('user') user: User,
-  // ): Promise<ResponseDTO> {
-  //   return this.packetsService.deletePacket(input, user);
-  // }
-
-  @Mutation((returns) => [Packet], { name: 'deletePacket' })
-  async deletePacket(
-    @Args('deleteApplicationInput')
-    deleteApplicationInput: DeleteApplicationInput,
+  @Mutation(() => [Packet], { name: 'deletePackets' })
+  async deletePackets(
+    @Args('packetsActionInput')
+    packetsActionInput: PacketsActionInput,
   ): Promise<Packet[]> {
-    return await this.packetsService.deletePacket(deleteApplicationInput);
+    return await this.packetsService.deletePackets(packetsActionInput);
   }
 
-  @Mutation((returns) => ResponseDTO)
+  @Mutation(() => ResponseDTO)
   deletePacketDocumentFile(@Args() input: DeleteFileArgs): Promise<ResponseDTO> {
     return this.fileService.deleteFile(input);
   }
 
-  @ResolveField((of) => [PacketEmail], { name: 'packet_emails' })
+  @ResolveField(() => [PacketEmail], { name: 'packet_emails' })
   public async getPacketEmails(@Parent() packet: Packet): Promise<PacketEmail[]> {
     return this.packetEmailsService.findByPacket(packet.packet_id);
   }
 
-  @Mutation((returns) => [PacketEmail], { name: 'emailPacket' })
+  @Mutation(() => [PacketEmail], { name: 'emailPacket' })
   @UseGuards(new AuthGuard())
   async emailPacket(
     @Context('user') user: User,
@@ -240,7 +232,7 @@ export class PacketsResolver {
     return await this.packetsService.sendEmail(emailPacketInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'moveThisYearPacket' })
+  @Mutation(() => Boolean, { name: 'moveThisYearPacket' })
   async moveThisYearPacket(
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
@@ -248,7 +240,7 @@ export class PacketsResolver {
     return await this.packetsService.moveThisYearPacket(deleteApplicationInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'moveNextYearPacket' })
+  @Mutation(() => Boolean, { name: 'moveNextYearPacket' })
   async moveNextYearPacket(
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
@@ -256,19 +248,19 @@ export class PacketsResolver {
     return await this.packetsService.moveNextYearPacket(deleteApplicationInput);
   }
 
-  @Query((returns) => ResponseDTO, { name: 'packetCount' })
+  @Query(() => ResponseDTO, { name: 'packetCount' })
   @UseGuards(new AuthGuard())
-  async getpacketCountGroup(): Promise<ResponseDTO> {
+  async getPacketCountGroup(): Promise<ResponseDTO> {
     return this.packetsService.getCountGroup();
   }
 
-  @Query((returns) => ResponseDTO, { name: 'packetCountByRegionId' })
+  @Query(() => ResponseDTO, { name: 'packetCountByRegionId' })
   @UseGuards(new AuthGuard())
-  async getpacketCountByRegionId(@Args({ name: 'region_id', type: () => ID }) region_id: number): Promise<ResponseDTO> {
-    return this.packetsService.getpacketCountByRegionId(region_id);
+  async getPacketCountByRegionId(@Args({ name: 'region_id', type: () => ID }) region_id: number): Promise<ResponseDTO> {
+    return this.packetsService.getPacketCountByRegionId(region_id);
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateEnrollmentSchoolYearByIds' })
+  @Mutation(() => Boolean, { name: 'updateEnrollmentSchoolYearByIds' })
   async updateEnrollmentSchoolYearByIds(
     @Args('updateEnrollmentSchoolYearByIdsInput')
     updateEnrollmentSchoolYearByIdsInput: UpdateSchoolYearIdsInput,
