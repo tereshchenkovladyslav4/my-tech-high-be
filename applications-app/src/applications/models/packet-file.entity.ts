@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int, InputType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, Unique } from 'typeorm';
 
 @InputType('packet_file')
@@ -7,8 +7,8 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, Unique } from 'type
 @Entity('mth_packet_file')
 @Unique('packet_file_id', ['packet_id', 'mth_file_id'])
 export class PacketFile extends BaseEntity {
-  @Column()
-  @Field(() => ID, { nullable: true })
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   file_id?: number;
 

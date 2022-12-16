@@ -40,6 +40,7 @@ import { EnrollmentPacketSubmitInput } from '../dto/enrollment-packet-submit.inp
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 import { PacketsActionInput } from '../dto/packets-action.input';
+import { DeleteEnrollmentPacketDocumentsInput } from '../dto/delete-enrollment-packet-documents.input';
 
 @Resolver(() => Packet)
 export class PacketsResolver {
@@ -176,6 +177,18 @@ export class PacketsResolver {
     enrollmentPacketDocumentInput: EnrollmentPacketDocumentInput,
   ): Promise<EnrollmentPacket | any> {
     return await this.enrollmentsService.saveDocument(enrollmentPacketDocumentInput);
+  }
+
+  @Mutation(() => Boolean, {
+    name: 'deleteEnrollmentPacketDocuments',
+  })
+  @UseGuards(new AuthGuard())
+  async deleteEnrollmentPacketDocuments(
+    @Context('user') user: User,
+    @Args('deleteEnrollmentPacketDocumentsInput')
+    deleteEnrollmentPacketDocumentsInput: DeleteEnrollmentPacketDocumentsInput,
+  ): Promise<boolean> {
+    return await this.enrollmentsService.deleteEnrollmentPacketDocuments(deleteEnrollmentPacketDocumentsInput);
   }
 
   @Mutation(() => EnrollmentPacket, {

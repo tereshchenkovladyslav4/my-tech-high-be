@@ -5,7 +5,7 @@ import { PhonesService } from './services/phones.service';
 import { StudentsService } from './services/students.service';
 import { StudentGradeLevelsService } from './services/student-grade-levels.service';
 import { PacketsService } from './services/packets.service';
-import { EnrollmentPacketContactInput } from '../applications/dto/enrollment-packet-contact.inputs';
+import { EnrollmentPacketContactInput } from './dto/enrollment-packet-contact.inputs';
 import { EnrollmentPacketPersonalInput } from './dto/enrollment-packet-personal.inputs';
 import { EnrollmentPacket } from './models/enrollment-packet.entity';
 import { EnrollmentPacketEducationInput } from './dto/enrollment-packet-education.inputs';
@@ -22,6 +22,7 @@ import { EmailReminderService } from './services/email-reminder.service';
 import { UserRegion } from './models/user-region.entity';
 import { UserRegionService } from './services/user-region.service';
 import { EnrollmentPacketSubmitInput } from './dto/enrollment-packet-submit.input';
+import { DeleteEnrollmentPacketDocumentsInput } from './dto/delete-enrollment-packet-documents.input';
 
 const common_1 = require('@nestjs/common');
 const templates = {
@@ -557,6 +558,19 @@ export class EnrollmentsService {
       student,
       packet,
     };
+  }
+  async deleteEnrollmentPacketDocuments(deleteDocumentsInput: DeleteEnrollmentPacketDocumentsInput): Promise<boolean> {
+    const { packetId, mthFileIds } = deleteDocumentsInput;
+    const packet = await this.packetsService.findOneById(packetId);
+
+    if (!packet) throw new ServiceUnavailableException('Packet Not Found');
+
+    const { student_id } = packet;
+    const student = await this.studentsService.findOneById(student_id);
+
+    if (!student) throw new ServiceUnavailableException('Student Not Found');
+
+    return await this.packetFilesService.deletePacketDocumentsWithMthFileIds(mthFileIds);
   }
 
   async saveSubmission(

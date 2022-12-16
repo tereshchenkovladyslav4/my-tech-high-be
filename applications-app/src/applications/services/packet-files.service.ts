@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getConnection, InsertResult } from 'typeorm';
+import { Repository, getConnection, InsertResult, In } from 'typeorm';
 import { File } from '../models/file.entity';
 import { PacketFile } from '../models/packet-file.entity';
 import { S3Service } from './s3.service';
@@ -47,5 +47,14 @@ export class PacketFilesService {
     });
 
     return await getConnection().createQueryBuilder().insert().into(PacketFile).values(files).orIgnore().execute();
+  }
+
+  async deletePacketDocumentsWithMthFileIds(mthFileIds: number[]): Promise<boolean> {
+    try {
+      await this.packetFilesRepository.delete({ mth_file_id: In(mthFileIds) });
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 }

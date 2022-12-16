@@ -133,7 +133,7 @@ export class ScheduleService {
           qb.orderBy('parent_name', 'DESC');
         } else {
           qb.orderBy('schedule.status', 'DESC');
-          qb.addOrderBy('schedule.last_modified', 'DESC');
+          qb.addOrderBy('schedule.date_submitted', 'DESC');
         }
       } else {
         if (_sortBy[0] === 'grade') {
@@ -152,7 +152,7 @@ export class ScheduleService {
           qb.orderBy('parent_name', 'ASC');
         } else {
           qb.orderBy('schedule.status', 'ASC');
-          qb.addOrderBy('schedule.last_modified', 'ASC');
+          qb.addOrderBy('schedule.date_submitted', 'ASC');
         }
       }
     }
@@ -477,19 +477,39 @@ export class ScheduleService {
   }
 
   async getScheduleCountByRegionId(scheduleGroup: SchedulesGroupCountArgs): Promise<ResponseDTO> {
-    const qb = await this.repo.query(
-      `SELECT
-          t1.status AS status,
-          COUNT(*) AS count 
-        FROM
-          ( SELECT * FROM infocenter.mth_schedule WHERE status <> "${ScheduleStatus.DRAFT}" ) AS t1
-          LEFT JOIN infocenter.mth_student student ON ( student.student_id = t1.StudentId )
-          LEFT JOIN infocenter.mth_schoolyear schoolYear ON ( schoolYear.school_year_id = t1.SchoolYearId ) 
-        WHERE
-          schoolYear.RegionId = ${scheduleGroup.region_id} and schoolYear.school_year_id = ${scheduleGroup.school_year_id}
-        GROUP BY
-          t1.status`,
-    );
+    const { filter, region_id } = scheduleGroup;
+    const qb = this.repo
+      .createQueryBuilder('schedule')
+      .leftJoinAndSelect('schedule.ScheduleStudent', 'student')
+      .leftJoinAndSelect('schedule.ScheduleEmails', 'ScheduleEmails')
+      .leftJoinAndSelect('schedule.SchoolYear', 'schoolYear')
+      .leftJoinAndSelect('schedule.SchedulePeriods', 'SchedulePeriods')
+      .leftJoinAndMapOne('SchedulePeriods.Provider', Provider, 'provider', 'provider.id = SchedulePeriods.ProviderId')
+      .leftJoinAndSelect('student.person', 'person')
+      .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+      .leftJoinAndSelect('student.parent', 'parent')
+      .leftJoinAndSelect('parent.person', 'p_person')
+      .andWhere(`schoolYear.RegionId = ${region_id}`)
+      .andWhere(`schedule.status <> '${ScheduleStatus.DRAFT}'`);
+
+    if (filter && filter.grades && filter.grades.length > 0) {
+      qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: filter.grades });
+    }
+    if (filter && filter.diplomaSeeking) {
+      qb.andWhere(`student.diploma_seeking = ${filter.diplomaSeeking}`);
+    }
+    if (filter && filter.selectedYearId) {
+      qb.andWhere(`schoolYear.school_year_id = ${filter.selectedYearId}`);
+    }
+    if (filter && filter.courseType.length > 0) {
+      qb.andWhere(`SchedulePeriods.course_type IN (:...courseType)`, { courseType: filter.courseType });
+    }
+    if (filter && filter.curriculumProviders.length > 0) {
+      qb.andWhere(`Provider.id IN (:...curriculumProvider)`, { curriculumProvider: filter.curriculumProviders });
+    }
+    qb.select('schedule.status');
+    const [result, total] = await qb.getManyAndCount();
+
     const statusArray = {
       'Updates Required': 0,
       'Updates Requested': 0,
@@ -498,8 +518,8 @@ export class ScheduleService {
       'Not Submitted': 0,
       Accepted: 0,
     };
-    qb.map((item) => {
-      statusArray[item.status] = +item.count;
+    result.map((item) => {
+      statusArray[item.status] = statusArray[item.status] + 1;
     });
     return <ResponseDTO>{
       error: false,

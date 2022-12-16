@@ -1,5 +1,5 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In, OneToMany } from 'typeorm';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from 'typeorm';
 import { StudentRecordFile } from './student-record-file.entity';
 
 @ObjectType()
@@ -7,8 +7,8 @@ import { StudentRecordFile } from './student-record-file.entity';
 @Directive('@key(fields: "file_id, name, type, item1, item2, item3, year, is_new_upload_type, uploaded_by, signedUrl")')
 @Entity('mth_file')
 export class File extends BaseEntity {
-  @Column()
-  @Field(() => ID, { nullable: true })
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   @PrimaryGeneratedColumn({ type: 'int', name: 'file_id' })
   file_id: number;

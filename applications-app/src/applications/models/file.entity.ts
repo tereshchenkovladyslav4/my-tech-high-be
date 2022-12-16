@@ -1,12 +1,12 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, In } from 'typeorm';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @ObjectType()
 @Directive('@key(fields: "file_id, name, type, item1, item2, item3, year, is_new_upload_type, uploaded_by, signedUrl")')
 @Entity('mth_file')
 export class File extends BaseEntity {
-  @Column()
-  @Field(() => ID, { nullable: true })
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   file_id?: number;
 
