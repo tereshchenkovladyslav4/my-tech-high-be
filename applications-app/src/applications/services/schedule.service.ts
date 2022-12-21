@@ -74,7 +74,9 @@ export class ScheduleService {
       qb.andWhere(`SchedulePeriods.course_type IN (:...courseType)`, { courseType: filter.courseType });
     }
     if (filter && filter.curriculumProviders.length > 0) {
-      qb.andWhere(`Provider.id IN (:...curriculumProvider)`, { curriculumProvider: filter.curriculumProviders });
+      qb.andWhere(`SchedulePeriods.ProviderId IN (:...curriculumProvider)`, {
+        curriculumProvider: filter.curriculumProviders,
+      });
     }
     if (search) {
       const date = search
@@ -505,7 +507,9 @@ export class ScheduleService {
       qb.andWhere(`SchedulePeriods.course_type IN (:...courseType)`, { courseType: filter.courseType });
     }
     if (filter && filter.curriculumProviders.length > 0) {
-      qb.andWhere(`Provider.id IN (:...curriculumProvider)`, { curriculumProvider: filter.curriculumProviders });
+      qb.andWhere(`SchedulePeriods.ProviderId IN (:...curriculumProvider)`, {
+        curriculumProvider: filter.curriculumProviders,
+      });
     }
     qb.select('schedule.status');
     const [result, total] = await qb.getManyAndCount();
