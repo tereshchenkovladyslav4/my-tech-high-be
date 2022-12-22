@@ -7,7 +7,9 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany
 } from 'typeorm';
+import { HomeroomStudent } from './homeroom-student.entity';
 import { Master } from './master.entity';
 import { User } from './user.entity';
 @ObjectType()
@@ -48,4 +50,9 @@ export class Classes extends BaseEntity {
   @Field(() => Date, { nullable: true })
   @CreateDateColumn()
   created_at?: Date;
+
+  @OneToMany(() => HomeroomStudent, (homeroomStudent) => homeroomStudent.classes)
+  @Field(() => [HomeroomStudent])
+  @JoinColumn({ name: 'class_id', referencedColumnName: 'teacher_id' })
+  homeroomStudent: HomeroomStudent[];
 }

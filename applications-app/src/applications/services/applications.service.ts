@@ -582,6 +582,19 @@ export class ApplicationsService {
       const acceptApplication = await this.acceptApplication(acceptApplicationInput);
     }
 
+    if (status == 'Submitted' && relation_status == 2) {
+      const application = await this.applicationsRepository.save({
+        application_id,
+        midyear_application,
+        status: status,
+        school_year_id,
+        relation_status,
+        date_started: new Date(),
+        date_submitted: new Date(),
+      });
+      return application;
+    }
+
     const application = await this.applicationsRepository.save({
       application_id,
       midyear_application,

@@ -15,4 +15,11 @@ export class ClassesService {
         await this.classesRepository.save(createNewClassInput);
         return true;
     }
+
+    async deleteByMasterId(masterId: number): Promise<Boolean> {
+        await this.classesRepository.delete({
+            master_id: masterId
+        });
+        return true;
+    }
 }

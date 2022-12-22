@@ -4,7 +4,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   BaseEntity,
+  ManyToOne,
+  JoinColumn
 } from 'typeorm';
+import { Classes } from './classes.entity';
 
 @ObjectType()
 @Directive('@key(fields: "id,student_id,school_year_id,teacher_id,auto_grade")')
@@ -30,5 +33,10 @@ export class HomeroomStudent extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   auto_grade?: string;
+
+  @ManyToOne(() => Classes, (classes) => classes.homeroomStudent)
+  @Field(() => Classes)
+  @JoinColumn([{ name: 'teacher_id', referencedColumnName: 'class_id' }])
+  classes: Classes;
 
 }

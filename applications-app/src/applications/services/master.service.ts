@@ -4,12 +4,14 @@ import { createQueryBuilder, Repository } from 'typeorm';
 import { Master } from '../models/master.entity';
 import { CreateNewMasterInput } from '../dto/create-new-master.input';
 import { CreateOrUpdateInstructions } from '../dto/create-new-master-instruction.input';
+import { ClassesService } from './classes.service';
 
 @Injectable()
 export class MasterService {
     constructor(
         @InjectRepository(Master)
         private readonly masterRepository: Repository<Master>,
+        private classesService: ClassesService,
     ) { }
 
     async getAll(schoolYearId: number): Promise<Master[]> {
@@ -19,6 +21,7 @@ export class MasterService {
             .leftJoinAndSelect('master.masterClasses', 'masterClasses')
             .leftJoinAndSelect('master.masterAssignments', 'masterAssignments')
             .leftJoinAndSelect('masterClasses.primaryTeacher', 'primaryTeacher')
+            .leftJoinAndSelect('masterClasses.homeroomStudent', 'homeroomStudent')
             .where('master.school_year_id = :schoolYearId', { schoolYearId: schoolYearId })
             .getMany();
 
@@ -49,6 +52,13 @@ export class MasterService {
             { master_id },
             { instructions }
         )
+        return true;
+    }
+
+    async deleteByMasterId(masterId: number): Promise<Boolean> {
+        const master = await this.masterRepository.findOne({ master_id: masterId });
+        await this.classesService.deleteByMasterId(masterId);
+        await master.remove();
         return true;
     }
 }
