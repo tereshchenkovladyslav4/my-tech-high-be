@@ -27,6 +27,9 @@ export class PacketsArgs {
   @Max(50)
   search = '';
 
+  @Field((type) => Int)
+  selectedYearId = null;
+
   @Field((type) => [String])
   filters: string[] = ['Submitted', 'Resubmitted'];
 }

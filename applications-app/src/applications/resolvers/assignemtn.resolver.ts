@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { AssignmentService } from '../services/assignment.service';
@@ -27,6 +27,12 @@ export class AssignmentResolver {
   async getChecklist(@Args() assignmentArgs: AssignmentArgs): Promise<Pagination<Assignment>> {
     const results = await this.service.getAssignmentsByMasterId(assignmentArgs);
     return results;
+  }
+
+  @Mutation((returns) => Boolean, { name: 'deleteAssignmentById' })
+  @UseGuards(new AuthGuard())
+  async deleteAssignmentById(@Args('assignmentId', { type: () => Int }) assignmentId: number): Promise<Boolean> {
+    return this.service.deleteById(assignmentId);
   }
 
 }

@@ -62,7 +62,7 @@ export class PacketsService {
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
     try {
-      const { skip, take, sort, filters, search, region_id } = packetsArgs;
+      const { skip, take, sort, filters, search, region_id, selectedYearId } = packetsArgs;
       const _sortBy = sort.split('|');
 
       if (filters.length === 0) {
@@ -88,7 +88,8 @@ export class PacketsService {
         .leftJoinAndSelect('packet.packet_emails', 'packet_emails')
         .leftJoinAndSelect('packet.packet_emails', '(' + userEmails + ')')
         .where('packet.status IN (:status)', { status: filters })
-        .andWhere(`school_year.RegionId = ${region_id}`);
+        .andWhere(`school_year.RegionId = ${region_id}`)
+        .andWhere(`school_year.school_year_id = ${selectedYearId}`);
 
       if (filters.includes('Age Issue')) {
         qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });

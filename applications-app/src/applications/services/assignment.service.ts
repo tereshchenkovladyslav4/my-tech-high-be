@@ -38,4 +38,9 @@ export class AssignmentService {
         });
         return true;
     }
+
+    async deleteById(assignmentId: number): Promise<Boolean> {
+        await this.masterRepository.delete({ id: assignmentId });
+        return true;
+    }
 }
