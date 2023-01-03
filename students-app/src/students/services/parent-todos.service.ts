@@ -10,10 +10,16 @@ import { Packet } from '../models/packet.entity';
 import { Parent } from '../models/parent.entity';
 import { Person } from '../models/person.entity';
 import { UserRegion } from '../models/user-region.entity';
-import { ScheduleStatus, SEMESTER_TYPE, StudentNotification, StudentStatusEnum, WithdrawalStatus } from '../enums';
+import {
+  PacketStatus,
+  ScheduleStatus,
+  SEMESTER_TYPE,
+  StudentNotification,
+  StudentStatusEnum,
+  WithdrawalStatus,
+} from '../enums';
 import { TimezoneService } from './timezone.service';
 import { Schedule } from '../models/schedule.entity';
-import { Period } from '../models/period.entity';
 
 @Injectable()
 export class ParentToDosService {
@@ -32,13 +38,11 @@ export class ParentToDosService {
       .printSql()
       .getOne();
 
-    const students = await this.studentsRepository.find({
+    return await this.studentsRepository.find({
       where: {
         parent_id: parent.parent_id,
       },
     });
-
-    return students;
   }
 
   async getParent(user_id: number): Promise<any> {
@@ -145,7 +149,7 @@ export class ParentToDosService {
       .innerJoin(
         Packet,
         'packet',
-        "packet.student_id = `Student`.student_id AND ( packet.status <> 'Accepted' AND packet.status <> 'Submitted' AND packet.status <> 'Resubmitted' AND packet.status <> 'Missing Info' ) AND packet.deleted = 0",
+        `packet.student_id = Student.student_id AND ( packet.status <> '${PacketStatus.ACCEPTED}' AND packet.status <> '${PacketStatus.CONDITIONAL}' AND packet.status <> '${PacketStatus.SUBMITTED}' AND packet.status <> '${PacketStatus.RESUBMITTED}' AND packet.status <> '${PacketStatus.MISSING_INFO}' ) AND packet.deleted = 0`,
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .orderBy('application.application_id', 'DESC')
@@ -198,7 +202,7 @@ export class ParentToDosService {
       .innerJoin(
         Packet,
         'packet',
-        "packet.student_id = `Student`.student_id AND packet.status = 'Missing Info' AND packet.deleted = 0",
+        `packet.student_id = Student.student_id AND packet.status = '${PacketStatus.MISSING_INFO}' AND packet.deleted = 0`,
       )
       .where('`Student`.parent_id = :parent', { parent: Parent_parent_id })
       .orderBy('application.application_id', 'DESC')
@@ -254,7 +258,7 @@ export class ParentToDosService {
       .innerJoin(
         Packet,
         'packet',
-        "packet.student_id = `Student`.student_id AND packet.status = 'Accepted' AND packet.deleted = 0",
+        `packet.student_id = Student.student_id AND (packet.status = '${PacketStatus.ACCEPTED}' OR packet.status = '${PacketStatus.CONDITIONAL}') AND packet.deleted = 0`,
       )
       .leftJoinAndSelect(
         Schedule,
@@ -478,7 +482,7 @@ export class ParentToDosService {
     };
   }
 
-  async testingPrefernce(user: User): Promise<ToDoItem> {
+  async testingPreference(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
     const students = [];
     return {
@@ -520,7 +524,7 @@ export class ParentToDosService {
     };
   }
 
-  async intentToReenroll(user: User): Promise<ToDoItem> {
+  async intentToReEnroll(user: User): Promise<ToDoItem> {
     // Fetch students for Enrollment Packets
     const students = [];
     return {

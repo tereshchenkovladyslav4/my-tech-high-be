@@ -311,7 +311,7 @@ export class ApplicationsService {
   }
 
   async acceptApplication(acceptApplicationInput: AcceptApplicationInput): Promise<Application[]> {
-    const { application_ids } = acceptApplicationInput;
+    const { application_ids, fromAdmin } = acceptApplicationInput;
 
     const promise = Promise.all(
       application_ids.map(async (id) => {
@@ -416,7 +416,7 @@ export class ApplicationsService {
           await this.studentRecordService.createStudentRecord(student.student_id, school_year.RegionId, 6, null);
         }
 
-        if (emailTemplate) {
+        if (emailTemplate && !fromAdmin) {
           const setAdditionalLinksInfo = (content, student, school_year) => {
             const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
             const yearend = new Date(school_year.date_end).getFullYear().toString();

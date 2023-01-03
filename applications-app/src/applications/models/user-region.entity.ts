@@ -1,4 +1,4 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
   BaseEntity,
   Column,
@@ -12,24 +12,25 @@ import {
 import { Region } from './region.entity';
 import { User } from './user.entity';
 
+@InputType('user_region')
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "id,region_id,user_id, regionDetail, user")')
 @Entity({ name: 'user_region' })
 export class UserRegion extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
   id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   region_id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   user_id: number;
 

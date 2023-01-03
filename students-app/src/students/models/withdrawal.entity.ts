@@ -15,7 +15,7 @@ export const WITHDRAWAL_TABLE_NAME = 'withdrawal';
 export class Withdrawal extends BaseEntity {
   //	Auto increment withdrawal ID
   @Column()
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn({ type: 'int', name: 'withdrawal_id' })
   @Directive('@external')
   withdrawal_id?: number;

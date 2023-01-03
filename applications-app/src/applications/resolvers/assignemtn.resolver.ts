@@ -14,12 +14,12 @@ export class AssignmentResolver {
     private service: AssignmentService,
   ) { }
 
-  @Mutation((returns) => Boolean, { name: 'createNewAssignment' })
+  @Mutation((returns) => Assignment, { name: 'createNewAssignment' })
   @UseGuards(new AuthGuard())
   async createNewAssignment(
     @Args('createNewAssignmentInput', { type: () => CreateNewAssignmentInput })
     createNewAssignmentInput: CreateNewAssignmentInput,
-  ): Promise<Boolean> {
+  ): Promise<Assignment> {
     return this.service.save(createNewAssignmentInput);
   }
 

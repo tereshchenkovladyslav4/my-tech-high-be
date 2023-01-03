@@ -58,10 +58,10 @@ export class StudentRecordService {
       const gradeLevels = JSON.parse(grade_level_2);
       gradeLevels.map((item) => {
         if (item === 'Kindergarten') {
+          if (!grades.includes('Kindergarten')) grades.push('Kindergarten');
           if (!grades.includes('Kin')) grades.push('Kin');
           if (!grades.includes('K')) grades.push('K');
-        }
-        if (item === '1-8' || item === '9-12') {
+        } else if (item === '1-8' || item === '9-12') {
           for (let i = Number(item.split('-')[0]); i <= Number(item.split('-')[1]); i++) {
             if (!grades.includes(i.toString())) {
               grades.push(i.toString());
@@ -166,26 +166,21 @@ export class StudentRecordService {
       else fileKinds = JSON.parse(enrollment_packet_document);
     }
 
-    if (grades.length == 0) {
-      return new Pagination<StudentRecord>({
-        results: [],
-        total: 0,
-      });
+    if (grades.length) {
+      qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
     }
 
-    qb.andWhere('grade_levels.grade_level IN (:grades)', { grades: grades });
-
-    if (studentIds.length > 0) {
+    if (studentIds.length) {
       qb.andWhere('record.StudentId IN (:studentIds)', {
         studentIds: studentIds,
       });
     }
 
-    if (specialEdList.length > 0) {
+    if (specialEdList.length) {
       qb.andWhere('Student.special_ed IN (:specialEds)', { specialEds: specialEdList });
     }
 
-    if (fileKinds.length > 0) {
+    if (fileKinds.length) {
       qb.andWhere('StudentRecordFiles.file_kind IN (:fileKinds)', {
         fileKinds: fileKinds,
       });

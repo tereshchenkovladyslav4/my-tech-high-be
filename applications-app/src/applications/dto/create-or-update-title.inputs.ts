@@ -68,9 +68,6 @@ export class CreateOrUpdateTitleInput {
   @Field(() => String, { nullable: true })
   state_course_codes?: string;
 
-  @Field(() => Int, { nullable: true })
-  priority: number | null;
-
   @Field(() => Boolean, { nullable: true })
   allow_request: boolean;
 

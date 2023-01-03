@@ -1,8 +1,9 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
 import { Region } from './region.entity';
 import { SchoolYear } from './schoolyear.entity';
 
+@InputType('school_partner')
 @ObjectType()
 @Directive('@extends')
 @Directive(
@@ -37,12 +38,12 @@ export class SchoolPartner extends BaseEntity {
   active: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   region_id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   school_year_id: number;
 

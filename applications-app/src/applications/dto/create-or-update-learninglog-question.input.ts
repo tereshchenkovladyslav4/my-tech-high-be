@@ -6,7 +6,7 @@ export class CreateOrUpdateLearningLogQuestionInput {
   id?: number;
 
   @Field(() => Int, { nullable: true })
-  master_id?: number;
+  assignment_id?: number;
 
   @Field(() => String, { nullable: true })
   type?: string;
@@ -15,17 +15,20 @@ export class CreateOrUpdateLearningLogQuestionInput {
   question?: string;
 
   @Field(() => String, { nullable: true })
+  slug?: string;
+
+  @Field(() => String, { nullable: true })
+  parent_slug?: string;
+
+  @Field(() => String, { nullable: true })
   options?: string;
 
   @Field(() => Boolean, { defaultValue: false })
   default_question: boolean;
 
-  @Field(() => Boolean, { defaultValue: false })
-  custom_question: boolean;
+  @Field(() => String, { nullable: true })
+  validations: string;
 
-  @Field(() => Boolean, { defaultValue: false })
-  required: boolean;
-
-  @Field(() => Boolean, { defaultValue: false })
-  can_upload: boolean;
+  @Field(() => String, { nullable: true })
+  grades: string;
 }

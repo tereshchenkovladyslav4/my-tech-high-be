@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int, InputType, ID } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Packet } from './packet.entity';
 import { Application } from './application.entity';
@@ -11,7 +11,7 @@ import { StudentReenrollmentStatus } from './student-reenrollment-status.entity'
 import { SchoolEnrollment } from './school-enrollment.entity';
 import { Schedule } from './schedule.entity';
 import { ScheduleHistory } from './schedule-history.entity';
-import { HomeroomStudent } from './homeroom-student.entity';
+import { ResourceRequest } from './resource-request.entity';
 
 @InputType('student')
 @ObjectType()
@@ -37,21 +37,21 @@ export class Student extends BaseEntity {
   @Directive('@external')
   person_id?: number;
 
-  @Field((type) => [Packet], { nullable: true })
+  @Field(() => [Packet], { nullable: true })
   packets?: Packet[];
 
-  @OneToOne((type) => Parent)
+  @OneToOne(() => Parent)
   @JoinColumn({ name: 'parent_id' })
   parent: Parent;
 
-  @OneToMany((type) => SchoolEnrollment, (soes) => soes.student)
+  @OneToMany(() => SchoolEnrollment, (soes) => soes.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   schoolEnroll: SchoolEnrollment[];
 
-  @OneToMany((type) => Application, (application) => application.student)
+  @OneToMany(() => Application, (application) => application.student)
   applications?: Application[];
 
-  @OneToOne((type) => StudentGradeLevel, (gradeLevel) => gradeLevel.student)
+  @OneToOne(() => StudentGradeLevel, (gradeLevel) => gradeLevel.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => StudentGradeLevel, { nullable: true })
   student_grade_level: StudentGradeLevel;
@@ -66,7 +66,7 @@ export class Student extends BaseEntity {
   @Directive('@external')
   diploma_seeking: number;
 
-  @OneToMany((type) => StudentGradeLevel, (gradeLevels) => gradeLevels.student)
+  @OneToMany(() => StudentGradeLevel, (gradeLevels) => gradeLevels.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   grade_levels?: StudentGradeLevel[];
 
@@ -85,11 +85,11 @@ export class Student extends BaseEntity {
   @Directive('@external')
   opt_out_form_signature_file_id?: number;
 
-  @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
+  @OneToMany(() => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status?: StudentStatus[];
 
-  @OneToMany((type) => StudentReenrollmentStatus, (studentReenrollmentStatus) => studentReenrollmentStatus.student)
+  @OneToMany(() => StudentReenrollmentStatus, (studentReenrollmentStatus) => studentReenrollmentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   reenrollment_status?: StudentReenrollmentStatus[];
 
@@ -113,4 +113,7 @@ export class Student extends BaseEntity {
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
   @Field(() => Person, { nullable: true })
   person: Person;
+
+  @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.Student)
+  ResourceRequests: ResourceRequest[];
 }

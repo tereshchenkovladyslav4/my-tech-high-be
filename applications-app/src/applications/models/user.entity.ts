@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -13,6 +13,8 @@ import {
 import { UserRegion } from './user-region.entity';
 import { Role } from './role.entity';
 import { Classes } from './classes.entity';
+
+@InputType('users')
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "user_id, email")')
@@ -58,7 +60,7 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'level', referencedColumnName: 'id' })
   role: Role;
 
-  @OneToMany((type) => Classes, (classes) => classes.primaryTeacher)
+  @OneToMany(() => Classes, (classes) => classes.primaryTeacher)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'primary_id' })
   classes: Classes[];
 }

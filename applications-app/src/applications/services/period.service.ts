@@ -11,7 +11,11 @@ export class PeriodService {
   ) {}
 
   async find(schoolYearId: number): Promise<Period[]> {
-    return await this.repo.createQueryBuilder('period').where({ school_year_id: schoolYearId }).getMany();
+    return await this.repo
+      .createQueryBuilder('period')
+      .where({ school_year_id: schoolYearId })
+      .orderBy({ period: 'ASC', id: 'ASC' })
+      .getMany();
   }
 
   async findByIds(periodIds: (number | string)[]): Promise<Period[]> {

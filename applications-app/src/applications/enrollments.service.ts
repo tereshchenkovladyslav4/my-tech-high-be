@@ -62,13 +62,14 @@ export class EnrollmentsService {
       parent,
       meta,
       status,
-      is_age_issue,
       school_year_id,
       missing_files,
       student_id,
+      fromAdmin,
     } = enrollmentPacketInput;
 
     try {
+      let is_age_issue = false;
       if (student_person_id) {
         const studentPerson = await this.personsService.update({
           person_id: student_person_id,
@@ -86,6 +87,28 @@ export class EnrollmentsService {
             school_year_id,
             grade_level,
           });
+        }
+
+        const parseGradeLevel = (value: number | string): number => {
+          if (!value) return 0;
+          if (value === 'OR-K') return 0;
+          if (['K', 'Kindergarten', 'Kin'].indexOf(value + '') !== -1) return 5;
+          return Number(value) + 5;
+        };
+
+        const school_year = await this.schoolYearService.findOneById(school_year_id);
+
+        if (school_year.birth_date_cut) {
+          if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
+
+          const age = studentPerson.date_of_birth
+            ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
+            : 0;
+          const grade_age = parseGradeLevel(grade_level);
+
+          if (studentPerson.date_of_birth && grade_age != 0) {
+            if (age != grade_age) is_age_issue = true;
+          }
         }
       }
 
@@ -110,18 +133,37 @@ export class EnrollmentsService {
         }
       }
 
-      const studentPacket = await this.packetsService.update({
-        packet_id: packet_id,
-        ...packet,
-        admin_notes: admin_notes,
-        medical_exemption,
-        exemption_form_date: exemption_form_date ? new Date(exemption_form_date) : null,
-        status: status,
-        is_age_issue,
-        missing_files,
-        meta,
-      });
-      if (templates[status]) {
+      let studentPacket = null;
+      if (status != 'Submitted' && status != 'Resubmitted') is_age_issue = false;
+
+      if (status == 'Accpeted') {
+        studentPacket = await this.packetsService.update({
+          packet_id: packet_id,
+          ...packet,
+          admin_notes: admin_notes,
+          date_accepted: new Date(),
+          medical_exemption,
+          exemption_form_date: exemption_form_date ? new Date(exemption_form_date) : null,
+          status: status,
+          is_age_issue,
+          missing_files,
+          meta,
+        });
+      } else {
+        studentPacket = await this.packetsService.update({
+          packet_id: packet_id,
+          ...packet,
+          admin_notes: admin_notes,
+          medical_exemption,
+          exemption_form_date: exemption_form_date ? new Date(exemption_form_date) : null,
+          status: status,
+          is_age_issue,
+          missing_files,
+          meta,
+        });
+      }
+
+      if (templates[status] && !fromAdmin) {
         const tmp = await this.packetsService.findOneById(packet_id);
 
         const studentPerson = await this.studentsService.findOneById(tmp.student_id);
@@ -277,21 +319,6 @@ export class EnrollmentsService {
         });
       }
 
-      const parseGradeLevel = (value: number | string): number => {
-        if (!value) return 0;
-        if (value === 'OR-K') return 0;
-        if (['K', 'Kindergarten', 'Kin'].indexOf(value + '') !== -1) return 5;
-        return Number(value) + 5;
-      };
-
-      const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
-      const grade_age = parseGradeLevel(grade_level);
-      let is_age_issue = false;
-
-      if (studentPerson.date_of_birth && grade_age != 0) {
-        is_age_issue = age < grade_age;
-      }
-
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
@@ -305,7 +332,6 @@ export class EnrollmentsService {
         school_district: packet.school_district,
         meta: packet.meta,
         special_ed: String(special_ed),
-        is_age_issue: is_age_issue,
       });
       await this.studentsService.findOneById(student_id);
 
@@ -388,12 +414,20 @@ export class EnrollmentsService {
         return Number(value) + 5;
       };
 
-      const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
-      const grade_age = parseGradeLevel(grade_level);
+      const school_year = await this.schoolYearService.findOneById(school_year_id);
       let is_age_issue = false;
 
-      if (studentPerson.date_of_birth && grade_age != 0) {
-        is_age_issue = age < grade_age;
+      if (school_year.birth_date_cut) {
+        if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
+
+        const age = studentPerson.date_of_birth
+          ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
+          : 0;
+        const grade_age = parseGradeLevel(grade_level);
+
+        if (studentPerson.date_of_birth && grade_age != 0) {
+          if (age != grade_age) is_age_issue = true;
+        }
       }
 
       const studentPacket = await this.packetsService.createOrUpdate({

@@ -6,6 +6,7 @@ import { schedulePeriodInput } from '../dto/create-or-update-schedule-period.inp
 import { SchedulePeriodHistory } from '../models/schedule-period-history.entity';
 import { ScheduleService } from './schedule.service';
 import { ScheduleStatus } from '../enums';
+import { Schedule } from '../models/schedule.entity';
 
 @Injectable()
 export class SchedulePeriodService {
@@ -33,8 +34,13 @@ export class SchedulePeriodService {
     const qb = this.historyRepo
       .createQueryBuilder('SchedulePeriodHistory')
       .leftJoinAndSelect('SchedulePeriodHistory.ScheduleHistory', 'ScheduleHistory')
+      .leftJoin(
+        Schedule,
+        'schedule',
+        'schedule.StudentId = ScheduleHistory.StudentId AND schedule.SchoolYearId = ScheduleHistory.SchoolYearId AND schedule.is_second_semester = ScheduleHistory.is_second_semester AND schedule.date_accepted = ScheduleHistory.date_accepted',
+      )
       .where(
-        `ScheduleHistory.StudentId = ${studentId} AND ScheduleHistory.SchoolYearId = ${schoolYearId} AND ScheduleHistory.is_second_semester=${isSecondSemester}`,
+        `ScheduleHistory.StudentId = ${studentId} AND ScheduleHistory.SchoolYearId = ${schoolYearId} AND ScheduleHistory.is_second_semester=${isSecondSemester} AND schedule.schedule_id IS NULL`,
       );
     return await qb.getMany();
   }

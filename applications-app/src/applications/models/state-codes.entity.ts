@@ -1,7 +1,8 @@
-import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BaseEntity } from 'typeorm';
 import { Title } from './title.entity';
 
+@InputType('state_code')
 @ObjectType()
 @Directive('@key(fields: "state_codes_id, TitleId, title_name, state_code, grade, teacher, subject")')
 @Entity({ name: 'mth_state_codes' })

@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id,master_id, type, question, options, default_question, custom_question, required, can_upload")',
+  '@key(fields: "id,assignment_id, type, slug, parent_slug, question, options, default_question, required, can_upload, grade_specific, grades")',
 )
 @Entity('mth_learning_log_questions')
 export class LearningLogQuestion extends BaseEntity {
@@ -12,13 +12,21 @@ export class LearningLogQuestion extends BaseEntity {
   @PrimaryGeneratedColumn('increment')
   id?: number;
 
-  @Column('int', { name: 'master_id', nullable: true })
+  @Column('int', { name: 'assignment_id' })
   @Field(() => Int, { nullable: true })
-  master_id: number;
+  assignment_id: number;
 
   @Column()
   @Field(() => String, { nullable: true })
   type?: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  slug?: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  parent_slug?: string;
 
   @Column()
   @Field(() => String, { nullable: true })
@@ -34,13 +42,17 @@ export class LearningLogQuestion extends BaseEntity {
 
   @Column()
   @Field(() => Boolean, { defaultValue: false })
-  custom_question: boolean;
-
-  @Column()
-  @Field(() => Boolean, { defaultValue: false })
   required: boolean;
 
   @Column()
   @Field(() => Boolean, { defaultValue: false })
   can_upload: boolean;
+
+  @Column()
+  @Field(() => Boolean, { defaultValue: false })
+  grade_specific: boolean;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  grades: string;
 }

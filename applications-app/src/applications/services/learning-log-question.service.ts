@@ -9,17 +9,31 @@ export class LearningLogQuestionService {
   constructor(
     @InjectRepository(LearningLogQuestion)
     private readonly questionRepository: Repository<LearningLogQuestion>,
-  ) {}
+  ) { }
 
-  async save(createOrUpdateLearningLogQuestionInput: CreateOrUpdateLearningLogQuestionInput): Promise<Boolean> {
-    await this.questionRepository.save(createOrUpdateLearningLogQuestionInput);
+  async save(createOrUpdateLearningLogQuestionInput: CreateOrUpdateLearningLogQuestionInput[]): Promise<Boolean> {
+    Promise.all([
+      createOrUpdateLearningLogQuestionInput.map(async (item) => {
+        let validationList = [];
+        if (item?.validations) {
+          validationList = JSON.parse(item?.validations)
+        }
+        await this.questionRepository.save({
+          ...item,
+          required: validationList.includes('required'),
+          can_upload: validationList.includes('upload'),
+          grade_specific: validationList.includes('grade_question'),
+        })
+      })
+    ])
+
     return true;
   }
 
-  async get(masterId: number): Promise<LearningLogQuestion[]> {
+  async get(assignmentId: number): Promise<LearningLogQuestion[]> {
     const result = await this.questionRepository
       .createQueryBuilder('learningLogQuestion')
-      .where('learningLogQuestion.master_id = :masterId', { masterId: masterId })
+      .where('learningLogQuestion.assignment_id = :assignmentId', { assignmentId: assignmentId })
       .getMany();
 
     return result;

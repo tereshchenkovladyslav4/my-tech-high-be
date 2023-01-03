@@ -1,4 +1,5 @@
 export * from './diploma-seeking-path-status.enum';
+export * from './packet-status.enum';
 export * from './pdf-template.enum';
 export * from './period.enum';
 export * from './reduce-funds.enum';

@@ -1,4 +1,4 @@
-import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int, InputType } from '@nestjs/graphql';
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, OneToMany } from 'typeorm';
 import { Announcement } from './announcement.entity';
 import { EventType } from './event-type.entity';
@@ -6,6 +6,7 @@ import { UserRegion } from './user-region.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { ImmunizationSettings } from './immunization-settings.entity';
 
+@InputType('region')
 @ObjectType()
 @Directive('@extends')
 @Directive('@key(fields: "id, name, program, state_logo, enrollment_packet_deadline_num_days, region")')

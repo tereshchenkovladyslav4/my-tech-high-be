@@ -35,8 +35,10 @@ export class SubjectService {
       .orderBy({
         'subject.priority': 'ASC',
         'subject.subject_id': 'ASC',
-        'Titles.priority': 'ASC',
+        'Titles.name': 'ASC',
         'Titles.title_id': 'ASC',
+        'Periods.period': 'ASC',
+        'Periods.id': 'ASC',
       });
 
     const subQuery = `EXISTS (

@@ -1,4 +1,4 @@
-import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -16,6 +16,7 @@ import { Course } from './course.entity';
 import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
+@InputType('provider')
 @ObjectType()
 @Directive(
   '@key(fields: "id, school_year_id, name, is_display, reduce_funds, price, reduce_funds_notification, multiple_periods, multi_periods_notification, allow_request, is_active, deleted, Courses, Periods")',

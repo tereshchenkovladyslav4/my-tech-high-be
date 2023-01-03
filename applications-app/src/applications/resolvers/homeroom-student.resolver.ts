@@ -20,10 +20,19 @@ export class HomeroomStudentResolver {
 
   @Mutation((returns) => Boolean, { name: 'assignStudentToHomeroom' })
   @UseGuards(new AuthGuard())
-  async createNewMaster(
-    @Args('createNewMasterInput')
+  async assignStudentToHomeroom(
+    @Args('homeroomStudentInput')
     homeroomStudentInput: HomeroomStudentInput,
   ): Promise<Boolean> {
     return this.service.assignStudentToHomeroom(homeroomStudentInput);
+  }
+
+  @Mutation((returns) => Boolean, { name: 'transferStudentToHomeroom' })
+  @UseGuards(new AuthGuard())
+  async createNewMaster(
+    @Args('homeroomStudentInput')
+    homeroomStudentInput: HomeroomStudentInput,
+  ): Promise<Boolean> {
+    return this.service.transferStudentToHomeroom(homeroomStudentInput);
   }
 }

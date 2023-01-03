@@ -36,6 +36,7 @@ import { SchedulePeriod } from './models/schedule-period.entity';
 import { ProviderResolver } from './resolvers/provider.resolver';
 import { MTHHomeroomStudent } from './models/homeroom-student.entity';
 import { MTHClasses } from './models/classes.entity';
+import { ResourceRequest } from './models/resource-request.entity';
 
 const graphQLImports = [
   StudentsResolver,
@@ -81,7 +82,8 @@ const graphQLImports = [
           Schedule,
           SchedulePeriod,
           MTHHomeroomStudent,
-          MTHClasses
+          MTHClasses,
+          ResourceRequest,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),
@@ -91,4 +93,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class StudentsGraphqlModule { }
+export class StudentsGraphqlModule {}

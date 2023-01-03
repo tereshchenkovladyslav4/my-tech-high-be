@@ -1,7 +1,8 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { SchoolYear } from './schoolyear.entity';
 
+@InputType('schedule_builder')
 @ObjectType()
 @Directive(
   '@key(fields: "id, max_num_periods, custom_built, split_enrollment, always_unlock, school_year_id, parent_tooltip, schoolYear, third_party_provider")',

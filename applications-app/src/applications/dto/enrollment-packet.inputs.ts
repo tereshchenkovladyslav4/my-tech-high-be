@@ -49,4 +49,7 @@ export class EnrollmentPacketInput {
 
   @Field(() => Int, { nullable: true })
   student_id?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  fromAdmin?: boolean;
 }

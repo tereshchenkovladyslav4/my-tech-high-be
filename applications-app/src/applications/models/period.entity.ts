@@ -1,4 +1,4 @@
-import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToMany, OneToMany } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Provider } from './provider.entity';
@@ -6,6 +6,7 @@ import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
 import { SEMESTER_TYPE } from '../enums';
 
+@InputType('period')
 @ObjectType()
 @Directive('@extends')
 @Directive(

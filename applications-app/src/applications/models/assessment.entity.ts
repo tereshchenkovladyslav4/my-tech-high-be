@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -14,6 +14,7 @@ import { AssessmentOption } from './assessment-option.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { StudentAssessmentOption } from './student-assessment-option.entity';
 
+@InputType('assessment')
 @ObjectType()
 @Directive(
   '@key(fields: "assessment_id, SchoolYearId, test_name, grades, information, information, priority, is_archived, Options")',

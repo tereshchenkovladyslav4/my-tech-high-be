@@ -60,6 +60,7 @@ import { ProviderService } from './services/provider.service';
 import { ReimbursementSetting } from './models/reimbursement-setting.entity';
 import { MTHHomeroomStudent } from './models/homeroom-student.entity';
 import { MTHClasses } from './models/classes.entity';
+import { ResourceRequest } from './models/resource-request.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -126,11 +127,12 @@ const servicesImports = [
       SchedulePeriodHistory,
       ReimbursementSetting,
       MTHHomeroomStudent,
-      MTHClasses
+      MTHClasses,
+      ResourceRequest,
     ]),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule { }
+class RepoModule {}
 export default RepoModule;

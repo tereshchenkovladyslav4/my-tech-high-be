@@ -38,7 +38,7 @@ export class PeriodService {
         }),
       );
     }
-    qb.orderBy('period', 'ASC');
+    qb.orderBy({ period: 'ASC', id: 'ASC' });
     return await qb.getMany();
   }
 

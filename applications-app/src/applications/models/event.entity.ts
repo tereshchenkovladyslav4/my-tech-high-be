@@ -1,7 +1,8 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, ManyToOne, JoinColumn, BaseEntity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { EventType } from './event-type.entity';
 
+@InputType('event')
 @ObjectType()
 @Entity('mth_event')
 export class ApplicationEvent extends BaseEntity {
@@ -25,39 +26,39 @@ export class ApplicationEvent extends BaseEntity {
   @Column({ type: 'tinyint', name: 'has_rsvp', nullable: true, default: 0 })
   has_rsvp?: boolean;
 
-  @Field((type) => Date, { nullable: true })
+  @Field(() => Date, { nullable: true })
   @Column({ type: 'datetime', name: 'start_date', nullable: true })
   start_date?: Date;
 
-  @Field((type) => Date, { nullable: true })
+  @Field(() => Date, { nullable: true })
   @Column({ type: 'datetime', name: 'end_date', nullable: true })
   end_date?: Date;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   filter_grades?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   filter_program_year?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   filter_users?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   filter_school_of_enrollment?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   filter_other?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   filter_provider?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column('text', { nullable: true })
   description?: string;
 

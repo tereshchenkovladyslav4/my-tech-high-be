@@ -1,4 +1,4 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -11,6 +11,8 @@ import {
 } from 'typeorm';
 import { Region } from './region.entity';
 import { UserAnnouncement } from './user-announcement.entity';
+
+@InputType('announcement')
 @ObjectType()
 @Entity('announcement')
 export class Announcement extends BaseEntity {
@@ -18,7 +20,7 @@ export class Announcement extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'announcement_id' })
   announcement_id?: number;
 
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @Column('int', { name: 'RegionId', nullable: true })
   RegionId: number | null;
 

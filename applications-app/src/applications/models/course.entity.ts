@@ -1,4 +1,4 @@
-import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -15,6 +15,7 @@ import { Provider } from './provider.entity';
 import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
+@InputType('course')
 @ObjectType()
 @Directive(
   '@key(fields: "id, provider_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, always_unlock, software_reimbursement, display_notification, course_notification, launchpad_course, course_id, website, diploma_seeking_path, limit, reduce_funds, price, reduce_funds_notification, subject_id, allow_request, is_active, deleted, Provider, Subject, Titles, SchedulePeriods, SchedulePeriodHistories")',

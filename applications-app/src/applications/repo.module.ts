@@ -135,6 +135,8 @@ import { LearningLogQuestionService } from './services/learning-log-question.ser
 import { LearningLogQuestion } from './models/learning-log-question.entity';
 import { StateCodesService } from './services/state-codes.service';
 import { StateCodes } from './models/state-codes.entity';
+import { ResourceRequestService } from './services/resource-request.service';
+import { ResourceRequest } from './models/resource-request.entity';
 
 const servicesImports = [
   UsersService,
@@ -207,6 +209,7 @@ const servicesImports = [
   HomeroomStudentService,
   LearningLogQuestionService,
   StateCodesService,
+  ResourceRequestService,
 ];
 
 @Global()
@@ -280,10 +283,11 @@ const servicesImports = [
       HomeroomStudent,
       LearningLogQuestion,
       StateCodes,
+      ResourceRequest,
     ]),
   ],
   providers: [...servicesImports],
   exports: [...servicesImports],
 })
-class RepoModule { }
+class RepoModule {}
 export default RepoModule;

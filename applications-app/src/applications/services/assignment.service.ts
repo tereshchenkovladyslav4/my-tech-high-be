@@ -28,15 +28,15 @@ export class AssignmentService {
         });
     }
 
-    async save(createNewAssignmentInput: CreateNewAssignmentInput): Promise<Boolean> {
-        await this.masterRepository.save({
+    async save(createNewAssignmentInput: CreateNewAssignmentInput): Promise<Assignment> {
+        const newAssignment = await this.masterRepository.save({
             ...createNewAssignmentInput,
             due_date: createNewAssignmentInput.dueDateTime,
             reminder_date: createNewAssignmentInput.reminderDateTime,
             auto_grade: createNewAssignmentInput.autoGradeDateTime,
             auto_grade_email: createNewAssignmentInput.autoGradeEmail ? 1 : 0
         });
-        return true;
+        return newAssignment;
     }
 
     async deleteById(assignmentId: number): Promise<Boolean> {

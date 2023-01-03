@@ -67,7 +67,6 @@ export class WithdrawalService {
         .getManyAndCount();
 
       const existingWithdrawalId = notifiedWithdrawals?.length ? notifiedWithdrawals[0].withdrawal_id : 0;
-
       const withdrawalResponse = await this.repo.save({
         withdrawal_id: withdrawal_id || existingWithdrawalId,
         StudentId: StudentId,
@@ -75,7 +74,6 @@ export class WithdrawalService {
         date_effective: date_effective,
         response: response,
       });
-
       if (
         (status === WithdrawalStatus.WITHDRAWN && notifiedWithdrawals?.length) ||
         withdrawalOption === WithdrawalOption.UNDECLARED_FORM_EMAIL ||
@@ -98,7 +96,6 @@ export class WithdrawalService {
         const webAppUrl = process.env.WEB_APP_URL;
         const student = await this.studentService.findOneById(StudentId);
         const cur_application = student.applications[0];
-        const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
         const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
           student.parent?.person?.user_id,
@@ -159,8 +156,8 @@ export class WithdrawalService {
             region_id: region_id,
             template_name:
               withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW
-                ? 'Notify of Withdraw'
-                : 'Undeclared Withdraw',
+                ? EmailTemplateEnum.NOTIFY_OF_WITHDRAW
+                : EmailTemplateEnum.UNDECLARED_WITHDRAW,
           });
 
           if (withdrawalResponse?.withdrawal_id) {
@@ -284,7 +281,7 @@ export class WithdrawalService {
     const select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
     ${WITHDRAWAL_TABLE_NAME}.date_effective, ${WITHDRAWAL_TABLE_NAME}.response,${WITHDRAWAL_TABLE_NAME}.date,
 		CONCAT(person.last_name, ", ", person.first_name) student_name,
-		gradeLevel.grade_level, emails.email_date AS date_emailed`;
+		gradeLevel.grade_level, emails.email_date AS date_emailed, student.student_id AS StudentId`;
 
     let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
 			LEFT JOIN mth_application application ON (application.student_id = ${WITHDRAWAL_TABLE_NAME}.StudentId)
@@ -398,7 +395,7 @@ export class WithdrawalService {
         LEFT JOIN infocenter.mth_person studentInfo ON (studentInfo.person_id = student.person_id)
         LEFT JOIN infocenter.mth_parent parent ON (parent.parent_id = student.parent_id)
         LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
-        LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Undeclared Withdraw' AND templates.region_id = schoolYear.RegionId)
+        LEFT JOIN infocenter.email_templates templates ON (templates.template_name = '${EmailTemplateEnum.UNDECLARED_WITHDRAW}' AND templates.region_id = schoolYear.RegionId)
         WHERE 
           region.withdraw_deadline_num_days < withdrawal.diff_date AND 
           templates.id IS NOT NULL
@@ -431,7 +428,9 @@ export class WithdrawalService {
         LEFT JOIN infocenter.mth_person studentInfo ON (studentInfo.person_id = student.person_id)
 				LEFT JOIN infocenter.mth_parent parent ON (parent.parent_id = student.parent_id)
 				LEFT JOIN infocenter.mth_person person ON (person.person_id = parent.person_id)
-				LEFT JOIN infocenter.email_templates templates ON (templates.title = 'Notify of Withdraw' AND templates.region_id = schoolYear.RegionId)
+				LEFT JOIN infocenter.email_templates templates ON (templates.template_name = '${
+          EmailTemplateEnum.NOTIFY_OF_WITHDRAW
+        }' AND templates.region_id = schoolYear.RegionId)
 				WHERE 
 					${
             remind_date > 0
@@ -441,6 +440,7 @@ export class WithdrawalService {
 					templates.id IS NOT NULL
 			`);
       await queryRunner.release();
+
       reminders.map(async (reminder) => {
         const {
           remain_date,
@@ -530,7 +530,7 @@ export class WithdrawalService {
             .replace(/\[Year\]/g, `${yearBegin}-${yearEnd.substring(2, 4)}`),
           from: email_from,
           bcc: email_bcc,
-          template_name: 'Undeclared Withdraw',
+          template_name: EmailTemplateEnum.UNDECLARED_WITHDRAW,
         });
         await this.generateWithdrawalFormPdf(withdrawal.withdrawal_id);
         await queryRunner.query(

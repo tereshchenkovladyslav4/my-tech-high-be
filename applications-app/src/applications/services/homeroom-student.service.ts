@@ -34,4 +34,24 @@ export class HomeroomStudentService {
 
         return true;
     }
+
+    async transferStudentToHomeroom(homeroomStudentInput: HomeroomStudentInput): Promise<boolean> {
+        const { studentIds, school_year_id, teacher_id, auto_grade } = homeroomStudentInput;
+        if (teacher_id !== -1) {
+            for (let i = 0; i < studentIds.length; i++) {
+                const student_id = studentIds[i];
+                const existHomeroom = await this.repository.findOne({ student_id, school_year_id });
+                existHomeroom.teacher_id = teacher_id;
+                await existHomeroom.save();
+            }
+        }
+        return true;
+    }
+
+    async deleteByClassId(classId: number): Promise<boolean> {
+        await this.repository.delete({
+            teacher_id: classId
+        })
+        return true;
+    }
 }

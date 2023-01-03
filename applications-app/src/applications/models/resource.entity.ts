@@ -1,10 +1,12 @@
-import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ResourceSubtitle } from '../enums';
 import { ResourceLevel } from './resource-level.entity';
 import { SchoolYear } from './schoolyear.entity';
+import { ResourceRequest } from './resource-request.entity';
 
+@InputType('resource')
 @ObjectType()
 @Directive(
   '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels, SchoolYear")',
@@ -105,4 +107,7 @@ export class Resource extends BaseEntity {
   @OneToMany(() => ResourceLevel, (resourceLevel) => resourceLevel.Resource)
   @Field(() => [ResourceLevel], { nullable: true })
   ResourceLevels: ResourceLevel[];
+
+  @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.Resource)
+  ResourceRequests: ResourceRequest[];
 }

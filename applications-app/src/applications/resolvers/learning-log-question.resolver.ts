@@ -8,22 +8,22 @@ import { CreateOrUpdateLearningLogQuestionInput } from '../dto/create-or-update-
 
 @Resolver((of) => LearningLogQuestion)
 export class LearningLogQuestionResolver {
-  constructor(private service: LearningLogQuestionService) {}
+  constructor(private service: LearningLogQuestionService) { }
 
   @Mutation((returns) => Boolean, { name: 'createOrUpdateLearningLogQuestion' })
   @UseGuards(new AuthGuard())
   async createOrUpdateLearningLogQuestion(
-    @Args('createOrUpdateLearningLogQuestionInput')
-    createOrUpdateLearningLogQuestionInput: CreateOrUpdateLearningLogQuestionInput,
+    @Args('createOrUpdateLearningLogQuestionInput', { type: () => [CreateOrUpdateLearningLogQuestionInput] })
+    createOrUpdateLearningLogQuestionInput: CreateOrUpdateLearningLogQuestionInput[],
   ): Promise<Boolean> {
     return this.service.save(createOrUpdateLearningLogQuestionInput);
   }
 
-  @Query((returns) => [LearningLogQuestion], { name: 'getLearningLogQuestionByMasterId' })
+  @Query((returns) => [LearningLogQuestion], { name: 'getLearningLogQuestionByAssignmentId' })
   @UseGuards(new AuthGuard())
-  async getLearningLogQuestionByMasterId(
-    @Args('masterId', { type: () => Int }) masterId: number,
+  async getLearningLogQuestionByAssignmentId(
+    @Args('assignmentId', { type: () => Int }) assignmentId: number,
   ): Promise<LearningLogQuestion[]> {
-    return this.service.get(masterId);
+    return this.service.get(assignmentId);
   }
 }

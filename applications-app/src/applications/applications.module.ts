@@ -10,8 +10,8 @@ import { Phone } from './models/phone.entity';
 import { SchoolYear } from './models/schoolyear.entity';
 import RepoModule from './repo.module';
 import { ApplicationsResolver } from './resolvers/applications.resolver';
-import { ParentApplication } from '../applications/models/parent-application.entity';
-import { EnrollmentPacket } from '../applications/models/enrollment-packet.entity';
+import { ParentApplication } from './models/parent-application.entity';
+import { EnrollmentPacket } from './models/enrollment-packet.entity';
 import { Address } from './models/address.entity';
 import { PersonAddress } from './models/person-address.entity';
 import { PacketsResolver } from './resolvers/packets.resolver';
@@ -86,6 +86,9 @@ import { LearningLogQuestionResolver } from './resolvers/learning-log-question.r
 import { LearningLogQuestion } from './models/learning-log-question.entity';
 import { StateCodesResolver } from './resolvers/state-code.resolver';
 import { StateCodes } from './models/state-codes.entity';
+import { ResourceRequestResolver } from './resolvers/resource-request.resolver';
+import { ResourceRequest } from './models/resource-request.entity';
+import { ResourceRequestPagination } from './models/resource-request-pagination.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -123,6 +126,7 @@ const graphQLImports = [
   HomeroomStudentResolver,
   LearningLogQuestionResolver,
   StateCodesResolver,
+  ResourceRequestResolver,
 ];
 @Module({
   imports: [
@@ -184,6 +188,8 @@ const graphQLImports = [
           HomeroomStudent,
           LearningLogQuestion,
           StateCodes,
+          ResourceRequest,
+          ResourceRequestPagination,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),
@@ -194,4 +200,4 @@ const graphQLImports = [
     ...graphQLImports,
   ],
 })
-export class ApplicationsGraphqlModule { }
+export class ApplicationsGraphqlModule {}

@@ -1,5 +1,14 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { Directive, Field, ObjectType, Int, ID } from '@nestjs/graphql';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BaseEntity,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import { Person } from './person.entity';
 import { Parent } from './parent.entity';
 import { StudentGradeLevel } from './student-grade-level.entity';
@@ -21,7 +30,7 @@ import { MTHHomeroomStudent } from './homeroom-student.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "student_id, parent_id, person_id,special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id")',
+  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id")',
 )
 @Entity('mth_student')
 export class Student extends BaseEntity {
@@ -78,49 +87,49 @@ export class Student extends BaseEntity {
   @Field(() => Int, { nullable: true })
   opt_out_form_signature_file_id: number;
 
-  @OneToOne((type) => Parent)
+  @OneToOne(() => Parent)
   @JoinColumn({ name: 'parent_id' })
   parent?: Parent;
 
-  @OneToMany((type) => StudentGradeLevel, (gradeLevels) => gradeLevels.Student)
-  @Field((type) => [StudentGradeLevel])
+  @OneToMany(() => StudentGradeLevel, (gradeLevels) => gradeLevels.Student)
+  @Field(() => [StudentGradeLevel])
   grade_levels?: StudentGradeLevel[];
 
-  @Field((type) => StudentCurrentStatus)
+  @Field(() => StudentCurrentStatus)
   current_school_year_status?: StudentCurrentStatus;
 
-  @OneToOne((type) => Person, (person) => person.person_id)
+  @OneToOne(() => Person, (person) => person.person_id)
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
   person: Person;
 
-  @OneToMany((type) => Application, (application) => application.student_id)
+  @OneToMany(() => Application, (application) => application.student_id)
   applications?: Application[];
 
   @OneToMany(() => Packet, (packet) => packet.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   packets?: Packet[];
 
-  @OneToMany((type) => SchoolEnrollment, (soes) => soes.student)
+  @OneToMany(() => SchoolEnrollment, (soes) => soes.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => [SchoolEnrollment], { nullable: true })
   currentSoe: SchoolEnrollment[];
 
-  @OneToMany((type) => SchoolEnrollment, (soes) => soes.student)
+  @OneToMany(() => SchoolEnrollment, (soes) => soes.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => [SchoolEnrollment], { nullable: true })
   previousSoe: SchoolEnrollment[];
 
-  @ManyToOne((type) => MTHHomeroomStudent, (homeroom) => homeroom.student)
+  @ManyToOne(() => MTHHomeroomStudent, (homeroom) => homeroom.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => MTHHomeroomStudent, { nullable: true })
   currentHomeroom: MTHHomeroomStudent;
 
-  @ManyToOne((type) => MTHHomeroomStudent, (homeroom) => homeroom.student)
+  @ManyToOne(() => MTHHomeroomStudent, (homeroom) => homeroom.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => MTHHomeroomStudent, { nullable: true })
   previousHomeroom: MTHHomeroomStudent;
 
-  @OneToMany((type) => StudentStatus, (studentStatus) => studentStatus.student)
+  @OneToMany(() => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status?: StudentStatus[];
 
@@ -129,11 +138,11 @@ export class Student extends BaseEntity {
   @Field(() => [Withdrawal], { nullable: true })
   StudentWithdrawals: Withdrawal[];
 
-  @OneToOne((type) => StudentStatusHistory, (studentStatusHistory) => studentStatusHistory.Student)
+  @OneToOne(() => StudentStatusHistory, (studentStatusHistory) => studentStatusHistory.Student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   status_history?: StudentStatusHistory[];
 
-  @OneToMany((type) => StudentReenrollmentStatus, (studentReenrollmentStatus) => studentReenrollmentStatus.student_id)
+  @OneToMany(() => StudentReenrollmentStatus, (studentReenrollmentStatus) => studentReenrollmentStatus.student_id)
   reenrollment_status?: StudentReenrollmentStatus[];
 
   @OneToMany(() => StudentHiddenResource, (studentHiddenResource) => studentHiddenResource.Student)

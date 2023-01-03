@@ -43,6 +43,12 @@ export class MasterResolver {
     return this.service.deleteByMasterId(masterId);
   }
 
+  @Mutation((returns) => Boolean, { name: 'deleteClassesById' })
+  @UseGuards(new AuthGuard())
+  async deleteClassesById(@Args('classId', { type: () => Int }) classId: number): Promise<Boolean> {
+    return this.classesService.deleteClassesById(classId);
+  }
+
   @Mutation((returns) => Boolean, { name: 'updateMaster' })
   @UseGuards(new AuthGuard())
   async updateMaster(

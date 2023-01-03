@@ -1,4 +1,4 @@
-import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, OneToMany, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Course } from './course.entity';
@@ -6,6 +6,7 @@ import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
 import { StateCodes } from './state-codes.entity';
 
+@InputType('title')
 @ObjectType()
 @Directive(
   '@key(fields: "title_id, subject_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, diploma_seeking_path, reduce_funds, price, reduce_funds_notification, custom_built_description, subject_notification, always_unlock, custom_built, third_party_provider, split_enrollment, software_reimbursement, display_notification, launchpad_course, course_id, state_course_codes, allow_request, is_active, deleted, Subject, Courses")',
@@ -105,10 +106,6 @@ export class Title {
   @Column('text', { nullable: true })
   @Field(() => String, { nullable: true })
   state_course_codes: string;
-
-  @Column('int', { name: 'priority', nullable: true })
-  @Field(() => Int, { nullable: true })
-  priority: number | null;
 
   @Column('tinyint', { name: 'allow_request', default: false })
   @Field(() => Boolean, { nullable: true })
