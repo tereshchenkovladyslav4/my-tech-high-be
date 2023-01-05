@@ -227,22 +227,6 @@ export class PacketsService {
     return this.packetsRepository.save(saveStudentPacketInput);
   }
 
-  async getPacketStatues(): Promise<ResponseDTO> {
-    const statusArray = [
-      'Not Started',
-      'Missing Info',
-      'Submitted',
-      'Resubmitted',
-      'Age Issue',
-      'Conditional',
-      'Accepted',
-    ];
-    return <ResponseDTO>{
-      error: false,
-      results: statusArray,
-    };
-  }
-
   async sendEmail(emailPacketInput: EmailApplicationInput): Promise<PacketEmail[]> {
     const { application_ids, subject, body } = emailPacketInput;
     const [results] = await this.packetsRepository

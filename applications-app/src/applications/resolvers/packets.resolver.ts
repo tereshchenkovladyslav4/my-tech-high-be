@@ -90,12 +90,6 @@ export class PacketsResolver {
     return this.immunizationSettingsService.findAll(where);
   }
 
-  @Query(() => ResponseDTO, { name: 'packetStatuses' })
-  @UseGuards(new AuthGuard())
-  async getPacketStatues(): Promise<ResponseDTO> {
-    return this.packetsService.getPacketStatues();
-  }
-
   @Mutation(() => EnrollmentPacket, {
     name: 'saveEnrollmentPacketContact',
   })
