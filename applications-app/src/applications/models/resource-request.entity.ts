@@ -1,28 +1,33 @@
 import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ResourceRequestStatus } from '../enums';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
 import { ResourceLevel } from './resource-level.entity';
+import { ResourceRequestEmail } from './resource-request-email.entity';
 
 @InputType('resource_request')
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "student_id, resource_id, resource_level_id, status, created_at, updated_at, Student, Resource, ResourceLevel")',
+  '@key(fields: "id, student_id, resource_id, resource_level_id, status, created_at, updated_at, Student, Resource, ResourceLevel")',
 )
 @Entity('mth_resource_request')
 export class ResourceRequest {
   @Column('int')
   @Field(() => Int, { nullable: true })
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  @Directive('@external')
+  id?: number;
+
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   student_id?: number;
 
   @Column('int')
   @Field(() => Int, { nullable: true })
-  @PrimaryColumn()
   @Directive('@external')
   resource_id?: number;
 
@@ -73,4 +78,8 @@ export class ResourceRequest {
   @Field(() => ResourceLevel, { nullable: true })
   @Directive('@external')
   ResourceLevel: ResourceLevel;
+
+  @OneToMany(() => ResourceRequestEmail, (resourceRequestEmail) => resourceRequestEmail.ResourceRequest)
+  @Field(() => [ResourceRequestEmail], { nullable: true })
+  ResourceRequestEmails: ResourceRequestEmail[];
 }

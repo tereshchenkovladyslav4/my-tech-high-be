@@ -6,7 +6,7 @@ export class CreateOrUpdateResourceInput {
   resource_id?: number;
 
   @Field(() => Int, { nullable: true })
-  SchoolYearId: number | null;
+  SchoolYearId?: number | null;
 
   @Field(() => String, { nullable: true })
   title?: string;
@@ -18,47 +18,47 @@ export class CreateOrUpdateResourceInput {
   subtitle?: string;
 
   @Field(() => Float, { nullable: true })
-  price: number | null;
+  price?: number | null;
 
   @Field(() => String, { nullable: true })
-  website: string;
+  website?: string;
 
   @Field(() => String, { nullable: true })
-  grades: string;
+  grades?: string;
 
   @Field(() => String, { nullable: true })
-  std_user_name: string;
+  std_user_name?: string;
 
   @Field(() => String, { nullable: true })
-  std_password: string;
+  std_password?: string;
 
   @Field(() => String, { nullable: true })
-  detail: string;
+  detail?: string;
 
   @Field(() => Int, { nullable: true })
-  priority: number | null;
+  priority?: number | null;
 
   @Field(() => Boolean, { nullable: true })
-  is_active: boolean;
+  is_active?: boolean;
 
   @Field(() => Int, { nullable: true })
-  resource_limit: number | null;
+  resource_limit?: number | null;
 
   @Field(() => Boolean, { nullable: true })
-  add_resource_level: boolean;
+  add_resource_level?: boolean;
 
   @Field(() => String, { nullable: true })
-  resourceLevelsStr: string;
+  resourceLevelsStr?: string;
 
   @Field(() => Boolean, { nullable: true })
-  family_resource: boolean;
+  family_resource?: boolean;
 
   @Field(() => Boolean, { nullable: true })
-  allow_request: boolean;
+  allow_request?: boolean;
 
   @Field(() => Boolean, { nullable: true })
-  deleted: boolean;
+  deleted?: boolean;
 
   @Field(() => Boolean, { nullable: true })
-  software_reimbursement: boolean;
+  software_reimbursement?: boolean;
 }

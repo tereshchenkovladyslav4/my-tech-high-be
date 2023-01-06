@@ -10,12 +10,12 @@ import { AssignmentArgs } from '../dto/assignment.args';
 export class AssignmentService {
     constructor(
         @InjectRepository(Assignment)
-        private readonly masterRepository: Repository<Assignment>,
+        private readonly repository: Repository<Assignment>,
     ) { }
 
     async getAssignmentsByMasterId(assignmentArgs: AssignmentArgs): Promise<Pagination<Assignment>> {
         const { skip, take, sort, filter, search, masterId } = assignmentArgs;
-        const [results, total] = await this.masterRepository.findAndCount({
+        const [results, total] = await this.repository.findAndCount({
             where: `(master_id = '${masterId}' and 
             (title like '%${search}%' or due_date like '%${search}%' or reminder_date like '%${search}%' or auto_grade like '%${search}%' or teacher_deadline like '%${search}%'))
             `,
@@ -28,8 +28,12 @@ export class AssignmentService {
         });
     }
 
+    async getById(assignmentId: number): Promise<Assignment> {
+        return await this.repository.findOne(assignmentId)
+    }
+
     async save(createNewAssignmentInput: CreateNewAssignmentInput): Promise<Assignment> {
-        const newAssignment = await this.masterRepository.save({
+        const newAssignment = await this.repository.save({
             ...createNewAssignmentInput,
             due_date: createNewAssignmentInput.dueDateTime,
             reminder_date: createNewAssignmentInput.reminderDateTime,
@@ -40,7 +44,7 @@ export class AssignmentService {
     }
 
     async deleteById(assignmentId: number): Promise<Boolean> {
-        await this.masterRepository.delete({ id: assignmentId });
+        await this.repository.delete({ id: assignmentId });
         return true;
     }
 }

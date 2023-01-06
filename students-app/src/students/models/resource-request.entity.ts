@@ -1,6 +1,6 @@
 import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ResourceRequestStatus } from '../enums';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
@@ -8,18 +8,21 @@ import { ResourceLevel } from './resource-level.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "student_id, resource_id, resource_level_id, status, created_at, updated_at, Student, Resource, ResourceLevel")',
+  '@key(fields: "id, student_id, resource_id, resource_level_id, status, created_at, updated_at, Student, Resource, ResourceLevel")',
 )
 @Entity('mth_resource_request')
 export class ResourceRequest {
   @Column('int')
   @Field(() => Int, { nullable: true })
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id?: number;
+
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   student_id?: number;
 
   @Column('int')
   @Field(() => Int, { nullable: true })
-  @PrimaryColumn()
   resource_id?: number;
 
   @Column('int')

@@ -55,4 +55,8 @@ export class LearningLogQuestion extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   grades: string;
+
+  @Column()
+  @Field(() => Int)
+  page: number;
 }

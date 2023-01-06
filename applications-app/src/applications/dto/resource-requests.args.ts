@@ -18,7 +18,7 @@ export class ResourceRequestsArgs {
   @Field(() => String)
   @Min(1)
   @Max(50)
-  sort = 'status|ASC';
+  sort = 'created_at|asc';
 
   @Field(() => ResourceRequestFilters)
   filter = null;

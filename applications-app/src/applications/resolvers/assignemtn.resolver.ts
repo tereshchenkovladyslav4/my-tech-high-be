@@ -29,6 +29,12 @@ export class AssignmentResolver {
     return results;
   }
 
+  @Query((returns) => Assignment, { name: 'getAssignmentById' })
+  @UseGuards(new AuthGuard())
+  async getMastersById(@Args('assignmentId', { type: () => Int }) assignmentId: number): Promise<Assignment> {
+    return this.service.getById(assignmentId);
+  }
+
   @Mutation((returns) => Boolean, { name: 'deleteAssignmentById' })
   @UseGuards(new AuthGuard())
   async deleteAssignmentById(@Args('assignmentId', { type: () => Int }) assignmentId: number): Promise<Boolean> {

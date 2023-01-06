@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, Repository } from 'typeorm';
-import { CoreSetting } from '../models/core-setting.entity';
 import { CoreSettingsService } from './core-settings.service';
 import { SESService } from './ses.service';
-import { EmailInput } from './../dto/email.inputs';
+import { EmailInput } from '../dto/email.inputs';
 import { User } from '../models/user.entity';
 import { EmailVerifier } from '../models/email-verifier.entity';
 import { ResponseDTO } from '../dto/response.dto';
@@ -20,7 +17,6 @@ import { UsersService } from './users.service';
 import { SchoolYearService } from './schoolyear.service';
 import { EmailRecordsService } from './email-records.service';
 import { EmailTemplateEnum } from '../enums';
-//import { AnnouncementsService } from './announcements.service';
 
 const base64 = require('base-64');
 @Injectable()
@@ -248,7 +244,7 @@ export class EmailsService {
     const email_status = result == false ? 'Sent' : 'Error';
 
     // Add Email Records
-    await this.emailRecordsService.create({
+    const emailRecord = await this.emailRecordsService.create({
       subject: subject,
       body: content,
       to_email: email,
@@ -262,6 +258,9 @@ export class EmailsService {
     return <ResponseDTO>{
       error: result,
       message: result == false ? 'Email Send Successfully' : 'Unexpected Error Occured',
+      results: {
+        emailRecordId: emailRecord.id,
+      },
     };
   }
 

@@ -1,4 +1,4 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Resource } from './resource.entity';
 
@@ -7,13 +7,14 @@ import { Resource } from './resource.entity';
 @Directive('@key(fields: "resource_level_id, resource_id, name, limit, created_at, Resource")')
 @Entity('mth_resource_level')
 export class ResourceLevel {
-  @Field(() => ID, { nullable: true })
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
   resource_level_id?: number;
 
-  @Column()
-  @Field(() => ID, { nullable: true })
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @Directive('@external')
   resource_id?: number;
 

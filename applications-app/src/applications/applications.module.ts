@@ -89,6 +89,7 @@ import { StateCodes } from './models/state-codes.entity';
 import { ResourceRequestResolver } from './resolvers/resource-request.resolver';
 import { ResourceRequest } from './models/resource-request.entity';
 import { ResourceRequestPagination } from './models/resource-request-pagination.entity';
+import { ResourceRequestEmail } from './models/resource-request-email.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -190,6 +191,7 @@ const graphQLImports = [
           StateCodes,
           ResourceRequest,
           ResourceRequestPagination,
+          ResourceRequestEmail,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

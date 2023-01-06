@@ -40,6 +40,10 @@ export class Assignment extends BaseEntity {
   @Field(() => Int)
   auto_grade_email: number;
 
+  @Column()
+  @Field(() => Int)
+  page_count: number;
+
   @ManyToOne(() => Master, (master) => master.masterAssignments)
   @Field(() => Master)
   @JoinColumn([{ name: 'master_id', referencedColumnName: 'master_id' }])

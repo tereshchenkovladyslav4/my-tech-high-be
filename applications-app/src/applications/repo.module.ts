@@ -137,6 +137,8 @@ import { StateCodesService } from './services/state-codes.service';
 import { StateCodes } from './models/state-codes.entity';
 import { ResourceRequestService } from './services/resource-request.service';
 import { ResourceRequest } from './models/resource-request.entity';
+import { ResourceRequestEmail } from './models/resource-request-email.entity';
+import { ResourceRequestEmailsService } from './services/resource-request-emails.service';
 
 const servicesImports = [
   UsersService,
@@ -210,6 +212,7 @@ const servicesImports = [
   LearningLogQuestionService,
   StateCodesService,
   ResourceRequestService,
+  ResourceRequestEmailsService,
 ];
 
 @Global()
@@ -284,6 +287,7 @@ const servicesImports = [
       LearningLogQuestion,
       StateCodes,
       ResourceRequest,
+      ResourceRequestEmail,
     ]),
   ],
   providers: [...servicesImports],
