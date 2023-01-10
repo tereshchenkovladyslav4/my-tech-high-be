@@ -419,8 +419,10 @@ export class PacketsService {
       statusArray[item.status] = +item.count;
     });
 
-    const age_issue_qb = await this.packetsRepository.query(`select * from mth_packet where is_age_issue = 1`);
-    statusArray['Age Issue'] = age_issue_qb.length;
+    const age_issue_qb = await this.packetsRepository.query(
+      `select * from mth_packet where is_age_issue = 1 and status != "Age Issue" `,
+    );
+    statusArray['Age Issue'] += age_issue_qb.length;
 
     return <ResponseDTO>{
       error: false,
@@ -462,9 +464,9 @@ export class PacketsService {
         ) AS t1
         LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
         LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
-        WHERE schoolYear.RegionId=${region_id} and t1.is_age_issue = 1`,
+        WHERE schoolYear.RegionId=${region_id} and t1.is_age_issue = 1 and t1.status != "Age Issue" `,
     );
-    statusArray['Age Issue'] = age_issue_qb.length;
+    statusArray['Age Issue'] += age_issue_qb.length;
 
     return <ResponseDTO>{
       error: false,

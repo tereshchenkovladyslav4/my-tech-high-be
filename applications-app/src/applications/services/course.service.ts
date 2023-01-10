@@ -29,7 +29,7 @@ export class CourseService {
         const titles = await this.titleService.findByIds(titleIds);
         await this.repo.save({
           id: result.id,
-          Titles: titles.filter((item) => item.subject_id === courseInput.subject_id),
+          Titles: titles,
         });
       }
 

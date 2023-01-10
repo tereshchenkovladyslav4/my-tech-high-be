@@ -15,7 +15,6 @@ export class CourseService {
   async cloneForProvider(
     cloneProviderId: number,
     newProviderId: number,
-    subjectIdMap: { [key: number]: number },
     titleIdMap: { [key: number]: number },
   ): Promise<{ [key: number]: number }> {
     const courses = await this.repo.find({ where: { provider_id: cloneProviderId }, relations: ['Titles'] });
@@ -33,7 +32,6 @@ export class CourseService {
       const result = await this.repo.save({
         ...course,
         provider_id: newProviderId,
-        subject_id: subjectIdMap[course.subject_id],
         Titles: titles,
       });
       idMap[courseId] = result.id;

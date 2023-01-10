@@ -7,10 +7,10 @@ import { Person } from '../../models/person.entity';
 import { Phone } from '../../models/phone.entity';
 import { User } from '../../models/user.entity';
 import { PersonInfo } from '../../models/person-info';
-import { CreateUserInput } from './../dto/create-user.input';
-import { UpdateProfileInput } from './../dto/update-profile.inputs';
+import { CreateUserInput } from '../dto/create-user.input';
+import { UpdateProfileInput } from '../dto/update-profile.inputs';
 import { UpdateAccountInput } from '../dto/update-account.inputs';
-import { UpdateUserInput } from './../dto/update-user.input';
+import { UpdateUserInput } from '../dto/update-user.input';
 import * as Moment from 'moment';
 import { EmailsService } from 'src/users/services/emails.service';
 import { EmailVerifierService } from './email-verifier.service';
@@ -31,23 +31,17 @@ export class UsersService {
     private emailService: EmailsService,
     private emailVerifierService: EmailVerifierService,
     private userRegionService: UserRegionService,
-  ) { }
+  ) {}
 
   saltPassword(password: string) {
     return crypto.createHash('md5').update(`${password}${salt}`).digest('hex');
   }
 
   async validateCreator(id: number): Promise<boolean> {
-    // const user = this.usersRepository.createQueryBuilder("user").leftJoinAndSelect("user.user_id", "level")
-    //   .where("level.user_id = :user_id", { id })
     const user = await this.usersRepository.findOne({
-      where: {
-        user_id: id,
-        level: 1,
-      },
+      where: { user_id: id, level: 1 },
     });
-    if (user) return true;
-    return false;
+    return !!user;
   }
 
   async findAllPersonInfoBySearchItem(getPersonInfoArgs: GetPersonInfoArgs): Promise<PersonInfo[]> {
@@ -126,7 +120,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    const data = await this.usersRepository.find({
+    return await this.usersRepository.find({
       relations: [
         'role',
         'userRegion',
@@ -137,7 +131,6 @@ export class UsersService {
         'student.studentDetail',
       ],
     });
-    return data;
   }
 
   async findOneById(user_id: number): Promise<User> {
@@ -299,6 +292,7 @@ export class UsersService {
         };
         await this.userRegionService.createUserRegion(regionPayload);
 
+        await this.emailVerifierService.delete({ email: user.email });
         const emailVerifier = await this.emailVerifierService.create({
           user_id: user.user_id,
           email: user.email,
@@ -306,7 +300,6 @@ export class UsersService {
         });
 
         if (!emailVerifier) throw new HttpException('EmailVerifier Not Created', HttpStatus.CONFLICT);
-        console.log('EmailVerifier: ', emailVerifier);
 
         await this.emailService.sendAccountVerificationEmail(emailVerifier);
 
@@ -340,22 +333,14 @@ export class UsersService {
     }
   }
 
-  async getProfile(user_id: number): Promise<Person> {
-    return await createQueryBuilder(Person)
-      .innerJoin(User, 'user', 'user.user_id = `Person`.user_id')
-      .where('user.user_id = :userId', { userId: user_id })
-      .printSql()
-      .getOne();
-  }
-
   async updateProfile(user: User, updateProfileInput: UpdateProfileInput): Promise<User> {
-    const anotherperson = await createQueryBuilder(Person)
+    const anotherPerson = await createQueryBuilder(Person)
       .where('email = :email AND user_id != :userId', {
         email: updateProfileInput.email,
         userId: user.user_id,
       })
       .getOne();
-    if (anotherperson) {
+    if (anotherPerson) {
       throw new BadRequestException('Email is already in use. Please choose another one.');
     }
 
@@ -376,7 +361,7 @@ export class UsersService {
       .where('user_id = :id', { id: user.user_id })
       .execute();
 
-    // Check if the curent user exists in person table
+    // Check if the current user exists in person table
     if (!person) {
       return user;
     }
@@ -450,7 +435,6 @@ export class UsersService {
       .printSql()
       .getOne();
 
-    console.log('HasAddress: ', hasAddress);
     if (!hasAddress) {
       const address = await getConnection()
         .createQueryBuilder()
@@ -470,10 +454,8 @@ export class UsersService {
         ])
         .execute();
 
-      console.log('Address: ', address);
       const address_id = address.raw && address.raw.insertId;
       if (address_id) {
-        console.log('Address ID: ', address_id);
         await getConnection()
           .createQueryBuilder()
           .insert()
@@ -557,8 +539,7 @@ export class UsersService {
   async getTeachersBySearch(searchPrimaryTeacher: GetPersonInfoArgs): Promise<User[]> {
     const { region_id, search } = searchPrimaryTeacher;
 
-
-    let qb = this.usersRepository
+    const qb = this.usersRepository
       .createQueryBuilder('users')
       .innerJoinAndSelect('users.userRegion', 'userRegion')
       .where('userRegion.region_id = :region_id', { region_id: region_id })
@@ -571,7 +552,7 @@ export class UsersService {
           sub.where('users.first_name like :text', { text: `%${search}%` });
           sub.orWhere('users.last_name like :text', { text: `%${search}%` });
         }),
-      )
+      );
     }
 
     const [results] = await qb.getManyAndCount();

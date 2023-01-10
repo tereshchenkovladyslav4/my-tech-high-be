@@ -59,9 +59,6 @@ export class CreateOrUpdateCourseInput {
   @Field(() => String, { nullable: true })
   reduce_funds_notification?: string;
 
-  @Field(() => Int, { nullable: true })
-  subject_id?: number;
-
   @Field(() => String, { nullable: true })
   titles: string;
 

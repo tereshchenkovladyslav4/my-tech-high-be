@@ -22,7 +22,7 @@ export class EventsService {
     private readonly eventsRepository: Repository<ApplicationEvent>,
     private schoolYearsService: SchoolYearService,
     private timeZonesService: TimezonesService,
-  ) {}
+  ) { }
 
   async getScheduleActiveSchoolYears(region_id: number): Promise<any> {
     const activeSchoolYears = await this.schoolYearsService.getAllActive(region_id);
@@ -86,9 +86,8 @@ export class EventsService {
         `);
         if (grades) {
           grades.forEach((grade) => {
-            filter_grades += ` OR events.filter_grades LIKE '%"${
-              grade.grade_level.includes('K') ? 'Kindergarten' : grade.grade_level
-            }"%'`;
+            filter_grades += ` OR events.filter_grades LIKE '%"${grade.grade_level.includes('K') ? 'Kindergarten' : grade.grade_level
+              }"%'`;
           });
         }
         subCond = `AND (events.title like '%${param.search_field}%' OR events.description like '%${param.search_field}%' ${filter_grades})`;
@@ -145,7 +144,7 @@ export class EventsService {
 
         const studentsAssessments = await createQueryBuilder('StudentAssessmentOption')
           .innerJoinAndSelect('StudentAssessmentOption.AssessmentOption', 'AssessmentOption')
-          .where('StudentAssessmentOption.StudentId IN (:studentIds)', { studentIds: studentIds.join(',') })
+          .where('StudentAssessmentOption.StudentId IN (:studentIds)', { studentIds: studentIds })
           .printSql()
           .getMany();
 

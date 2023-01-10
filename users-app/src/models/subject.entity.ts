@@ -17,7 +17,7 @@ import { Course } from './course.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "subject_id, SchoolYearId, name, priority, allow_request, is_active, deleted, Titles, Periods, Courses")',
+  '@key(fields: "subject_id, SchoolYearId, name, priority, allow_request, is_active, deleted, Titles, Periods")',
 )
 @Entity({ name: 'mth_subject' })
 export class Subject extends BaseEntity {
@@ -71,9 +71,4 @@ export class Subject extends BaseEntity {
   @Field(() => [Period], { nullable: true })
   @Directive('@external')
   Periods: Period[];
-
-  @OneToMany(() => Course, (course) => course.Subject)
-  @Field(() => [Course], { nullable: true })
-  @Directive('@external')
-  Courses: Course[];
 }

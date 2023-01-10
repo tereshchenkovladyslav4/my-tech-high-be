@@ -190,12 +190,7 @@ export class SchoolYearsService {
       for (let index = 0; index < providerIds.length; index++) {
         const cloneProviderId = +providerIds[index];
         const newProviderId = providerIdMap[cloneProviderId];
-        const idMap = await this.courseService.cloneForProvider(
-          cloneProviderId,
-          newProviderId,
-          subjectIdMap,
-          titleIdMap,
-        );
+        const idMap = await this.courseService.cloneForProvider(cloneProviderId, newProviderId, titleIdMap);
         Object.assign(courseIdMap, courseIdMap, idMap);
       }
     }

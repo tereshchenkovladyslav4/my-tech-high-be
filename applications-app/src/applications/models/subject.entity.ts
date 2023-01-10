@@ -13,14 +13,13 @@ import {
 import { SchoolYear } from './schoolyear.entity';
 import { Title } from './title.entity';
 import { Period } from './period.entity';
-import { Course } from './course.entity';
 import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
 @InputType('subject')
 @ObjectType()
 @Directive(
-  '@key(fields: "subject_id, SchoolYearId, name, priority, allow_request, is_active, deleted, Titles, Periods, Courses")',
+  '@key(fields: "subject_id, SchoolYearId, name, priority, allow_request, is_active, deleted, Titles, Periods")',
 )
 @Entity({ name: 'mth_subject' })
 export class Subject extends BaseEntity {
@@ -73,10 +72,6 @@ export class Subject extends BaseEntity {
   })
   @Field(() => [Period], { nullable: true })
   Periods: Period[];
-
-  @OneToMany(() => Course, (course) => course.Subject)
-  @Field(() => [Course], { nullable: true })
-  Courses: Course[];
 
   @OneToMany(() => SchedulePeriod, (schedulePeriod) => schedulePeriod.Subject)
   @Field(() => [SchedulePeriod], { nullable: true })

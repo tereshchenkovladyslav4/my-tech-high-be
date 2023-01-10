@@ -92,17 +92,10 @@ export class PeriodService {
       )
       .leftJoinAndSelect('Subjects.Titles', 'Titles', `${titleCourseQuery('Titles')}`)
       .leftJoinAndSelect('Titles.Courses', 'Courses', `${titleCourseQuery('Courses')}`)
-      .leftJoinAndSelect('Subjects.Courses', 'SubjectsCourses', `${titleCourseQuery('SubjectsCourses')}`)
       .loadRelationCountAndMap(
         'Courses.TotalRequests',
         'Courses.SchedulePeriods',
         'CoursesSchedulePeriods',
-        courseRequestsQuery,
-      )
-      .loadRelationCountAndMap(
-        'SubjectsCourses.TotalRequests',
-        'SubjectsCourses.SchedulePeriods',
-        'SubjectsCoursesSchedulePeriods',
         courseRequestsQuery,
       )
       .where({ school_year_id: schoolYearId, archived: false })
@@ -116,9 +109,6 @@ export class PeriodService {
           title.Courses = filteredCourses.courses;
           title.AltCourses = filteredCourses.altCourses;
         });
-        const filteredCourses = this.filterCourses(subject.Courses, numericGrade);
-        subject.Courses = filteredCourses.courses;
-        subject.AltCourses = filteredCourses.altCourses;
 
         const filteredTitles = this.filterTitles(subject.Titles, numericGrade);
         subject.Titles = filteredTitles.titles;

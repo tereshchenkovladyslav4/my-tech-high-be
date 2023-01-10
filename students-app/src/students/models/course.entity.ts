@@ -9,7 +9,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Subject } from './subject.entity';
 import { Title } from './title.entity';
 import { Provider } from './provider.entity';
 import { SchedulePeriod } from './schedule-period.entity';
@@ -18,7 +17,7 @@ import { SchedulePeriodHistory } from './schedule-period-history.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "id, provider_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, always_unlock, software_reimbursement, display_notification, course_notification, launchpad_course, course_id, website, diploma_seeking_path, limit, reduce_funds, price, reduce_funds_notification, subject_id, allow_request, is_active, deleted, Provider, Subject, Titles, SchedulePeriods, SchedulePeriodHistories")',
+  '@key(fields: "id, provider_id, name, min_grade, max_grade, min_alt_grade, max_alt_grade, always_unlock, software_reimbursement, display_notification, course_notification, launchpad_course, course_id, website, diploma_seeking_path, limit, reduce_funds, price, reduce_funds_notification, allow_request, is_active, deleted, Provider, Titles, SchedulePeriods, SchedulePeriodHistories")',
 )
 @Entity('mth_course')
 export class Course {
@@ -123,11 +122,6 @@ export class Course {
   @Directive('@external')
   reduce_funds_notification: string;
 
-  @Column()
-  @Field(() => ID, { nullable: true })
-  @Directive('@external')
-  subject_id?: number;
-
   @Column('tinyint', { name: 'allow_request', default: false })
   @Field(() => Boolean, { nullable: true })
   @Directive('@external')
@@ -151,15 +145,6 @@ export class Course {
   @Field(() => Provider, { nullable: true })
   @Directive('@external')
   Provider: Provider;
-
-  @ManyToOne(() => Subject, (subject) => subject.Courses, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'subject_id', referencedColumnName: 'subject_id' }])
-  @Field(() => Subject, { nullable: true })
-  @Directive('@external')
-  Subject: Subject;
 
   @ManyToMany(() => Title, (title) => title.Courses)
   @JoinTable({
