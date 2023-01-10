@@ -29,4 +29,7 @@ export class UpdateAddressInput {
 
   @Field(() => String, { nullable: true })
   country_id?: string;
+
+  @Field(() => String, { nullable: true })
+  school_district?: string;
 }
