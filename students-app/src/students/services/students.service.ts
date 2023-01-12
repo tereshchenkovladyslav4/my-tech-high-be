@@ -39,7 +39,7 @@ export class StudentsService {
     private personsService: PersonsService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private schoolYearService: SchoolYearsService,
-  ) { }
+  ) {}
 
   protected user: User;
   protected NewUser;
@@ -241,7 +241,6 @@ export class StudentsService {
       const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
                         UNION ${sqlAll}) aaa GROUP BY student_id`;
 
-
       let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
       const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
 
@@ -352,9 +351,17 @@ export class StudentsService {
       .leftJoinAndSelect('parent.person', 'p_person')
       .leftJoinAndSelect('p_person.person_address', 'p_address')
       .leftJoinAndSelect('p_address.address', 'address')
-      .leftJoinAndSelect('student.currentHomeroom', 'currentHomeroom', `currentHomeroom.school_year_id=${filter.schoolYear}`)
+      .leftJoinAndSelect(
+        'student.currentHomeroom',
+        'currentHomeroom',
+        `currentHomeroom.school_year_id=${filter.schoolYear}`,
+      )
       .leftJoinAndSelect('currentHomeroom.teacher', 'currentTeacher')
-      .leftJoinAndSelect('student.previousHomeroom', 'previousHomeroom', `previousHomeroom.school_year_id=${previousSchoolYear}`)
+      .leftJoinAndSelect(
+        'student.previousHomeroom',
+        'previousHomeroom',
+        `previousHomeroom.school_year_id=${previousSchoolYear}`,
+      )
       .leftJoinAndSelect('previousHomeroom.teacher', 'previousTeacher')
       .leftJoinAndSelect('student.packets', 'packets')
       .where(`grade_levels.school_year_id = ${filter.schoolYear} AND status.status IN (0, 1)`);
@@ -446,7 +453,7 @@ export class StudentsService {
             .orWhere(`p_person.first_name like '%${search}%'`)
             .orWhere(`p_person.last_name like '%${search}%'`)
             .orWhere(`address.city like '%${search}%'`)
-            .orWhere(`grade_levels.grade_level like '%${search}%'`)
+            .orWhere(`grade_levels.grade_level like '%${search}%'`);
           // .orWhere(`currentPartner.name like '%${search}%'`)
           // .orWhere(`previousPartner.name like '%${search}%'`);
         }),
@@ -509,7 +516,6 @@ export class StudentsService {
       const [sql1] = qb.getQueryAndParameters();
       const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
                         UNION ${sqlAll}) aaa GROUP BY student_id`;
-
 
       let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
       const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
@@ -595,7 +601,7 @@ export class StudentsService {
   findOneById(student_id: number): Promise<Student> {
     return this.studentsRepository.findOne({
       where: { student_id },
-      relations: ['currentSoe'],
+      relations: ['currentSoe', 'currentSoe.partner'],
     });
   }
 
@@ -715,10 +721,10 @@ export class StudentsService {
       enrollment_packet_date_deadline: student?.packet_deadline
         ? Moment(student.packet_deadline).format('MM.DD')
         : (student &&
-          Moment(student.application_date_accepted)
-            .add(parent.region_enrollment_packet_deadline_num_days, 'd')
-            .format('MM.DD')) ||
-        null,
+            Moment(student.application_date_accepted)
+              .add(parent.region_enrollment_packet_deadline_num_days, 'd')
+              .format('MM.DD')) ||
+          null,
       withdraw_deadline_num_days: parent.region_withdraw_deadline_num_days,
       midyear_application: (student && student.application_midyear_application) || false,
       schedule_builder_close: schoolYear.schedule_builder_close || '0000-00-00',
@@ -805,7 +811,6 @@ export class StudentsService {
       });
 
       if (!updatedPerson) throw new ServiceUnavailableException('Person User ID Not been Updated');
-      console.log('Updated Person: ', updatedPerson);
     }
 
     return student;

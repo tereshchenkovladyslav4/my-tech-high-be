@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Person } from '../models/person.entity';
-import { CreateParentPersonInput } from '../dto/new-parent-person.inputs';
 import { CreatePersonInput } from '../dto/new-person.inputs';
 import { SavePersonUserIdInput } from '../dto/save-person-user-id.inputs';
 import { UpdatePersonInput } from '../dto/update-person.inputs';

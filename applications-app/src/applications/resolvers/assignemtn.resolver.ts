@@ -23,6 +23,15 @@ export class AssignmentResolver {
     return this.service.save(createNewAssignmentInput);
   }
 
+  @Mutation((returns) => Boolean, { name: 'updateNewAssignment' })
+  @UseGuards(new AuthGuard())
+  async updateNewAssignment(
+    @Args('updateAssignmentInput', { type: () => CreateNewAssignmentInput })
+    updateAssignmentInput: CreateNewAssignmentInput,
+  ): Promise<Boolean> {
+    return this.service.update(updateAssignmentInput);
+  }
+
   @Query((returns) => AssignmentPagination, { name: 'getAssignmentsByMasterId' })
   async getChecklist(@Args() assignmentArgs: AssignmentArgs): Promise<Pagination<Assignment>> {
     const results = await this.service.getAssignmentsByMasterId(assignmentArgs);

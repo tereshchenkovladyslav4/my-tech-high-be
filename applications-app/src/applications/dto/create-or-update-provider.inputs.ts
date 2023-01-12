@@ -40,4 +40,7 @@ export class CreateOrUpdateProviderInput {
 
   @Field(() => Boolean, { nullable: true })
   deleted: boolean;
+
+  @Field(() => Int, { nullable: true })
+  priority: number | null;
 }

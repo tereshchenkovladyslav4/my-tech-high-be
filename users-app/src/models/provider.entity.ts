@@ -6,7 +6,7 @@ import { Course } from './course.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "id, school_year_id, name, is_display, reduce_funds, price, reduce_funds_notification, multiple_periods, multi_periods_notification, allow_request, is_active, deleted, Courses, Periods")',
+  '@key(fields: "id, school_year_id, name, is_display, reduce_funds, price, reduce_funds_notification, multiple_periods, multi_periods_notification, allow_request, is_active, deleted, Courses, Periods, priority")',
 )
 @Entity({ name: 'mth_provider' })
 export class Provider extends BaseEntity {
@@ -75,6 +75,11 @@ export class Provider extends BaseEntity {
   @Field(() => Boolean, { nullable: true })
   @Directive('@external')
   deleted: boolean;
+
+  @Column('int', { name: 'priority', nullable: true })
+  @Field(() => Int, { nullable: true })
+  @Directive('@external')
+  priority: number | null;
 
   @OneToMany(() => Course, (course) => course.Provider)
   @Field(() => [Course], { nullable: true })

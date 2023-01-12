@@ -59,4 +59,8 @@ export class LearningLogQuestion extends BaseEntity {
   @Column()
   @Field(() => Int)
   page: number;
+
+  @Column()
+  @Field(() => Int)
+  order: number;
 }

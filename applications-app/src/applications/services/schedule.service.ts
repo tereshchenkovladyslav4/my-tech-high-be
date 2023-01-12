@@ -135,6 +135,7 @@ export class ScheduleService {
           qb.orderBy('parent_name', 'DESC');
         } else {
           qb.orderBy('schedule.status', 'DESC');
+          qb.addOrderBy('schedule.last_modified', 'ASC');
           qb.addOrderBy('schedule.date_submitted', 'DESC');
         }
       } else {
@@ -154,7 +155,8 @@ export class ScheduleService {
           qb.orderBy('parent_name', 'ASC');
         } else {
           qb.orderBy('schedule.status', 'ASC');
-          qb.addOrderBy('schedule.date_submitted', 'ASC');
+          qb.addOrderBy('schedule.last_modified', 'ASC');
+          qb.addOrderBy('schedule.date_submitted', 'DESC');
         }
       }
     }

@@ -370,19 +370,6 @@ export class ApplicationsService {
         }
 
         // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
-        const parseGradeLevel = (value: number | string): number => {
-          if (!value) return 0;
-          if (value === 'OR-K') return 0;
-          if (['K', 'Kindergarten', 'Kin'].indexOf(value + '') !== -1) return 5;
-          return Number(value) + 5;
-        };
-        const age = student.person.date_of_birth ? Moment().diff(student.person.date_of_birth, 'years', false) : 0;
-        const grade_age = student.grade_levels.length > 0 ? parseGradeLevel(student.grade_levels[0].grade_level) : 0;
-        let is_age_issue = false;
-
-        if (student.person.date_of_birth && grade_age != 0) {
-          is_age_issue = age < grade_age;
-        }
 
         const studentPacket = await this.packetsService.createOrUpdate({
           packet_id,
@@ -392,7 +379,7 @@ export class ApplicationsService {
           date_accepted: null,
           date_submitted: null,
           date_last_submitted: null,
-          is_age_issue: is_age_issue,
+          is_age_issue: false,
           secondary_contact_first: application?.secondary_contact_first,
           secondary_contact_last: application?.secondary_contact_last,
           school_district: existingSchoolDistrict,

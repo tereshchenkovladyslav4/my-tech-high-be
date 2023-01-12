@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, createQueryBuilder, In } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Parent } from '../models/parent.entity';
 import { CreateParentInput } from '../dto/new-parent.inputs';
 import { UpdatePersonAddressInput } from '../dto/update-person-address.inputs';
@@ -22,22 +22,10 @@ export class ParentsService {
     private personAddressService: PersonAddressService,
     private observerService: ObserversService,
     private usersService: UsersService,
-  ) { }
+  ) {}
 
   async findOneById(parent_id: number): Promise<Parent> {
-    // return await createQueryBuilder(Parent)
-    //   .innerJoin(Student, 'students', 'students.parent_id = parent.parent_id')
-    //   .where('parent.parent_id = :id', { id: parent_id })
-    //   .printSql()
-    //   .getOne();
-    return this.parentsRepository.findOne(parent_id, {
-      // relations: [
-      //   'person',
-      //   'person.user',
-      //   'person.user.userRegion',
-      //   'person.user.userRegion.regionDetail',
-      // ],
-    });
+    return this.parentsRepository.findOne(parent_id, {});
   }
 
   //  Find Parents by person ids
@@ -85,7 +73,7 @@ export class ParentsService {
       const personData = await this.personService.update(data);
 
       const addressData = await this.addressService.update(address);
-      const phoneData = await this.phoneService.create(phone);
+      await this.phoneService.create(phone);
 
       await this.personAddressService.create({
         person_id: personData.person_id,

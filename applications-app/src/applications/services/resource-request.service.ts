@@ -35,6 +35,7 @@ export class ResourceRequestService {
       .leftJoinAndSelect('resourceRequest.Resource', 'Resource')
       .leftJoinAndSelect('Resource.ResourceLevels', 'ResourceLevels')
       .leftJoinAndSelect('Student.parent', 'Parent')
+      .leftJoinAndSelect('Student.applications', 'applications')
       .leftJoinAndSelect('Student.status', 'StudentStatus', `StudentStatus.school_year_id = ${schoolYearId}`)
       .leftJoinAndSelect('Student.grade_levels', 'GradeLevels', `GradeLevels.school_year_id = ${schoolYearId}`)
       .leftJoinAndSelect('Parent.person', 'ParentPerson')
@@ -99,6 +100,10 @@ export class ResourceRequestService {
           qb.orderBy('GradeLevels.grade_level', sortOrder === 'asc' ? 'ASC' : 'DESC');
           break;
         }
+        case 'vendor': {
+          qb.orderBy('Resource.title', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
         case 'email': {
           qb.orderBy('Person.email', sortOrder === 'asc' ? 'ASC' : 'DESC');
           break;
@@ -110,12 +115,16 @@ export class ResourceRequestService {
         case 'cost': {
           // TODO
           qb.orderBy('Resource.subtitle', sortOrder === 'asc' ? 'ASC' : 'DESC');
-          qb.orderBy('Resource.price', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          qb.addOrderBy('Resource.price', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+        default: {
+          qb.orderBy('ResourceRequestEmails.created_at', 'DESC');
           break;
         }
       }
     }
-    qb.orderBy('ResourceRequestEmails.created_at', 'DESC');
+    qb.addOrderBy('ResourceRequestEmails.created_at', 'DESC');
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
 
     // Special case when sortBy is 'emailed'
@@ -211,9 +220,13 @@ export class ResourceRequestService {
   }
 
   async save(updateResourceRequestInput: UpdateResourceRequestInput): Promise<ResourceRequest> {
-    const { id, resource_id, resource_level_id, username, password } = updateResourceRequestInput;
-    const result = await this.repo.save({ id, resource_level_id });
-    await this.resourceService.save({ resource_id, std_user_name: username, std_password: password });
-    return result;
+    try {
+      const { id, resource_id, resource_level_id, username, password } = updateResourceRequestInput;
+      const result = await this.repo.save({ id, resource_level_id });
+      await this.resourceService.save({ resource_id, std_user_name: username, std_password: password });
+      return result;
+    } catch (e) {
+      return e;
+    }
   }
 }

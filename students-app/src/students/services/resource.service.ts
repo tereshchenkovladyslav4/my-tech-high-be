@@ -207,6 +207,16 @@ export class ResourceService {
               VALUES
                 (${studentId}, ${resourceId}, ${resourceLevelId}, "${ResourceRequestStatus.REQUESTED}", NOW(), NOW());
             `);
+          } else {
+            await queryRunner.query(`
+              UPDATE infocenter.mth_resource_request
+              SET
+                status = "${ResourceRequestStatus.REQUESTED}"
+              WHERE 
+                student_id = ${studentId} AND
+                resource_id = ${resourceId} AND
+                resource_level_id = ${resourceLevelId}
+            `);
           }
           // Delete from cart
           await queryRunner.query(`

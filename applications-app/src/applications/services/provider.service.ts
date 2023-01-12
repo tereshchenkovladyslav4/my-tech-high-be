@@ -31,7 +31,7 @@ export class ProviderService {
       )
       .leftJoinAndSelect('Courses.Titles', 'Titles')
       .where({ school_year_id: schoolYearId, deleted: false })
-      .orderBy({ 'provider.id': 'ASC', 'Courses.name': 'ASC', 'Courses.id': 'ASC' });
+      .orderBy({ 'provider.priority': 'ASC', 'provider.name': 'ASC', 'Courses.name': 'ASC', 'Courses.id': 'ASC' });
 
     const subQuery = `EXISTS (
       SELECT * FROM mth_course course 
@@ -62,8 +62,13 @@ export class ProviderService {
 
   async save(providerInput: CreateOrUpdateProviderInput): Promise<Provider> {
     try {
+      if (!providerInput.id) {
+        const totalCnt = await this.repo.count({
+          school_year_id: providerInput.school_year_id,
+        });
+        if (!providerInput.priority) providerInput.priority = totalCnt + 1;
+      }
       const result = await this.repo.save({ ...providerInput });
-
       if (providerInput.periods != undefined) {
         const periodIds = providerInput.periods.split(',');
         const periods = await this.periodService.findByIds(periodIds);

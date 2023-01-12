@@ -34,7 +34,7 @@ export class SubjectService {
       .where({ SchoolYearId: schoolYearId, deleted: false })
       .orderBy({
         'subject.priority': 'ASC',
-        'subject.subject_id': 'ASC',
+        'subject.name': 'ASC',
         'Titles.name': 'ASC',
         'Titles.title_id': 'ASC',
         'Periods.period': 'ASC',

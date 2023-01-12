@@ -2,24 +2,30 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateNewAssignmentInput {
+    @Field(() => Int, { nullable: true })
+    assignment_id?: number;
+
     @Field(() => Int)
-    master_id: number;
+    master_id?: number;
 
     @Field(() => String)
-    title: string;
+    title?: string;
 
     @Field(() => Date)
-    dueDateTime: Date;
+    dueDateTime?: Date;
 
     @Field(() => Date)
-    reminderDateTime: Date;
+    reminderDateTime?: Date;
 
     @Field(() => Date)
-    autoGradeDateTime: Date;
+    autoGradeDateTime?: Date;
 
     @Field(() => Date)
-    teacher_deadline: Date;
+    teacher_deadline?: Date;
 
     @Field(() => Boolean)
-    autoGradeEmail: boolean;
+    autoGradeEmail?: boolean;
+
+    @Field(() => Int, { defaultValue: 1 })
+    page_count?: number;
 }

@@ -19,7 +19,7 @@ import { SchedulePeriodHistory } from './schedule-period-history.entity';
 @InputType('provider')
 @ObjectType()
 @Directive(
-  '@key(fields: "id, school_year_id, name, is_display, reduce_funds, price, reduce_funds_notification, multiple_periods, multi_periods_notification, allow_request, is_active, deleted, Courses, Periods")',
+  '@key(fields: "id, school_year_id, name, is_display, reduce_funds, price, reduce_funds_notification, multiple_periods, multi_periods_notification, allow_request, is_active, deleted, Courses, Periods, priority")',
 )
 @Entity({ name: 'mth_provider' })
 export class Provider extends BaseEntity {
@@ -76,6 +76,10 @@ export class Provider extends BaseEntity {
   @Column('tinyint', { name: 'deleted', default: false })
   @Field(() => Boolean, { nullable: true })
   deleted: boolean;
+
+  @Column('int', { name: 'priority', nullable: true })
+  @Field(() => Int, { nullable: true })
+  priority: number | null;
 
   @ManyToOne(() => SchoolYear, (schoolyear) => schoolyear.Subjects, {
     onDelete: 'SET NULL',

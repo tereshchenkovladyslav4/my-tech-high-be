@@ -35,7 +35,7 @@ export class StudentsResolver {
     private parentsService: ParentsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
     private schoolEnrollmentService: SchoolEnrollmentService,
-  ) { }
+  ) {}
 
   @Query((returns) => Student, { name: 'student' })
   async getStudent(@Args({ name: 'student_id', type: () => ID }) student_id: number): Promise<Student> {

@@ -16,11 +16,24 @@ export class ChecklistService {
   async findAll(checklistArgs: ChecklistsArgs): Promise<Pagination<Checklist>> {
     const { skip, take, sort, filter, search, region_id } = checklistArgs;
     const _sortBy = sort.split('|');
+    let newStatus = filter.status;
 
+    if (filter.status.includes('both')) {
+      const queryResult = await this.checklistRepository.query(
+        `SELECT COUNT(*) as count, status FROM mth_checklist WHERE school_year_id=${filter.selectedYearId} AND region_id =${region_id} GROUP BY status`,
+      );
+      if (queryResult.length >= 2) {
+        newStatus = ['Independent Checklist'];
+      } else if (queryResult.length === 1) {
+        newStatus = [queryResult[0].status];
+      } else {
+        newStatus = ['Independent Checklist'];
+      }
+    }
     const qb = this.checklistRepository
       .createQueryBuilder('checklist')
       .where(`checklist.region_id = ${region_id}`)
-      .andWhere('checklist.status IN (:status)', { status: filter.status });
+      .andWhere('checklist.status IN (:status)', { status: newStatus });
 
     if (filter && filter.selectedYearId) {
       qb.andWhere(`checklist.school_year_id = ${filter.selectedYearId}`);
@@ -40,7 +53,7 @@ export class ChecklistService {
         }),
       );
     }
-
+    qb.orderBy('checklist.checklist_id', 'ASC');
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
 
     return new Pagination<Checklist>({

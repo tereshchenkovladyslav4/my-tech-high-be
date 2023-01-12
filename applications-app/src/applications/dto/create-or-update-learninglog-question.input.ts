@@ -24,14 +24,17 @@ export class CreateOrUpdateLearningLogQuestionInput {
   options?: string;
 
   @Field(() => Boolean, { defaultValue: false })
-  default_question: boolean;
+  default_question?: boolean;
 
   @Field(() => String, { nullable: true })
-  validations: string;
+  validations?: string;
 
   @Field(() => String, { nullable: true })
-  grades: string;
+  grades?: string;
 
   @Field(() => Number)
-  page: number;
+  page?: number;
+
+  @Field(() => Number)
+  order?: number;
 }

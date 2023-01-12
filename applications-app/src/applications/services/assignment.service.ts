@@ -43,6 +43,20 @@ export class AssignmentService {
         return newAssignment;
     }
 
+    async update(updateAssignmentInput: CreateNewAssignmentInput): Promise<Boolean> {
+        await this.repository.update({ id: updateAssignmentInput.assignment_id }, {
+            due_date: updateAssignmentInput.dueDateTime,
+            reminder_date: updateAssignmentInput.reminderDateTime,
+            auto_grade: updateAssignmentInput.autoGradeDateTime,
+            auto_grade_email: updateAssignmentInput.autoGradeEmail ? 1 : 0,
+            teacher_deadline: updateAssignmentInput.teacher_deadline,
+            master_id: updateAssignmentInput.master_id,
+            title: updateAssignmentInput.title,
+            page_count: updateAssignmentInput.page_count
+        })
+        return true;
+    }
+
     async deleteById(assignmentId: number): Promise<Boolean> {
         await this.repository.delete({ id: assignmentId });
         return true;

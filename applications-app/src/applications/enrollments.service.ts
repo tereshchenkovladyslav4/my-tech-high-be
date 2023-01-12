@@ -136,7 +136,7 @@ export class EnrollmentsService {
       let studentPacket = null;
       if (status != 'Submitted' && status != 'Resubmitted') is_age_issue = false;
 
-      if (status == 'Accpeted') {
+      if (status == 'Accepted') {
         studentPacket = await this.packetsService.update({
           packet_id: packet_id,
           ...packet,
@@ -420,9 +420,15 @@ export class EnrollmentsService {
       if (school_year.birth_date_cut) {
         if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
 
-        const age = studentPerson.date_of_birth
+        let age = studentPerson.date_of_birth
           ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
           : 0;
+
+        if (
+          Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD') &&
+          age != 0
+        )
+          age -= 1;
         const grade_age = parseGradeLevel(grade_level);
 
         if (studentPerson.date_of_birth && grade_age != 0) {
