@@ -206,7 +206,6 @@ export class AnnouncementsService {
       const gradeTypes = JSON.parse(grades);
 
       const programYearTypes = JSON.parse(filter_program_years);
-      //const schoolYearId = programYearTypes.indexOf('schoolYear') > -1 ? 15 : 0;
       const isMidYear = programYearTypes.indexOf('midYear') > -1 ? 1 : 0;
 
       const schoolPartnerTypes = JSON.parse(filter_school_partners);
@@ -214,7 +213,6 @@ export class AnnouncementsService {
 
       const filterOther = JSON.parse(filter_others);
       const filterProvider = JSON.parse(filter_providers);
-      //console.log('SchoolPartners: ', schoolPartners);
 
       let parentResults = [];
       if (userTypes.indexOf('1') > -1) {
@@ -228,31 +226,18 @@ export class AnnouncementsService {
           .leftJoin(StudentGradeLevel, 'studentGradeLevel', 'studentGradeLevel.student_id = student.student_id')
           .leftJoin(SchoolYear, 'schoolYear', 'schoolYear.school_year_id = application.school_year_id')
           .leftJoin(SchoolPartner, 'schoolPartner', 'schoolPartner.school_year_id = schoolYear.school_year_id')
-          // test preference
           .leftJoin(StudentAssessmentOption, 'student_assessment', 'student_assessment.StudentId = student.student_id')
           .leftJoin(AssessmentOption, 'assessment_option', 'assessment_option.option_id = student_assessment.OptionId')
           .leftJoin(StudentStatus, 'studentStatus', 'studentStatus.student_id = student.student_id')
-
           .select('person.user_id', 'user_id')
           .addSelect('person.email', 'email')
           .distinct(true)
-          //.where('schoolYear.school_year_id = :schoolYearId', { schoolYearId })
-          //.andWhere('application.midyear_application = :isMidYear', { isMidYear })
           .where('studentGradeLevel.grade_level IN(:...grades)', {
             grades: gradeTypes,
           })
           .andWhere('studentStatus.status != 2') // withdraw student
-          // .andWhere(
-          //   'IFNULL( application.midyear_application, 0 ) = :isMidYear',
-          //   {
-          //     isMidYear,
-          //   },
-          // )
-          //.andWhere('schoolYear.school_year_id = :schoolYearId', { schoolYearId })
           .andWhere('schoolYear.RegionId = :regionId', { regionId: RegionId })
           .andWhere('person.email IS NOT NULL');
-        //.printSql()
-        //.getRawMany();
 
         if (Array.isArray(isMidYear) && isMidYear > 0)
           parentQuery.andWhere('IFNULL( application.midyear_application, 0 ) = :isMidYear', {
@@ -266,13 +251,17 @@ export class AnnouncementsService {
 
           if (schoolPartners.includes('Unassigned')) {
             const filteredOutUnassigned = schoolPartners.filter((item) => item !== 'Unassigned');
-            parentQuery.andWhere(
-              new Brackets((qb) => {
-                qb.where('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
-                  schoolPartnerIds: filteredOutUnassigned,
-                }).orWhere('schoolEnrollment.school_partner_id IS NULL');
-              }),
-            );
+            if (filteredOutUnassigned?.length > 0) {
+              parentQuery.andWhere(
+                new Brackets((qb) => {
+                  qb.where('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
+                    schoolPartnerIds: filteredOutUnassigned,
+                  }).orWhere('schoolEnrollment.school_partner_id IS NULL');
+                }),
+              );
+            } else {
+              parentQuery.andWhere('schoolEnrollment.school_partner_id IS NULL');
+            }
           } else {
             parentQuery.andWhere('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
               schoolPartnerIds: schoolPartners,
@@ -299,10 +288,6 @@ export class AnnouncementsService {
             .leftJoinAndSelect(Provider, 'provider', 'provider.id = schedulePeriod.ProviderId')
             .andWhere(`provider.id IN (:...curriculumProvider)`, { curriculumProvider: filterProvider });
         }
-        // if (schoolYearId > 0)
-        //   parentUsers.andWhere('schoolYear.school_year_id = :schoolYearId', {
-        //     schoolYearId,
-        //   });
 
         const parentUsers = await parentQuery.printSql().getRawMany();
 

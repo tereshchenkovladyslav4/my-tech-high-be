@@ -330,10 +330,20 @@ export class ScheduleService {
       const schedule = await this.repo.findOne({
         StudentId: scheduleHistory?.StudentId,
         SchoolYearId: scheduleHistory?.SchoolYearId,
+        is_second_semester: scheduleHistory?.is_second_semester,
       });
       return schedule?.schedule_id || 0;
     } catch (error) {
       return error;
+    }
+  }
+
+  async deleteScheduleHistory(scheduleHistoryId: number): Promise<boolean> {
+    try {
+      await this.historyRepo.delete({ schedule_history_id: scheduleHistoryId });
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ApplicationsService as StudentApplicationsService } from './services/applications.service';
 import { ParentsService } from './services/parents.service';
 import { PersonsService } from './services/persons.service';
@@ -16,7 +16,6 @@ import { StudentGradeLevelsService } from './services/student-grade-levels.servi
 import { CreateStudentApplicationsInput } from './dto/new-student-applications.inputs';
 import { User } from './models/user.entity';
 import { createQueryBuilder } from 'typeorm';
-import { SESService } from './services/ses.service';
 import { EmailsService } from './services/emails.service';
 import { EmailVerifierService } from './services/email-verifier.service';
 import { UserRegionService } from './services/user-region.service';
@@ -41,7 +40,6 @@ export class ApplicationsService {
     private usersService: UsersService,
     private studentsService: StudentsService,
     private studentGradeLevelsService: StudentGradeLevelsService,
-    private SESService: SESService,
     private emailsService: EmailsService,
     private schoolYearService: SchoolYearService,
     private emailVerifierService: EmailVerifierService,
@@ -101,14 +99,9 @@ export class ApplicationsService {
     if (!emailVerifier) {
       throw new ServiceUnavailableException('EmailVerifier Not Created');
     }
-    await this.emailsService.sendAccountVerificationEmail(
-      emailVerifier,
-      {
-        recipients: newApplication.parent.email,
-      },
-      parent_id,
-      await students,
-    );
+    await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
+      recipients: newApplication.parent.email,
+    });
 
     return {
       parent,
@@ -184,8 +177,6 @@ export class ApplicationsService {
     user: User,
     newApplication: CreateStudentApplicationsInput,
   ): Promise<ParentApplication> {
-    console.log('User: ', user);
-
     const parent = await createQueryBuilder(Parent)
       .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
       .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
@@ -263,23 +254,6 @@ export class ApplicationsService {
           });
         });
       }
-
-      // const gradeLevels = await this.studentGradeLevelsService.forStudents(
-      //   students[students.length -1].student_id,
-      // );
-
-      // const school_year = await this.schoolYearService.findOneById(
-      //   gradeLevels[0]?.school_year_id,
-      // );
-      // const emailBody = setEmailBodyInfo(school_year);
-
-      // await this.emailsService.sendEmail({
-      //   email: person?.email,
-      //   subject: emailTemplate.subject,
-      //   content: emailBody,
-      //   bcc: emailTemplate.bcc,
-      //   from: emailTemplate.from,
-      // });
     }
 
     return {
@@ -293,25 +267,20 @@ export class ApplicationsService {
     if (hasUser) throw new ServiceUnavailableException('Email Already Exist!');
 
     const personInput = omit(parentPerson, ['phone_number']);
-    console.log(personInput);
     const person = await this.personsService.create(personInput);
     if (!person) throw new ServiceUnavailableException('Person Not Created');
-    console.log('Person: ', person);
 
     const { person_id } = person;
     const parent = await this.parentsService.create({ person_id });
     if (!parent) throw new ServiceUnavailableException('Parent Not Created');
-    console.log('Parent: ', parent);
 
     const phone = await this.phonesService.create({
       person_id,
       number: parentPerson.phone_number,
     });
     if (!phone) throw new ServiceUnavailableException('Phone Not Created');
-    console.log('Phone: ', phone);
 
     const password = this.generatePassword();
-    console.log('Password: ', password);
     const user = await this.usersService.create({
       firstName: parentPerson.first_name,
       lastName: parentPerson.last_name,
@@ -326,7 +295,6 @@ export class ApplicationsService {
       password: password,
     };
     if (!user) throw new ServiceUnavailableException('User Not Created');
-    console.log('User: ', user);
 
     const { user_id } = user;
     const updatedPerson = await this.personsService.updateUserId({
@@ -339,7 +307,6 @@ export class ApplicationsService {
     };
     await this.userRegionService.createUserRegion(regionPayload);
     if (!updatedPerson) throw new ServiceUnavailableException('Person User ID Not been Updated');
-    console.log('Updated Person: ', updatedPerson);
 
     return parent;
   }
@@ -356,11 +323,10 @@ export class ApplicationsService {
       midyear_application,
       parent_person_id,
     } = createStudentApplicationInput;
-    const { first_name, last_name, grade_level, meta: studentMeta } = studentApplication;
+    const { grade_level, meta: studentMeta } = studentApplication;
     const studentApplicationInput = omit(studentApplication, ['grade_level', 'meta', 'address', 'packet']);
     const person = await this.personsService.create(studentApplicationInput);
     if (!person) throw new ServiceUnavailableException('Person Not Created');
-    console.log('Person: ', person);
 
     const parentPerson = await this.personsService.findOneById(parent_person_id);
 
@@ -369,7 +335,6 @@ export class ApplicationsService {
       ...studentApplication.address,
     });
     if (!personAddress) throw new ServiceUnavailableException('PersonAddress Not Created');
-    console.log('PersonAddress: ', personAddress);
 
     const { person_id } = person;
 
@@ -387,7 +352,6 @@ export class ApplicationsService {
       grade_level,
     });
     if (!student) throw new ServiceUnavailableException('Student Not Created');
-    console.log('Student: ', student);
 
     const { student_id } = student;
     const student_grade_level = await this.studentGradeLevelsService.createOrUpdate({
@@ -396,7 +360,6 @@ export class ApplicationsService {
       grade_level,
     });
     if (!student_grade_level) throw new ServiceUnavailableException('Student Grade Level Not Created');
-    console.log('Student Grade Level: ', student);
     const application_meta = JSON.stringify({
       ...JSON.parse(meta),
       ...JSON.parse(studentMeta),
@@ -413,8 +376,6 @@ export class ApplicationsService {
       midyear_application: midyear_application,
     });
     if (!application) throw new ServiceUnavailableException('Application Not Created');
-
-    console.log('Application: ', student);
     student.applications?.push(application);
 
     const statudUpdated = await this.studentStatusService.update({
@@ -422,12 +383,6 @@ export class ApplicationsService {
       school_year_id: school_year_id,
       status: 5,
     });
-
-    const new_student = {
-      ...student,
-      applications: [application],
-      grade_levels: [student_grade_level],
-    };
 
     return { ...student, person: person, status: statudUpdated };
   }
@@ -458,6 +413,4 @@ export class ApplicationsService {
     });
     return applications;
   }
-
-  async createObserPerson() {}
 }

@@ -1,7 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Student } from '../models/student.entity';
 import { Person } from '../models/person.entity';
 import { Observer } from '../models/observer.entity';
 import { ObserverInput } from '../dto/observer.inputs';
@@ -72,7 +71,6 @@ export class ObserversService {
     });
 
     if (!user) throw new ServiceUnavailableException('User Not Created');
-    console.log('regions-------------------', regions);
     const { user_id } = user;
     if (regions) {
       const regionPayload = {
@@ -87,7 +85,6 @@ export class ObserversService {
     });
 
     if (!updatedPerson) throw new ServiceUnavailableException('Person User ID Not been Updated');
-    console.log('Updated Person: ', updatedPerson);
     const emailVerifier = await this.emailVerifierService.create({
       user_id: user_id,
       email: email,
@@ -95,16 +92,10 @@ export class ObserversService {
     });
 
     if (!emailVerifier) throw new ServiceUnavailableException('EmailVerifier Not Created');
-    console.log('EmailVerifier: ', emailVerifier);
 
-    await this.emailsService.sendAccountVerificationEmail(
-      emailVerifier,
-      {
-        recipients: email,
-      },
-      parent_id,
-      [],
-    );
+    await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
+      recipients: email,
+    });
     return await Promise.all(
       student_ids.map(async (student) => {
         const observer = await this.observersRepository.save({

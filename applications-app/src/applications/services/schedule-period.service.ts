@@ -1,4 +1,4 @@
-import { Injectable, Param } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SchedulePeriod } from '../models/schedule-period.entity';
@@ -104,6 +104,10 @@ export class SchedulePeriodService {
             osse_school_district_name: periodHistory.osse_school_district_name,
             status: periodHistory.status,
           })),
+        );
+        await this.scheduleService.deleteScheduleHistory(scheduleHistoryId);
+        await this.historyRepo.delete(
+          schedulePeriodHistories?.map((periodHistory) => periodHistory.schedule_period_history_id),
         );
         return true;
       }

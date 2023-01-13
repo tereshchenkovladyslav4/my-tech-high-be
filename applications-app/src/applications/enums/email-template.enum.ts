@@ -22,6 +22,7 @@ export enum EmailTemplateEnum {
   UPDATES_REQUIRED = 'Updates Required',
   WITHDRAW_CONFIRMATION = 'Withdraw Confirmation',
   WITHDRAW_PAGE = 'Withdraw Page',
+  ANNOUNCEMENT = 'Announcemnet',
 }
 
 registerEnumType(EmailTemplateEnum, {
