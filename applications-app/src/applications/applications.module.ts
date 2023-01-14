@@ -90,6 +90,7 @@ import { ResourceRequestResolver } from './resolvers/resource-request.resolver';
 import { ResourceRequest } from './models/resource-request.entity';
 import { ResourceRequestPagination } from './models/resource-request-pagination.entity';
 import { ResourceRequestEmail } from './models/resource-request-email.entity';
+import { ResourceCart } from './models/resource-cart.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -192,6 +193,7 @@ const graphQLImports = [
           ResourceRequest,
           ResourceRequestPagination,
           ResourceRequestEmail,
+          ResourceCart,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

@@ -205,17 +205,18 @@ export class ResourceService {
               INSERT INTO infocenter.mth_resource_request
                 (student_id, resource_id, resource_level_id, status, created_at, updated_at)
               VALUES
-                (${studentId}, ${resourceId}, ${resourceLevelId}, "${ResourceRequestStatus.REQUESTED}", NOW(), NOW());
+                (${studentId}, ${resourceId}, ${resourceLevelId}, "${
+              waitlistConfirmed ? ResourceRequestStatus.WAITLIST : ResourceRequestStatus.REQUESTED
+            }", NOW(), NOW());
             `);
           } else {
             await queryRunner.query(`
               UPDATE infocenter.mth_resource_request
               SET
-                status = "${ResourceRequestStatus.REQUESTED}"
+                status = "${waitlistConfirmed ? ResourceRequestStatus.WAITLIST : ResourceRequestStatus.REQUESTED}"
               WHERE 
                 student_id = ${studentId} AND
-                resource_id = ${resourceId} AND
-                resource_level_id = ${resourceLevelId}
+                resource_id = ${resourceId}
             `);
           }
           // Delete from cart

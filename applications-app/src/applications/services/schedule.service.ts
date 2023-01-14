@@ -181,7 +181,9 @@ export class ScheduleService {
         const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
         const yearbegin = Moment(schoolYear?.date_begin).format('YYYY');
         const yearend = Moment(schoolYear?.date_end).format('YYYY');
-        const yearText = schoolYear?.midyear_application
+        const yearText = studentInfo?.applications?.find(
+          (application) => application.school_year_id == schoolYear.school_year_id,
+        )?.midyear_application
           ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
           : `${yearbegin}-${yearend.substring(2, 4)}`;
         const email_subject = subject
@@ -231,7 +233,9 @@ export class ScheduleService {
         const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
         const yearbegin = Moment(schoolYear?.date_begin).format('YYYY');
         const yearend = Moment(schoolYear?.date_end).format('YYYY');
-        const yearText = schoolYear?.midyear_application
+        const yearText = studentInfo?.applications?.find(
+          (application) => application.school_year_id == schoolYear.school_year_id,
+        )?.midyear_application
           ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
           : `${yearbegin}-${yearend.substring(2, 4)}`;
         const email_subject = emailTemplate.subject
@@ -407,7 +411,9 @@ export class ScheduleService {
           const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
           const yearbegin = Moment(schoolYear?.date_begin).format('YYYY');
           const yearend = Moment(schoolYear?.date_end).format('YYYY');
-          const yearText = schoolYear?.midyear_application
+          const yearText = studentInfo?.applications?.find(
+            (application) => application.school_year_id == schoolYear.school_year_id,
+          )?.midyear_application
             ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
             : `${yearbegin}-${yearend.substring(2, 4)}`;
           const email_subject = emailTemplate.subject
@@ -573,10 +579,13 @@ export class ScheduleService {
             EmailTemplateEnum.SECOND_SEMESTER_UNLOCKED,
             region_id,
           );
+          const studentInfo = await this.studentService.findOneById(schedule?.ScheduleStudent?.student_id);
           if (emailTemplate) {
             const yearbegin = Moment(schedule?.SchoolYear?.date_begin).format('YYYY');
             const yearend = Moment(schedule?.SchoolYear?.date_end).format('YYYY');
-            const yearText = schedule?.SchoolYear?.midyear_application
+            const yearText = studentInfo?.applications?.find(
+              (application) => application.school_year_id == schedule?.SchoolYear?.school_year_id,
+            )?.midyear_application
               ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
               : `${yearbegin}-${yearend.substring(2, 4)}`;
             const email_subject = emailTemplate.subject

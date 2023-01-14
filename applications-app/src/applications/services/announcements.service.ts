@@ -281,7 +281,7 @@ export class AnnouncementsService {
           parentQuery.andWhere("assessment_option.method = 'Opt-out'");
         }
 
-        if (filterProvider && filterProvider.length > 0) {
+        if (Array.isArray(filterProvider) && filterProvider.length > 0) {
           parentQuery
             .leftJoin(Schedule, 'schedule', 'student.student_id = schedule.StudentId')
             .leftJoin(SchedulePeriod, 'schedulePeriod', 'schedule.schedule_id = schedulePeriod.ScheduleId')

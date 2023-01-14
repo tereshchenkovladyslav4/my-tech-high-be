@@ -139,6 +139,7 @@ import { ResourceRequestService } from './services/resource-request.service';
 import { ResourceRequest } from './models/resource-request.entity';
 import { ResourceRequestEmail } from './models/resource-request-email.entity';
 import { ResourceRequestEmailsService } from './services/resource-request-emails.service';
+import { ResourceCart } from './models/resource-cart.entity';
 
 const servicesImports = [
   UsersService,
@@ -288,6 +289,7 @@ const servicesImports = [
       StateCodes,
       ResourceRequest,
       ResourceRequestEmail,
+      ResourceCart,
     ]),
   ],
   providers: [...servicesImports],

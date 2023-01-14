@@ -115,6 +115,7 @@ export class CronJobService {
           filter_program_years,
           filter_school_partners,
           filter_others,
+          filter_providers,
           schedule_time AS scheduleTime
         FROM infocenter.announcement
         WHERE
@@ -135,6 +136,7 @@ export class CronJobService {
           filter_program_years,
           filter_school_partners,
           filter_others,
+          filter_providers,
         } = announcement;
 
         const userEmailList = await this.announcementsService.getAnnouncementUsersByFilters({
@@ -144,6 +146,7 @@ export class CronJobService {
           filter_program_years,
           filter_school_partners,
           filter_others,
+          filter_providers,
         });
         userEmailList.map(async (user) => {
           await this.sesEmailService.sendAnnouncementEmail({

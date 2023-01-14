@@ -46,16 +46,39 @@ export class ResourceRequestService {
     if (filter) {
       // TODO relations and courses filter
       const { studentStatuses, statuses, features, types, resources } = filter;
-      if (studentStatuses?.includes(`${StudentStatusEnum.MID_YEAR}`)) {
-        studentStatuses.splice(studentStatuses.indexOf(`${StudentStatusEnum.MID_YEAR}`), 1);
-      }
       if (studentStatuses?.length) {
-        qb.andWhere(
-          `StudentStatus.school_year_id = ${schoolYearId} AND StudentStatus.status IN (${studentStatuses.join(',')})`,
-        );
+        const hasMidYear = studentStatuses?.includes(`${StudentStatusEnum.MID_YEAR}`);
+        if (hasMidYear) studentStatuses.splice(studentStatuses.indexOf(`${StudentStatusEnum.MID_YEAR}`), 1);
+        if (studentStatuses?.length > 0 && hasMidYear) {
+          qb.andWhere(
+            `StudentStatus.school_year_id = ${schoolYearId} AND StudentStatus.status IN (${studentStatuses.join(',')})`,
+          );
+        } else if (studentStatuses?.length > 0 && !hasMidYear) {
+          qb.andWhere(
+            `StudentStatus.school_year_id = ${schoolYearId} AND StudentStatus.status IN (${studentStatuses.join(
+              ',',
+            )}) AND (applications.midyear_application IS NULL OR applications.midyear_application = 0)`,
+          );
+        } else if (!(studentStatuses?.length > 0) && hasMidYear) {
+          qb.andWhere('applications.midyear_application = 1');
+        }
       }
       if (statuses?.length) {
-        qb.andWhere(`resourceRequest.status IN ("${statuses.join('","')}")`);
+        const hasPendingRemoval = statuses?.includes(`${ResourceRequestStatus.PENDING_REMOVAL}`);
+        if (hasPendingRemoval) statuses.splice(statuses.indexOf(`${ResourceRequestStatus.PENDING_REMOVAL}`), 1);
+        if (statuses.length > 0 && hasPendingRemoval) {
+          qb.andWhere(
+            `(resourceRequest.status IN ("${statuses.join('","')}") OR (StudentStatus.status = ${
+              StudentStatusEnum.WITHDRAWN
+            } AND resourceRequest.status <> '${ResourceRequestStatus.REMOVED}') )`,
+          );
+        } else if (statuses.length > 0 && !hasPendingRemoval) {
+          qb.andWhere(`resourceRequest.status IN ("${statuses.join('","')}")`);
+        } else if (statuses.length == 0 && hasPendingRemoval) {
+          qb.andWhere(
+            `StudentStatus.status = ${StudentStatusEnum.WITHDRAWN} AND resourceRequest.status <> '${ResourceRequestStatus.REMOVED}'`,
+          );
+        }
       }
       if (features?.includes(`${ResourceFeature.LIMIT}`) && !features?.includes(`${ResourceFeature.FAMILY_RESOURCE}`)) {
         qb.andWhere('Resource.resource_limit > 0 OR ResourceLevel.limit > 0');
