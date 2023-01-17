@@ -1,7 +1,5 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
-import { Student } from './student.entity';
-import { SchoolYear } from './schoolyear.entity';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, BaseEntity, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
 import { Address } from './address.entity';
 
 @ObjectType()
@@ -18,7 +16,7 @@ export class PersonAddress extends BaseEntity {
   @PrimaryColumn()
   address_id?: number;
 
-  @OneToOne((type) => Address, (address) => address.address_id)
+  @OneToOne(() => Address, (address) => address.address_id)
   @JoinColumn({ name: 'address_id', referencedColumnName: 'address_id' })
   address: Address;
 }

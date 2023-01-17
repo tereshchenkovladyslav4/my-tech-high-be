@@ -1,36 +1,36 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { BaseEntity, Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @ObjectType()
 @Directive('@key(fields: "id")')
 @Entity({ name: 'email_templates' })
 export class ApplicationEmailTemplate extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => String)
+  @Field(() => String)
   template_name: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   title: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   subject: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   from: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   bcc: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   body: string;
 
   @Column()
@@ -54,6 +54,6 @@ export class ApplicationEmailTemplate extends BaseEntity {
   region_id?: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   priority: number;
 }

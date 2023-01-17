@@ -29,7 +29,6 @@ export class QuestionService {
   }
 
   async save(input: Question): Promise<Question> {
-    console.log(input);
     return this.repo.save(input);
   }
 

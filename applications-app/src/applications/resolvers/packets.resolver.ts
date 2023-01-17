@@ -2,11 +2,8 @@ import { Args, ID, Query, Resolver, ResolveReference, Mutation, ResolveField, Pa
 import { Student } from '../models/student.entity';
 import { User } from '../models/user.entity';
 import { StudentsService } from '../services/students.service';
-import { ApplicationsService } from '../services/applications.service';
-import { SchoolYearService } from '../services/schoolyear.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
-import { ApplicationsService as StudentApplicationsService } from '../applications.service';
 import { Packet } from '../models/packet.entity';
 import { PacketEmail } from '../models/packet-email.entity';
 import { PacketsService } from '../services/packets.service';
@@ -45,10 +42,7 @@ import { DeleteEnrollmentPacketDocumentsInput } from '../dto/delete-enrollment-p
 @Resolver(() => Packet)
 export class PacketsResolver {
   constructor(
-    private applicationsService: ApplicationsService,
     private studentsService: StudentsService,
-    private schoolYearService: SchoolYearService,
-    private studentApplicationsService: StudentApplicationsService,
     private packetsService: PacketsService,
     private enrollmentsService: EnrollmentsService,
     private packetFilesService: PacketFilesService,

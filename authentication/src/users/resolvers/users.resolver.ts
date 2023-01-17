@@ -8,7 +8,7 @@ import { VerifyInput } from '../dto/verify.inputs';
 import * as Moment from 'moment';
 import { EmailsService } from '../services/emails.service';
 import { ForgotPasswordResponse } from '../models/forgot-password-response';
-const base64 = require('base-64');
+import * as base64 from 'base-64';
 
 export const CurrentUser = createParamDecorator((data: unknown, context: ExecutionContext) => {
   const ctx = GqlExecutionContext.create(context);

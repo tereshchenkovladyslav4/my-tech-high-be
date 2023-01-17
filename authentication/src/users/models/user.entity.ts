@@ -17,7 +17,7 @@ import { UserRegion } from './user-region.entity';
 @Entity({ name: 'core_users' })
 export class User extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
   user_id?: number;

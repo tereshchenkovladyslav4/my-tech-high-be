@@ -1,14 +1,14 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Checklist } from './checklist.entity';
 
 @ObjectType()
 export class ChecklistPagination {
-  @Field((type) => [Checklist])
+  @Field(() => [Checklist])
   results?: Checklist[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

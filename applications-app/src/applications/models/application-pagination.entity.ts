@@ -1,14 +1,14 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Application } from './application.entity';
 
 @ObjectType()
 export class ApplicationPagination {
-  @Field((type) => [Application])
+  @Field(() => [Application])
   results?: Application[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

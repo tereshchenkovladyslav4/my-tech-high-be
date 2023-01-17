@@ -8,6 +8,5 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new LoggingInterceptor());
   await app.listen(3005);
-  console.log('>>>>>media-app is running in port 3005');
 }
 bootstrap();

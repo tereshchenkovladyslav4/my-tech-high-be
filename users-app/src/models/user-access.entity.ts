@@ -6,7 +6,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -18,16 +17,16 @@ import { User } from './user.entity';
 @Entity({ name: 'user_access' })
 export class UserAccess extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   access_id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   user_id: number;
 
   @ManyToOne(() => Access, (access) => access.access, { onDelete: 'CASCADE' })

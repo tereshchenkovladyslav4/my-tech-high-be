@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, MoreThanOrEqual, createQueryBuilder, getConnection } from 'typeorm';
+import { Repository, createQueryBuilder, getConnection } from 'typeorm';
 import { SchoolPartnerInput } from '../dto/school-partner.input';
 import { UpdateSchoolPartnerInput } from '../dto/update-school-partner.input';
 import { SchoolPartner } from '../../models/school-partner.entity';
 import { SchoolPartnerArgs } from '../dto/school-partner-args';
-import { SchoolYearsService } from './schoolyear.service';
-import { SchoolYear } from 'src/models/schoolyear.entity';
 
 @Injectable()
 export class SchoolPartnerService {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars*/
 import { Injectable } from '@nestjs/common';
 import { SESService } from './ses.service';
 import { EmailInput } from '../dto/email.inputs';
@@ -12,8 +13,8 @@ import { UserAnnouncementsService } from './user-announcements.service';
 import { UsersService } from './users.service';
 import { EmailRecordsService } from './email-records.service';
 import { EmailTemplateEnum } from '../enums';
+import * as base64 from 'base-64';
 
-const base64 = require('base-64');
 @Injectable()
 export class EmailsService {
   constructor(
@@ -27,7 +28,6 @@ export class EmailsService {
 
   async sendAccountVerificationEmail(emailVerifier: EmailVerifier, emailInput: EmailInput): Promise<any> {
     const webAppUrl = process.env.WEB_APP_URL;
-
     const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(emailVerifier.user_id);
 
     let region_id = 1;

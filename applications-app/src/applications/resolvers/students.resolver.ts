@@ -8,9 +8,8 @@ import { Application } from '../models/application.entity';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
-import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 
-@Resolver((of) => Student)
+@Resolver(() => Student)
 export class StudentsResolver {
   constructor(
     private studentsService: StudentsService,
@@ -18,12 +17,12 @@ export class StudentsResolver {
     private applicationsService: ApplicationsService,
   ) {}
 
-  @ResolveField((of) => [Packet], { name: 'packets' })
+  @ResolveField(() => [Packet], { name: 'packets' })
   public async getPackets(@TypeParent() student: Student): Promise<Packet[]> {
     return this.packetsService.findByStudent(student.student_id);
   }
 
-  @ResolveField((of) => [Application], { name: 'applications' })
+  @ResolveField(() => [Application], { name: 'applications' })
   public async getApplications(@TypeParent() student: Student): Promise<Application[]> {
     return this.applicationsService.findByStudent(student.student_id);
   }
@@ -33,7 +32,7 @@ export class StudentsResolver {
     return this.studentsService.findOneById(reference.student_id);
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateStudent' })
+  @Mutation(() => Boolean, { name: 'updateStudent' })
   @UseGuards(new AuthGuard())
   async updateStudent(
     @Args('updateStudentInput')

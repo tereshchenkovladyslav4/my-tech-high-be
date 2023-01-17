@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GATEWAY_BUILD_SERVICE, GraphQLGatewayModule } from '@nestjs/graphql';
 import { RemoteGraphQLDataSource } from '@apollo/gateway';
-import { decode } from 'jsonwebtoken';
 class AuthenticatedDataSource extends RemoteGraphQLDataSource {
   async willSendRequest({ request, context }) {
     // lets pass authorization token
@@ -20,7 +19,7 @@ class AuthenticatedDataSource extends RemoteGraphQLDataSource {
     {
       provide: GATEWAY_BUILD_SERVICE,
       useFactory: (AuthenticatedDataSource) => {
-        return ({ name, url }) => new AuthenticatedDataSource({ url });
+        return ({ url }) => new AuthenticatedDataSource({ url });
       },
       inject: [AuthenticatedDataSource],
     },

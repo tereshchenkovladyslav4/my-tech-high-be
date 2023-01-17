@@ -1,14 +1,14 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Schedule } from './schedule.entity';
 
 @ObjectType()
 export class SchedulePagination {
-  @Field((type) => [Schedule])
+  @Field(() => [Schedule])
   results?: Schedule[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

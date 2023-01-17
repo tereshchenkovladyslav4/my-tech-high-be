@@ -6,6 +6,5 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalInterceptors(new LoggingInterceptor());
   await app.listen(3004);
-  console.log(`>>>>>>applications-app is running in the port 3004`);
 }
 bootstrap();

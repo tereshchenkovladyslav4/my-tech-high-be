@@ -1,4 +1,4 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { CreateAddressInput } from './new-address.inputs';
 import { CreateStudentPersonInput } from './new-student-person.inputs';
 import { NewParentPacketContactInput } from './new-parent-packet-contact.inputs';

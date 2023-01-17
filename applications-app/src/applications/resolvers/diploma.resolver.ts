@@ -1,4 +1,4 @@
-import { Args, Query, Resolver, Mutation, Int } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { ApplicationEvent } from '../models/event.entity';
@@ -8,11 +8,11 @@ import { DiplomaService } from '../services/diploma.service';
 import { DiplomaAnswer } from '../models/diploma-answer.entity';
 import { DiplomaAnswerInput } from '../dto/diploma-answer.inputs';
 import { DiplomaAnswerService } from '../services/diploma-answer.service';
-@Resolver((of) => ApplicationEvent)
+@Resolver(() => ApplicationEvent)
 export class DiplomaResolver {
   constructor(private diplomaService: DiplomaService, private diplomaAnswerService: DiplomaAnswerService) {}
 
-  @Query((returns) => DiplomaQuestion, { name: 'getDiplomaQuestion', nullable: true })
+  @Query(() => DiplomaQuestion, { name: 'getDiplomaQuestion', nullable: true })
   @UseGuards(new AuthGuard())
   async getDiplomaQuestion(
     @Args('diplomaQuestionInput')
@@ -21,7 +21,7 @@ export class DiplomaResolver {
     return this.diplomaService.getDiplomaQuestion(diplomaQuestionInput);
   }
 
-  @Query((returns) => DiplomaQuestion, { name: 'getDiplomaQuestionForStudent', nullable: true })
+  @Query(() => DiplomaQuestion, { name: 'getDiplomaQuestionForStudent', nullable: true })
   @UseGuards(new AuthGuard())
   async getDiplomaQuestionForStudent(
     @Args('diplomaQuestionInput')
@@ -30,7 +30,7 @@ export class DiplomaResolver {
     return this.diplomaService.getDiplomaQuestionForStudent(diplomaQuestionInput);
   }
 
-  @Query((returns) => DiplomaAnswer, { name: 'getDiplomaAnswer', nullable: true })
+  @Query(() => DiplomaAnswer, { name: 'getDiplomaAnswer', nullable: true })
   @UseGuards(new AuthGuard())
   async getDiplomaAnswer(
     @Args('diplomaAnswerInput')
@@ -39,7 +39,7 @@ export class DiplomaResolver {
     return this.diplomaAnswerService.getDiplomaAnswer(diplomaAnswerInput);
   }
 
-  @Mutation((returns) => DiplomaQuestion, { name: 'saveDiplomaQuestion' })
+  @Mutation(() => DiplomaQuestion, { name: 'saveDiplomaQuestion' })
   @UseGuards(new AuthGuard())
   async saveDiplomaQuestion(
     @Args('diplomaQuestionInput')
@@ -48,7 +48,7 @@ export class DiplomaResolver {
     return this.diplomaService.saveQuestion(diplomaQuestionInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'saveDiplomaQuestionGrade' })
+  @Mutation(() => Boolean, { name: 'saveDiplomaQuestionGrade' })
   @UseGuards(new AuthGuard())
   async saveDiplomaQuestionGrade(
     @Args('diplomaQuestionInput')
@@ -57,7 +57,7 @@ export class DiplomaResolver {
     return this.diplomaService.saveQuestionGrades(diplomaQuestionInput);
   }
 
-  @Mutation((returns) => DiplomaAnswer, { name: 'saveDiplomaAnswer' })
+  @Mutation(() => DiplomaAnswer, { name: 'saveDiplomaAnswer' })
   @UseGuards(new AuthGuard())
   async saveDiplomaAnswer(
     @Args('saveDiplomaAnswerInput')

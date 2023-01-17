@@ -4,7 +4,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   ManyToOne,
@@ -16,12 +15,12 @@ import { UserAccess } from './user-access.entity';
 @Entity({ name: 'access' })
 export class Access extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   name: string;
 
   @ManyToOne(() => UserAccess, (userAccess) => userAccess.accessDetail)

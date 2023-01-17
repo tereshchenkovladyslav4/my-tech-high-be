@@ -16,16 +16,16 @@ import { User } from './user.entity';
 @Entity({ name: 'parent' })
 export class ParentUser extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   child_id: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   parent_email: string;
 
   @CreateDateColumn()

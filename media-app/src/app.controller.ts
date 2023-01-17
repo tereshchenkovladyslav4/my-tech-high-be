@@ -8,7 +8,7 @@ import { FilesService } from './services/files.services';
 import { UsersService } from './services/users.services';
 import { SchoolYearService } from './services/schoolyear.service';
 
-const crypto = require('crypto');
+import crypto = require('crypto');
 import * as Moment from 'moment';
 
 @Controller()
@@ -89,13 +89,12 @@ export class AppController {
       let currentSchoolYear = 0;
       if (body.year) {
         currentSchoolYear = await this.getCurrentSchoolYear(body.year);
-        console.log('CurrentSchoolYear: ', currentSchoolYear);
       }
 
       const { buffer, mimetype, originalname, size } = file;
 
       let extension = false;
-      this.allowed_files.map((item, i) => {
+      this.allowed_files.map((item) => {
         //console.log("Item: ", item, " = ", i, " = ", mimetype);
         if (typeof item[mimetype] !== 'undefined') extension = item[mimetype];
       });
@@ -174,7 +173,7 @@ export class AppController {
       ];
 
       let extension = false;
-      allowed_files.map((item, i) => {
+      allowed_files.map((item) => {
         //console.log("Item: ", item, " = ", i, " = ", mimetype);
         if (typeof item[mimetype] !== 'undefined') extension = item[mimetype];
       });
@@ -248,7 +247,7 @@ export class AppController {
       ];
 
       let extension = false;
-      allowed_files.map((item, i) => {
+      allowed_files.map((item) => {
         //console.log("Item: ", item, " = ", i, " = ", mimetype);
         if (typeof item[mimetype] !== 'undefined') extension = item[mimetype];
       });

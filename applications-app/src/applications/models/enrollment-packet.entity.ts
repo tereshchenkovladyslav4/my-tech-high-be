@@ -1,14 +1,12 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
-import { Parent } from './parent.entity';
+import { Field, ObjectType } from '@nestjs/graphql';
+
 import { Student } from './student.entity';
 import { Packet } from './packet.entity';
-
 @ObjectType()
 export class EnrollmentPacket {
-  @Field((type) => Packet)
+  @Field(() => Packet)
   packet?: Packet;
 
-  @Field((type) => Student)
+  @Field(() => Student)
   student?: Student;
 }

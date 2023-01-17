@@ -1,4 +1,4 @@
-import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @InputType('question')
@@ -7,20 +7,20 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity({ name: 'mth_question' })
 export class Question extends BaseEntity {
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn('increment')
   id?: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   region_id: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   section: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   slug: string;
 
   @Column()
@@ -32,27 +32,27 @@ export class Question extends BaseEntity {
   sequence?: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   question: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   options: string;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   validation: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   mainQuestion: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   defaultQuestion: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   additionalQuestion: string;
 
   @Column()

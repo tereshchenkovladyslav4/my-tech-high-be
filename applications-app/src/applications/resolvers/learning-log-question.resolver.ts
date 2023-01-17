@@ -6,20 +6,20 @@ import { LearningLogQuestion } from '../models/learning-log-question.entity';
 import { LearningLogQuestionService } from '../services/learning-log-question.service';
 import { CreateOrUpdateLearningLogQuestionInput } from '../dto/create-or-update-learninglog-question.input';
 
-@Resolver((of) => LearningLogQuestion)
+@Resolver(() => LearningLogQuestion)
 export class LearningLogQuestionResolver {
-  constructor(private service: LearningLogQuestionService) { }
+  constructor(private service: LearningLogQuestionService) {}
 
-  @Mutation((returns) => Boolean, { name: 'createOrUpdateLearningLogQuestion' })
+  @Mutation(() => Boolean, { name: 'createOrUpdateLearningLogQuestion' })
   @UseGuards(new AuthGuard())
   async createOrUpdateLearningLogQuestion(
     @Args('createOrUpdateLearningLogQuestionInput', { type: () => [CreateOrUpdateLearningLogQuestionInput] })
     createOrUpdateLearningLogQuestionInput: CreateOrUpdateLearningLogQuestionInput[],
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.save(createOrUpdateLearningLogQuestionInput);
   }
 
-  @Query((returns) => [LearningLogQuestion], { name: 'getLearningLogQuestionByAssignmentId' })
+  @Query(() => [LearningLogQuestion], { name: 'getLearningLogQuestionByAssignmentId' })
   @UseGuards(new AuthGuard())
   async getLearningLogQuestionByAssignmentId(
     @Args('assignmentId', { type: () => Int }) assignmentId: number,

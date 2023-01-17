@@ -7,7 +7,7 @@ import { UserAccessService } from '../../services/access/user-access.service';
 import { UsersService } from '../../services/users.service';
 import { AuthGuard } from './../../guards/auth.guard';
 
-@Resolver((of) => UserAccess)
+@Resolver(() => UserAccess)
 export class UserAccessResolver {
   constructor(private userAccessService: UserAccessService, private userService: UsersService) {}
 
@@ -30,7 +30,7 @@ export class UserAccessResolver {
   }
 
   // @UseGuards(new AuthGuard())
-  @Mutation((of) => [UserAccess], { name: 'createUserAccess' })
+  @Mutation(() => [UserAccess], { name: 'createUserAccess' })
   @UseGuards(new AuthGuard())
   async createUserAccess(
     @Args('createUserAccessInput') createUserAccessInput: CreateUserAccessInput,
@@ -43,7 +43,7 @@ export class UserAccessResolver {
     }
   }
 
-  @Mutation((of) => [UserAccess], { name: 'updateUserAccess' })
+  @Mutation(() => [UserAccess], { name: 'updateUserAccess' })
   @UseGuards(new AuthGuard())
   async updateUserAccess(
     @Args('updateUserAccessInput') updateUserAccessInput: UpdateUserAccessInput,
@@ -52,7 +52,7 @@ export class UserAccessResolver {
     return response;
   }
 
-  @Mutation((of) => String, { name: 'removeUserAccess' })
+  @Mutation(() => String, { name: 'removeUserAccess' })
   @UseGuards(new AuthGuard())
   public async removeUserAccess(@Args({ name: 'id', type: () => ID }) id: number): Promise<string> {
     const response = await this.userAccessService.removeUserAccessById(id);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { SESService } from './ses.service';
 import { EmailVerifier } from 'src/models/email-verifier.entity';
@@ -8,8 +9,8 @@ import { User } from 'src/models/user.entity';
 import { EmailRecordsService } from './email-records.service';
 import { getConnection } from 'typeorm';
 import { EmailTemplateEnum } from 'src/enums';
+import * as base64 from 'base-64';
 
-const base64 = require('base-64');
 @Injectable()
 export class EmailsService {
   constructor(

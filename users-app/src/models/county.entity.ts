@@ -16,16 +16,16 @@ import { Region } from './region.entity';
 @Entity({ name: 'county' })
 export class County extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   county_name: string;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   Region_id: number;
 
   @CreateDateColumn()

@@ -18,9 +18,8 @@ export class EnrollmentQuestionsService {
       .where('questions.group_id = :parent_id', { parent_id: parent_id })
       .orderBy('questions.order', 'ASC')
       .getMany();
-    // return await this.repo.find({ where: { parent_id: parent_id } });
   }
-
+  /* eslint-disable @typescript-eslint/no-unused-vars*/
   async find(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestions[]> {
     return await this.repo.find();
   }

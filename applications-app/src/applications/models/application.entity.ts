@@ -69,19 +69,19 @@ export class Application extends BaseEntity {
   @Field(() => String, { nullable: true })
   secondary_contact_last?: string;
 
-  @ManyToOne((type) => Student, { nullable: true })
+  @ManyToOne(() => Student, { nullable: true })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => Student, { nullable: true })
   student?: Student;
 
-  @ManyToOne((type) => SchoolYear, { nullable: true })
+  @ManyToOne(() => SchoolYear, { nullable: true })
   @JoinColumn({
     name: 'school_year_id',
     referencedColumnName: 'school_year_id',
   })
   school_year?: SchoolYear;
 
-  @OneToMany((type) => ApplicationEmail, (application_email) => application_email.application)
+  @OneToMany(() => ApplicationEmail, (application_email) => application_email.application)
   @JoinColumn({
     name: 'application_id',
     referencedColumnName: 'application_id',

@@ -1,5 +1,5 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsInt, MaxLength } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsInt } from 'class-validator';
 
 @InputType()
 export class DeleteRecordInput {

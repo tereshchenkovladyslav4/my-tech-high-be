@@ -58,7 +58,7 @@ export class Schedule extends BaseEntity {
   @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   SchoolYear: SchoolYear;
 
-  @ManyToOne((type) => Student, (student) => student.Schedules, {
+  @ManyToOne(() => Student, (student) => student.Schedules, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
@@ -70,7 +70,7 @@ export class Schedule extends BaseEntity {
   @Field(() => [SchedulePeriod], { nullable: true })
   SchedulePeriods: SchedulePeriod[];
 
-  @OneToMany((type) => ScheduleEmail, (ScheduleEmail) => ScheduleEmail.Schedule)
+  @OneToMany(() => ScheduleEmail, (ScheduleEmail) => ScheduleEmail.Schedule)
   @Field(() => [ScheduleEmail], { nullable: true })
   ScheduleEmails: ScheduleEmail[];
 }

@@ -24,7 +24,6 @@ import { CreateStudentApplicationInput } from '../dto/new-student-application.in
 import { ParentApplication } from '../models/parent-application.entity';
 import { CreateApplicationInput } from '../dto/new-application.inputs';
 import { ApplicationsService as StudentApplicationsService } from '../applications.service';
-import { CreateParentStudentInput } from '../dto/new-parent-student.inputs';
 import { AcceptApplicationInput } from '../dto/accept-application.inputs';
 import { SchoolYearDataInput } from '../dto/school-year-data.Input';
 import { Pagination } from '../../paginate';
@@ -45,7 +44,7 @@ import { SchoolYearData } from '../models/school-year-data.entity';
 import { ResponseDTO } from '../dto/response.dto';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
 
-@Resolver((of) => Application)
+@Resolver(() => Application)
 export class ApplicationsResolver {
   constructor(
     private applicationsService: ApplicationsService,
@@ -58,33 +57,33 @@ export class ApplicationsResolver {
     private studentStatusService: StudentStatusService,
   ) {}
 
-  @Query((returns) => ApplicationPagination, { name: 'applications' })
+  @Query(() => ApplicationPagination, { name: 'applications' })
   //@UseGuards(new AuthGuard())
   async getApplications(@Args() applicationsArgs: ApplicationsArgs): Promise<Pagination<Application>> {
     const results = await this.applicationsService.findAll(applicationsArgs);
     return results;
   }
 
-  @Query((returns) => ResponseDTO, { name: 'getTodoListItems' })
+  @Query(() => ResponseDTO, { name: 'getTodoListItems' })
   @UseGuards(new AuthGuard())
   async getTodoListItems(@Args({ name: 'regionId', type: () => ID }) regionId: number): Promise<ResponseDTO> {
     const results = await this.applicationsService.getTodoListItems(regionId);
     return results;
   }
 
-  @Query((returns) => Application, { name: 'application' })
+  @Query(() => Application, { name: 'application' })
   @UseGuards(new AuthGuard())
   async getApplication(@Args({ name: 'application_id', type: () => ID }) application_id: number): Promise<Application> {
     return this.applicationsService.findOneById(application_id);
   }
 
-  @Query((returns) => [SchoolYear], { name: 'schoolYears' })
+  @Query(() => [SchoolYear], { name: 'schoolYears' })
   // @UseGuards(new AuthGuard())
   async findAllSchoolYear(): Promise<SchoolYear[]> {
     return this.schoolYearService.findAll();
   }
 
-  @Query((returns) => [SchoolYearData], { name: 'schoolYearsData' })
+  @Query(() => [SchoolYearData], { name: 'schoolYearsData' })
   // @UseGuards(new AuthGuard())
   async getSchoolYearData(
     @Args('schoolYearDataInput') schoolYearDataInput: SchoolYearDataInput,
@@ -92,7 +91,7 @@ export class ApplicationsResolver {
     return this.studentStatusService.getAllCount(schoolYearDataInput);
   }
 
-  @Mutation((returns) => Application, { name: 'createApplication' })
+  @Mutation(() => Application, { name: 'createApplication' })
   @UseGuards(new AuthGuard())
   async addApplication(
     @Context('user') user: User,
@@ -102,7 +101,7 @@ export class ApplicationsResolver {
     return await this.applicationsService.create(createApplicationInput);
   }
 
-  @Mutation((returns) => ParentApplication, { name: 'createNewApplication' })
+  @Mutation(() => ParentApplication, { name: 'createNewApplication' })
   async addNewApplication(
     @Args('createApplicationInput')
     createApplicationInput: CreateApplicationInput,
@@ -110,7 +109,7 @@ export class ApplicationsResolver {
     return await this.studentApplicationsService.createNewApplication(createApplicationInput);
   }
 
-  @Mutation((returns) => ParentApplication, {
+  @Mutation(() => ParentApplication, {
     name: 'createNewStudentApplication',
   })
   @UseGuards(new AuthGuard())
@@ -129,7 +128,7 @@ export class ApplicationsResolver {
     }
   }
 
-  @Mutation((returns) => Boolean, {
+  @Mutation(() => Boolean, {
     name: 'sendApplicationReceiveEmail',
   })
   async sendApplicationReceiveEmail(
@@ -139,7 +138,7 @@ export class ApplicationsResolver {
     return await this.studentApplicationsService.sendApplicationRecieveEmail(email);
   }
 
-  @Mutation((returns) => [Application], { name: 'acceptApplication' })
+  @Mutation(() => [Application], { name: 'acceptApplication' })
   async acceptApplication(
     @Args('acceptApplicationInput')
     acceptApplicationInput: AcceptApplicationInput,
@@ -147,17 +146,17 @@ export class ApplicationsResolver {
     return await this.applicationsService.acceptApplication(acceptApplicationInput);
   }
 
-  @ResolveField((of) => Student, { name: 'student' })
+  @ResolveField(() => Student, { name: 'student' })
   async getStudent(@Parent() application: Application): Promise<Student> {
     return await this.studentsService.findOneById(application.student_id);
   }
 
-  @ResolveField((of) => SchoolYear, { name: 'school_year' })
+  @ResolveField(() => SchoolYear, { name: 'school_year' })
   getSchoolYear(@Parent() application: Application): Promise<SchoolYear> {
     return this.schoolYearService.findOneById(application.school_year_id);
   }
 
-  @ResolveField((of) => [ApplicationEmail], { name: 'application_emails' })
+  @ResolveField(() => [ApplicationEmail], { name: 'application_emails' })
   public async getApplicationEmails(@Parent() application: Application): Promise<ApplicationEmail[]> {
     return this.applicationEmailsService.findByApplication(application.application_id);
   }
@@ -167,7 +166,7 @@ export class ApplicationsResolver {
     return this.applicationsService.findOneById(reference.application_id);
   }
 
-  @Mutation((returns) => [Application], { name: 'deleteApplication' })
+  @Mutation(() => [Application], { name: 'deleteApplication' })
   async deleteApplication(
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
@@ -176,14 +175,14 @@ export class ApplicationsResolver {
     return await this.studentApplicationsService.deleteStudentApplication(application_ids);
   }
 
-  @Mutation((returns) => [ApplicationEmail], { name: 'emailApplication' })
+  @Mutation(() => [ApplicationEmail], { name: 'emailApplication' })
   async emailApplication(
     @Args('emailApplicationInput') emailApplicationInput: EmailApplicationInput,
   ): Promise<ApplicationEmail[]> {
     return await this.applicationsService.sendEmail(emailApplicationInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'moveThisYearApplication' })
+  @Mutation(() => Boolean, { name: 'moveThisYearApplication' })
   async moveThisYearApplication(
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
@@ -191,7 +190,7 @@ export class ApplicationsResolver {
     return await this.applicationsService.moveThisYearApplication(deleteApplicationInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'moveNextYearApplication' })
+  @Mutation(() => Boolean, { name: 'moveNextYearApplication' })
   async moveNextYearApplication(
     @Args('deleteApplicationInput')
     deleteApplicationInput: DeleteApplicationInput,
@@ -199,7 +198,7 @@ export class ApplicationsResolver {
     return await this.applicationsService.moveNextYearApplication(deleteApplicationInput);
   }
 
-  @Mutation((returns) => Application, { name: 'updateApplication' })
+  @Mutation(() => Application, { name: 'updateApplication' })
   async updateApplication(
     @Args('updateApplicationInput')
     updateApplicationInput: UpdateApplicationInput,
@@ -207,7 +206,7 @@ export class ApplicationsResolver {
     return await this.applicationsService.updateApplication(updateApplicationInput);
   }
 
-  @Mutation((returns) => Application, { name: 'toggleHideApplication' })
+  @Mutation(() => Application, { name: 'toggleHideApplication' })
   async toggleHideApplication(
     @Args('updateApplicationInput')
     updateApplicationInput: UpdateApplicationInput,
@@ -215,7 +214,7 @@ export class ApplicationsResolver {
     return await this.applicationsService.toggleHideApplication(updateApplicationInput);
   }
 
-  @Mutation((returns) => ImmunizationSettings, {
+  @Mutation(() => ImmunizationSettings, {
     name: 'saveImmunizationSettings',
   })
   async saveImmunizationSettings(
@@ -225,7 +224,7 @@ export class ApplicationsResolver {
     return await this.immunizationSettingsService.updateOrAdd(updateImmunizationSettingsInput);
   }
 
-  @Mutation((returns) => Boolean, {
+  @Mutation(() => Boolean, {
     name: 'deleteImmunizationSetting',
   })
   async deleteImmunizationSetting(
@@ -235,7 +234,7 @@ export class ApplicationsResolver {
     return await this.immunizationSettingsService.deleteOne(id);
   }
 
-  @Mutation((returns) => Boolean, {
+  @Mutation(() => Boolean, {
     name: 'updateImmunizationOrder',
   })
   async updateImmunizationOrder(
@@ -246,7 +245,7 @@ export class ApplicationsResolver {
     return true;
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateApplicationSchoolYearByIds' })
+  @Mutation(() => Boolean, { name: 'updateApplicationSchoolYearByIds' })
   async updateApplicationSchoolYearByIds(
     @Args('updateApplicationSchoolYearInput')
     updateApplicationSchoolYearInput: UpdateSchoolYearIdsInput,

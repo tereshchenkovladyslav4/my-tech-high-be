@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import { Column, Entity, PrimaryColumn, BaseEntity } from 'typeorm';
 
 @ObjectType()

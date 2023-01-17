@@ -5,39 +5,39 @@ export class SchedulesGroupCountArgs {
   @Field(() => Int)
   region_id: number;
 
-  @Field((type) => ScheduleGroupFilters)
+  @Field(() => ScheduleGroupFilters)
   filter = null;
 }
 
 @InputType('ScheduleGroupFilters')
 export class ScheduleGroupFilters {
-  @Field((type) => [String])
+  @Field(() => [String])
   grades = [];
 
-  @Field((type) => [String])
+  @Field(() => [String])
   schoolYear = [];
 
-  @Field((type) => [String])
+  @Field(() => [String])
   specialEd = [];
 
-  @Field((type) => [String])
+  @Field(() => [String])
   status = [];
 
-  @Field((type) => [String])
+  @Field(() => [String])
   accountStatus = [];
 
-  @Field((type) => [String])
+  @Field(() => [String])
   visibility = [];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   diplomaSeeking = null;
 
-  @Field((type) => [String])
+  @Field(() => [String])
   courseType = [];
 
-  @Field((type) => [Int])
+  @Field(() => [Int])
   curriculumProviders = [];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   selectedYearId = null;
 }

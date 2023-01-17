@@ -31,7 +31,7 @@ export class PacketEmail extends BaseEntity {
   @Field(() => Date, { nullable: true })
   created_at?: Date;
 
-  @ManyToOne((type) => Packet)
+  @ManyToOne(() => Packet)
   @JoinColumn({
     name: 'packet_id',
     referencedColumnName: 'packet_id',

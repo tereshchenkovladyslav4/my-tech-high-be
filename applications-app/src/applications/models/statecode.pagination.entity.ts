@@ -1,14 +1,14 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { StateCodes } from './state-codes.entity';
 
 @ObjectType()
 export class StateCodesPagination {
-  @Field((type) => [StateCodes])
+  @Field(() => [StateCodes])
   results?: StateCodes[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires*/
 const SnakeNamingStrategy = require('typeorm-naming-strategies').SnakeNamingStrategy;
 module.exports = {
   name: 'default',

@@ -17,16 +17,16 @@ import { User } from './user.entity';
 @Entity({ name: 'user_region' })
 export class UserRegion extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   region_id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   user_id: number;
 
   @ManyToOne(() => Region, (region) => region.region, { onDelete: 'CASCADE' })

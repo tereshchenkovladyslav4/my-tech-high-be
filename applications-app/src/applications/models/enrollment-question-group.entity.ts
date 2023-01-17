@@ -22,7 +22,7 @@ export class EnrollmentQuestionGroup extends BaseEntity {
   @Field(() => Int, { defaultValue: 0 })
   order: number;
 
-  @OneToMany((type) => EnrollmentQuestions, (enrollmentQuestion) => enrollmentQuestion.group_id)
+  @OneToMany(() => EnrollmentQuestions, (enrollmentQuestion) => enrollmentQuestion.group_id)
   @JoinColumn({ name: 'id', referencedColumnName: 'group_id' })
   questions?: EnrollmentQuestions[];
 }

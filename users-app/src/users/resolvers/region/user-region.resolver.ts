@@ -1,4 +1,4 @@
-import { HttpException, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UsersService } from '../../services/users.service';
 import { UserRegion } from '../../../models/user-region.entity';
@@ -6,7 +6,7 @@ import { CreateUserRegionInput } from '../../dto/userRegion/create-user-region.i
 import { UpdateUserRegionInput } from '../../dto/userRegion/update-user-region.input';
 import { UserRegionService } from '../../services/region/user-region.service';
 
-@Resolver((of) => UserRegion)
+@Resolver(() => UserRegion)
 export class UserRegionResolver {
   constructor(private userRegionService: UserRegionService, private userService: UsersService) {}
 
@@ -26,7 +26,7 @@ export class UserRegionResolver {
   }
 
   // @UseGuards(new AuthGuard())
-  @Mutation((of) => [UserRegion], { name: 'createUserRegion' })
+  @Mutation(() => [UserRegion], { name: 'createUserRegion' })
   async createUserRegion(
     @Args('createUserRegionInput') createUserRegionInput: CreateUserRegionInput,
   ): Promise<UserRegion[]> {
@@ -38,7 +38,7 @@ export class UserRegionResolver {
     }
   }
 
-  @Mutation((of) => [UserRegion], { name: 'updateUserRegion' })
+  @Mutation(() => [UserRegion], { name: 'updateUserRegion' })
   async updateUserRegion(
     @Args('updateUserRegionInput') updateUserRegionInput: UpdateUserRegionInput,
   ): Promise<UserRegion[]> {
@@ -46,7 +46,7 @@ export class UserRegionResolver {
     return response;
   }
 
-  @Mutation((of) => String, { name: 'removeUserRegion' })
+  @Mutation(() => String, { name: 'removeUserRegion' })
   public async removeUserRegion(@Args({ name: 'id', type: () => ID }) id: number): Promise<string> {
     const response = await this.userRegionService.removeUserRegionById(id);
     return response;

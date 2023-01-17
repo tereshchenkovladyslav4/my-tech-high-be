@@ -20,7 +20,7 @@ export class AssessmentOptionService {
       delete assessmentOption.updated_at;
       delete assessmentOption.updated_at;
 
-      const result = await this.repo.save({
+      await this.repo.save({
         ...assessmentOption,
         AssessmentId: newAssessmentId,
       });

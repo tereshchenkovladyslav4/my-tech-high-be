@@ -7,25 +7,25 @@ import { Role } from './../../models/role.entity';
 import { UsersService } from './../../users/services/users.service';
 import { RoleService } from './../services/role-service';
 
-@Resolver((of) => Role)
+@Resolver(() => Role)
 export class RoleResolver {
   constructor(private roleService: RoleService, private userService: UsersService) {}
 
   //  @UseGuards(new AuthGuard())
-  @Query((of) => Role, { name: 'role' })
+  @Query(() => Role, { name: 'role' })
   @UseGuards(new AuthGuard())
   public async findRoleById(@Args({ name: 'id', type: () => ID }) id: number): Promise<Role> {
     const res = await this.roleService.findRoleById(id);
     return res;
   }
 
-  @Query((of) => [Role], { name: 'roles' })
+  @Query(() => [Role], { name: 'roles' })
   @UseGuards(new AuthGuard())
   getAllRoles(): Promise<Role[]> {
     return this.roleService.getAllRoles();
   }
   // @UseGuards(new AuthGuard())
-  @Mutation((of) => Role, { name: 'createRole' })
+  @Mutation(() => Role, { name: 'createRole' })
   @UseGuards(new AuthGuard())
   async createRole(@Args('createRoleInput') createRoleInput: CreateRoleInput): Promise<Role | any> {
     if ((await this.userService.validateCreator(createRoleInput.creator_id)) === true) {
@@ -36,7 +36,7 @@ export class RoleResolver {
     }
   }
 
-  @Mutation((of) => Role || String, { name: 'updateRole' })
+  @Mutation(() => Role || String, { name: 'updateRole' })
   @UseGuards(new AuthGuard())
   @UsePipes(ValidationPipe)
   async updateRole(@Args('updateRoleInput') updateRoleInput: UpdateRoleInput): Promise<string> {
@@ -47,7 +47,7 @@ export class RoleResolver {
     }
   }
 
-  @Mutation((of) => String, { name: 'removeRole' })
+  @Mutation(() => String, { name: 'removeRole' })
   @UseGuards(new AuthGuard())
   public async removeRoleById(@Args({ name: 'id', type: () => ID }) id: number): Promise<string> {
     const response = await this.roleService.removeRoleById(id);

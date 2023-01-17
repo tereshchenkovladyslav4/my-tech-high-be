@@ -2,7 +2,6 @@ import { UpdateProfileInput } from './../dto/update-profile.inputs';
 import { UpdateAccountInput } from '../dto/update-account.inputs';
 import { BadRequestException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Args, Context, ID, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql';
-import { Person } from 'src/models/person.entity';
 import { AuthService } from '../../auth/service/auth.service';
 import { AuthGuard } from '../../guards/auth.guard';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
@@ -25,7 +24,7 @@ import { GetPersonInfoArgs } from '../dto/get-person-info.args';
 import { Pagination } from '../paginate';
 import { MasqueradeInput } from '../dto/masquerade-input';
 
-@Resolver((of) => User)
+@Resolver(() => User)
 export class UsersResolver {
   constructor(
     private usersService: UsersService,
@@ -33,7 +32,7 @@ export class UsersResolver {
     private userRegionService: UserRegionService,
     private userAccessService: UserAccessService,
     private parentService: ParentUserService,
-  ) { }
+  ) {}
 
   @Query(() => User || null)
   @UseGuards(new AuthGuard())
@@ -65,7 +64,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((of) => MePermission)
+  @Mutation(() => MePermission)
   @UseGuards(LocalAuthGuard)
   public async login(@Args('loginInput') loginInput: LoginInput): Promise<AuthPayload | any> {
     const user = await this.authService.validateUser(loginInput.username, loginInput.password);
@@ -109,7 +108,7 @@ export class UsersResolver {
     return this.usersService.findAllPersonInfoBySearchItem(getPersonInfoArgs);
   }
 
-  @Query((returns) => UserPagination, { name: 'usersByRegions' })
+  @Query(() => UserPagination, { name: 'usersByRegions' })
   @UseGuards(new AuthGuard())
   getUserByRegions(@Args() userRegionArgs: UserRegionArgs): Promise<Pagination<User>> {
     if (userRegionArgs.filters.includes('Admin')) {
@@ -122,14 +121,16 @@ export class UsersResolver {
     }
   }
 
-  @Query((returns) => [User], { name: 'getTeacherListBySearchField' })
+  @Query(() => [User], { name: 'getTeacherListBySearchField' })
   @UseGuards(new AuthGuard())
-  async getTeacherListBySearchField(@Args('searchPrimaryTeacher') searchPrimaryTeacher: GetPersonInfoArgs): Promise<User[]> {
+  async getTeacherListBySearchField(
+    @Args('searchPrimaryTeacher') searchPrimaryTeacher: GetPersonInfoArgs,
+  ): Promise<User[]> {
     return this.usersService.getTeachersBySearch(searchPrimaryTeacher);
   }
 
   @UseGuards(new AuthGuard())
-  @Mutation((of) => User, { name: 'createUser' })
+  @Mutation(() => User, { name: 'createUser' })
   async createUser(@Args('createUserInput') createUserInput: CreateUserInput): Promise<User> {
     const isAdmin = await this.usersService.findOneById(createUserInput.creator_id);
     const canAddObserver = createUserInput.level === 14 && isAdmin.level === 2;
@@ -174,7 +175,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((of) => User, { name: 'updateUser' })
+  @Mutation(() => User, { name: 'updateUser' })
   @UseGuards(new AuthGuard())
   async updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput): Promise<User> {
     if ((await this.usersService.validateCreator(updateUserInput.creator_id)) === true) {
@@ -226,7 +227,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((of) => User, { name: 'changeUserStatus' })
+  @Mutation(() => User, { name: 'changeUserStatus' })
   @UseGuards(new AuthGuard())
   public async changeUserStatus(@Args() changeStatusArgs: ChangeStatusArgs): Promise<User> {
     if ((await this.usersService.validateCreator(changeStatusArgs.creator_id)) === true) {
@@ -237,7 +238,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((returns) => User, { name: 'updateProfile' })
+  @Mutation(() => User, { name: 'updateProfile' })
   @UseGuards(new AuthGuard())
   async updateProfile(
     @Context('user') user: any,
@@ -253,7 +254,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((returns) => User, { name: 'updateAccount' })
+  @Mutation(() => User, { name: 'updateAccount' })
   @UseGuards(new AuthGuard())
   async updateAccount(
     @Context('user') user: any,
@@ -269,7 +270,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((returns) => User, { name: 'removeProfilePhoto' })
+  @Mutation(() => User, { name: 'removeProfilePhoto' })
   @UseGuards(new AuthGuard())
   async removeProfilePhoto(@Context('user') user: any): Promise<User> {
     if (user) {
@@ -282,12 +283,12 @@ export class UsersResolver {
     }
   }
 
-  @ResolveField((of) => [UserRegion], { name: 'userRegions' })
+  @ResolveField(() => [UserRegion], { name: 'userRegions' })
   async getUserRegion(@Parent() user: User): Promise<UserRegion[]> {
     return await this.userRegionService.findUserRegionByUserId(user.user_id);
   }
 
-  @Mutation((returns) => User, { name: 'toggleMasquerade' })
+  @Mutation(() => User, { name: 'toggleMasquerade' })
   @UseGuards(new AuthGuard())
   async toggleMasquerade(
     @Context('user') user: any,
@@ -311,7 +312,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((of) => MePermission)
+  @Mutation(() => MePermission)
   @UseGuards(new AuthGuard())
   public async masqueradeUser(@Context('user') user: any, @Args('userId') userId: number): Promise<AuthPayload | any> {
     if (user) {

@@ -42,6 +42,6 @@ export class Person extends BaseEntity {
   @Column()
   date_of_birth?: Date;
 
-  @OneToOne((type) => User, (user) => user.user_id)
+  @OneToOne(() => User, (user) => user.user_id)
   user: User | null;
 }

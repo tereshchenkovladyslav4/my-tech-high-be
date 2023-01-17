@@ -1,18 +1,7 @@
-import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-  ManyToMany,
-  JoinTable,
-} from 'typeorm';
+import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Title } from './title.entity';
 import { Period } from './period.entity';
-import { Course } from './course.entity';
 
 @ObjectType()
 @Directive('@extends')

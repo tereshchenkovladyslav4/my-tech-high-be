@@ -36,7 +36,10 @@ export class ScheduleEmail extends BaseEntity {
   @Field(() => String, { nullable: true })
   template_name: string;
 
-  @ManyToOne((type) => Schedule)
+  @ManyToOne(() => Schedule, (schedule) => schedule.ScheduleEmails, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({
     name: 'schedule_id',
     referencedColumnName: 'schedule_id',

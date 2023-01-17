@@ -1,5 +1,4 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { IsIn, IsInt } from 'class-validator';
 
 @ObjectType()
 export class UserAnnouncementResponse {

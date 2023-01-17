@@ -109,14 +109,14 @@ export class SchedulePeriod extends BaseEntity {
   })
   @JoinColumn([{ name: 'ScheduleId', referencedColumnName: 'schedule_id' }])
   Schedule: Schedule;
-  
+
   @ManyToOne(() => Period, (period) => period.SchedulePeriods, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
-  })  
+  })
   @JoinColumn([{ name: 'PeriodId', referencedColumnName: 'id' }])
   Period: Period;
-  
+
   @ManyToOne(() => Provider, (schedule) => schedule.SchedulePeriods, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',

@@ -14,7 +14,7 @@ export class StateCodesService {
     private readonly stateCodesRepository: Repository<StateCodes>,
   ) {}
 
-  async save(stateCodesInput: StateCodesInput[]): Promise<Boolean> {
+  async save(stateCodesInput: StateCodesInput[]): Promise<boolean> {
     let result = true;
     stateCodesInput.forEach(async (item) => {
       await this.stateCodesRepository.save(item).catch(() => (result = false));
@@ -22,15 +22,14 @@ export class StateCodesService {
     return result;
   }
 
-  async update(updateStateCodesInput: StateCodesInput): Promise<Boolean> {
+  async update(updateStateCodesInput: StateCodesInput): Promise<boolean> {
     const { state_codes_id, state_code, teacher } = updateStateCodesInput;
     await this.stateCodesRepository.update(state_codes_id, { state_code, teacher });
     return true;
   }
 
   async findAll(stateCodesArgs: StateCodesArgs): Promise<Pagination<StateCodes>> {
-    const { skip, take, sort, filter, search, region_id } = stateCodesArgs;
-    const _sortBy = sort.split('|');
+    const { skip, take, search } = stateCodesArgs;
     const qb = this.stateCodesRepository
       .createQueryBuilder('stateCodes')
       .leftJoinAndMapOne('stateCodes.Title', Title, 'title', 'title.title_id = stateCodes.TitleId');

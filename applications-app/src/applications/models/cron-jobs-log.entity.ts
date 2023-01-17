@@ -6,20 +6,20 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, CreateDateColumn } 
 @Entity('cron_jobs_logs')
 export class CronJobsLog extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   log_id: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   function_name: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   type: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   log: string;
 
   @Field(() => Date, { nullable: true })

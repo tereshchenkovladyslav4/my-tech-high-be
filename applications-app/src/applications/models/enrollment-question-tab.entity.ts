@@ -1,5 +1,5 @@
-import { Field, ID, ObjectType, Int, Directive } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany, JoinColumn } from 'typeorm';
+import { Field, ObjectType, Int, Directive } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from 'typeorm';
 import { EnrollmentQuestionGroup } from './enrollment-question-group.entity';
 @ObjectType()
 @Directive('@key(fields: "id")')
@@ -22,6 +22,6 @@ export class EnrollmentQuestionTab extends BaseEntity {
   @Field(() => Int, { nullable: true })
   region_id?: number;
 
-  @OneToMany((type) => EnrollmentQuestionGroup, (enrollmentQuestionGroup) => enrollmentQuestionGroup.tab_id)
+  @OneToMany(() => EnrollmentQuestionGroup, (enrollmentQuestionGroup) => enrollmentQuestionGroup.tab_id)
   groups?: EnrollmentQuestionGroup[];
 }

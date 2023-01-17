@@ -1,7 +1,5 @@
-import { Injectable, Req, Res } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
-import { ServerlessApplicationRepository } from 'aws-sdk';
-import { SendEmailResponse } from 'aws-sdk/clients/ses';
 
 @Injectable()
 export class SESService {
@@ -40,9 +38,8 @@ export class SESService {
     let email_status = true;
 
     try {
-      const result = await this.ses.sendEmail(params).promise();
+      await this.ses.sendEmail(params).promise();
       email_status = false;
-      console.log(result);
     } catch (err) {
       email_status = true;
     }

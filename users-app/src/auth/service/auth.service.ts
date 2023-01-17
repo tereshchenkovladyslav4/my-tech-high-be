@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { UsersService } from '../../users/services/users.service';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EmailVerifierService } from 'src/users/services/email-verifier.service';
 import { EmailVerifier } from 'src/models/email-verifier.entity';
-const crypto = require('crypto');
+import * as crypto from 'crypto';
 
 const salt = process.env.MTH_SALT || 'asin';
 

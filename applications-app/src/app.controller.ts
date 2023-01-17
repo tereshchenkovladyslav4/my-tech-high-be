@@ -2,12 +2,11 @@ import { Controller, Get, Post, UploadedFile, UseInterceptors, UseGuards, Req } 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AppService } from './app.service';
 import { S3Service } from './applications/services/s3.service';
-import { AuthGuard } from './applications/guards/auth.guard';
 import { JWTAuthGuard } from './applications/guards/jwt-auth.guard';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { UsersService } from './applications/services/users.service';
 import { FilesService } from './applications/services/files.service';
-const crypto = require('crypto');
+import * as crypto from 'crypto';
 import * as Moment from 'moment';
 import { SchoolYearService } from './applications/services/schoolyear.service';
 
@@ -93,7 +92,7 @@ export class AppController {
       const { buffer, mimetype, originalname, size } = file;
 
       let extension = false;
-      this.allowed_files.map((item, i) => {
+      this.allowed_files.map((item) => {
         if (typeof item[mimetype] !== 'undefined') extension = item[mimetype];
       });
 

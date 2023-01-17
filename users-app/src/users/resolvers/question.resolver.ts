@@ -1,10 +1,9 @@
-import { BadRequestException, UseGuards } from '@nestjs/common';
 import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Question } from 'src/models/question.entity';
 import { QuestionInput } from 'src/users/dto/question.input';
 import { QuestionService } from 'src/users/services/question.service';
 
-@Resolver((of) => Question)
+@Resolver(() => Question)
 export class QuestionResolver {
   constructor(private service: QuestionService) {}
 
@@ -16,7 +15,7 @@ export class QuestionResolver {
     return this.service.findByRegion(regionId, section);
   }
 
-  @Mutation((returns) => Boolean, { name: 'saveQuestions' })
+  @Mutation(() => Boolean, { name: 'saveQuestions' })
   async saveQuestions(
     @Args('questionsInput', { type: () => [QuestionInput] })
     questions: QuestionInput[],

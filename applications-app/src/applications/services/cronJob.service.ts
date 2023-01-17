@@ -1,10 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression, Interval, Timeout } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { getConnection } from 'typeorm';
-import { AnnouncementEmailArgs } from '../dto/announcement-email.args';
 import { EmailsService } from './emails.service';
 import { EnrollmentsService } from '../enrollments.service';
-import * as Moment from 'moment';
 import { WithdrawalService } from './withdrawal.service';
 import { CronJobsLogsService } from './cron-jobs-logs.services';
 import { AnnouncementsService } from './announcements.service';

@@ -1,4 +1,4 @@
-import { Field, ID, InputType, Int } from '@nestjs/graphql';
+import { Field, ID, InputType } from '@nestjs/graphql';
 
 type SortType = {
   column: 'name' | 'abbreviation';
@@ -7,21 +7,21 @@ type SortType = {
 
 @InputType()
 export class SchoolPartnerArgs {
-  @Field((type) => Sort)
+  @Field(() => Sort)
   sort: SortType = null;
 
-  @Field((type) => ID)
+  @Field(() => ID)
   region_id = 0;
 
-  @Field((type) => ID)
+  @Field(() => ID)
   school_year_id = 0;
 }
 
 @InputType('Sort')
 export class Sort {
-  @Field((type) => String)
+  @Field(() => String)
   column;
 
-  @Field((type) => String)
+  @Field(() => String)
   direction;
 }

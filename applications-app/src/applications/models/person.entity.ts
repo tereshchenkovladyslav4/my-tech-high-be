@@ -47,19 +47,19 @@ export class Person extends BaseEntity {
   @Column()
   date_of_birth?: Date;
 
-  @OneToOne((type) => EmailVerifier, (verifier) => verifier.user_id)
+  @OneToOne(() => EmailVerifier, (verifier) => verifier.user_id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   email_verifier: EmailVerifier;
 
-  @OneToOne((type) => PersonAddress, (address) => address.person_id)
+  @OneToOne(() => PersonAddress, (address) => address.person_id)
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
   person_address: PersonAddress;
 
-  @OneToOne((type) => Phone, (phone) => phone.person_id)
+  @OneToOne(() => Phone, (phone) => phone.person_id)
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
   person_phone: Phone;
 
-  @OneToOne((type) => User, (user) => user.user_id)
+  @OneToOne(() => User, (user) => user.user_id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   user: User;
 

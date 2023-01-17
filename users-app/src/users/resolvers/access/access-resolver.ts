@@ -7,7 +7,7 @@ import { CreateAccessInput } from '../../dto/access/create-access.input';
 import { UpdateAccessInput } from '../../dto/access/update-access.input';
 import { AccessService } from '../../services/access/access.service';
 
-@Resolver((of) => Access)
+@Resolver(() => Access)
 export class AccessResolver {
   constructor(private accessService: AccessService, private userService: UsersService) {}
 
@@ -24,7 +24,7 @@ export class AccessResolver {
   }
 
   // @UseGuards(new AuthGuard())
-  @Mutation((of) => Access, { name: 'createAccess' })
+  @Mutation(() => Access, { name: 'createAccess' })
   @UseGuards(new AuthGuard())
   async createAccess(@Args('createAccessInput') createAccessInput: CreateAccessInput): Promise<Access> {
     if ((await this.userService.validateCreator(createAccessInput.creator_id)) === true) {
@@ -35,14 +35,14 @@ export class AccessResolver {
     }
   }
 
-  @Mutation((of) => Access, { name: 'updateAccess' })
+  @Mutation(() => Access, { name: 'updateAccess' })
   @UseGuards(new AuthGuard())
   async updateAccess(@Args('updateAccessInput') updateAccessInput: UpdateAccessInput): Promise<Access> {
     const response = await this.accessService.updateAccess(updateAccessInput);
     return response;
   }
 
-  @Mutation((of) => String, { name: 'removeAccess' })
+  @Mutation(() => String, { name: 'removeAccess' })
   @UseGuards(new AuthGuard())
   public async removeAccess(@Args({ name: 'id', type: () => ID }) id: number): Promise<string> {
     const response = await this.accessService.removeAccessById(id);

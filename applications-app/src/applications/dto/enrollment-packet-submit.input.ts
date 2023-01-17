@@ -1,5 +1,4 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { Length } from 'class-validator';
 import { CreateParentPersonInput } from './new-parent-person.inputs';
 import { CreateStudentPersonAddressInput } from './new-student-person-address.inputs';
 import { NewParentPacketContactInput } from './new-parent-packet-contact.inputs';
@@ -12,13 +11,13 @@ export class EnrollmentPacketSubmitInput {
   @Field(() => Int)
   student_id?: number;
 
-  @Field((type) => CreateParentPersonInput)
+  @Field(() => CreateParentPersonInput)
   parent?: CreateParentPersonInput;
 
-  @Field((type) => NewParentPacketContactInput)
+  @Field(() => NewParentPacketContactInput)
   packet?: NewParentPacketContactInput;
 
-  @Field((type) => CreateStudentPersonAddressInput)
+  @Field(() => CreateStudentPersonAddressInput)
   student?: CreateStudentPersonAddressInput;
 
   @Field({ nullable: true })

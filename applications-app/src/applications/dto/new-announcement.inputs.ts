@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsIn, IsInt } from 'class-validator';
+import { IsIn } from 'class-validator';
 
 @InputType()
 export class CreateAnnouncementInput {

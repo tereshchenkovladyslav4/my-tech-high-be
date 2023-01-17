@@ -1,5 +1,5 @@
 import { UnauthorizedException, UseGuards } from '@nestjs/common';
-import { Args, ID, Query, Resolver, ResolveReference, ResolveField, Parent, Mutation, Context } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation } from '@nestjs/graphql';
 import { SchoolPartnerInput } from '../dto/school-partner.input';
 import { UpdateSchoolPartnerInput } from '../dto/update-school-partner.input';
 import { AuthGuard } from '../guards/auth.guard';
@@ -7,16 +7,16 @@ import { SchoolPartner } from '../../models/school-partner.entity';
 import { SchoolPartnerService } from '../services/school-partner.service';
 import { SchoolPartnerArgs } from '../dto/school-partner-args';
 
-@Resolver((of) => SchoolPartner)
+@Resolver(() => SchoolPartner)
 export class SchoolPartnerResolver {
   constructor(private schoolPartnerService: SchoolPartnerService) {}
 
-  @Query((returns) => [SchoolPartner])
+  @Query(() => [SchoolPartner])
   async getSchoolsOfEnrollment(): Promise<SchoolPartner[]> {
     return this.schoolPartnerService.findAll();
   }
 
-  @Query((returns) => [SchoolPartner])
+  @Query(() => [SchoolPartner])
   async getSchoolsOfEnrollmentByRegion(
     @Args('schoolPartnerArgs')
     schoolPartnerArgs: SchoolPartnerArgs,

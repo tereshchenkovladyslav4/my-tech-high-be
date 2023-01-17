@@ -4,12 +4,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { UserRole } from './user-role.entity';
 import { User } from './user.entity';
 
 @ObjectType()
@@ -17,17 +15,17 @@ import { User } from './user.entity';
 @Entity({ name: 'roles' })
 export class Role extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   // @Directive('@external')
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   name: string;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   level: number;
 
   @ManyToOne(() => User, (user) => user.level)

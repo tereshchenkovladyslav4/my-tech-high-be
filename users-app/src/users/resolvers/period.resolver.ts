@@ -8,12 +8,12 @@ import { DeleteRes } from '../dto/delete-res';
 import { PeriodService } from '../services/period.service';
 import { DeleteResult } from 'typeorm';
 
-@Resolver((of) => Period)
+@Resolver(() => Period)
 export class PeriodResolver {
   constructor(private service: PeriodService) {}
   // ===========================================================================================================
   // GET
-  @Query((returns) => [Period], { name: 'periods' })
+  @Query(() => [Period], { name: 'periods' })
   @UseGuards(new AuthGuard())
   get(
     @Args({ name: 'school_year_id', type: () => ID }) school_year_id: number,
@@ -24,7 +24,7 @@ export class PeriodResolver {
   }
   // ===========================================================================================================
   // GET: Saved Period indexes (0 - max_num_periods)
-  @Query((returns) => [Number], { name: 'periodIds' })
+  @Query(() => [Number], { name: 'periodIds' })
   @UseGuards(new AuthGuard())
   periodIds(@Args({ name: 'school_year_id', type: () => ID }) school_year_id: number): Promise<number[]> {
     return this.service.findIds(school_year_id);
@@ -32,7 +32,7 @@ export class PeriodResolver {
 
   // ===========================================================================================================
   // upsert
-  @Mutation((returns) => Period, { name: 'periodUpsert' })
+  @Mutation(() => Period, { name: 'periodUpsert' })
   @UseGuards(new AuthGuard())
   async upsertPeriod(@Args({ name: 'PeriodInput' }) args: PeriodInput): Promise<Period> {
     return this.service.upsert(args);
@@ -40,7 +40,7 @@ export class PeriodResolver {
 
   // ===========================================================================================================
   // toggle archived
-  @Mutation((returns) => Period, { name: 'periodArchive' })
+  @Mutation(() => Period, { name: 'periodArchive' })
   @UseGuards(new AuthGuard())
   async setArchive(
     @Args({ name: 'id', type: () => Int }) id: number,
@@ -50,7 +50,7 @@ export class PeriodResolver {
   }
   // ===========================================================================================================
   // Delete
-  @Mutation((returns) => DeleteRes, { name: 'periodDeleteByIds' })
+  @Mutation(() => DeleteRes, { name: 'periodDeleteByIds' })
   @UseGuards(new AuthGuard())
   async deleteByIds(@Args({ name: 'ids', type: () => [ID] }) ids: number[]): Promise<DeleteResult> {
     return this.service.deleteByIds(ids);

@@ -1,5 +1,5 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Student } from './student.entity';
 
 @ObjectType()
@@ -22,7 +22,7 @@ export class StudentReenrollmentStatus {
   @Directive('@external')
   reenrolled?: number;
 
-  @ManyToOne((type) => Student, { nullable: true })
+  @ManyToOne(() => Student, { nullable: true })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   student?: Student;
 }

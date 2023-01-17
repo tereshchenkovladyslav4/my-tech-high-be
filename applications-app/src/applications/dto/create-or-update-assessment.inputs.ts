@@ -56,6 +56,6 @@ export class CreateOrUpdateAssessmentInput {
 
 @InputType()
 export class UpdateAssessmentInputs {
-  @Field((type) => [AssessmentInput], { nullable: true })
+  @Field(() => [AssessmentInput], { nullable: true })
   updateAssessments: AssessmentInput[];
 }

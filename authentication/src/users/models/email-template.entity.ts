@@ -5,32 +5,32 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity({ name: 'email_templates' })
 export class EmailTemplate extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => String)
+  @Field(() => String)
   template_name: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   title: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   subject: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   from: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   bcc: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   body: string;
 
   @Column()
@@ -42,18 +42,18 @@ export class EmailTemplate extends BaseEntity {
   standard_responses?: string;
 
   @Column()
-  @Field((type) => String, { nullable: true, defaultValue: '' })
+  @Field(() => String, { nullable: true, defaultValue: '' })
   template: string;
 
   @Column()
-  @Field((type) => String, { nullable: true, defaultValue: '' })
+  @Field(() => String, { nullable: true, defaultValue: '' })
   inserts: string;
 
   @Column()
-  @Field((type) => Int, { nullable: true, defaultValue: 1 })
+  @Field(() => Int, { nullable: true, defaultValue: 1 })
   region_id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   priority: number;
 }

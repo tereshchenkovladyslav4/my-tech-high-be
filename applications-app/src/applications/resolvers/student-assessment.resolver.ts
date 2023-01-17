@@ -5,17 +5,17 @@ import { StudentAssessmentOption } from '../models/student-assessment-option.ent
 import { StudentAssessmentService } from '../services/student-assessment.service';
 import { CreateOrUpdateStudentAssessmentInput } from '../dto/create-or-update-student-assessment.inputs';
 
-@Resolver((of) => StudentAssessmentOption)
+@Resolver(() => StudentAssessmentOption)
 export class StudentAssessmentResolver {
   constructor(private service: StudentAssessmentService) {}
 
-  @Query((returns) => [StudentAssessmentOption], { name: 'getStudentAssessmentsByStudentId' })
+  @Query(() => [StudentAssessmentOption], { name: 'getStudentAssessmentsByStudentId' })
   @UseGuards(new AuthGuard())
   get(@Args({ name: 'student_id', type: () => ID }) student_id: number): Promise<StudentAssessmentOption[]> {
     return this.service.find(student_id);
   }
 
-  @Mutation((returns) => StudentAssessmentOption, { name: 'createOrUpdateStudentAssessment' })
+  @Mutation(() => StudentAssessmentOption, { name: 'createOrUpdateStudentAssessment' })
   @UseGuards(new AuthGuard())
   async createOrUpdateStudentAssessment(
     @Args('studentAssessmentInput')

@@ -3,10 +3,10 @@ import { IsNotEmpty } from 'class-validator';
 
 @InputType()
 export class CreateOrUpdateInstructions {
-    @Field(() => Int)
-    @IsNotEmpty()
-    master_id?: number;
+  @Field(() => Int)
+  @IsNotEmpty()
+  master_id?: number;
 
-    @Field(() => String, { nullable: true })
-    instructions?: string;
+  @Field(() => String, { nullable: true })
+  instructions?: string;
 }

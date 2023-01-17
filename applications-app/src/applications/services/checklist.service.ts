@@ -14,8 +14,7 @@ export class ChecklistService {
   ) {}
 
   async findAll(checklistArgs: ChecklistsArgs): Promise<Pagination<Checklist>> {
-    const { skip, take, sort, filter, search, region_id } = checklistArgs;
-    const _sortBy = sort.split('|');
+    const { skip, take, filter, search, region_id } = checklistArgs;
     let newStatus = filter.status;
 
     if (filter.status.includes('both')) {
@@ -62,7 +61,7 @@ export class ChecklistService {
     });
   }
 
-  async save(createNewChecklistInput: ChecklistInput[]): Promise<Boolean> {
+  async save(createNewChecklistInput: ChecklistInput[]): Promise<boolean> {
     let result = true;
     await this.checklistRepository.delete({
       region_id: createNewChecklistInput[0].region_id,
@@ -75,8 +74,8 @@ export class ChecklistService {
     return result;
   }
 
-  async update(updateChecklistInput: ChecklistInput): Promise<Boolean> {
-    const { id, region_id, school_year_id, checklist_id, goal, subject, grade, status } = updateChecklistInput;
+  async update(updateChecklistInput: ChecklistInput): Promise<boolean> {
+    const { id, goal } = updateChecklistInput;
     await this.checklistRepository.update(id, { goal });
     return true;
   }

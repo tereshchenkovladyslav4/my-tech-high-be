@@ -5,7 +5,7 @@ import { Application } from '../models/application.entity';
 import { ApplicationsArgs } from '../dto/applications.args';
 import { CreateStudentApplicationInput } from '../dto/new-student-application.inputs';
 import { AcceptApplicationInput } from '../dto/accept-application.inputs';
-import { Pagination, PaginationOptionsInterface } from '../../paginate';
+import { Pagination } from '../../paginate';
 import { PacketsService } from './packets.service';
 import { DeleteApplicationInput } from '../dto/delete-application.inputs';
 import { EmailApplicationInput } from '../dto/email-application.inputs';
@@ -27,7 +27,6 @@ import { PersonAddressService } from './person-address.service';
 import { AddressService } from './address.service';
 import * as Moment from 'moment';
 import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.inputs';
-import { concatenateTypeDefs } from 'graphql-tools';
 import { StudentRecordService } from './student-record.service';
 import { EmailTemplateEnum } from '../enums';
 
@@ -275,6 +274,7 @@ export class ApplicationsService {
         }
       }
     }
+
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
 
     return new Pagination<Application>({
@@ -371,7 +371,7 @@ export class ApplicationsService {
 
         // const UTCdeadline = new Date(UTCDate.year(), UTCDate.month(), UTCDate.date(), UTCDate.hour(), UTCDate.minute(), UTCDate.second(), UTCDate.millisecond())
 
-        const studentPacket = await this.packetsService.createOrUpdate({
+        await this.packetsService.createOrUpdate({
           packet_id,
           student_id,
           status: 'Not Started',
@@ -386,7 +386,7 @@ export class ApplicationsService {
           meta: JSON.stringify(default_meta),
         });
 
-        const statudUpdated = this.studentStatusService.update({
+        this.studentStatusService.update({
           student_id: student_id,
           school_year_id: application.school_year_id,
           status: 6,
@@ -445,7 +445,7 @@ export class ApplicationsService {
 
   async sendEmail(emailApplicationInput: EmailApplicationInput): Promise<ApplicationEmail[]> {
     const { application_ids, subject, body } = emailApplicationInput;
-    const [results, total] = await this.applicationsRepository
+    const [results] = await this.applicationsRepository
       .createQueryBuilder('application')
       .leftJoinAndSelect('application.student', 'student')
       .leftJoinAndSelect('application.school_year', 'school_year')
@@ -510,7 +510,7 @@ export class ApplicationsService {
       const emailBody = setEmailBodyInfo(item.student, item.school_year, item);
       const emailSubject = setEmailSubjectInfo(item.student, item.school_year, item);
 
-      const result = await this.sesEmailService.sendEmail({
+      await this.sesEmailService.sendEmail({
         email: item.student.parent.person.email,
         subject: emailSubject,
         content: emailBody,
@@ -537,7 +537,7 @@ export class ApplicationsService {
   async moveThisYearApplication(deleteApplicationInput: DeleteApplicationInput): Promise<boolean> {
     const { application_ids } = deleteApplicationInput;
     const thisSchoolYear = await this.schoolYearService.findThisYear();
-    const result = await this.applicationsRepository.update(application_ids, {
+    await this.applicationsRepository.update(application_ids, {
       school_year_id: thisSchoolYear.school_year_id,
     });
     return true;
@@ -546,7 +546,7 @@ export class ApplicationsService {
   async moveNextYearApplication(deleteApplicationInput: DeleteApplicationInput): Promise<boolean> {
     const { application_ids } = deleteApplicationInput;
     const thisSchoolYear = await this.schoolYearService.findNextYear();
-    const result = await this.applicationsRepository.update(application_ids, {
+    await this.applicationsRepository.update(application_ids, {
       school_year_id: thisSchoolYear.school_year_id,
     });
     return true;
@@ -566,7 +566,7 @@ export class ApplicationsService {
         application_ids,
         midyear_application,
       };
-      const acceptApplication = await this.acceptApplication(acceptApplicationInput);
+      await this.acceptApplication(acceptApplicationInput);
     }
 
     if (status == 'Submitted' && relation_status == 2) {

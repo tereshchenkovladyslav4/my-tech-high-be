@@ -27,7 +27,7 @@ export class StudentStatus {
   @Directive('@external')
   date_updated?: Date;
 
-  @ManyToOne((type) => Student, { nullable: true })
+  @ManyToOne(() => Student, { nullable: true })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   student?: Student;
 }

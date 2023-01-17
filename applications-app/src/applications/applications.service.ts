@@ -25,7 +25,6 @@ import { StudentStatusService } from './services/student-status.service';
 import { UserRegion } from './models/user-region.entity';
 import { SchoolYearService } from './services/schoolyear.service';
 import { PersonAddressService } from './services/person-address.service';
-import { EmailRecordsService } from './services/email-records.service';
 import { SchoolYear } from './models/schoolyear.entity';
 import { CreateStudentApplicationInput } from './dto/create-student-application.inputs';
 import { EmailTemplateEnum } from './enums';
@@ -47,7 +46,6 @@ export class ApplicationsService {
     private emailTemplateService: EmailTemplatesService,
     private studentStatusService: StudentStatusService,
     private personAddressService: PersonAddressService,
-    private emailRecordsService: EmailRecordsService,
   ) {}
 
   protected user: User;
@@ -156,7 +154,7 @@ export class ApplicationsService {
 
           const emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
           const emailSubject = await setAdditionalLinksInfo(emailTemplate.subject, school_year, student);
-          const result = await this.emailsService.sendEmail({
+          await this.emailsService.sendEmail({
             email: email,
             subject: emailSubject,
             content: emailBody,
@@ -307,7 +305,6 @@ export class ApplicationsService {
     };
     await this.userRegionService.createUserRegion(regionPayload);
     if (!updatedPerson) throw new ServiceUnavailableException('Person User ID Not been Updated');
-
     return parent;
   }
 
@@ -337,7 +334,6 @@ export class ApplicationsService {
     if (!personAddress) throw new ServiceUnavailableException('PersonAddress Not Created');
 
     const { person_id } = person;
-
     // Get Current Speical ED
     let special_ed = 0;
     const student_meta = JSON.parse(studentMeta);
@@ -360,6 +356,7 @@ export class ApplicationsService {
       grade_level,
     });
     if (!student_grade_level) throw new ServiceUnavailableException('Student Grade Level Not Created');
+
     const application_meta = JSON.stringify({
       ...JSON.parse(meta),
       ...JSON.parse(studentMeta),
@@ -376,6 +373,7 @@ export class ApplicationsService {
       midyear_application: midyear_application,
     });
     if (!application) throw new ServiceUnavailableException('Application Not Created');
+
     student.applications?.push(application);
 
     const statudUpdated = await this.studentStatusService.update({

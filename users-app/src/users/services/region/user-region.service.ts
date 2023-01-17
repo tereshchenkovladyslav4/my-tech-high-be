@@ -45,7 +45,7 @@ export class UserRegionService {
             user_id: createUserRegionInput.user_id,
           };
           const data = this.userRegionRepository.create(payload);
-          const inserted = await this.userRegionRepository.save(data);
+          await this.userRegionRepository.save(data);
         }),
       );
       return await this.findUserRegionByUserId(createUserRegionInput.user_id);
@@ -60,7 +60,7 @@ export class UserRegionService {
     await queryRunner.connect();
     let deleteCount = 0;
     await Promise.all(
-      records.map(async (_) => {
+      records.map(async () => {
         const deletedRecord = await queryRunner.manager.delete(UserRegion, {
           user_id: id,
         });
@@ -76,7 +76,6 @@ export class UserRegionService {
       await this.removeUserRecords(updateUserRegionInput.region_id, updateUserRegionInput.user_id);
       return await this.createUserRegion(updateUserRegionInput);
     } catch (error) {
-      console.log(`🚀 ~ file: user-region.service.ts ~ line 64 ~ UserRegionService ~ updateUserRegion ~ error`, error);
       throw new BadRequestException();
     }
   }

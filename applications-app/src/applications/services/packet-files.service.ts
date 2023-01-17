@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getConnection, InsertResult, In } from 'typeorm';
+import { Repository, getConnection, In } from 'typeorm';
 import { File } from '../models/file.entity';
 import { PacketFile } from '../models/packet-file.entity';
 import { S3Service } from './s3.service';
@@ -38,7 +38,7 @@ export class PacketFilesService {
 
   async createMany(packet_id: number, documents: DocumentItemInput[]): Promise<any> {
     const files = [];
-    documents.map((item, i) => {
+    documents.map((item) => {
       files.push({
         packet_id,
         mth_file_id: item.mth_file_id,

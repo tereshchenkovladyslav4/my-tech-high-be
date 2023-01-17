@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver, ID } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { StateCodes } from '../models/state-codes.entity';
@@ -12,7 +12,7 @@ import { StateCodesPagination } from '../models/statecode.pagination.entity';
 export class StateCodesResolver {
   constructor(private service: StateCodesService) {}
 
-  @Query((returns) => StateCodesPagination, { name: 'stateCodes' })
+  @Query(() => StateCodesPagination, { name: 'stateCodes' })
   async getChecklist(@Args() stateCodesArgs: StateCodesArgs): Promise<Pagination<StateCodes>> {
     const results = await this.service.findAll(stateCodesArgs);
     return results;
@@ -23,16 +23,16 @@ export class StateCodesResolver {
   async createOrUpdateStateCodes(
     @Args('createStateCodesInput', { type: () => [StateCodesInput] })
     createStateCodesInput: StateCodesInput[],
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.save(createStateCodesInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateStateCodesById' })
+  @Mutation(() => Boolean, { name: 'updateStateCodesById' })
   @UseGuards(new AuthGuard())
   async updateStateCodesById(
     @Args('updateStateCodesInput')
     updateStateCodesInput: StateCodesInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.update(updateStateCodesInput);
   }
 }

@@ -22,7 +22,7 @@ export class ApplicationQuestionsResolver {
     return this.service.findExist(input);
   }
 
-  @Mutation((returns) => Boolean, {
+  @Mutation(() => Boolean, {
     name: 'saveApplicationQuestions',
   })
   async updateCreateStudentImmunization(

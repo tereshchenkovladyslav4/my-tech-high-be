@@ -3,6 +3,6 @@ import { ImmunizationSettings } from './immunization-settings.entity';
 
 @ObjectType()
 export class ImmunizationSettingsData {
-  @Field((type) => [ImmunizationSettings])
+  @Field(() => [ImmunizationSettings])
   results?: ImmunizationSettings[];
 }

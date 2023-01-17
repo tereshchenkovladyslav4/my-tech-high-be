@@ -2,13 +2,13 @@ import { Field, ObjectType, Int } from '@nestjs/graphql';
 
 @ObjectType()
 export class SchoolYearData {
-  @Field((type) => [SchoolDataCount])
+  @Field(() => [SchoolDataCount])
   students?: SchoolDataCount[];
 
-  @Field((type) => [SchoolDataCount])
+  @Field(() => [SchoolDataCount])
   parents?: SchoolDataCount[];
 
-  @Field((type) => [SchoolDataCount])
+  @Field(() => [SchoolDataCount])
   special_ed?: SchoolDataCount[];
 }
 
@@ -17,6 +17,6 @@ export class SchoolDataCount {
   @Field(() => String)
   status?: string;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   count?: number;
 }

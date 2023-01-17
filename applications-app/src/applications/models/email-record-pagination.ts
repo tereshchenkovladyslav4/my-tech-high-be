@@ -1,14 +1,14 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { EmailRecord } from './email-record.entity';
 
 @ObjectType()
 export class EmailRecordPagination {
-  @Field((type) => [EmailRecord])
+  @Field(() => [EmailRecord])
   results?: EmailRecord[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

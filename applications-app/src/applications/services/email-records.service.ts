@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars*/
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets } from 'typeorm';
@@ -10,7 +11,6 @@ import { ResponseDTO } from '../dto/response.dto';
 import { DeleteRecordInput } from '../dto/delete-record.input';
 import * as Moment from 'moment';
 import { SESService } from './ses.service';
-import { travelSchemaPossibleExtensions } from 'graphql-tools';
 
 @Injectable()
 export class EmailRecordsService {
@@ -41,10 +41,6 @@ export class EmailRecordsService {
       .andWhere('record.status IN (:status)', { status: filters });
 
     if (search) {
-      const date = search
-        .split('/')
-        .filter((v) => v)
-        .join('-');
       qb.andWhere(
         new Brackets((sub) => {
           if (
@@ -130,7 +126,7 @@ export class EmailRecordsService {
   async deleteRecord(deleteRecordInput: DeleteRecordInput): Promise<EmailRecord[]> {
     const { record_ids } = deleteRecordInput;
     const records = await this.emailRecordsRepository.findByIds(record_ids);
-    const result = await this.emailRecordsRepository.delete(record_ids);
+    await this.emailRecordsRepository.delete(record_ids);
     return records;
   }
 

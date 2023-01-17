@@ -9,7 +9,7 @@ export class SchoolEnrollmentService {
   constructor(
     @InjectRepository(SchoolEnrollment)
     private readonly schoolEnrollmentRepository: Repository<SchoolEnrollment>,
-  ) { }
+  ) {}
 
   async assignStudentToSOE(assignStudentToSOEInput: assignStudentToSOEInput): Promise<boolean> {
     const { student_ids, school_year_id, school_partner_id } = assignStudentToSOEInput;
@@ -34,7 +34,6 @@ export class SchoolEnrollmentService {
         } else {
           await existingPartner.remove();
         }
-
       }
     }
     return true;

@@ -13,7 +13,7 @@ export class NewEnrollmentQuestionTabInput {
   @Field(() => String)
   tab_name: string;
 
-  @Field((type) => [NewEnrollmentQuestionGroupInput], { defaultValue: [] })
+  @Field(() => [NewEnrollmentQuestionGroupInput], { defaultValue: [] })
   groups?: NewEnrollmentQuestionGroupInput[];
 
   @Field(() => Int)

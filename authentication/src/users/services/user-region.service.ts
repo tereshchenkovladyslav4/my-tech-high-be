@@ -1,8 +1,8 @@
 import { UserRegion } from './../models/user-region.entity';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
-import { getConnection, QueryRunner } from 'typeorm';
+import { Repository } from 'typeorm';
+
 @Injectable()
 export class UserRegionService {
   constructor(

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pagination } from 'src/paginate';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateFileInput } from '../dto/new-file.inputs';
 import { ResponseDTO } from '../dto/response.dto';
 import { DeleteFileArgs } from '../models/file-data.entity';

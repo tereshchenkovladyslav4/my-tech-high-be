@@ -1,14 +1,14 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Packet } from './packet.entity';
 
 @ObjectType()
 export class PacketPagination {
-  @Field((type) => [Packet])
+  @Field(() => [Packet])
   results?: Packet[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

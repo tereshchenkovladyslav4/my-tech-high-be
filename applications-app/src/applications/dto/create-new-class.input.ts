@@ -3,20 +3,20 @@ import { IsNotEmpty } from 'class-validator';
 
 @InputType()
 export class CreateNewClassInput {
-    @Field(() => Int)
-    @IsNotEmpty()
-    master_id?: number;
+  @Field(() => Int)
+  @IsNotEmpty()
+  master_id?: number;
 
-    @Field(() => Int, { nullable: true })
-    class_id?: number;
+  @Field(() => Int, { nullable: true })
+  class_id?: number;
 
-    @Field(() => String)
-    @IsNotEmpty()
-    class_name: string;
+  @Field(() => String)
+  @IsNotEmpty()
+  class_name: string;
 
-    @Field(() => Int, { nullable: true })
-    primary_id?: number;
+  @Field(() => Int, { nullable: true })
+  primary_id?: number;
 
-    @Field(() => String, { nullable: true })
-    addition_id: string;
+  @Field(() => String, { nullable: true })
+  addition_id: string;
 }

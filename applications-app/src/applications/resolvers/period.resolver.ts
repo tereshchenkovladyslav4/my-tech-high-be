@@ -1,7 +1,8 @@
 import { Resolver } from '@nestjs/graphql';
 import { Period } from '../models/period.entity';
+import { PeriodService } from '../services/period.service';
 
-@Resolver((of) => Period)
+@Resolver(() => Period)
 export class PeriodResolver {
-  constructor() {}
+  constructor(private periodService: PeriodService) {}
 }

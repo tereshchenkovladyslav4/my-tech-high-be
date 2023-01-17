@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, Repository, createQueryBuilder, Brackets } from 'typeorm';
+import { Repository, createQueryBuilder, Brackets } from 'typeorm';
 import { Announcement } from '../models/announcement.entity';
 import { CreateAnnouncementInput } from '../dto/new-announcement.inputs';
 import { ResponseDTO } from '../dto/response.dto';
 import { UpdateAnnouncementInput } from '../dto/update-announcement.inputs';
 import { EmailsService } from './emails.service';
-import { CronJobService } from './cronJob.service';
-import { difference } from 'lodash';
 
 import { User } from '../models/user.entity';
 import { UserRegion } from '../models/user-region.entity';

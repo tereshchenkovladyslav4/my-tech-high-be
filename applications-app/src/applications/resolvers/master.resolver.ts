@@ -8,71 +8,67 @@ import { CreateNewClassInput } from '../dto/create-new-class.input';
 import { ClassesService } from '../services/classes.service';
 import { CreateOrUpdateInstructions } from '../dto/create-new-master-instruction.input';
 
-@Resolver((of) => Master)
+@Resolver(() => Master)
 export class MasterResolver {
-  constructor(
-    private service: MasterService,
-    private classesService: ClassesService
-  ) { }
+  constructor(private service: MasterService, private classesService: ClassesService) {}
 
-
-  @Query((returns) => [Master], { name: 'getMastersBySchoolId' })
+  @Query(() => [Master], { name: 'getMastersBySchoolId' })
   @UseGuards(new AuthGuard())
   async getMastersBySchoolId(@Args('schoolYearId', { type: () => Int }) schoolYearId: number): Promise<Master[]> {
     return this.service.getAll(schoolYearId);
   }
 
-  @Query((returns) => Master, { name: 'getMastersById' })
+  @Query(() => Master, { name: 'getMastersById' })
   @UseGuards(new AuthGuard())
   async getMastersById(@Args('masterId', { type: () => Int }) masterId: number): Promise<Master> {
     return this.service.getById(masterId);
   }
 
-  @Mutation((returns) => Boolean, { name: 'createNewMaster' })
+  @Mutation(() => Boolean, { name: 'createNewMaster' })
   @UseGuards(new AuthGuard())
   async createNewMaster(
     @Args('createNewMasterInput')
     createNewMasterInput: CreateNewMasterInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.save(createNewMasterInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'deleteMasterById' })
+  @Mutation(() => Boolean, { name: 'deleteMasterById' })
   @UseGuards(new AuthGuard())
-  async deleteMasterById(@Args('masterId', { type: () => Int }) masterId: number): Promise<Boolean> {
+  async deleteMasterById(@Args('masterId', { type: () => Int }) masterId: number): Promise<boolean> {
     return this.service.deleteByMasterId(masterId);
   }
 
-  @Mutation((returns) => Boolean, { name: 'deleteClassesById' })
+  @Mutation(() => Boolean, { name: 'deleteClassesById' })
   @UseGuards(new AuthGuard())
-  async deleteClassesById(@Args('classId', { type: () => Int }) classId: number): Promise<Boolean> {
+  async deleteClassesById(@Args('classId', { type: () => Int }) classId: number): Promise<boolean> {
     return this.classesService.deleteClassesById(classId);
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateMaster' })
+  @Mutation(() => Boolean, { name: 'updateMaster' })
   @UseGuards(new AuthGuard())
   async updateMaster(
     @Args('updateMaster')
     updateMasterInput: CreateNewMasterInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.update(updateMasterInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'createNewClass' })
+  @Mutation(() => Boolean, { name: 'createNewClass' })
   @UseGuards(new AuthGuard())
   async createNewClass(
     @Args('createNewClassInput')
     createNewClassInput: CreateNewClassInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.classesService.saveClass(createNewClassInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'createOrUpdateInstructions' })
+  @Mutation(() => Boolean, { name: 'createOrUpdateInstructions' })
   @UseGuards(new AuthGuard())
   async createOrUpdateInstructions(
     @Args('createOrUpdateInstructions')
     createOrUpdateInstructions: CreateOrUpdateInstructions,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.createOrUpdateInstructions(createOrUpdateInstructions);
   }
 }

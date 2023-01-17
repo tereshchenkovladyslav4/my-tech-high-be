@@ -1,11 +1,10 @@
-import { BadRequestException, UseGuards } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthGuard } from 'src/guards/auth.guard';
 import { QuickLink } from 'src/models/quick-link.entity';
 import { QuickLinkInput } from 'src/users/dto/quickLink/quick-link.input';
 import { QuickLinkService } from 'src/users/services/quick-link/quick-link.service';
 
-@Resolver((of) => QuickLink)
+@Resolver(() => QuickLink)
 export class QuickLinkResolver {
   constructor(private quickLinkService: QuickLinkService) {}
 
@@ -14,7 +13,7 @@ export class QuickLinkResolver {
     return this.quickLinkService.findByRegion(regionId);
   }
 
-  @Mutation((of) => QuickLink, { name: 'createQuickLink' })
+  @Mutation(() => QuickLink, { name: 'createQuickLink' })
   async createQuickLink(
     @Args('quickLinkInput')
     quickLinkInput: QuickLinkInput,
@@ -24,7 +23,7 @@ export class QuickLinkResolver {
     return response;
   }
 
-  @Mutation((of) => QuickLink, { name: 'updateQuickLink' })
+  @Mutation(() => QuickLink, { name: 'updateQuickLink' })
   async updateQuickLink(
     @Args('quickLinkInput')
     quickLinkInput: QuickLinkInput,
@@ -34,7 +33,7 @@ export class QuickLinkResolver {
     return response;
   }
 
-  @Mutation((of) => QuickLink, { name: 'removeQuickLinkPhoto' })
+  @Mutation(() => QuickLink, { name: 'removeQuickLinkPhoto' })
   async removeQuickLinkPhoto(@Args({ name: 'id', type: () => ID }) id: number): Promise<QuickLink> {
     const quickLink = await this.quickLinkService.findById(id);
     if (!quickLink) throw new BadRequestException();

@@ -1,30 +1,30 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsOptional, IsDate, MaxLength, IsEmail, IsNotEmpty, Length, IsInt } from 'class-validator';
+import { MaxLength, IsEmail } from 'class-validator';
 
 @InputType()
 export class ObserverInput {
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   observer_id?: number;
 
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   parent_id?: number;
 
-  @Field((type) => [Int], { nullable: true })
+  @Field(() => [Int], { nullable: true })
   student_ids?: number[];
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @MaxLength(60)
   first_name?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @MaxLength(60)
   last_name?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   @IsEmail()
   email?: string;
 
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   notes?: string;
 
   @Field(() => [Int], { nullable: true })

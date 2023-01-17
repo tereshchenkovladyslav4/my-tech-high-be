@@ -9,7 +9,7 @@ import { Student } from './student.entity';
 @Entity({ name: 'mth_school_enrollment' })
 export class SchoolEnrollment extends BaseEntity {
   @Column()
-  @Field((type) => ID)
+  @Field(() => ID)
   @PrimaryGeneratedColumn()
   @Directive('@external')
   id?: number;
@@ -29,7 +29,7 @@ export class SchoolEnrollment extends BaseEntity {
   @Directive('@external')
   school_partner_id?: number;
 
-  @ManyToOne((type) => Student, (student) => student.schoolEnroll)
+  @ManyToOne(() => Student, (student) => student.schoolEnroll)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   @Field(() => Student, { nullable: true })
   student: Student;

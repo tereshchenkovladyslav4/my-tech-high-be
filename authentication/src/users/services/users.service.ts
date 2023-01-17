@@ -2,8 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../models/user.entity';
-const crypto = require('crypto');
-const axios = require('axios');
+import * as crypto from 'crypto';
+import axios from 'axios';
 const salt = process.env.MTH_SALT || 'asin';
 import * as Moment from 'moment';
 import { VerifyInput } from '../dto/verify.inputs';
@@ -77,7 +77,7 @@ export class UsersService {
     let fullName = user.firstName + ' ' + user.lastName;
     fullName = fullName ? fullName : 'Anonymous User';
 
-    const config = {
+    await axios({
       method: 'post',
       url: createZendeskAPI,
       headers: {
@@ -90,9 +90,7 @@ export class UsersService {
           name: fullName,
         },
       }),
-    };
-
-    await axios(config);
+    });
     return true;
   }
 }

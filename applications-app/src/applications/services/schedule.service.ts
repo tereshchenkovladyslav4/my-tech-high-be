@@ -275,7 +275,7 @@ export class ScheduleService {
 
   async sendEmail(emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
     const { schedule_ids, subject, body, from } = emailScheduleInput;
-    const [results, total] = await this.repo
+    const [results] = await this.repo
       .createQueryBuilder('schedule')
       .leftJoinAndSelect('schedule.ScheduleStudent', 'ScheduleStudent')
       .leftJoinAndSelect('schedule.SchoolYear', 'SchoolYear')
@@ -451,6 +451,21 @@ export class ScheduleService {
               : EmailTemplateEnum.SCHEDULE_ACCEPTED,
           });
         }
+      } else if (scheduleInput.status === ScheduleStatus.NOT_SUBMITTED) {
+        const existingSchedule = await this.repo.findOne({
+          StudentId: scheduleInput.StudentId,
+          SchoolYearId: scheduleInput.SchoolYearId,
+          status: ScheduleStatus.NOT_SUBMITTED,
+        });
+        if (existingSchedule) {
+          return existingSchedule;
+        } else {
+          result = await this.repo.save({
+            ...scheduleInput,
+            date_submitted: new Date(),
+            last_modified: new Date(),
+          });
+        }
       } else {
         const existingSchedule = scheduleInput.schedule_id ? await this.repo.findOne(scheduleInput.schedule_id) : null;
         result = await this.repo.save({
@@ -530,7 +545,7 @@ export class ScheduleService {
       });
     }
     qb.select('schedule.status');
-    const [result, total] = await qb.getManyAndCount();
+    const [result] = await qb.getManyAndCount();
 
     const statusArray = {
       'Updates Required': 0,

@@ -1,4 +1,4 @@
-import { Injectable, Req, Res, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 
 @Injectable()

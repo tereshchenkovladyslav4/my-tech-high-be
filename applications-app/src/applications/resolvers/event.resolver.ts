@@ -5,11 +5,11 @@ import { EventsService } from '../services/event.service';
 import { ApplicationEvent } from '../models/event.entity';
 import { CreateOrUpdateEventInput } from '../dto/create-or-update-event.inputs';
 import { FindEventsByRegionIdSearch } from '../dto/find-event-by-regionId-search';
-@Resolver((of) => ApplicationEvent)
+@Resolver(() => ApplicationEvent)
 export class EventsResolver {
   constructor(private eventsService: EventsService) {}
 
-  @Query((returns) => [ApplicationEvent], { name: 'eventsByRegionId' })
+  @Query(() => [ApplicationEvent], { name: 'eventsByRegionId' })
   @UseGuards(new AuthGuard())
   async getEvents(
     @Args('findEventsByRegionIdSearch')
@@ -18,7 +18,7 @@ export class EventsResolver {
     return this.eventsService.findAll(findEventsByRegionIdSearch);
   }
 
-  @Mutation((returns) => ApplicationEvent, { name: 'createOrUpdateEvent' })
+  @Mutation(() => ApplicationEvent, { name: 'createOrUpdateEvent' })
   @UseGuards(new AuthGuard())
   async createEvent(
     @Args('createEventInput')
@@ -27,7 +27,7 @@ export class EventsResolver {
     return this.eventsService.save(createEventInput);
   }
 
-  @Mutation((of) => Boolean, { name: 'removeEventById' })
+  @Mutation(() => Boolean, { name: 'removeEventById' })
   async removeWithdrawal(@Args('event_id', { type: () => Int }) event_id: number): Promise<boolean> {
     return await this.eventsService.deleteById(event_id);
   }

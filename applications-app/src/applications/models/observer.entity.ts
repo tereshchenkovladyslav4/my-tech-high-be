@@ -43,7 +43,7 @@ export class Observer extends BaseEntity {
   @UpdateDateColumn()
   updated_at?: Date;
 
-  @OneToOne((type) => Person, (person) => person.person_id)
+  @OneToOne(() => Person, (person) => person.person_id)
   @JoinColumn({ name: 'person_id', referencedColumnName: 'person_id' })
   person: Person;
 }

@@ -24,7 +24,8 @@ import { UserRegionService } from './services/user-region.service';
 import { EnrollmentPacketSubmitInput } from './dto/enrollment-packet-submit.input';
 import { DeleteEnrollmentPacketDocumentsInput } from './dto/delete-enrollment-packet-documents.input';
 
-const common_1 = require('@nestjs/common');
+import * as common_1 from '@nestjs/common';
+
 const templates = {
   Accepted: 'Packet Accepted',
   //   'Missing Info': 'Missing Information',

@@ -32,7 +32,6 @@ export class PersonAddressService {
       .printSql()
       .getOne();
 
-    console.log('HasAddress: ', hasAddress);
     if (!hasAddress) {
       const address = await getConnection()
         .createQueryBuilder()
@@ -53,10 +52,8 @@ export class PersonAddressService {
         ])
         .execute();
 
-      console.log('Address: ', address);
       const address_id = address.raw && address.raw.insertId;
       if (address_id) {
-        console.log('Address ID: ', address_id);
         await getConnection()
           .createQueryBuilder()
           .insert()

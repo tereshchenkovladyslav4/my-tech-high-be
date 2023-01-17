@@ -22,7 +22,7 @@ export class EventsService {
     private readonly eventsRepository: Repository<ApplicationEvent>,
     private schoolYearsService: SchoolYearService,
     private timeZonesService: TimezonesService,
-  ) { }
+  ) {}
 
   async getScheduleActiveSchoolYears(region_id: number): Promise<any> {
     const activeSchoolYears = await this.schoolYearsService.getAllActive(region_id);
@@ -86,8 +86,9 @@ export class EventsService {
         `);
         if (grades) {
           grades.forEach((grade) => {
-            filter_grades += ` OR events.filter_grades LIKE '%"${grade.grade_level.includes('K') ? 'Kindergarten' : grade.grade_level
-              }"%'`;
+            filter_grades += ` OR events.filter_grades LIKE '%"${
+              grade.grade_level.includes('K') ? 'Kindergarten' : grade.grade_level
+            }"%'`;
           });
         }
         subCond = `AND (events.title like '%${param.search_field}%' OR events.description like '%${param.search_field}%' ${filter_grades})`;
@@ -103,14 +104,31 @@ export class EventsService {
         WHERE eventType.RegionId = ${param.region_id} ${subCond} 
       `);
 
-      let results = [];
+      const results = [];
+      if (param.type === 'student') {
+        const student = (await createQueryBuilder(Student)
+          .innerJoinAndSelect(Person, 'person', 'person.person_id = `Student`.person_id')
+          .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
+          .innerJoinAndSelect(UserRegion, 'userRegion', 'userRegion.user_id = user.user_id')
+          .where('user.user_id = :userId', { userId: param.user_id })
+          .printSql()
+          .getRawOne()) as Student;
 
-      if (param.parent_id !== 0) {
+        events.forEach((event) => {
+          const users = JSON.parse(event.filter_users);
+          const grades = JSON.parse(event.filter_grades);
+          if (users.includes('students')) {
+            if (grades.includes(student.student_grade_level.grade_level)) {
+              results.push(event);
+            }
+          }
+        });
+      } else if (param.type === 'parent') {
         const parent = await createQueryBuilder(Parent)
           .innerJoinAndSelect(Person, 'person', 'person.person_id = `Parent`.person_id')
           .innerJoinAndSelect(User, 'user', 'user.user_id = person.user_id')
           .innerJoinAndSelect(UserRegion, 'userRegion', 'userRegion.user_id = user.user_id')
-          .where('user.user_id = :userId', { userId: param.parent_id })
+          .where('user.user_id = :userId', { userId: param.user_id })
           .printSql()
           .getRawOne();
 
@@ -159,41 +177,44 @@ export class EventsService {
         const optOutActive = optOutEvent ? true : false;
 
         events.map((event) => {
+          const users = JSON.parse(event.filter_users);
           const optFilter = JSON.parse(event.filter_other);
-          if (
-            (optFilter.indexOf('testing-opt-in') !== -1 && optInActive) ||
-            (optFilter.indexOf('testing-opt-out') !== -1 && optOutActive) ||
-            (optFilter.indexOf('testing-opt-in') !== -1 &&
-              optFilter.indexOf('testing-opt-out') !== -1 &&
-              (optInActive || optOutActive)) ||
-            (optFilter.indexOf('testing-opt-in') === -1 && optFilter.indexOf('testing-opt-out') === -1)
-          ) {
-            results.push({
-              EventType: {
-                RegionId: event.region_id,
-                archived: event.archived,
-                color: event.color,
-                created_at: event.eventType_created_at,
-                event_type_id: event.event_type_id,
-                name: event.name,
-                priority: event.priority,
-                updated_at: event.eventType_updated_at,
-              },
-              TypeId: event.TypeId,
-              description: event.description,
-              end_date: event.end_date,
-              event_id: event.event_id,
-              all_day: event.all_day,
-              start_date: event.start_date,
-              title: event.title,
-              filter_grades: event.filter_grades,
-              filter_other: event.filter_other,
-              filter_program_year: event.filter_program_year,
-              filter_provider: event.filter_provider,
-              filter_school_of_enrollment: event.filter_school_of_enrollment,
-              filter_users: event.filter_users,
-              has_rsvp: event.has_rsvp,
-            });
+          if (users.includes('parent/observers')) {
+            if (
+              (optFilter.indexOf('testing-opt-in') !== -1 && optInActive) ||
+              (optFilter.indexOf('testing-opt-out') !== -1 && optOutActive) ||
+              (optFilter.indexOf('testing-opt-in') !== -1 &&
+                optFilter.indexOf('testing-opt-out') !== -1 &&
+                (optInActive || optOutActive)) ||
+              (optFilter.indexOf('testing-opt-in') === -1 && optFilter.indexOf('testing-opt-out') === -1)
+            ) {
+              results.push({
+                EventType: {
+                  RegionId: event.region_id,
+                  archived: event.archived,
+                  color: event.color,
+                  created_at: event.eventType_created_at,
+                  event_type_id: event.event_type_id,
+                  name: event.name,
+                  priority: event.priority,
+                  updated_at: event.eventType_updated_at,
+                },
+                TypeId: event.TypeId,
+                description: event.description,
+                end_date: event.end_date,
+                event_id: event.event_id,
+                all_day: event.all_day,
+                start_date: event.start_date,
+                title: event.title,
+                filter_grades: event.filter_grades,
+                filter_other: event.filter_other,
+                filter_program_year: event.filter_program_year,
+                filter_provider: event.filter_provider,
+                filter_school_of_enrollment: event.filter_school_of_enrollment,
+                filter_users: event.filter_users,
+                has_rsvp: event.has_rsvp,
+              });
+            }
           }
         });
       } else {

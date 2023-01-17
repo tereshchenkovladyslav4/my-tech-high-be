@@ -1,21 +1,21 @@
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { Assessment } from '../models/assessment.entity';
 import { AssessmentService } from '../services/assessment.service';
 import { CreateOrUpdateAssessmentInput, UpdateAssessmentInputs } from '../dto/create-or-update-assessment.inputs';
 
-@Resolver((of) => Assessment)
+@Resolver(() => Assessment)
 export class AssessmentResolver {
   constructor(private service: AssessmentService) {}
 
-  @Query((returns) => [Assessment], { name: 'getAssessmentsBySchoolYearId' })
+  @Query(() => [Assessment], { name: 'getAssessmentsBySchoolYearId' })
   @UseGuards(new AuthGuard())
   get(@Args({ name: 'schoolYearId', type: () => ID }) schoolYearId: number): Promise<Assessment[]> {
     return this.service.find(schoolYearId);
   }
 
-  @Mutation((returns) => Assessment, { name: 'createOrUpdateAssessment' })
+  @Mutation(() => Assessment, { name: 'createOrUpdateAssessment' })
   @UseGuards(new AuthGuard())
   async createOrUpdateAssessment(
     @Args('assessmentInput')
@@ -24,7 +24,7 @@ export class AssessmentResolver {
     return this.service.save(assessmentInput);
   }
 
-  @Mutation((returns) => [Assessment], { name: 'updateAssessments' })
+  @Mutation(() => [Assessment], { name: 'updateAssessments' })
   @UseGuards(new AuthGuard())
   async updateAssessments(
     @Args('updateAssessmentsInputs')
@@ -33,7 +33,7 @@ export class AssessmentResolver {
     return this.service.updates(updateAssessmentsInputs);
   }
 
-  @Mutation((returns) => Boolean, { name: 'deleteAssessment' })
+  @Mutation(() => Boolean, { name: 'deleteAssessment' })
   @UseGuards(new AuthGuard())
   async deleteResource(
     @Args({ name: 'assessment_id', type: () => ID })

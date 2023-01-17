@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreatePersonPhoneInput } from '../dto/new-person-phone.inputs';
 import { StudentImmunization } from '../models/student-immunization.entity';
 
 @Injectable()

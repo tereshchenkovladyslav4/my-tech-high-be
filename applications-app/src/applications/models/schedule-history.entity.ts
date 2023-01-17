@@ -3,8 +3,6 @@ import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BaseEnti
 import { IsIn } from 'class-validator';
 import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
-import { SchedulePeriod } from './schedule-period.entity';
-import { ScheduleEmail } from './schedule-email.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
 
 @InputType('schedule_history')
@@ -45,7 +43,7 @@ export class ScheduleHistory extends BaseEntity {
   @JoinColumn([{ name: 'SchoolYearId', referencedColumnName: 'school_year_id' }])
   SchoolYear: SchoolYear;
 
-  @ManyToOne((type) => Student, (student) => student.ScheduleHistories, {
+  @ManyToOne(() => Student, (student) => student.ScheduleHistories, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })

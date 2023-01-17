@@ -3,29 +3,29 @@ import { Max, Min } from 'class-validator';
 
 @ArgsType()
 export class AssignmentArgs {
-  @Field((type) => Int)
+  @Field(() => Int)
   @Min(0)
   skip = 0;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   @Min(1)
   @Max(50)
   take = 25;
 
-  @Field((type) => String)
+  @Field(() => String)
   @Min(1)
   @Max(50)
   sort = 'status|ASC';
 
-  @Field((type) => Int)
+  @Field(() => Int)
   @Min(1)
   @Max(100)
   masterId;
 
-  @Field((type) => AssignmentlistFilters)
+  @Field(() => AssignmentlistFilters)
   filter = null;
 
-  @Field((type) => String)
+  @Field(() => String)
   @Min(1)
   @Max(50)
   search = '';
@@ -33,9 +33,9 @@ export class AssignmentArgs {
 
 @InputType('AssignmentlistFilters')
 export class AssignmentlistFilters {
-  @Field((type) => [String])
+  @Field(() => [String])
   status = [];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   selectedYearId = null;
 }

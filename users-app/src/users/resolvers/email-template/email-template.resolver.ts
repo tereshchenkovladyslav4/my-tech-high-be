@@ -3,7 +3,7 @@ import { EmailTemplate } from 'src/models/email-template.entity';
 import { EmailTemplatesService } from 'src/users/services/email-templates/email-templates.service';
 import { CreateEmailTemplateInput } from 'src/users/dto/emailTemplate/create-email-template.input';
 
-@Resolver((of) => EmailTemplate)
+@Resolver(() => EmailTemplate)
 export class EmailTemplateResolver {
   constructor(private emailTemplatesService: EmailTemplatesService) {}
 
@@ -23,7 +23,7 @@ export class EmailTemplateResolver {
     return this.emailTemplatesService.findByRegion(regionId);
   }
 
-  @Mutation((of) => EmailTemplate, { name: 'createEmailTemplate' })
+  @Mutation(() => EmailTemplate, { name: 'createEmailTemplate' })
   async createEmailTemplate(
     @Args('createEmailTemplateInput')
     createEmailTemplateInput: CreateEmailTemplateInput,
@@ -31,7 +31,7 @@ export class EmailTemplateResolver {
     return this.emailTemplatesService.createEmailTemplate(createEmailTemplateInput);
   }
 
-  @Mutation((of) => EmailTemplate, { name: 'updateEmailTemplate' })
+  @Mutation(() => EmailTemplate, { name: 'updateEmailTemplate' })
   async updateEmailTemplate(
     @Args('createEmailTemplateInput')
     createEmailTemplateInput: CreateEmailTemplateInput,

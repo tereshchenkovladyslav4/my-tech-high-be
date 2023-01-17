@@ -1,12 +1,11 @@
-// Use require instead of import
+/* eslint-disable @typescript-eslint/no-var-requires*/
 const SnakeNamingStrategy = require('typeorm-naming-strategies').SnakeNamingStrategy;
-
 module.exports = {
   name: 'default',
   type: 'mysql',
   synchronize: false,
   autoLoadEntities: true,
-  logging: true,
+  logging: true, // TODO - set false on the prod
   cache: true,
   timezone: 'UTC',
   host: process.env.DB_HOST || '127.0.0.1',

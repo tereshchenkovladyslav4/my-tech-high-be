@@ -7,7 +7,7 @@ async function bootstrap() {
   return app;
 }
 
-export async function handler(event, context) {
+export async function handler() {
   const app = await bootstrap();
   const appService = app.get(AppService);
   const data = appService.getHello();
@@ -20,7 +20,7 @@ export async function handler(event, context) {
   };
 }
 
-export async function schedulePacketReminders(event, context) {
+export async function schedulePacketReminders() {
   const app = await bootstrap();
   const enrollmentsService = app.get(EnrollmentsService);
   const data = await enrollmentsService.runScheduleReminders();

@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany
+  OneToMany,
 } from 'typeorm';
 import { HomeroomStudent } from './homeroom-student.entity';
 import { Master } from './master.entity';

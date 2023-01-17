@@ -17,9 +17,6 @@ import { Role } from './role.entity';
 import { UserAccess } from './user-access.entity';
 import { UserRegion } from './user-region.entity';
 
-const salt = process.env.MTH_SALT || 'asin';
-const crypto = require('crypto');
-
 @ObjectType()
 @Directive('@key(fields: "user_id, email")')
 @Entity({ name: 'core_users' })
@@ -109,7 +106,7 @@ export class User extends BaseEntity {
   @Field(() => [ParentUser], { nullable: true })
   student: ParentUser;
 
-  @OneToOne((type) => Person, (person) => person.user_id)
+  @OneToOne(() => Person, (person) => person.user_id)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'user_id' })
   @Field(() => Person, { nullable: true })
   profile: Person;

@@ -1,11 +1,10 @@
-import { Directive, Field, ObjectType } from '@nestjs/graphql';
-import { User } from './user.entity';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class ForgotPasswordResponse {
-  @Field((type) => Boolean)
+  @Field(() => Boolean)
   status?: boolean;
 
-  @Field((type) => Boolean)
+  @Field(() => Boolean)
   unverified?: boolean;
 }

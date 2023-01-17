@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars*/
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, Repository } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { SESService } from './ses.service';
 import { EmailVerifier } from 'src/users/models/email-verifier.entity';
 import { EmailTemplatesService } from './email-templates.service';
@@ -9,7 +9,7 @@ import { EmailRecordsService } from './email-records.service';
 import { UserRegion } from './../models/user-region.entity';
 import { User } from '../models/user.entity';
 
-const base64 = require('base-64');
+import * as base64 from 'base-64';
 import * as Moment from 'moment';
 
 @Injectable()

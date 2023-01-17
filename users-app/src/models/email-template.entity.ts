@@ -1,15 +1,5 @@
 import { Directive, Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-  ManyToOne,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { EmailTemplateCategory } from './email-template-category.entity';
 import { Region } from './region.entity';
 @ObjectType()
@@ -17,40 +7,40 @@ import { Region } from './region.entity';
 @Entity({ name: 'email_templates' })
 export class EmailTemplate extends BaseEntity {
   @Column()
-  @Field((type) => ID, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Field((type) => String)
+  @Field(() => String)
   template_name: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   title: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   subject: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   from: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   bcc: string;
 
   @Column()
-  @Field((type) => String, { nullable: true })
+  @Field(() => String, { nullable: true })
   body: string;
 
   @Column()
-  @Field((type) => String, { nullable: true, defaultValue: '' })
+  @Field(() => String, { nullable: true, defaultValue: '' })
   standard_responses: string;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   priority: number;
 
   // @Column()
@@ -70,15 +60,15 @@ export class EmailTemplate extends BaseEntity {
   category: EmailTemplateCategory;
 
   @Column()
-  @Field((type) => String, { nullable: true, defaultValue: '' })
+  @Field(() => String, { nullable: true, defaultValue: '' })
   template: string;
 
   @Column()
-  @Field((type) => String, { nullable: true, defaultValue: '' })
+  @Field(() => String, { nullable: true, defaultValue: '' })
   inserts: string;
 
   @Column()
-  @Field((type) => Int, { nullable: true, defaultValue: 1 })
+  @Field(() => Int, { nullable: true, defaultValue: 1 })
   region_id: number;
 
   @ManyToOne(() => Region, (region) => region.email_templates, {

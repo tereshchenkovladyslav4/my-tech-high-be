@@ -1,4 +1,4 @@
-import { Directive, Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn, IsInt } from 'class-validator';
 import { Column, Entity, ManyToOne, JoinColumn, BaseEntity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Student } from './student.entity';
@@ -81,12 +81,12 @@ export class Withdrawal extends BaseEntity {
 
 @ObjectType()
 export class WithdrawalPagination {
-  @Field((type) => [Withdrawal])
+  @Field(() => [Withdrawal])
   results?: Withdrawal[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

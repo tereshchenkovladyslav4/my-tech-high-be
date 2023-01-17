@@ -2,6 +2,8 @@ import { Controller, Get, HttpException, HttpStatus, Param, StreamableFile, UseG
 import { AppService } from './app.service';
 import { JWTAuthGuard } from './students/guards/jwt-auth.guard';
 import { FilesService } from './students/services/files.service';
+import AdmZip = require('adm-zip');
+import RequestPromise = require('request-promise');
 
 export type DownloadStudentRecordFilesVM = {
   studentName: string;
@@ -24,13 +26,12 @@ export class AppController {
     try {
       const downloadItems: DownloadStudentRecordFilesVM[] = JSON.parse(param);
       if (downloadItems.length > 0) {
-        const req = require('request-promise').defaults({ encoding: null });
+        const req = RequestPromise.defaults({ encoding: null });
         if (downloadItems.length == 1 && downloadItems[0].fileIds?.length == 1 && downloadItems[0].isIndividualFile) {
           const file = await this.fileService.findOneById(downloadItems[0].fileIds[0]);
           const data = req.get(file?.signedUrl);
           return new StreamableFile(data);
         } else {
-          const AdmZip = require('adm-zip');
           const zip = new AdmZip();
           const dataToArchive: { url: string; fileName: string }[] = [];
 

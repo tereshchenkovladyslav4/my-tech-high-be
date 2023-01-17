@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateEmailRecordInput } from '../dto/new-email-record.inputs';
 import { EmailRecord } from '../../models/email-record.entity';
 

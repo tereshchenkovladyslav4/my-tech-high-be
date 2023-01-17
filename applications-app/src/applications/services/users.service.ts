@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../models/user.entity';
 import { CreateParentUserInput } from '../dto/new-parent-user.inputs';
-const crypto = require('crypto');
+import * as crypto from 'crypto';
 const salt = process.env.MTH_SALT || 'asin';
 
 @Injectable()
@@ -29,7 +29,6 @@ export class UsersService {
     const password =
       (user.password && this.encryptPassword(user.password)) || this.encryptPassword(new Date().toString());
     const userInput = { ...user, password };
-    console.log(userInput);
     return this.usersRepository.save(userInput);
   }
 }

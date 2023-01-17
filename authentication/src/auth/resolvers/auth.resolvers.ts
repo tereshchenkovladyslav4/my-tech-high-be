@@ -1,9 +1,5 @@
-import { Args, ID, Query, Resolver, ResolveReference, Context } from '@nestjs/graphql';
-import { UseGuards, Request, UnauthorizedException } from '@nestjs/common';
-import { LocalAuthGuard } from '../../auth/guards/local-auth.guard';
-import { LoginInput } from '../../users/dto/login.inputs';
+import { Resolver } from '@nestjs/graphql';
 import { AuthService } from '../../auth/auth.service';
-import { User } from '../../users/models/user.entity';
 
 @Resolver()
 export class AuthResolver {

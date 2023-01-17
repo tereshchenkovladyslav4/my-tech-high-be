@@ -19,7 +19,7 @@ export class ResourceLevelService {
       delete resourceLevel.resource_id;
       delete resourceLevel.created_at;
 
-      const result = await this.repo.save({
+      await this.repo.save({
         ...resourceLevel,
         resource_id: newResourceId,
       });

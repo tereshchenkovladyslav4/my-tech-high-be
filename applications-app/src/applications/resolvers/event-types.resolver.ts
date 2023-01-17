@@ -5,17 +5,17 @@ import { EventType } from '../models/event-type.entity';
 import { EventTypesService } from '../services/event-types.service';
 import { CreateEventTypeInput } from '../dto/new-event-type.inputs';
 import { UpdateEventTypeInput, UpdateEventTypeInputs } from '../dto/update-event-type.inputs';
-@Resolver((of) => EventType)
+@Resolver(() => EventType)
 export class EventTypesResolver {
   constructor(private eventTypesService: EventTypesService) {}
 
-  @Query((returns) => [EventType], { name: 'eventTypes' })
+  @Query(() => [EventType], { name: 'eventTypes' })
   @UseGuards(new AuthGuard())
   async getEventTypes(@Args('region_id', { type: () => Int }) region_id: number): Promise<EventType[]> {
     return this.eventTypesService.findAll(region_id);
   }
 
-  @Mutation((returns) => EventType, { name: 'createEventType' })
+  @Mutation(() => EventType, { name: 'createEventType' })
   @UseGuards(new AuthGuard())
   async createEventType(
     @Args('createEventTypeInput')
@@ -24,7 +24,7 @@ export class EventTypesResolver {
     return this.eventTypesService.create(createEventTypeInput);
   }
 
-  @Mutation((returns) => EventType, { name: 'updateEventType' })
+  @Mutation(() => EventType, { name: 'updateEventType' })
   @UseGuards(new AuthGuard())
   async updateEventType(
     @Args('updateEventTypeInput')
@@ -33,7 +33,7 @@ export class EventTypesResolver {
     return this.eventTypesService.update(updateEventTypeInput);
   }
 
-  @Mutation((returns) => [EventType], { name: 'updateEventTypes' })
+  @Mutation(() => [EventType], { name: 'updateEventTypes' })
   @UseGuards(new AuthGuard())
   async updateEventTypes(
     @Args('updateEventTypeInputs')

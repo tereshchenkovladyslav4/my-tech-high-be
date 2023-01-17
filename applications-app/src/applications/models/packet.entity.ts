@@ -232,11 +232,11 @@ export class Packet extends BaseEntity {
   @Field(() => Date, { nullable: true })
   date_assigned_to_soe?: Date;
 
-  @ManyToOne((type) => Student, { nullable: true })
+  @ManyToOne(() => Student, { nullable: true })
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
   student?: Student;
 
-  @Field((type) => [PacketFile])
+  @Field(() => [PacketFile])
   files?: PacketFile[];
 
   @Column()
@@ -247,7 +247,7 @@ export class Packet extends BaseEntity {
   @Field(() => String, { nullable: true })
   missing_files?: string;
 
-  @OneToMany((type) => PacketEmail, (packet_email) => packet_email.packet)
+  @OneToMany(() => PacketEmail, (packet_email) => packet_email.packet)
   @JoinColumn({ name: 'packet_id', referencedColumnName: 'packet_id' })
   packet_emails: PacketEmail[];
 

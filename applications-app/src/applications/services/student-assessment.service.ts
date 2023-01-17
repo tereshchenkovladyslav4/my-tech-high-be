@@ -9,7 +9,7 @@ export class StudentAssessmentService {
   constructor(
     @InjectRepository(StudentAssessmentOption)
     private readonly repo: Repository<StudentAssessmentOption>,
-  ) { }
+  ) {}
 
   async find(student_id: number): Promise<StudentAssessmentOption[]> {
     const data = await this.repo.find({
@@ -36,7 +36,7 @@ export class StudentAssessmentService {
     try {
       const testData = JSON.parse(testing_preference);
       for (let i = 0; i < testData.length; i++) {
-        const testOption = await this.repo.update(
+        await this.repo.update(
           {
             assessment_option_id: testData[i].assessmentOptionId,
           },

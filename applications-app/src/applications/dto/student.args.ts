@@ -3,39 +3,39 @@ import { Max, Min } from 'class-validator';
 
 @ArgsType()
 export class StudentsArgs {
-  @Field((type) => Int)
+  @Field(() => Int)
   @Min(0)
   skip = 0;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   @Min(1)
   @Max(50)
   take = 25;
 
-  @Field((type) => String)
+  @Field(() => String)
   sort = 'ASC';
 
-  @Field((type) => String)
+  @Field(() => String)
   search = '';
 
-  @Field((type) => StudentFilters)
+  @Field(() => StudentFilters)
   filter = null;
 }
 
 @InputType('StudentFilters')
 export class StudentFilters {
-  @Field((type) => String)
+  @Field(() => String)
   region_id = '';
 
-  @Field((type) => Int)
+  @Field(() => Int)
   schoolYear = 1;
 
-  @Field((type) => [String])
+  @Field(() => [String])
   grades = [];
 
-  @Field((type) => [String])
+  @Field(() => [String])
   specialEd = [];
 
-  @Field((type) => [String])
+  @Field(() => [String])
   status = [];
 }

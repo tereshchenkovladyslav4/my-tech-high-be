@@ -5,10 +5,10 @@ import { Withdrawal } from '../models/withdrawal.entity';
 
 @InputType()
 export class WithdrawalInput {
-  @Field((type) => Withdrawal)
+  @Field(() => Withdrawal)
   withdrawal = null;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   @IsIn([WithdrawalOption])
   withdrawalOption?: number = null;
 }

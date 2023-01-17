@@ -19,7 +19,7 @@ export class PersonsResolver {
     private phonesService: PhonesService,
     private addressService: AddressService,
     private emailVerifiersService: EmailVerifiersService,
-  ) { }
+  ) {}
 
   @Query((returns) => Person, { name: 'person' })
   async getPerson(@Args({ name: 'person_id', type: () => ID }) person_id: number): Promise<Person> {

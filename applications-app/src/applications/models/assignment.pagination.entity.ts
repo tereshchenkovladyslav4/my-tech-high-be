@@ -3,12 +3,12 @@ import { Assignment } from './assignment.entity';
 
 @ObjectType()
 export class AssignmentPagination {
-  @Field((type) => [Assignment])
+  @Field(() => [Assignment])
   results?: Assignment[];
 
-  @Field((type) => Int)
+  @Field(() => Int)
   page_total?: number;
 
-  @Field((type) => Int)
+  @Field(() => Int)
   total?: number;
 }

@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver, ID } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { Schedule } from '../models/schedule.entity';
@@ -18,19 +18,19 @@ import { EmailUpdatesAllowedInput } from '../dto/email-update-allowed.inputs';
 export class ScheduleResolver {
   constructor(private service: ScheduleService) {}
 
-  @Query((returns) => SchedulePagination, { name: 'schedules' })
+  @Query(() => SchedulePagination, { name: 'schedules' })
   //@UseGuards(new AuthGuard())
   async getSchedules(@Args() schedulesArgs: SchedulesArgs): Promise<Pagination<Schedule>> {
     const results = await this.service.findAll(schedulesArgs);
     return results;
   }
 
-  @Mutation((returns) => [ScheduleEmail], { name: 'emailSchedule' })
+  @Mutation(() => [ScheduleEmail], { name: 'emailSchedule' })
   async emailSchedule(@Args('emailScheduleInput') emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
     return await this.service.sendEmail(emailScheduleInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'sendUpdatesRequiredEmail' })
+  @Mutation(() => Boolean, { name: 'sendUpdatesRequiredEmail' })
   @UseGuards(new AuthGuard())
   async sendUpdatesRequiredEmail(
     @Args('updateRequiredEmail') updateRequiredEmail: EmailUpdatesRequiredInput,
@@ -38,7 +38,7 @@ export class ScheduleResolver {
     return await this.service.sendUpdatesReqiredEmail(updateRequiredEmail);
   }
 
-  @Mutation((returns) => Boolean, { name: 'sendUpdatesAllowedEmail' })
+  @Mutation(() => Boolean, { name: 'sendUpdatesAllowedEmail' })
   @UseGuards(new AuthGuard())
   async sendUpdatesAllowedEmail(
     @Args('updatesAllowedEmail') updatesAllowedEmail: EmailUpdatesAllowedInput,
@@ -64,13 +64,13 @@ export class ScheduleResolver {
     return this.service.delete(scheduleId);
   }
 
-  @Query((returns) => ResponseDTO, { name: 'scheduleCount' })
+  @Query(() => ResponseDTO, { name: 'scheduleCount' })
   @UseGuards(new AuthGuard())
   async getScheduleCountGroup(): Promise<ResponseDTO> {
     return this.service.getScheduleCountGroup();
   }
 
-  @Query((returns) => ResponseDTO, { name: 'scheduleCountByRegionId' })
+  @Query(() => ResponseDTO, { name: 'scheduleCountByRegionId' })
   @UseGuards(new AuthGuard())
   async getScheduleCountByRegionId(
     @Args('scheduleGroupCountArgs') scheduleGroupCountArgs: SchedulesGroupCountArgs,

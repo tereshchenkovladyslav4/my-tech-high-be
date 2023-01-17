@@ -1,12 +1,5 @@
 import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  BaseEntity,
-  ManyToOne,
-  JoinColumn
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
 import { Classes } from './classes.entity';
 
 @ObjectType()
@@ -14,7 +7,7 @@ import { Classes } from './classes.entity';
 @Entity('mth_homeroom_student')
 export class HomeroomStudent extends BaseEntity {
   @Column()
-  @Field((type) => ID)
+  @Field(() => ID)
   @PrimaryGeneratedColumn()
   id?: number;
 
@@ -38,5 +31,4 @@ export class HomeroomStudent extends BaseEntity {
   @Field(() => Classes)
   @JoinColumn([{ name: 'teacher_id', referencedColumnName: 'class_id' }])
   classes: Classes;
-
 }

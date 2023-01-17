@@ -1,6 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { REDUCE_FUNDS, SEMESTER_TYPE } from '../../enums/period.enum';
-import { Min } from 'class-validator';
 
 @InputType()
 export class PeriodInput {

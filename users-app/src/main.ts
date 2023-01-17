@@ -8,6 +8,5 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new LoggingInterceptor());
   await app.listen(3000);
-  console.log('>>>>>users-app is running in port 3000');
 }
 bootstrap();

@@ -4,7 +4,7 @@ import { Args, ID, Query, Resolver } from '@nestjs/graphql';
 import { SchoolDistrictService } from '../../services/schoolDistrict.service';
 import { SchoolDistrict } from '../../../models/school-district.entity';
 
-@Resolver((of) => SchoolDistrict)
+@Resolver(() => SchoolDistrict)
 export class SchoolDistrictsResolver {
   constructor(private schoolDistrictService: SchoolDistrictService) {}
 

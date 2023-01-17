@@ -5,7 +5,6 @@ import { StudentStatus } from '../models/student-status.entity';
 import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { SchoolYearDataInput } from '../dto/school-year-data.Input';
 import { SchoolYearData } from '../models/school-year-data.entity';
-import { WithdrawalService } from './withdrawal.service';
 import { StudentStatusEnum } from '../enums';
 
 @Injectable()

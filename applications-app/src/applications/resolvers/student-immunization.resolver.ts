@@ -6,7 +6,7 @@ import { ImmunizationSettingsService } from '../services/immunization-settings.s
 import { SchoolYearService } from '../services/schoolyear.service';
 import { StudentImmunizationService } from '../services/student-immunization.service';
 
-@Resolver((of) => StudentImmunization)
+@Resolver(() => StudentImmunization)
 export class StudentImmunizationResolver {
   constructor(
     private studentImmunizationService: StudentImmunizationService,
@@ -14,14 +14,14 @@ export class StudentImmunizationResolver {
     private applicationService: ApplicationsService,
     private schoolYearService: SchoolYearService,
   ) {}
-  @Query((returns) => StudentImmunization, { nullable: true })
+  @Query(() => StudentImmunization, { nullable: true })
   async StudentImmunization(
     @Args('student_id', { type: () => Int }) student_id: number,
     @Args('immunization_id', { type: () => Int }) immunization_id: number,
   ) {
     return this.studentImmunizationService.findOne(student_id, immunization_id);
   }
-  @Query((returns) => [StudentImmunization])
+  @Query(() => [StudentImmunization])
   async StudentImmunizations(@Args('student_id', { type: () => Int }) student_id: number) {
     const application = await this.applicationService.findByStudent(student_id);
     const schoolYearId = application[0].school_year_id;
@@ -51,7 +51,7 @@ export class StudentImmunizationResolver {
     return res;
   }
 
-  @Mutation((returns) => Boolean, {
+  @Mutation(() => Boolean, {
     name: 'updateCreateStudentImmunization',
   })
   async updateCreateStudentImmunization(

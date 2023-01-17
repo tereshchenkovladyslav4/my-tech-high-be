@@ -58,7 +58,7 @@ export class Schedule extends BaseEntity {
   @Field(() => Date, { nullable: true })
   @Directive('@external')
   current_submission: Date;
-  
+
   @ManyToOne(() => Student, (student) => student.StudentSchedules, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',

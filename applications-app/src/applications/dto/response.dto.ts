@@ -10,7 +10,7 @@ export class ResponseDTO {
   @Field({ nullable: true })
   error: boolean;
 
-  @Field((type) => GraphQLJSON, { nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
   results: any;
 }

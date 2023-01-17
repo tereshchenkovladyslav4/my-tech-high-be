@@ -31,11 +31,11 @@ export class SchoolPartner extends BaseEntity {
   active: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   region_id: number;
 
   @Column()
-  @Field((type) => Int, { nullable: true })
+  @Field(() => Int, { nullable: true })
   school_year_id: number;
 
   @OneToOne(() => Region, (region) => region.id)

@@ -20,7 +20,7 @@ export class EnrollmentQuestionGroupService {
       .orderBy('groups.order', 'ASC')
       .getMany();
   }
-
+  /* eslint-disable @typescript-eslint/no-unused-vars*/
   async find(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionGroup[]> {
     return await this.repo.find();
   }

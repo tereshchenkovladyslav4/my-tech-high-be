@@ -1,8 +1,8 @@
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Query, Resolver } from '@nestjs/graphql';
 import { EmailReminder } from 'src/models/email-reminder.entity';
 import { EmailReminderService } from 'src/users/services/email-templates/email-reminder.service';
 
-@Resolver((of) => EmailReminder)
+@Resolver(() => EmailReminder)
 export class EmailReminderResolver {
   constructor(private emailReminderService: EmailReminderService) {}
 

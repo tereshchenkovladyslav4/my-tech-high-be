@@ -17,28 +17,28 @@ import { ReinstateWithdrawalInput } from '../dto/reinstate-withdrawal.inputs';
 import { WithdrawalStudentInfo } from '../dto/student-info-by-withdrawalId.dto';
 import { IndividualWithdrawalInput } from '../dto/individual-withdrawal.inputs';
 
-@Resolver((of) => Withdrawal)
+@Resolver(() => Withdrawal)
 export class WithdrawalResolver {
   constructor(private service: WithdrawalService, private emailService: WithdrawalEmailsService) {}
 
-  @Query((returns) => WithdrawalPagination, { name: 'withdrawals' })
+  @Query(() => WithdrawalPagination, { name: 'withdrawals' })
   @UseGuards(new AuthGuard())
   get(@Args() pagination: PaginationInput, @Args() filter: FilterInput): Promise<Pagination<Withdrawal>> {
     return this.service.find(pagination, filter);
   }
 
-  @Query((returns) => ResponseDTO, { name: 'withdrawalCountsByStatus' })
+  @Query(() => ResponseDTO, { name: 'withdrawalCountsByStatus' })
   @UseGuards(new AuthGuard())
   getCountsByStatus(@Args() filter: FilterInput): Promise<ResponseDTO> {
     return this.service.getCountsByStatus(filter);
   }
 
-  @Query((returns) => [WithdrawalEmail], { name: 'getEmailsByWithdrawId' })
+  @Query(() => [WithdrawalEmail], { name: 'getEmailsByWithdrawId' })
   getWithdrawalEmails(@Args({ name: 'withdrawId', type: () => Int }) withdrawId: number): Promise<WithdrawalEmail[]> {
     return this.emailService.findByApplication(withdrawId);
   }
 
-  @Query((returns) => WithdrawalStudentInfo, {
+  @Query(() => WithdrawalStudentInfo, {
     name: 'getStudentInfoByWithdrawalId',
   })
   getStudentInfoByWithdrawalId(
@@ -47,13 +47,13 @@ export class WithdrawalResolver {
     return this.service.getStudentInfoByWithdrawalId(withdrawId);
   }
 
-  @Query((returns) => ResponseDTO, { name: 'withdrawalStatus' })
+  @Query(() => ResponseDTO, { name: 'withdrawalStatus' })
   @UseGuards(new AuthGuard())
   getWithdrawalStatus(@Args() filter: FilterInput): Promise<ResponseDTO> {
     return this.service.getStatus(filter);
   }
 
-  @Mutation((returns) => Boolean, { name: 'saveWithdrawal' })
+  @Mutation(() => Boolean, { name: 'saveWithdrawal' })
   async save(
     @Args('withdrawalInput')
     withdrawalInput: WithdrawalInput,
@@ -61,7 +61,7 @@ export class WithdrawalResolver {
     return await this.service.save(withdrawalInput);
   }
 
-  @Mutation((returns) => [WithdrawalEmail], { name: 'emailWithdrawal' })
+  @Mutation(() => [WithdrawalEmail], { name: 'emailWithdrawal' })
   @UseGuards(new AuthGuard())
   async emailWithdrawal(
     @Args('emailWithdrawalInput') emailWithdrawalInput: EmailWithdrawalInput,
@@ -69,13 +69,13 @@ export class WithdrawalResolver {
     return await this.service.sendEmail(emailWithdrawalInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'quickWithdrawal' })
+  @Mutation(() => Boolean, { name: 'quickWithdrawal' })
   @UseGuards(new AuthGuard())
   async quickWithdrawal(@Args('quickWithdrawalInput') quickWithdrawalInput: QuickWithdrawalInput): Promise<boolean> {
     return await this.service.quickWithdrawal(quickWithdrawalInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'reinstateWithdrawal' })
+  @Mutation(() => Boolean, { name: 'reinstateWithdrawal' })
   @UseGuards(new AuthGuard())
   async reinstateWithdrawal(
     @Args('reinstateWithdrawalInput')
@@ -84,7 +84,7 @@ export class WithdrawalResolver {
     return await this.service.reinstateWithdrawal(reinstateWithdrawalInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'individualWithdrawal' })
+  @Mutation(() => Boolean, { name: 'individualWithdrawal' })
   @UseGuards(new AuthGuard())
   async individualWithdrawal(
     @Args('individualWithdrawalInput')
@@ -93,7 +93,7 @@ export class WithdrawalResolver {
     return await this.service.individualWithdrawal(individualWithdrawalInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'deleteWithdrawal' })
+  @Mutation(() => Boolean, { name: 'deleteWithdrawal' })
   @UseGuards(new AuthGuard())
   async deleteWithdrawal(
     @Args('student_id', { type: () => Int })
@@ -104,7 +104,7 @@ export class WithdrawalResolver {
     return this.service.delete(student_id, active_option);
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateWithdrawal' })
+  @Mutation(() => Boolean, { name: 'updateWithdrawal' })
   @UseGuards(new AuthGuard())
   async updateWithdrawal(
     @Args('updateWithdrawalInput')

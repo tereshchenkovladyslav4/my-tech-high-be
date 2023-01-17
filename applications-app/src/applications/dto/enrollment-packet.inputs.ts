@@ -35,13 +35,13 @@ export class EnrollmentPacketInput {
   @Field({ nullable: true })
   meta?: string;
 
-  @Field((type) => CreateStudentPersonAddressInput, { nullable: true })
+  @Field(() => CreateStudentPersonAddressInput, { nullable: true })
   student?: CreateStudentPersonAddressInput;
 
-  @Field((type) => NewParentPacketContactInput, { nullable: true })
+  @Field(() => NewParentPacketContactInput, { nullable: true })
   packet?: NewParentPacketContactInput;
 
-  @Field((type) => CreateParentPersonInput, { nullable: true })
+  @Field(() => CreateParentPersonInput, { nullable: true })
   parent?: CreateParentPersonInput;
 
   @Field({ nullable: true })

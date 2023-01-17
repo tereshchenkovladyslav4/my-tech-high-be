@@ -8,13 +8,11 @@ import { Pagination } from 'src/paginate';
 import { AssignmentPagination } from '../models/assignment.pagination.entity';
 import { AssignmentArgs } from '../dto/assignment.args';
 
-@Resolver((of) => Assignment)
+@Resolver(() => Assignment)
 export class AssignmentResolver {
-  constructor(
-    private service: AssignmentService,
-  ) { }
+  constructor(private service: AssignmentService) {}
 
-  @Mutation((returns) => Assignment, { name: 'createNewAssignment' })
+  @Mutation(() => Assignment, { name: 'createNewAssignment' })
   @UseGuards(new AuthGuard())
   async createNewAssignment(
     @Args('createNewAssignmentInput', { type: () => CreateNewAssignmentInput })
@@ -23,31 +21,30 @@ export class AssignmentResolver {
     return this.service.save(createNewAssignmentInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'updateNewAssignment' })
+  @Mutation(() => Boolean, { name: 'updateNewAssignment' })
   @UseGuards(new AuthGuard())
   async updateNewAssignment(
     @Args('updateAssignmentInput', { type: () => CreateNewAssignmentInput })
     updateAssignmentInput: CreateNewAssignmentInput,
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     return this.service.update(updateAssignmentInput);
   }
 
-  @Query((returns) => AssignmentPagination, { name: 'getAssignmentsByMasterId' })
+  @Query(() => AssignmentPagination, { name: 'getAssignmentsByMasterId' })
   async getChecklist(@Args() assignmentArgs: AssignmentArgs): Promise<Pagination<Assignment>> {
     const results = await this.service.getAssignmentsByMasterId(assignmentArgs);
     return results;
   }
 
-  @Query((returns) => Assignment, { name: 'getAssignmentById' })
+  @Query(() => Assignment, { name: 'getAssignmentById' })
   @UseGuards(new AuthGuard())
   async getMastersById(@Args('assignmentId', { type: () => Int }) assignmentId: number): Promise<Assignment> {
     return this.service.getById(assignmentId);
   }
 
-  @Mutation((returns) => Boolean, { name: 'deleteAssignmentById' })
+  @Mutation(() => Boolean, { name: 'deleteAssignmentById' })
   @UseGuards(new AuthGuard())
-  async deleteAssignmentById(@Args('assignmentId', { type: () => Int }) assignmentId: number): Promise<Boolean> {
+  async deleteAssignmentById(@Args('assignmentId', { type: () => Int }) assignmentId: number): Promise<boolean> {
     return this.service.deleteById(assignmentId);
   }
-
 }

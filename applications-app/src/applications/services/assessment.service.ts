@@ -11,7 +11,7 @@ export class AssessmentService {
     @InjectRepository(Assessment)
     private readonly repo: Repository<Assessment>,
     private assessmentOptionService: AssessmentOptionService,
-  ) { }
+  ) {}
 
   async find(schoolYearId: number): Promise<Assessment[]> {
     const data = await this.repo.find({

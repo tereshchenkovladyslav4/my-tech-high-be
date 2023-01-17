@@ -1,4 +1,4 @@
-import { Field, ID, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class FindEventsByRegionIdSearch {
@@ -9,5 +9,8 @@ export class FindEventsByRegionIdSearch {
   search_field?: string;
 
   @Field(() => Int, { nullable: true })
-  parent_id?: number;
+  user_id?: number;
+
+  @Field(() => Int, { nullable: true })
+  type?: 'parent' | 'student';
 }

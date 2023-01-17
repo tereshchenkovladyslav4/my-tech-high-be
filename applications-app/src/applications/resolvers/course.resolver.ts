@@ -1,15 +1,15 @@
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { Course } from '../models/course.entity';
 import { CourseService } from '../services/course.service';
 import { CreateOrUpdateCourseInput } from '../dto/create-or-update-course.inputs';
 
-@Resolver((of) => Course)
+@Resolver(() => Course)
 export class CourseResolver {
   constructor(private service: CourseService) {}
 
-  @Mutation((returns) => Course, { name: 'createOrUpdateCourse' })
+  @Mutation(() => Course, { name: 'createOrUpdateCourse' })
   @UseGuards(new AuthGuard())
   async createOrUpdateCourse(
     @Args('createCourseInput')
@@ -18,7 +18,7 @@ export class CourseResolver {
     return this.service.save(createCourseInput);
   }
 
-  @Mutation((returns) => Boolean, { name: 'deleteCourse' })
+  @Mutation(() => Boolean, { name: 'deleteCourse' })
   @UseGuards(new AuthGuard())
   async deleteCourse(
     @Args('courseId')
@@ -27,7 +27,7 @@ export class CourseResolver {
     return this.service.delete(courseId);
   }
 
-  @Mutation((returns) => Boolean, { name: 'cloneCourse' })
+  @Mutation(() => Boolean, { name: 'cloneCourse' })
   @UseGuards(new AuthGuard())
   async cloneCourse(
     @Args('courseId')

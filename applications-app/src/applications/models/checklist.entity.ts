@@ -1,8 +1,7 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, CreateDateColumn } from 'typeorm';
 import { CHECKLIST_STATUS } from '../enums';
-import { SchoolYear } from './schoolyear.entity';
 @ObjectType()
 @Directive('@key(fields: "id,checklist_id,region_id,school_year_id,subject,goal")')
 @Entity('mth_checklist')

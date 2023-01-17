@@ -8,13 +8,13 @@ export class EnrollmentPacketContactInput {
   @Field(() => Int)
   student_id?: number;
 
-  @Field((type) => CreateParentPersonInput)
+  @Field(() => CreateParentPersonInput)
   parent?: CreateParentPersonInput;
 
-  @Field((type) => NewParentPacketContactInput)
+  @Field(() => NewParentPacketContactInput)
   packet?: NewParentPacketContactInput;
 
-  @Field((type) => CreateStudentPersonAddressInput)
+  @Field(() => CreateStudentPersonAddressInput)
   student?: CreateStudentPersonAddressInput;
 
   @Field({ nullable: true })

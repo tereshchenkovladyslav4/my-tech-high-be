@@ -26,7 +26,7 @@ export class StudentsHomeroomArgs {
 @InputType('StudentHomeroomFilters')
 export class StudentHomeroomFilters {
   @Field((type) => String)
-  region_id = "";
+  region_id = '';
 
   @Field((type) => Int)
   schoolYear = 1;

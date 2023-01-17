@@ -482,7 +482,7 @@ export class PacketsService {
       application_ids.map(async (id) => {
         const application_id = Number(id);
         const packet = await this.packetsRepository.findOne({ packet_id: application_id });
-        const studentGradeLevel = await this.studentGradeLevelService.update(packet.student_id, school_year_id);
+        await this.studentGradeLevelService.update(packet.student_id, school_year_id);
         const applications = await this.applicationService.findByStudent(packet.student_id);
         if (applications[0]) {
           applications[0].school_year_id = school_year_id;

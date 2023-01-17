@@ -31,7 +31,7 @@ export class ApplicationEmail extends BaseEntity {
   @Field(() => Date, { nullable: true })
   created_at?: Date;
 
-  @ManyToOne((type) => Application)
+  @ManyToOne(() => Application)
   @JoinColumn({
     name: 'application_id',
     referencedColumnName: 'application_id',

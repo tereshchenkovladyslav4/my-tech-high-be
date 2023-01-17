@@ -2,7 +2,7 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateEmailTemplateInput {
-  @Field((type) => EmailTemplate)
+  @Field(() => EmailTemplate)
   emailTemplate = null;
 
   @Field(() => String, { nullable: true })

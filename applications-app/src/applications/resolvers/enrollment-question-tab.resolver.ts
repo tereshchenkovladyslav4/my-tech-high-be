@@ -13,7 +13,7 @@ export class EnrollmentQuestionTabResolver {
     private enrollmentQuestionGroupService: EnrollmentQuestionGroupService,
     private enrollmentQuestionsService: EnrollmentQuestionsService,
   ) {}
-  @ResolveField((of) => [EnrollmentQuestionGroup], { name: 'groups' })
+  @ResolveField(() => [EnrollmentQuestionGroup], { name: 'groups' })
   public async getGroups(@TypeParent() parent: EnrollmentQuestionTab): Promise<EnrollmentQuestionGroup[]> {
     return await this.enrollmentQuestionGroupService.findOneByParent(parent.id);
   }
@@ -43,7 +43,7 @@ export class EnrollmentQuestionTabResolver {
     return this.service.findByAdmin(input);
   }
 
-  @Mutation((returns) => Boolean, {
+  @Mutation(() => Boolean, {
     name: 'saveEnrollmentQuestions',
   })
   async updateCreateEnrollmentQuestions(

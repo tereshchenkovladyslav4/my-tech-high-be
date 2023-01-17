@@ -1,6 +1,5 @@
 import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, BaseEntity } from 'typeorm';
-import { Schedule } from './schedule.entity';
 import { Period } from './period.entity';
 import { Subject } from './subject.entity';
 import { Title } from './title.entity';

@@ -14,7 +14,7 @@ export class RegionService {
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
   ) {}
-
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   async timezoneOffset(region_id: number): Promise<number> {
     // -420 is UTCOffset for MST timezone
     // We will integrate timezone for every region

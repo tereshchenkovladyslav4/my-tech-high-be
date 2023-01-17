@@ -19,8 +19,7 @@ import { UserRegionArgs } from '../dto/user-regions.args';
 import { UserRegionService } from './region/user-region.service';
 import { Pagination } from '../paginate';
 import { MasqueradeInput } from '../dto/masquerade-input';
-
-const crypto = require('crypto');
+import * as crypto from 'crypto';
 const salt = process.env.MTH_SALT || 'asin';
 
 @Injectable()
@@ -298,11 +297,9 @@ export class UsersService {
           email: user.email,
           verification_type: 0,
         });
-
         if (!emailVerifier) throw new HttpException('EmailVerifier Not Created', HttpStatus.CONFLICT);
 
         await this.emailService.sendAccountVerificationEmail(emailVerifier);
-
         return user;
       } else {
         throw new HttpException('There was an error creating user, Try Again!', HttpStatus.CONFLICT);

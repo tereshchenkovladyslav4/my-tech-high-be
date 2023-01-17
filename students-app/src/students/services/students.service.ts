@@ -671,8 +671,6 @@ export class StudentsService {
       .printSql()
       .getRawOne();
 
-    // console.log('ParentData: ', parent);
-
     const region_id = (parent && parent.userRegion_region_id) || null;
     if (!region_id) {
       return defaultResponse;
@@ -703,7 +701,6 @@ export class StudentsService {
       .printSql()
       .getRawOne();
 
-    //console.log('Student: ', student);
     return {
       student_id: (student && student.Student_student_id) || studentData.student_id,
       school_year_id: studentGradeLevel.school_year_id || null,

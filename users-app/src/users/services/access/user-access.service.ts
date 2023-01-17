@@ -1,10 +1,9 @@
 import { UserAccess } from '../../../models/user-access.entity';
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserAccessInput } from '../../dto/userAccess/create-user-access.input';
 import { UpdateUserAccessInput } from '../../dto/userAccess/update-user-access.input';
-import { map } from 'rxjs';
 
 @Injectable()
 export class UserAccessService {
@@ -53,7 +52,7 @@ export class UserAccessService {
 
   async updateUserAccess(updateUserAccessInput: UpdateUserAccessInput): Promise<UserAccess[]> {
     await Promise.all(
-      updateUserAccessInput.access_id.map(async (_) => {
+      updateUserAccessInput.access_id.map(async () => {
         await this.userAccessRepository.delete({ user_id: updateUserAccessInput.user_id });
       }),
     );

@@ -1,12 +1,11 @@
-import { Directive, Field, ObjectType } from '@nestjs/graphql';
-import { User } from './user.entity';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class MeConfirmation {
-  @Field((type) => String)
+  @Field(() => String)
   token?: string;
 
-  @Field((type) => String)
+  @Field(() => String)
   email?: string;
 
   @Field()
