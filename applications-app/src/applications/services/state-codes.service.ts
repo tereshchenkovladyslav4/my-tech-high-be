@@ -29,7 +29,7 @@ export class StateCodesService {
   }
 
   async findAll(stateCodesArgs: StateCodesArgs): Promise<Pagination<StateCodes>> {
-    const { skip, take, search } = stateCodesArgs;
+    const { skip, take, filter, search, region_id } = stateCodesArgs;
     const qb = this.stateCodesRepository
       .createQueryBuilder('stateCodes')
       .leftJoinAndSelect('stateCodes.SchoolYear', 'schoolYear')
