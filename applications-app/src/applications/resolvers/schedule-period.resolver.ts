@@ -21,6 +21,15 @@ export class SchedulePeriodResolver {
     return this.service.find(schoolYearId, studentId);
   }
 
+  @Query(() => [SchedulePeriod], { name: 'schedulePeriodsByProvider' })
+  @UseGuards(new AuthGuard())
+  getSchedulePeriodsByProvider(
+    @Args('providerIds')
+    providerIds: string,
+  ): Promise<SchedulePeriod[]> {
+    return this.service.findAll(providerIds);
+  }
+
   @Query(() => [SchedulePeriodHistory], { name: 'schedulePeriodHistories' })
   //@UseGuards(new AuthGuard())
   schedulePeriodHistories(

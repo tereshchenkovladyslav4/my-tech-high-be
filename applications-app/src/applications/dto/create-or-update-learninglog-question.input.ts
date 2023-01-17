@@ -32,9 +32,9 @@ export class CreateOrUpdateLearningLogQuestionInput {
   @Field(() => String, { nullable: true })
   grades?: string;
 
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true })
   page?: number;
 
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true })
   order?: number;
 }

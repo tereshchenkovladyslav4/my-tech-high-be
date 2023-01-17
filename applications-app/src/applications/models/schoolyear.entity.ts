@@ -19,6 +19,7 @@ import { SchoolPartner } from './school-partner.entity';
 import { Subject } from './subject.entity';
 import { ReduceFunds } from '../enums/reduce-funds.enum';
 import { ReimbursementSetting } from './reimbursement-setting.entity';
+import { StateCodes } from './state-codes.entity';
 
 @InputType('schoolyear')
 @ObjectType()
@@ -319,4 +320,8 @@ export class SchoolYear extends BaseEntity {
 
   @Field(() => Boolean, { nullable: true })
   IsCurrentYear: boolean;
+
+  @OneToMany(() => StateCodes, (stateCodes) => stateCodes.SchoolYear)
+  @Field(() => [StateCodes], { nullable: true })
+  StateCodes: StateCodes[];
 }

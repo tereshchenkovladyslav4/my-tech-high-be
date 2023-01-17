@@ -32,12 +32,23 @@ export class StateCodesService {
     const { skip, take, search } = stateCodesArgs;
     const qb = this.stateCodesRepository
       .createQueryBuilder('stateCodes')
-      .leftJoinAndMapOne('stateCodes.Title', Title, 'title', 'title.title_id = stateCodes.TitleId');
+      .leftJoinAndSelect('stateCodes.SchoolYear', 'schoolYear')
+      .leftJoinAndMapOne('stateCodes.Title', Title, 'title', 'title.title_id = stateCodes.TitleId')
+      .where(`schoolYear.RegionId = ${region_id}`);
 
+    if (filter && filter.selectedYearId) {
+      qb.andWhere(`schoolYear.school_year_id = ${filter.selectedYearId}`);
+    }
     if (search) {
       qb.andWhere(
         new Brackets((sub) => {
           sub
+            .orWhere('stateCodes.TitleId like :text', {
+              text: `%${search}%`,
+            })
+            .orWhere('stateCodes.title_name like :text', {
+              text: `%${search}%`,
+            })
             .orWhere('stateCodes.teacher like :text', {
               text: `%${search}%`,
             })

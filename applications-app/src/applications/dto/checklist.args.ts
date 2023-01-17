@@ -8,7 +8,7 @@ export class ChecklistsArgs {
   skip = 0;
 
   @Field(() => Int)
-  @Min(1)
+  @Min(-1)
   @Max(50)
   take = 25;
 

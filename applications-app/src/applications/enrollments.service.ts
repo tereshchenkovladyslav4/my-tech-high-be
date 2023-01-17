@@ -23,6 +23,7 @@ import { UserRegion } from './models/user-region.entity';
 import { UserRegionService } from './services/user-region.service';
 import { EnrollmentPacketSubmitInput } from './dto/enrollment-packet-submit.input';
 import { DeleteEnrollmentPacketDocumentsInput } from './dto/delete-enrollment-packet-documents.input';
+import { StatusEnum } from './models/packet.entity';
 
 import * as common_1 from '@nestjs/common';
 
@@ -323,7 +324,7 @@ export class EnrollmentsService {
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
-        status: 'Started',
+        status: packetData.status == StatusEnum.missing_info ? StatusEnum.resubmitted : StatusEnum.started,
         deadline: packetData ? packetData.deadline.toISOString() : new Date().toISOString(),
         date_accepted: null,
         date_submitted: new Date(),

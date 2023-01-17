@@ -15,17 +15,8 @@ export class LearningLogQuestionService {
     await this.questionRepository.delete({ assignment_id: createOrUpdateLearningLogQuestionInput[0].assignment_id });
     Promise.all([
       createOrUpdateLearningLogQuestionInput.map(async (item) => {
-        let validationList = [];
-        if (item?.validations) {
-          validationList = JSON.parse(item?.validations);
-        }
         if (item.slug) {
-          await this.questionRepository.save({
-            ...item,
-            required: validationList.includes('required'),
-            can_upload: validationList.includes('upload'),
-            grade_specific: validationList.includes('grade_question'),
-          });
+          await this.questionRepository.save(item);
         }
       }),
     ]);

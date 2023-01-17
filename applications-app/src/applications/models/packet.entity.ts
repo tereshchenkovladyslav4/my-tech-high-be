@@ -6,6 +6,7 @@ import { PacketEmail } from './packet-email.entity';
 
 export enum StatusEnum {
   not_started = 'Not Started',
+  started = 'Started',
   missing_info = 'Missing Info',
   submitted = 'Submitted',
   resubmitted = 'Resubmitted',

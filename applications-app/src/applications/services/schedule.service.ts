@@ -274,17 +274,21 @@ export class ScheduleService {
   }
 
   async sendEmail(emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
-    const { schedule_ids, subject, body, from } = emailScheduleInput;
-    const [results] = await this.repo
+    const { schedule_ids, schedule_status, subject, body, from } = emailScheduleInput;
+    const qb = this.repo
       .createQueryBuilder('schedule')
       .leftJoinAndSelect('schedule.ScheduleStudent', 'ScheduleStudent')
       .leftJoinAndSelect('schedule.SchoolYear', 'SchoolYear')
       .leftJoinAndSelect('ScheduleStudent.person', 'person')
       .leftJoinAndSelect('ScheduleStudent.parent', 'parent')
-      .leftJoinAndSelect('parent.person', 'p_person')
-      .whereInIds(schedule_ids)
-      .getManyAndCount();
-
+      .leftJoinAndSelect('parent.person', 'p_person');
+    if (schedule_ids && schedule_ids.length > 0) {
+      qb.whereInIds(schedule_ids);
+    }
+    if (schedule_status && schedule_status.length > 0) {
+      qb.andWhere('schedule.status IN (:status)', { status: schedule_status });
+    }
+    const [results] = await qb.getManyAndCount();
     const user_id = results[0].ScheduleStudent.parent.person.user_id;
     const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(user_id);
 
@@ -303,9 +307,17 @@ export class ScheduleService {
         template_name: 'Schedule Page',
       });
     }
-
+    let newScheduleIds = [];
+    if (schedule_ids && schedule_ids.length > 0) {
+      newScheduleIds = schedule_ids;
+    }
+    if (schedule_status && schedule_status.length > 0) {
+      newScheduleIds = results.map((ret) => {
+        return ret.schedule_id;
+      });
+    }
     const scheduleEmails = Promise.all(
-      schedule_ids.map(async (id) => {
+      newScheduleIds.map(async (id) => {
         return await this.scheduleEmailsService.create({
           schedule_id: id,
           subject: subject,

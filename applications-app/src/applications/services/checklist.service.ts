@@ -53,7 +53,13 @@ export class ChecklistService {
       );
     }
     qb.orderBy('checklist.checklist_id', 'ASC');
-    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+    let results = [];
+    let total = 0;
+    if (take === -1) {
+      [results, total] = await qb.getManyAndCount();
+    } else {
+      [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+    }
 
     return new Pagination<Checklist>({
       results,

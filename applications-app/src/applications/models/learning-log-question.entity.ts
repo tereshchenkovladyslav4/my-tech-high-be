@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id,assignment_id, type, slug, parent_slug, question, options, default_question, required, can_upload, grade_specific, grades")',
+  '@key(fields: "id,assignment_id, type, slug, parent_slug, question, options, default_question, validations, grades")',
 )
 @Entity('mth_learning_log_questions')
 export class LearningLogQuestion extends BaseEntity {
@@ -41,16 +41,8 @@ export class LearningLogQuestion extends BaseEntity {
   default_question: boolean;
 
   @Column()
-  @Field(() => Boolean, { defaultValue: false })
-  required: boolean;
-
-  @Column()
-  @Field(() => Boolean, { defaultValue: false })
-  can_upload: boolean;
-
-  @Column()
-  @Field(() => Boolean, { defaultValue: false })
-  grade_specific: boolean;
+  @Field(() => String)
+  validations: string;
 
   @Column()
   @Field(() => String, { nullable: true })

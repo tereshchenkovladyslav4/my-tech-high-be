@@ -5,6 +5,9 @@ export class EmailScheduleInput {
   @Field(() => [Int])
   schedule_ids: number[];
 
+  @Field(() => [String])
+  schedule_status: string[];
+
   @Field(() => String)
   from: string;
 

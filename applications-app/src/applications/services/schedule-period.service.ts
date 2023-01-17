@@ -26,6 +26,14 @@ export class SchedulePeriodService {
     return await qb.getMany();
   }
 
+  async findAll(providerIds: string): Promise<SchedulePeriod[]> {
+    const pIds = JSON.parse(providerIds);
+    const qb = this.repo
+      .createQueryBuilder('SchedulePeriod')
+      .where('SchedulePeriod.ProviderId IN (:providerId)', { providerId: pIds });
+    return await qb.getMany();
+  }
+
   async findAllHistories(
     schoolYearId: number,
     studentId: number,

@@ -8,6 +8,9 @@ export class StateCodesInput {
   @Field(() => Int, { nullable: true })
   TitleId?: number;
 
+  @Field(() => Int, { nullable: true })
+  SchoolYearId?: number;
+
   @Field(() => String, { nullable: true })
   title_name?: string;
 

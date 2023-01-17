@@ -76,7 +76,7 @@ export class EventsService {
           SELECT
             grade.grade_level
           FROM(
-            SELECT person_id FROM infocenter.mth_person WHERE user_id = ${param.parent_id}
+            SELECT person_id FROM infocenter.mth_person WHERE user_id = ${param.user_id}
           ) AS parent
           LEFT JOIN infocenter.mth_parent parentInfo ON (parentInfo.person_id = parent.person_id)
           LEFT JOIN infocenter.mth_student studentInfo ON (studentInfo.parent_id = parentInfo.parent_id)
