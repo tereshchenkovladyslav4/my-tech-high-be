@@ -14,7 +14,7 @@ export class ScheduleEmail extends BaseEntity {
 
   @Column()
   @Field(() => Int, { nullable: true })
-  schedule_id?: number;
+  schedule_id: number;
 
   @Column()
   @Field(() => String)
@@ -37,7 +37,7 @@ export class ScheduleEmail extends BaseEntity {
   template_name: string;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.ScheduleEmails, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   @JoinColumn({
