@@ -79,7 +79,7 @@ import { Checklist } from './models/checklist.entity';
 import { ReimbursementSetting } from './models/reimbursement-setting.entity';
 import { ReimbursementSettingResolver } from './resolvers/reimbursement-setting.resolver';
 import { Assignment } from './models/assignment.entity';
-import { AssignmentResolver } from './resolvers/assignemtn.resolver';
+import { AssignmentResolver } from './resolvers/assignment.resolver';
 import { HomeroomStudentResolver } from './resolvers/homeroom-student.resolver';
 import { HomeroomStudent } from './models/homeroom-student.entity';
 import { LearningLogQuestionResolver } from './resolvers/learning-log-question.resolver';

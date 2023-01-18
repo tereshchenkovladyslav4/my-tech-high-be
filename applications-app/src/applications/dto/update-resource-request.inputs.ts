@@ -6,9 +6,6 @@ export class UpdateResourceRequestInput {
   id: number;
 
   @Field(() => Int, { nullable: true })
-  resource_id: number;
-
-  @Field(() => Int, { nullable: true })
   resource_level_id?: number;
 
   @Field(() => String, { nullable: true })

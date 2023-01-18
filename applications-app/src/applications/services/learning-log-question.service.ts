@@ -32,4 +32,21 @@ export class LearningLogQuestionService {
 
     return result;
   }
+
+  async clone(sourceAssignmentId: number, newAssignmentId: number): Promise<boolean> {
+    const sourceQuestios = await this.questionRepository.find({ assignment_id: sourceAssignmentId });
+    Promise.all([
+      sourceQuestios.map(async (item) => {
+        if (item.slug) {
+          delete item.id;
+          await this.questionRepository.save({
+            ...item,
+            assignment_id: newAssignmentId,
+          });
+        }
+      }),
+    ]);
+
+    return true;
+  }
 }

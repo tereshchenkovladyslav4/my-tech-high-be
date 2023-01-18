@@ -244,10 +244,17 @@ export class ResourceRequestService {
 
   async save(updateResourceRequestInput: UpdateResourceRequestInput): Promise<ResourceRequest> {
     try {
-      const { id, resource_id, resource_level_id, username, password } = updateResourceRequestInput;
-      const result = await this.repo.save({ id, resource_level_id });
-      await this.resourceService.save({ resource_id, std_user_name: username, std_password: password });
-      return result;
+      const { id, resource_level_id, username, password } = updateResourceRequestInput;
+      if (resource_level_id !== undefined) {
+        await this.repo.save({ id, resource_level_id });
+      }
+      const resourceRequest = await this.repo.findOne(id);
+      await this.resourceService.save({
+        resource_id: resourceRequest.resource_id,
+        std_user_name: username,
+        std_password: password,
+      });
+      return resourceRequest;
     } catch (e) {
       return e;
     }

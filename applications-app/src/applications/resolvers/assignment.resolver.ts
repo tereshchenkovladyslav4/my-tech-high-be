@@ -30,6 +30,15 @@ export class AssignmentResolver {
     return this.service.update(updateAssignmentInput);
   }
 
+  @Mutation(() => Boolean, { name: 'cloneAssignment' })
+  @UseGuards(new AuthGuard())
+  async cloneAssignment(
+    @Args('cloneAssignmentInput', { type: () => CreateNewAssignmentInput })
+    cloneAssignmentInput: CreateNewAssignmentInput,
+  ): Promise<boolean> {
+    return this.service.clone(cloneAssignmentInput);
+  }
+
   @Query(() => AssignmentPagination, { name: 'getAssignmentsByMasterId' })
   async getChecklist(@Args() assignmentArgs: AssignmentArgs): Promise<Pagination<Assignment>> {
     const results = await this.service.getAssignmentsByMasterId(assignmentArgs);

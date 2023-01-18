@@ -5,12 +5,14 @@ import { Assignment } from '../models/assignment.entity';
 import { CreateNewAssignmentInput } from '../dto/create-new-assignment.input';
 import { Pagination } from 'src/paginate';
 import { AssignmentArgs } from '../dto/assignment.args';
+import { LearningLogQuestionService } from './learning-log-question.service';
 
 @Injectable()
 export class AssignmentService {
   constructor(
     @InjectRepository(Assignment)
     private readonly repository: Repository<Assignment>,
+    private learningLogQuestionService: LearningLogQuestionService,
   ) {}
 
   async getAssignmentsByMasterId(assignmentArgs: AssignmentArgs): Promise<Pagination<Assignment>> {
@@ -57,6 +59,20 @@ export class AssignmentService {
         page_count: updateAssignmentInput.page_count,
       },
     );
+    return true;
+  }
+
+  async clone(cloneAssignmentInput: CreateNewAssignmentInput): Promise<boolean> {
+    const newAssignment = await this.repository.save({
+      teacher_deadline: cloneAssignmentInput.teacher_deadline,
+      title: cloneAssignmentInput.title,
+      master_id: cloneAssignmentInput.master_id,
+      due_date: cloneAssignmentInput.dueDateTime,
+      reminder_date: cloneAssignmentInput.reminderDateTime,
+      auto_grade: cloneAssignmentInput.autoGradeDateTime,
+      auto_grade_email: cloneAssignmentInput.autoGradeEmail ? 1 : 0,
+    });
+    await this.learningLogQuestionService.clone(cloneAssignmentInput.assignment_id, newAssignment.id);
     return true;
   }
 
