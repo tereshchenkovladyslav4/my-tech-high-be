@@ -4,7 +4,7 @@ import { SchoolYear } from './schoolyear.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id, max_num_periods, custom_built, split_enrollment, always_unlock, school_year_id, parent_tooltip, schoolYear, third_party_provider")',
+  '@key(fields: "id, max_num_periods, custom_built, split_enrollment, split_enrollment_grades, always_unlock, school_year_id, parent_tooltip, schoolYear, third_party_provider")',
 )
 @Directive('@extends')
 @Entity({ name: 'mth_schedule_builder' })
@@ -34,6 +34,11 @@ export class ScheduleBuilder extends BaseEntity {
   @Field()
   @Directive('@external')
   split_enrollment: number;
+
+  @Column()
+  @Field({ nullable: true })
+  @Directive('@external')
+  split_enrollment_grades?: string;
 
   @Column()
   @Field()

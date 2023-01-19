@@ -54,7 +54,28 @@ export class UpdateSchoolYearInput {
   opt_out_form_title?: string;
 
   @Field(() => String, { nullable: true })
-  opt_out_form_description?: string;
+  direct_orders_technology_instructions?: string;
+
+  @Field(() => String, { nullable: true })
+  direct_orders_supplement_instructions?: string;
+
+  @Field(() => String, { nullable: true })
+  direct_orders_custom_built_instructions?: string;
+
+  @Field(() => String, { nullable: true })
+  reimbursements_technology_instructions?: string;
+
+  @Field(() => String, { nullable: true })
+  reimbursements_supplement_instructions?: string;
+
+  @Field(() => String, { nullable: true })
+  reimbursements_custom_built_instructions?: string;
+
+  @Field(() => String, { nullable: true })
+  reimbursements_third_party_instructions?: string;
+
+  @Field(() => String, { nullable: true })
+  reimbursements_required_software_instructions?: string;
 
   @Field(() => Boolean, { nullable: true })
   schedule?: boolean;

@@ -7,9 +7,9 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { FilesService } from './services/files.services';
 import { UsersService } from './services/users.services';
 import { SchoolYearService } from './services/schoolyear.service';
-
 import crypto = require('crypto');
 import * as Moment from 'moment';
+import { FileCategory } from './enums';
 
 @Controller()
 export class AppController {
@@ -84,7 +84,8 @@ export class AppController {
       if (!user) throw new HttpException("You don't have permission to upload a file to storage!", HttpStatus.CONFLICT);
 
       const { body } = request;
-      if (!body.region) throw new HttpException('Region is requied!', HttpStatus.CONFLICT);
+      const { region, category, studentId } = body;
+      if (!region) throw new HttpException('Region is requied!', HttpStatus.CONFLICT);
 
       let currentSchoolYear = 0;
       if (body.year) {
@@ -95,18 +96,29 @@ export class AppController {
 
       let extension = false;
       this.allowed_files.map((item) => {
-        //console.log("Item: ", item, " = ", i, " = ", mimetype);
         if (typeof item[mimetype] !== 'undefined') extension = item[mimetype];
       });
 
-      //console.log("Allowed: ", extension);
       if (!extension) throw new HttpException('Filetype ' + mimetype + ' is not allowed!', HttpStatus.CONFLICT);
 
       let file_name = '';
-      if (body.directory) {
-        file_name = body.directory + '/' + this.encryptFileName(originalname) + '/' + originalname + '.' + extension;
-      } else {
-        file_name = body.region + '/' + currentSchoolYear + '/' + this.encryptFileName(originalname) + '.' + extension;
+      switch (category) {
+        case FileCategory.PROFILE:
+        case FileCategory.COUNTY:
+        case FileCategory.SCHOOL_DISTRICT:
+        case FileCategory.STATE_LOGO:
+        case FileCategory.RESOURCES: {
+          file_name = `${category}/${this.encryptFileName(originalname)}/${originalname}`;
+          break;
+        }
+        case FileCategory.STUDENT_RECORDS: {
+          if (!studentId) throw new HttpException('Student ID is requied!', HttpStatus.CONFLICT);
+          file_name = `${region}/${category}/${studentId}/${this.encryptFileName(originalname)}.${extension}`;
+          break;
+        }
+        default: {
+          file_name = `${region}/${currentSchoolYear}/${this.encryptFileName(originalname)}.${extension}`;
+        }
       }
 
       const upload = await this.s3Service.s3_upload(buffer, null, file_name, mimetype);
@@ -124,20 +136,19 @@ export class AppController {
       return {
         status: 'Success',
         data: {
-          region: body.region,
+          region: region,
           year: currentSchoolYear,
           name: originalname,
           key: upload.Key,
           type: mimetype,
           size: size,
           file: userFile,
-          s3: upload,
+          url: upload.Location,
         },
         success: true,
         code: 200,
       };
     } catch (err) {
-      //console.log(err);
       return {
         status: 'Error',
         message: err.response,

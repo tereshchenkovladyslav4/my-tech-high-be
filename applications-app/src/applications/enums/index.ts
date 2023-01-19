@@ -11,3 +11,5 @@ export * from './student-record-file-kind.enum';
 export * from './student-status.enum';
 export * from './withdrawal-option.enum';
 export * from './withdrawal-status.enum';
+export * from './question-type.enum';
+export * from './reimbursement-form-type.enum';

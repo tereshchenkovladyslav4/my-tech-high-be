@@ -11,6 +11,9 @@ export class CreateScheduleBuilderInput {
   @Field(() => Int)
   split_enrollment: number;
 
+  @Field({ nullable: true })
+  split_enrollment_grades?: string;
+
   @Field(() => Int)
   always_unlock: number;
 
