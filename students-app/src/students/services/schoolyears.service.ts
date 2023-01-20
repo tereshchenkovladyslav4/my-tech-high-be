@@ -118,6 +118,19 @@ export class SchoolYearsService {
     return result;
   }
 
+  async getReimbursementRequestSchoolYears(regionId: number): Promise<SchoolYear[]> {
+    const now = await this.timezoneService.getTimezoneDate(regionId);
+
+    const pastSchoolYears = await this.schoolYearsRepository.find({
+      where: {
+        RegionId: regionId,
+        date_begin: LessThanOrEqual(now),
+      },
+    });
+
+    return pastSchoolYears;
+  }
+
   findNextYear(year: number, regionId: number): Promise<SchoolYear> {
     return this.schoolYearsRepository
       .createQueryBuilder('year')

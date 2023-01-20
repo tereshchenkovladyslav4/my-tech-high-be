@@ -117,7 +117,7 @@ export class EventsService {
         events.forEach((event) => {
           const users = JSON.parse(event.filter_users);
           const grades = JSON.parse(event.filter_grades);
-          if (users.includes('students')) {
+          if (users.includes('students') || users.includes('2')) {
             if (grades.includes(student.student_grade_level.grade_level)) {
               results.push(event);
             }
@@ -179,7 +179,7 @@ export class EventsService {
         events.map((event) => {
           const users = JSON.parse(event.filter_users);
           const optFilter = JSON.parse(event.filter_other);
-          if (users.includes('parent/observers')) {
+          if (users.includes('parent/observers') || users.includes('1')) {
             if (
               (optFilter.indexOf('testing-opt-in') !== -1 && optInActive) ||
               (optFilter.indexOf('testing-opt-out') !== -1 && optOutActive) ||
