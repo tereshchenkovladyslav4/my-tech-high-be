@@ -14,7 +14,8 @@ export class PeriodResolver {
     @Args({ name: 'studentId', type: () => ID }) studentId: number,
     @Args({ name: 'schoolYearId', type: () => ID }) schoolYearId: number,
     @Args({ name: 'diplomaSeekingPath', type: () => String, nullable: true }) diplomaSeekingPath: string,
+    @Args({ name: 'isGradeFilter', type: () => Boolean }) isGradeFilter: boolean,
   ): Promise<Period[]> {
-    return this.service.find(studentId, schoolYearId, diplomaSeekingPath);
+    return this.service.find(studentId, schoolYearId, diplomaSeekingPath, isGradeFilter);
   }
 }

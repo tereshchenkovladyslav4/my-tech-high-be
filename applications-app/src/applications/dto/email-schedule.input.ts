@@ -16,4 +16,7 @@ export class EmailScheduleInput {
 
   @Field(() => String)
   body: string;
+
+  @Field(() => Number, { nullable: true })
+  region_id?: number;
 }

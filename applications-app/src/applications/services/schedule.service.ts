@@ -274,14 +274,15 @@ export class ScheduleService {
   }
 
   async sendEmail(emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
-    const { schedule_ids, schedule_status, subject, body, from } = emailScheduleInput;
+    const { schedule_ids, schedule_status, subject, body, from, region_id } = emailScheduleInput;
     const qb = this.repo
       .createQueryBuilder('schedule')
       .leftJoinAndSelect('schedule.ScheduleStudent', 'ScheduleStudent')
       .leftJoinAndSelect('schedule.SchoolYear', 'SchoolYear')
       .leftJoinAndSelect('ScheduleStudent.person', 'person')
       .leftJoinAndSelect('ScheduleStudent.parent', 'parent')
-      .leftJoinAndSelect('parent.person', 'p_person');
+      .leftJoinAndSelect('parent.person', 'p_person')
+      .andWhere(`schoolYear.RegionId = ${region_id}`);
     if (schedule_ids && schedule_ids.length > 0) {
       qb.whereInIds(schedule_ids);
     }
@@ -289,13 +290,6 @@ export class ScheduleService {
       qb.andWhere('schedule.status IN (:status)', { status: schedule_status });
     }
     const [results] = await qb.getManyAndCount();
-    const user_id = results[0].ScheduleStudent.parent.person.user_id;
-    const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(user_id);
-
-    let region_id = 1;
-    if (regions.length != 0) {
-      region_id = regions[0].region_id;
-    }
     for (let index = 0; index < results.length; index++) {
       const item = results[index];
       await this.sesEmailService.sendEmail({
@@ -402,66 +396,70 @@ export class ScheduleService {
           school_year_id: school_year_id,
         });
 
-        // Sending Accepted Email To Parent
-        const studentInfo = await this.studentService.findOneById(student_id);
-        const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
-          studentInfo.parent?.person?.user_id,
-        );
+        if (scheduleInput.is_sending_email) {
+          // Sending Accepted Email To Parent
+          const studentInfo = await this.studentService.findOneById(student_id);
+          const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
+            studentInfo.parent?.person?.user_id,
+          );
 
-        let region_id = 1;
-        if (regions.length != 0) {
-          region_id = regions[0].region_id;
-        }
+          let region_id = 1;
+          if (regions.length != 0) {
+            region_id = regions[0].region_id;
+          }
 
-        const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-          scheduleInput.is_second_semester
-            ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
-            : EmailTemplateEnum.SCHEDULE_ACCEPTED,
-          region_id,
-        );
-        if (emailTemplate) {
-          const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
-          const yearbegin = Moment(schoolYear?.date_begin).format('YYYY');
-          const yearend = Moment(schoolYear?.date_end).format('YYYY');
-          const yearText = studentInfo?.applications?.find(
-            (application) => application.school_year_id == schoolYear.school_year_id,
-          )?.midyear_application
-            ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
-            : `${yearbegin}-${yearend.substring(2, 4)}`;
-          const email_subject = emailTemplate.subject
-            .toString()
-            .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
-            .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
-            .replace(/\[YEAR\]/g, yearText)
-            .replace(/\[SCHEDULE_YEAR\]/g, yearText);
-          const email_body = emailTemplate.body
-            .toString()
-            .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
-            .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
-            .replace(/\[YEAR\]/g, yearText)
-            .replace(/\[SCHEDULE_YEAR\]/g, yearText);
-
-          await this.sesEmailService.sendEmail({
-            email: studentInfo?.parent?.person?.email,
-            subject: email_subject,
-            content: email_body,
-            from: emailTemplate.from,
-            bcc: emailTemplate.bcc,
+          const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+            scheduleInput.is_second_semester
+              ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
+              : EmailTemplateEnum.SCHEDULE_ACCEPTED,
             region_id,
-            template_name: scheduleInput.is_second_semester
-              ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
-              : EmailTemplateEnum.SCHEDULE_ACCEPTED,
-          });
+          );
+          if (emailTemplate) {
+            const schoolYear = await this.schoolYearService.findOneById(
+              studentInfo?.student_grade_level?.school_year_id,
+            );
+            const yearbegin = Moment(schoolYear?.date_begin).format('YYYY');
+            const yearend = Moment(schoolYear?.date_end).format('YYYY');
+            const yearText = studentInfo?.applications?.find(
+              (application) => application.school_year_id == schoolYear.school_year_id,
+            )?.midyear_application
+              ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+              : `${yearbegin}-${yearend.substring(2, 4)}`;
+            const email_subject = emailTemplate.subject
+              .toString()
+              .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
+              .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
+              .replace(/\[YEAR\]/g, yearText)
+              .replace(/\[SCHEDULE_YEAR\]/g, yearText);
+            const email_body = emailTemplate.body
+              .toString()
+              .replace(/\[STUDENT\]/g, studentInfo.person?.first_name)
+              .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
+              .replace(/\[YEAR\]/g, yearText)
+              .replace(/\[SCHEDULE_YEAR\]/g, yearText);
 
-          await this.scheduleEmailsService.create({
-            schedule_id: result?.schedule_id,
-            subject: email_subject,
-            body: email_body,
-            from_email: emailTemplate.from,
-            template_name: scheduleInput.is_second_semester
-              ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
-              : EmailTemplateEnum.SCHEDULE_ACCEPTED,
-          });
+            await this.sesEmailService.sendEmail({
+              email: studentInfo?.parent?.person?.email,
+              subject: email_subject,
+              content: email_body,
+              from: emailTemplate.from,
+              bcc: emailTemplate.bcc,
+              region_id,
+              template_name: scheduleInput.is_second_semester
+                ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
+                : EmailTemplateEnum.SCHEDULE_ACCEPTED,
+            });
+
+            await this.scheduleEmailsService.create({
+              schedule_id: result?.schedule_id,
+              subject: email_subject,
+              body: email_body,
+              from_email: emailTemplate.from,
+              template_name: scheduleInput.is_second_semester
+                ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
+                : EmailTemplateEnum.SCHEDULE_ACCEPTED,
+            });
+          }
         }
       } else if (scheduleInput.status === ScheduleStatus.NOT_SUBMITTED) {
         const existingSchedule = await this.repo.findOne({

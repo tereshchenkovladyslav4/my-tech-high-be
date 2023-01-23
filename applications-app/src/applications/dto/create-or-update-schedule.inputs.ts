@@ -16,4 +16,7 @@ export class CreateOrUpdateScheduleInput {
 
   @Field(() => Boolean, { nullable: true })
   is_second_semester: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  is_sending_email: boolean;
 }

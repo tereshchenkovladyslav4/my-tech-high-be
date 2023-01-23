@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { QUESTION_TYPE, ReimbursementFormType } from '../enums';
+import { ReimbursementFormType } from '../enums';
 
 @InputType()
 export class ReimbursementQuestionInput {

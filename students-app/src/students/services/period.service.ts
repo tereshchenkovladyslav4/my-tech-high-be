@@ -16,43 +16,56 @@ export class PeriodService {
     private scheduleService: ScheduleService,
   ) {}
 
-  private filterCourses(originalCourses, numericGrade) {
+  private filterCourses(originalCourses, numericGrade, isGradeFilter) {
     const courses = [];
     const altCourses = [];
     originalCourses
       .filter((course) => !course.limit || course.TotalRequests < course.limit)
       .forEach((course) => {
-        if (course.min_grade <= numericGrade && course.max_grade >= numericGrade) {
-          courses.push(course);
+        if (isGradeFilter) {
+          if (course.min_grade <= numericGrade && course.max_grade >= numericGrade) {
+            courses.push(course);
+          } else {
+            altCourses.push(course);
+          }
         } else {
+          courses.push(course);
           altCourses.push(course);
         }
       });
     return { courses, altCourses };
   }
 
-  private filterTitles(originalTitles, numericGrade) {
+  private filterTitles(originalTitles, numericGrade, isGradeFilter) {
     const titles = [];
     const altTitles = [];
     originalTitles.forEach((title) => {
-      if (title.min_grade <= numericGrade && title.max_grade >= numericGrade) {
-        titles.push(title);
+      if (isGradeFilter) {
+        if (title.min_grade <= numericGrade && title.max_grade >= numericGrade) {
+          titles.push(title);
+        } else {
+          altTitles.push(title);
+        }
       } else {
+        titles.push(title);
         altTitles.push(title);
       }
     });
     return { titles, altTitles };
   }
 
-  async find(studentId: number, schoolYearId: number, diplomaSeekingPath: string): Promise<Period[]> {
+  async find(
+    studentId: number,
+    schoolYearId: number,
+    diplomaSeekingPath: string,
+    isGradeFilter: boolean,
+  ): Promise<Period[]> {
     const studentGradeLevel = await this.studentGradeLevelService.findByStudentID(studentId);
 
     if (!studentGradeLevel) {
       return [];
     }
-
     const schedule = await this.scheduleService.findOne(studentId, schoolYearId);
-
     const grade = studentGradeLevel.grade_level;
     const numericGrade = grade.startsWith('K') ? -1 : +grade;
     const diplomaQuery = (alias: string, diploma: string) => {
@@ -69,11 +82,10 @@ export class PeriodService {
     };
 
     const titleCourseQuery = (alias: string) => {
-      const gradeQuery = `((${alias}.min_grade <= ${numericGrade} AND ${alias}.max_grade >= ${numericGrade}) OR (${alias}.min_alt_grade <= ${numericGrade} AND ${alias}.max_alt_grade >= ${numericGrade}))`;
-      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} AND ${gradeQuery} ${diplomaQuery(
-        alias,
-        diplomaSeekingPath,
-      )}`;
+      const gradeQuery = `AND ((${alias}.min_grade <= ${numericGrade} AND ${alias}.max_grade >= ${numericGrade}) OR (${alias}.min_alt_grade <= ${numericGrade} AND ${alias}.max_alt_grade >= ${numericGrade}))`;
+      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} ${
+        isGradeFilter ? gradeQuery : ''
+      } ${diplomaQuery(alias, diplomaSeekingPath)}`;
     };
 
     const courseRequestsQuery = (qb: SelectQueryBuilder<SchedulePeriod>) => {
@@ -83,7 +95,7 @@ export class PeriodService {
       return qb;
     };
 
-    const result = await this.repo
+    const qb = await this.repo
       .createQueryBuilder('period')
       .leftJoinAndSelect(
         'period.Subjects',
@@ -98,19 +110,21 @@ export class PeriodService {
         'CoursesSchedulePeriods',
         courseRequestsQuery,
       )
-      .where({ school_year_id: schoolYearId, archived: false })
-      .andWhere(`period.min_grade <= ${numericGrade} AND period.max_grade >= ${numericGrade}`)
-      .getMany();
+      .where({ school_year_id: schoolYearId, archived: false });
+    if (isGradeFilter) {
+      qb.andWhere(`period.min_grade <= ${numericGrade} AND period.max_grade >= ${numericGrade}`);
+    }
 
+    const result = await qb.getMany();
     result.map((period) => {
       period.Subjects.map((subject) => {
         subject.Titles.map((title) => {
-          const filteredCourses = this.filterCourses(title.Courses, numericGrade);
+          const filteredCourses = this.filterCourses(title.Courses, numericGrade, isGradeFilter);
           title.Courses = filteredCourses.courses;
           title.AltCourses = filteredCourses.altCourses;
         });
 
-        const filteredTitles = this.filterTitles(subject.Titles, numericGrade);
+        const filteredTitles = this.filterTitles(subject.Titles, numericGrade, isGradeFilter);
         subject.Titles = filteredTitles.titles;
         subject.AltTitles = filteredTitles.altTitles;
       });
