@@ -945,6 +945,7 @@ export class WithdrawalService {
                 ${address?.city || ''}, ${address?.state || ''} ${address?.zip || ''}`
             : 'NA',
           parentPhone: withdraw?.Student?.parent?.person?.person_phone?.number || 'NA',
+          parentName: `${withdraw?.Student?.parent?.person?.last_name} ${withdraw?.Student?.parent?.person?.first_name}`,
           grades: gradeText(withdraw?.Student),
           dateEffective: withdraw?.date_effective ? Moment(withdraw?.date_effective).format('MM/DD/YYYY') : 'NA',
           schoolYear: `${yearBegin}-${yearEnd}`,
