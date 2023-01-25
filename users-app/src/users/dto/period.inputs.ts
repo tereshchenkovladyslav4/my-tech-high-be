@@ -12,6 +12,9 @@ export class PeriodInput {
   @Field(() => Int)
   period: number;
 
+  @Field(() => String, { nullable: true })
+  diploma_seeking_path: string;
+
   @Field(() => String)
   category: string;
 

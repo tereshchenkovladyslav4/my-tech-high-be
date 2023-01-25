@@ -8,7 +8,7 @@ import { SchedulePeriod } from './schedule-period.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "id, school_year_id, period, category, min_grade, max_grade, semester, message_period, notify_period, archived, Subjects, Providers")',
+  '@key(fields: "id, school_year_id, period, diploma_seeking_path, category, min_grade, max_grade, semester, message_period, notify_period, archived, Subjects, Providers")',
 )
 @Entity({ name: 'mth_period' })
 export class Period extends BaseEntity {
@@ -27,6 +27,11 @@ export class Period extends BaseEntity {
   @Field(() => Int, { nullable: true })
   @Directive('@external')
   period: number;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  diploma_seeking_path: string;
 
   @Column()
   @Field(() => String, { nullable: true })

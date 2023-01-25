@@ -290,7 +290,7 @@ export class ScheduleService {
       qb.andWhere('schedule.status IN (:status)', { status: schedule_status });
     }
     const [results] = await qb.getManyAndCount();
-    for (let index = 0; index < results.length; index++) {
+    for (let index = 0; index <= results.length; index++) {
       const item = results[index];
       await this.sesEmailService.sendEmail({
         email: item.ScheduleStudent.parent.person.email,

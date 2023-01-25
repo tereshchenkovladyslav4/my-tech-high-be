@@ -34,7 +34,8 @@ export class StateCodesService {
       .createQueryBuilder('stateCodes')
       .leftJoinAndSelect('stateCodes.SchoolYear', 'schoolYear')
       .leftJoinAndMapOne('stateCodes.Title', Title, 'title', 'title.title_id = stateCodes.TitleId')
-      .where(`schoolYear.RegionId = ${region_id}`);
+      .where(`schoolYear.RegionId = ${region_id}`)
+      .orderBy('stateCodes.TitleId', 'ASC');
 
     if (filter && filter.selectedYearId) {
       qb.andWhere(`schoolYear.school_year_id = ${filter.selectedYearId}`);

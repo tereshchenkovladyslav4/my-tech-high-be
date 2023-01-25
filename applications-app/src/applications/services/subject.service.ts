@@ -69,13 +69,6 @@ export class SubjectService {
 
   async save(subjectInput: CreateOrUpdateSubjectInput): Promise<Subject> {
     try {
-      if (!subjectInput.subject_id) {
-        const totalCnt = await this.repo.count({
-          SchoolYearId: subjectInput.SchoolYearId,
-        });
-        if (!subjectInput.priority) subjectInput.priority = totalCnt + 1;
-      }
-
       const result = await this.repo.save({ ...subjectInput });
 
       if (subjectInput.periods != undefined) {

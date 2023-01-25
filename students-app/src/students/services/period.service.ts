@@ -71,11 +71,11 @@ export class PeriodService {
     const diplomaQuery = (alias: string, diploma: string) => {
       switch (diploma) {
         case DiplomaSeekingPathStatus.BOTH:
-          return ` AND ${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
+          return `${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
         case DiplomaSeekingPathStatus.DIPLOMA_SEEKING:
-          return ` AND ${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}')`;
+          return `${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.DIPLOMA_SEEKING}')`;
         case DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING:
-          return ` AND ${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
+          return `${alias}.diploma_seeking_path in ('${DiplomaSeekingPathStatus.BOTH}', '${DiplomaSeekingPathStatus.NON_DIPLOMA_SEEKING}')`;
         default:
           return '';
       }
@@ -83,9 +83,9 @@ export class PeriodService {
 
     const titleCourseQuery = (alias: string) => {
       const gradeQuery = `AND ((${alias}.min_grade <= ${numericGrade} AND ${alias}.max_grade >= ${numericGrade}) OR (${alias}.min_alt_grade <= ${numericGrade} AND ${alias}.max_alt_grade >= ${numericGrade}))`;
-      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} ${
-        isGradeFilter ? gradeQuery : ''
-      } ${diplomaQuery(alias, diplomaSeekingPath)}`;
+      return `${alias}.allow_request = ${true} AND ${alias}.is_active = ${true} ${isGradeFilter ? gradeQuery : ''} ${
+        diplomaQuery(alias, diplomaSeekingPath) ? ' AND ' + diplomaQuery(alias, diplomaSeekingPath) : ''
+      }`;
     };
 
     const courseRequestsQuery = (qb: SelectQueryBuilder<SchedulePeriod>) => {
@@ -111,6 +111,7 @@ export class PeriodService {
         courseRequestsQuery,
       )
       .where({ school_year_id: schoolYearId, archived: false });
+    if (diplomaQuery('period', diplomaSeekingPath)) qb.andWhere(diplomaQuery('period', diplomaSeekingPath));
     if (isGradeFilter) {
       qb.andWhere(`period.min_grade <= ${numericGrade} AND period.max_grade >= ${numericGrade}`);
     }
