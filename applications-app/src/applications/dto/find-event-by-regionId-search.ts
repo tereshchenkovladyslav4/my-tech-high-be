@@ -11,6 +11,6 @@ export class FindEventsByRegionIdSearch {
   @Field(() => Int, { nullable: true })
   user_id?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => String, { nullable: true })
   type?: 'parent' | 'student';
 }

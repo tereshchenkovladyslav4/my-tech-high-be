@@ -5,7 +5,7 @@ import { NewParentPacketContactInput } from './new-parent-packet-contact.inputs'
 
 @InputType()
 export class EnrollmentPacketSubmitInput {
-  @Field()
+  @Field({ nullable: true })
   packet_id?: number;
 
   @Field(() => Int)

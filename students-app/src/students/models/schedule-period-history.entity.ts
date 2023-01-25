@@ -50,7 +50,7 @@ export class SchedulePeriodHistory extends BaseEntity {
   @Directive('@external')
   course_type: string;
 
-  @Column({ nullable: true })
+  @Column('text', { nullable: true })
   @Field(() => String, { nullable: true })
   @Directive('@external')
   custom_build_description: string;

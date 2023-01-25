@@ -48,7 +48,7 @@ export class SchedulePeriod extends BaseEntity {
   @Field(() => String, { nullable: true })
   course_type: string;
 
-  @Column({ nullable: true })
+  @Column('text', { nullable: true })
   @Field(() => String, { nullable: true })
   custom_build_description: string;
 
