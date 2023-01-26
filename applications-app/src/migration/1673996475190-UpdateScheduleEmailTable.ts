@@ -4,7 +4,7 @@ export class UpdateScheduleEmailTable1673996475190 implements MigrationInterface
   name = 'UpdateScheduleEmailTable1673996475190';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX \`FK_d42e930cd8df811a5cca5e4a441\` ON \`mth_schedule_email\``);
+    await queryRunner.query(`ALTER TABLE \`mth_schedule_email\` DROP FOREIGN KEY \`FK_d42e930cd8df811a5cca5e4a441\``);
     await queryRunner.query(
       `ALTER TABLE \`mth_schedule_email\` ADD CONSTRAINT \`FK_d42e930cd8df811a5cca5e4a441\` FOREIGN KEY (\`schedule_id\`) REFERENCES \`mth_schedule\`(\`schedule_id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
     );
@@ -13,7 +13,7 @@ export class UpdateScheduleEmailTable1673996475190 implements MigrationInterface
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE \`mth_schedule_email\` DROP FOREIGN KEY \`FK_d42e930cd8df811a5cca5e4a441\``);
     await queryRunner.query(
-      `CREATE INDEX \`FK_d42e930cd8df811a5cca5e4a441\` ON \`mth_schedule_email\` (\`schedule_id\`)`,
+      `ALTER TABLE \`mth_schedule_email\` ADD CONSTRAINT \`FK_d42e930cd8df811a5cca5e4a441\` FOREIGN KEY (\`schedule_id\`) REFERENCES \`mth_schedule\`(\`schedule_id\`) ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
   }
 }
