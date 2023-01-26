@@ -38,6 +38,7 @@ export class StudentsResolver {
     @Args('updateStudentInput')
     updateStudentInput: UpdateStudentInput,
   ): Promise<boolean> {
+    await this.packetsService.setAgeIssueByStudent(updateStudentInput.student_id, updateStudentInput.school_year_id);
     return this.studentsService.update(updateStudentInput);
   }
 }

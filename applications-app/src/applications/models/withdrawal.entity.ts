@@ -9,7 +9,7 @@ export const WITHDRAWAL_TABLE_NAME = 'withdrawal';
 @InputType('withdrawal')
 @ObjectType()
 @Directive(
-  '@key(fields: "withdrawal_id, application_id, StudentId, status, soe, funding, date, date_effective, date_emailed, response, grade_level, student_name")',
+  '@key(fields: "withdrawal_id, application_id, StudentId, school_year_id, status, soe, funding, date, date_effective, date_emailed, response, grade_level, student_name")',
 )
 @Entity({ name: 'withdrawal' })
 export class Withdrawal extends BaseEntity {
@@ -29,6 +29,11 @@ export class Withdrawal extends BaseEntity {
   @Column('int', { name: 'StudentId', nullable: true })
   @Field(() => Int, { nullable: true })
   StudentId?: number;
+
+  //	school_year_id
+  @Column('int', { name: 'school_year_id', nullable: true })
+  @Field(() => Int, { nullable: true })
+  school_year_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })

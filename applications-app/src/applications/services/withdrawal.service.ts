@@ -59,7 +59,7 @@ export class WithdrawalService {
     try {
       const { withdrawal, withdrawalOption } = withdrawalInput;
       const queryRunner = await getConnection().createQueryRunner();
-      const { StudentId, status, date_effective, response, withdrawal_id } = withdrawal;
+      const { StudentId, status, date_effective, response, withdrawal_id, school_year_id } = withdrawal;
 
       const [notifiedWithdrawals] = await this.repo
         .createQueryBuilder('withdrawal')
@@ -73,6 +73,7 @@ export class WithdrawalService {
         status: status,
         date_effective: date_effective,
         response: response,
+        school_year_id: school_year_id,
       });
       if (
         (status === WithdrawalStatus.WITHDRAWN && notifiedWithdrawals?.length) ||
@@ -142,7 +143,7 @@ export class WithdrawalService {
               .replace(/\[DEADLINE\]/g, `${Moment(deadline).format('MM/DD/yy')}`);
           };
 
-          const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
+          const school_year = await this.schoolYearService.findOneById(school_year_id);
 
           const body = setAdditionalLinksInfo(emailTemplate.body, student, school_year);
           const emailSubject = setAdditionalLinksInfo(emailTemplate.subject, student, school_year);
@@ -233,7 +234,7 @@ export class WithdrawalService {
 			LEFT JOIN mth_student_grade_level gradeLevel ON (gradeLevel.student_id = application.student_id AND gradeLevel.school_year_id = application.school_year_id)
 			LEFT JOIN mth_student student ON (student.student_id = application.student_id)
 			LEFT JOIN mth_person person ON (person.person_id = student.person_id)
-			LEFT JOIN mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+			LEFT JOIN mth_schoolyear schoolYear ON (schoolYear.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
 			WHERE ${WITHDRAWAL_TABLE_NAME}.withdrawal_id > 0`;
 
     if (filter.region_id) {
@@ -285,10 +286,10 @@ export class WithdrawalService {
 
     let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
 			LEFT JOIN mth_application application ON (application.student_id = ${WITHDRAWAL_TABLE_NAME}.StudentId)
-			LEFT JOIN mth_student_grade_level gradeLevel ON (gradeLevel.student_id = application.student_id AND gradeLevel.school_year_id = application.school_year_id)
+			LEFT JOIN mth_student_grade_level gradeLevel ON (gradeLevel.student_id = application.student_id AND gradeLevel.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
 			LEFT JOIN mth_student student ON (student.student_id = application.student_id)
 			LEFT JOIN mth_person person ON (person.person_id = student.person_id) 
-			LEFT JOIN mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+			LEFT JOIN mth_schoolyear schoolYear ON (schoolYear.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
       LEFT JOIN (
         SELECT  withdrawal_id, MAX(created_at) email_date
         FROM    mth_withdrawal_email
@@ -389,7 +390,7 @@ export class WithdrawalService {
           SELECT withdrawal_id, StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal WHERE status='${WithdrawalStatus.NOTIFIED}' and StudentId IS NOT NULL
         ) AS withdrawal
         LEFT JOIN infocenter.mth_application application ON (application.student_id = withdrawal.student_id)
-        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = withdrawal.school_year_id)
         LEFT JOIN infocenter.region region ON (region.id = schoolYear.RegionId)
         LEFT JOIN infocenter.mth_student student ON (student.student_id = withdrawal.student_id)
         LEFT JOIN infocenter.mth_person studentInfo ON (studentInfo.person_id = student.person_id)
@@ -422,7 +423,7 @@ export class WithdrawalService {
           }' and StudentId IS NOT NULL
 				) AS withdrawal
 				LEFT JOIN infocenter.mth_application application ON (application.student_id = withdrawal.student_id)
-				LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+				LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = withdrawal.school_year_id)
 				LEFT JOIN infocenter.region region ON (region.id = schoolYear.RegionId)
 				LEFT JOIN infocenter.mth_student student ON (student.student_id = withdrawal.student_id)
         LEFT JOIN infocenter.mth_person studentInfo ON (studentInfo.person_id = student.person_id)

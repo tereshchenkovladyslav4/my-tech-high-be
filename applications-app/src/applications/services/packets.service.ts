@@ -30,6 +30,7 @@ import { UserRegionService } from './user-region.service';
 import { PDFService } from './pdf.service';
 import { PacketsActionInput } from '../dto/packets-action.input';
 import { StudentStatusService } from './student-status.service';
+import { PersonsService } from './persons.service';
 
 class Question {
   question: string;
@@ -52,6 +53,7 @@ export class PacketsService {
     private emailTemplateService: EmailTemplatesService,
     private studentGradeLevelService: StudentGradeLevelsService,
     private studentService: StudentsService,
+    private personsService: PersonsService,
     private studentStatusService: StudentStatusService,
     private filesService: FilesService,
     private studentRecordService: StudentRecordService,
@@ -94,6 +96,8 @@ export class PacketsService {
       if (filters.includes('Age Issue')) {
         qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
         qb.andWhere(`school_year.RegionId = ${region_id}`);
+      } else {
+        qb.andWhere('packet.is_age_issue = 0');
       }
       if (search) {
         const date = search
@@ -428,6 +432,51 @@ export class PacketsService {
       error: false,
       results: statusArray,
     };
+  }
+
+  async setAgeIssueByStudent(student_id: number, school_year_id: number): Promise<Packet> {
+    let is_age_issue = false;
+    const student = await this.studentService.findOneById(student_id);
+    if (student == null) {
+      return null;
+    }
+    const packet = await this.findOneByStudentId(student.student_id);
+    const studentPerson = await this.personsService.findOneById(student.person_id);
+    if (packet == null) {
+      return null;
+    }
+
+    const parseGradeLevel = (value: number | string): number => {
+      if (!value) return 0;
+      if (value === 'OR-K') return 0;
+      if (['K', 'Kindergarten', 'Kin'].indexOf(value + '') !== -1) return 5;
+      return Number(value) + 5;
+    };
+
+    const school_year = await this.schoolYearService.findOneById(school_year_id);
+    if (school_year == null) return null;
+
+    if (school_year.birth_date_cut) {
+      if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
+
+      const age = studentPerson.date_of_birth
+        ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
+        : 0;
+      const grade_age = parseGradeLevel(student.grade_levels[0].grade_level);
+
+      if (studentPerson.date_of_birth && grade_age != 0) {
+        if (age != grade_age) is_age_issue = true;
+      }
+    }
+
+    if (packet.status != 'Submitted' && packet.status != 'Resubmitted') is_age_issue = false;
+
+    this.update({
+      packet_id: packet.packet_id,
+      is_age_issue: is_age_issue,
+    });
+
+    return packet;
   }
 
   async getPacketCountByRegionId(region_id: number): Promise<ResponseDTO> {
