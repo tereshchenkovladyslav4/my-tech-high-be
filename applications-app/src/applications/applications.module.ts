@@ -93,6 +93,8 @@ import { ResourceRequestEmail } from './models/resource-request-email.entity';
 import { ResourceCart } from './models/resource-cart.entity';
 import { ReimbursementQuestionResolver } from './resolvers/reimbursement-question.resolver';
 import { ReimbursementQuestion } from './models/reimbursement-question.entity';
+import { ReimbursementRequestResolver } from './resolvers/reimbursement-request.resolver';
+import { ReimbursementRequest } from './models/reimbursement-request.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -132,6 +134,7 @@ const graphQLImports = [
   StateCodesResolver,
   ResourceRequestResolver,
   ReimbursementQuestionResolver,
+  ReimbursementRequestResolver,
 ];
 @Module({
   imports: [
@@ -198,6 +201,7 @@ const graphQLImports = [
           ResourceRequestEmail,
           ResourceCart,
           ReimbursementQuestion,
+          ReimbursementRequest,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

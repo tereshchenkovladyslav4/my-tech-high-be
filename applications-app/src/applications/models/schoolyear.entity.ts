@@ -21,6 +21,7 @@ import { ReduceFunds } from '../enums/reduce-funds.enum';
 import { ReimbursementSetting } from './reimbursement-setting.entity';
 import { ReimbursementQuestion } from './reimbursement-question.entity';
 import { StateCodes } from './state-codes.entity';
+import { ReimbursementRequest } from './reimbursement-request.entity';
 
 @InputType('schoolyear')
 @ObjectType()
@@ -334,6 +335,10 @@ export class SchoolYear extends BaseEntity {
   @OneToMany(() => ReimbursementQuestion, (reimbursementQuestion) => reimbursementQuestion.SchoolYear)
   @Field(() => [ReimbursementQuestion], { nullable: true })
   ReimbursementQuestions: ReimbursementQuestion[];
+
+  @OneToMany(() => ReimbursementRequest, (reimbursementRequest) => reimbursementRequest.SchoolYear)
+  @Field(() => [ReimbursementRequest], { nullable: true })
+  ReimbursementRequests: ReimbursementRequest[];
 
   @OneToOne(() => ScheduleBuilder, (scheduleBuilder) => scheduleBuilder.schoolYear)
   @Field(() => ScheduleBuilder, { nullable: true })

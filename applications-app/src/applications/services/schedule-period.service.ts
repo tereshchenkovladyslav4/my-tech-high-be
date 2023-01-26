@@ -22,6 +22,9 @@ export class SchedulePeriodService {
     const qb = this.repo
       .createQueryBuilder('SchedulePeriod')
       .leftJoinAndSelect('SchedulePeriod.Schedule', 'Schedule')
+      .leftJoinAndSelect('SchedulePeriod.Period', 'Period')
+      .leftJoinAndSelect('SchedulePeriod.Title', 'Title')
+      .leftJoinAndSelect('Title.Subject', 'Subject')
       .where(`Schedule.StudentId = ${studentId} AND Schedule.SchoolYearId = ${schoolYearId}`);
     return await qb.getMany();
   }

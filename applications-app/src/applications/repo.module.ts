@@ -142,6 +142,8 @@ import { ResourceRequestEmailsService } from './services/resource-request-emails
 import { ResourceCart } from './models/resource-cart.entity';
 import { ReimbursementQuestionService } from './services/reimbursement-question.service';
 import { ReimbursementQuestion } from './models/reimbursement-question.entity';
+import { ReimbursementRequestService } from './services/reimbursement-request.service';
+import { ReimbursementRequest } from './models/reimbursement-request.entity';
 
 const servicesImports = [
   UsersService,
@@ -217,6 +219,7 @@ const servicesImports = [
   ResourceRequestService,
   ResourceRequestEmailsService,
   ReimbursementQuestionService,
+  ReimbursementRequestService,
 ];
 
 @Global()
@@ -294,6 +297,7 @@ const servicesImports = [
       ResourceRequestEmail,
       ResourceCart,
       ReimbursementQuestion,
+      ReimbursementRequest,
     ]),
   ],
   providers: [...servicesImports],

@@ -11,3 +11,5 @@ export * from './student-status.enum';
 export * from './withdrawal-status.enum';
 export * from './student-notification.enum';
 export * from './schedule-period-status.enum';
+export * from './reimbursement-form-type.enum';
+export * from './reimbursement-request-status.enum';

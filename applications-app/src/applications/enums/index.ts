@@ -13,3 +13,4 @@ export * from './withdrawal-option.enum';
 export * from './withdrawal-status.enum';
 export * from './question-type.enum';
 export * from './reimbursement-form-type.enum';
+export * from './reimbursement-request-status.enum';

@@ -106,6 +106,7 @@ export class SchedulePeriod extends BaseEntity {
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'PeriodId', referencedColumnName: 'id' }])
+  @Field(() => Period, { nullable: true })
   Period: Period;
 
   @ManyToOne(() => Subject, (schedule) => schedule.SchedulePeriods, {
@@ -113,6 +114,7 @@ export class SchedulePeriod extends BaseEntity {
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'SubjectId', referencedColumnName: 'subject_id' }])
+  @Field(() => Subject, { nullable: true })
   Subject: Subject;
 
   @ManyToOne(() => Title, (schedule) => schedule.SchedulePeriods, {
@@ -120,6 +122,7 @@ export class SchedulePeriod extends BaseEntity {
     onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'TitleId', referencedColumnName: 'title_id' }])
+  @Field(() => Title, { nullable: true })
   Title: Title;
 
   @ManyToOne(() => Provider, (schedule) => schedule.SchedulePeriods, {
