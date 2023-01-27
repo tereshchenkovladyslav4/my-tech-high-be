@@ -26,6 +26,7 @@ import { SchoolEnrollment } from '../models/school-enrollment.entity';
 import { Schedule } from '../models/schedule.entity';
 import { SchedulePeriod } from '../models/schedule-period.entity';
 import { Provider } from '../models/provider.entity';
+import { GetAnnouncementParams } from '../dto/get-announcement-params';
 @Injectable()
 export class AnnouncementsService {
   constructor(
@@ -37,13 +38,26 @@ export class AnnouncementsService {
     private readonly applicationsRepository: Repository<Application>,
   ) {}
 
-  async findAll(region_id: number): Promise<Array<Announcement>> {
+  async findAll(getAnnouncementParams: GetAnnouncementParams): Promise<Array<Announcement>> {
     try {
-      const results = await this.announcementsRepository
-        .createQueryBuilder('announcement')
-        .where({ RegionId: region_id })
-        .getMany();
-      return results;
+      const { region_id, search } = getAnnouncementParams;
+      if (search) {
+        const results = await this.announcementsRepository
+          .createQueryBuilder('announcement')
+          .where({ RegionId: region_id })
+          .andWhere('announcement.subject LIKE :search', { search: `%${search}%` })
+          .orWhere('announcement.posted_by LIKE :search', { search: `%${search}%` })
+          .orWhere('announcement.body LIKE :search', { search: `%${search}%` })
+          .orWhere('announcement.date LIKE :search', { search: `%${search}%` })
+          .getMany();
+        return results;
+      } else {
+        const results = await this.announcementsRepository
+          .createQueryBuilder('announcement')
+          .where({ RegionId: region_id })
+          .getMany();
+        return results;
+      }
     } catch (error) {
       return [];
     }

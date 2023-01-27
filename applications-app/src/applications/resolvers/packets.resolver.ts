@@ -257,8 +257,11 @@ export class PacketsResolver {
 
   @Query(() => ResponseDTO, { name: 'packetCountByRegionId' })
   @UseGuards(new AuthGuard())
-  async getPacketCountByRegionId(@Args({ name: 'region_id', type: () => ID }) region_id: number): Promise<ResponseDTO> {
-    return this.packetsService.getPacketCountByRegionId(region_id);
+  async getPacketCountByRegionId(
+    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+    @Args({ name: 'school_year_id', type: () => ID }) school_year_id: number,
+  ): Promise<ResponseDTO> {
+    return this.packetsService.getPacketCountByRegionId(region_id, school_year_id);
   }
 
   @Mutation(() => Boolean, { name: 'updateEnrollmentSchoolYearByIds' })

@@ -290,17 +290,21 @@ export class ScheduleService {
       qb.andWhere('schedule.status IN (:status)', { status: schedule_status });
     }
     const [results] = await qb.getManyAndCount();
-    for (let index = 0; index <= results.length; index++) {
-      const item = results[index];
-      await this.sesEmailService.sendEmail({
-        email: item.ScheduleStudent.parent.person.email,
-        subject: subject.toString(),
-        content: body.toString(),
-        from,
-        region_id,
-        template_name: 'Schedule Page',
-      });
-    }
+    Promise.all(
+      results &&
+        results.length > 0 &&
+        results.map(async (item) => {
+          await this.sesEmailService.sendEmail({
+            email: item.ScheduleStudent.parent.person.email,
+            subject: subject.toString(),
+            content: body.toString(),
+            from,
+            region_id,
+            template_name: 'Schedule Page',
+          });
+        }),
+    );
+
     let newScheduleIds = [];
     if (schedule_ids && schedule_ids.length > 0) {
       newScheduleIds = schedule_ids;
@@ -310,10 +314,11 @@ export class ScheduleService {
         return ret.schedule_id;
       });
     }
+
     const scheduleEmails = Promise.all(
       newScheduleIds.map(async (id) => {
         return await this.scheduleEmailsService.create({
-          schedule_id: id,
+          schedule_id: +id,
           subject: subject,
           body: body,
           from_email: from,

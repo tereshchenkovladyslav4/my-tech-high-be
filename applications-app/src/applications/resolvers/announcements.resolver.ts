@@ -10,6 +10,7 @@ import { UserAnnouncementResponse } from '../dto/user-announcement.response';
 import { ResponseDTO } from '../dto/response.dto';
 import { UserAnnouncementRequestParams } from '../dto/user-announcement-request-param';
 import { UserAnnouncement } from '../models/user-announcement.entity';
+import { GetAnnouncementParams } from '../dto/get-announcement-params';
 @Resolver(() => Announcement)
 export class AnnouncementsResolver {
   constructor(
@@ -19,8 +20,10 @@ export class AnnouncementsResolver {
 
   @Query(() => [Announcement], { name: 'announcements' })
   @UseGuards(new AuthGuard())
-  async getAnnouncements(@Args('region_id', { type: () => Int }) region_id: number): Promise<Announcement[]> {
-    return this.announcementsService.findAll(region_id);
+  async getAnnouncements(
+    @Args('getAnnouncementParams') getAnnouncementParams: GetAnnouncementParams,
+  ): Promise<Announcement[]> {
+    return this.announcementsService.findAll(getAnnouncementParams);
   }
 
   @Query(() => Announcement, { name: 'announcement' })

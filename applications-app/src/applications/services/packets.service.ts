@@ -96,6 +96,7 @@ export class PacketsService {
       if (filters.includes('Age Issue')) {
         qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
         qb.andWhere(`school_year.RegionId = ${region_id}`);
+        qb.andWhere(`school_year.school_year_id = ${selectedYearId}`);
       } else {
         qb.andWhere('packet.is_age_issue = 0');
       }
@@ -479,7 +480,7 @@ export class PacketsService {
     return packet;
   }
 
-  async getPacketCountByRegionId(region_id: number): Promise<ResponseDTO> {
+  async getPacketCountByRegionId(region_id: number, school_year_id: number): Promise<ResponseDTO> {
     const qb = await this.packetsRepository.query(
       `SELECT
           t1.status AS status,
@@ -489,7 +490,7 @@ export class PacketsService {
         ) AS t1
         LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
         LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
-        WHERE schoolYear.RegionId=${region_id}
+        WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id}
         GROUP BY t1.status`,
     );
     const statusArray = {
@@ -513,7 +514,7 @@ export class PacketsService {
         ) AS t1
         LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
         LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
-        WHERE schoolYear.RegionId=${region_id} and t1.is_age_issue = 1 and t1.status != "Age Issue" `,
+        WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id} and t1.is_age_issue = 1 and t1.status != "Age Issue" `,
     );
     statusArray['Age Issue'] += age_issue_qb.length;
 
