@@ -1,17 +1,27 @@
 import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ResourceRequestStatus } from '../enums';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
 import { ResourceLevel } from './resource-level.entity';
 import { ResourceRequestEmail } from './resource-request-email.entity';
+import { Course } from './course.entity';
 
 @InputType('resource_request')
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "id, student_id, resource_id, resource_level_id, status, created_at, updated_at, Student, Resource, ResourceLevel")',
+  '@key(fields: "id, student_id, resource_id, resource_level_id, course_id, status, created_at, updated_at, Student, Resource, ResourceLevel, Course")',
 )
 @Entity('mth_resource_request')
 export class ResourceRequest {
@@ -36,18 +46,23 @@ export class ResourceRequest {
   @Directive('@external')
   resource_level_id?: number;
 
-  @Column()
+  @Column('int', { nullable: true })
   @Field(() => String, { nullable: true })
   @IsIn([ResourceRequestStatus.REQUESTED])
   @Directive('@external')
   status?: string;
 
-  @Column()
+  @Column('int')
+  @Field(() => Int, { nullable: true })
+  @Directive('@external')
+  course_id?: number;
+
+  @CreateDateColumn()
   @Field(() => Date, { nullable: true })
   @Directive('@external')
   created_at?: Date;
 
-  @Column()
+  @UpdateDateColumn()
   @Field(() => Date, { nullable: true })
   @Directive('@external')
   updated_at?: Date;
@@ -82,4 +97,13 @@ export class ResourceRequest {
   @OneToMany(() => ResourceRequestEmail, (resourceRequestEmail) => resourceRequestEmail.ResourceRequest)
   @Field(() => [ResourceRequestEmail], { nullable: true })
   ResourceRequestEmails: ResourceRequestEmail[];
+
+  @ManyToOne(() => Course, (course) => course.ResourceRequests, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'course_id', referencedColumnName: 'id' }])
+  @Field(() => Course, { nullable: true })
+  @Directive('@external')
+  Course: Course;
 }

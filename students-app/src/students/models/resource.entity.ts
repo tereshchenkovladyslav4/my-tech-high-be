@@ -1,4 +1,4 @@
-import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
 import { Column, Entity, BaseEntity, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { ResourceSubtitle } from '../enums';
@@ -16,7 +16,7 @@ import { StudentHiddenResource } from './student-hidden-resource.entity';
 @Entity({ name: 'mth_resource_settings' })
 export class Resource extends BaseEntity {
   @Column()
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
   resource_id?: number;

@@ -70,4 +70,7 @@ export class CreateOrUpdateCourseInput {
 
   @Field(() => Boolean, { nullable: true })
   deleted: boolean;
+
+  @Field(() => Int, { nullable: true })
+  resource_id?: number;
 }

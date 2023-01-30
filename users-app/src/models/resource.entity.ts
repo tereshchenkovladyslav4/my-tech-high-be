@@ -1,4 +1,4 @@
-import { Directive, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
 import { ResourceSubtitle } from 'src/enums';
 import { Column, Entity, BaseEntity, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
@@ -13,7 +13,7 @@ import { SchoolYear } from './schoolyear.entity';
 @Entity({ name: 'mth_resource_settings' })
 export class Resource extends BaseEntity {
   @Column()
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   @Directive('@external')
   resource_id?: number;
@@ -114,7 +114,7 @@ export class Resource extends BaseEntity {
   @Directive('@external')
   ResourceLevels: ResourceLevel[];
 
-  @ManyToOne(() => SchoolYear, (schoolyear) => schoolyear.Resources, {
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Resources, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })

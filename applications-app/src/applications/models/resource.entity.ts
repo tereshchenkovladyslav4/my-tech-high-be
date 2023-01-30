@@ -1,10 +1,11 @@
-import { Directive, Field, Float, ID, InputType, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ResourceSubtitle } from '../enums';
 import { ResourceLevel } from './resource-level.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { ResourceRequest } from './resource-request.entity';
+import { Course } from './course.entity';
 
 @InputType('resource')
 @ObjectType()
@@ -14,7 +15,7 @@ import { ResourceRequest } from './resource-request.entity';
 @Entity({ name: 'mth_resource_settings' })
 export class Resource extends BaseEntity {
   @Column('int', { name: 'resource_id', nullable: true })
-  @Field(() => ID, { nullable: true })
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   resource_id?: number;
 
@@ -96,7 +97,7 @@ export class Resource extends BaseEntity {
   @Field(() => Boolean, { nullable: true })
   software_reimbursement: boolean;
 
-  @ManyToOne(() => SchoolYear, (schoolyear) => schoolyear.Resources, {
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Resources, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
@@ -110,4 +111,7 @@ export class Resource extends BaseEntity {
 
   @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.Resource)
   ResourceRequests: ResourceRequest[];
+
+  @OneToMany(() => Course, (course) => course.Resource)
+  Courses: Course[];
 }

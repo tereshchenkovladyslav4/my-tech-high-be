@@ -13,6 +13,7 @@ import { Title } from './title.entity';
 import { Provider } from './provider.entity';
 import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
+import { ResourceRequest } from './resource-request.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -168,4 +169,8 @@ export class Course {
 
   @Field(() => Int, { nullable: true })
   TotalRequests: number;
+
+  @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.Course)
+  // @Field(() => [ResourceRequest], { nullable: true })
+  ResourceRequests: ResourceRequest[];
 }

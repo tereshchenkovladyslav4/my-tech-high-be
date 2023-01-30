@@ -7,6 +7,9 @@ import { SchedulePeriodHistory } from '../models/schedule-period-history.entity'
 import { ScheduleService } from './schedule.service';
 import { ScheduleStatus } from '../enums';
 import { Schedule } from '../models/schedule.entity';
+import { CourseService } from './course.service';
+import { ResourceRequestService } from './resource-request.service';
+import { ResourceService } from './resource.service';
 
 @Injectable()
 export class SchedulePeriodService {
@@ -16,6 +19,8 @@ export class SchedulePeriodService {
     @InjectRepository(SchedulePeriodHistory)
     private readonly historyRepo: Repository<SchedulePeriodHistory>,
     private scheduleService: ScheduleService,
+    private courseService: CourseService,
+    private resourceRequestService: ResourceRequestService,
   ) {}
 
   async find(schoolYearId: number, studentId: number): Promise<SchedulePeriod[]> {
@@ -80,6 +85,21 @@ export class SchedulePeriodService {
                 ScheduleHistoryId: scheduleHistory?.schedule_history_id,
               })),
             );
+          }
+
+          // Request resource automatically
+          for (let index = 0; index < schedulePeriodInput.param.length; index++) {
+            const item = schedulePeriodInput.param[index];
+            if (item.CourseId) {
+              const course = await this.courseService.findOne(item.CourseId);
+              if (course.resource_id) {
+                await this.resourceRequestService.create({
+                  student_id: schedule.StudentId,
+                  resource_id: course.resource_id,
+                  course_id: course.id,
+                });
+              }
+            }
           }
         }
       }

@@ -1,14 +1,23 @@
 import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn } from 'class-validator';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ResourceRequestStatus } from '../enums';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
 import { ResourceLevel } from './resource-level.entity';
+import { Course } from './course.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id, student_id, resource_id, resource_level_id, status, created_at, updated_at, Student, Resource, ResourceLevel")',
+  '@key(fields: "id, student_id, resource_id, resource_level_id, course_id, status, created_at, updated_at, Student, Resource, ResourceLevel, Course")',
 )
 @Entity('mth_resource_request')
 export class ResourceRequest {
@@ -35,11 +44,15 @@ export class ResourceRequest {
   @IsIn([ResourceRequestStatus.REQUESTED])
   status?: string;
 
-  @Column()
+  @Column('int', { nullable: true })
+  @Field(() => Int, { nullable: true })
+  course_id?: number;
+
+  @CreateDateColumn()
   @Field(() => Date, { nullable: true })
   created_at?: Date;
 
-  @Column()
+  @UpdateDateColumn()
   @Field(() => Date, { nullable: true })
   updated_at?: Date;
 
@@ -66,4 +79,12 @@ export class ResourceRequest {
   @JoinColumn([{ name: 'resource_level_id', referencedColumnName: 'resource_level_id' }])
   @Field(() => ResourceLevel, { nullable: true })
   ResourceLevel: ResourceLevel;
+
+  @ManyToOne(() => Course, (course) => course.ResourceRequests, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'course_id', referencedColumnName: 'id' }])
+  @Field(() => Course, { nullable: true })
+  Course: Course;
 }

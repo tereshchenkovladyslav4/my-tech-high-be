@@ -16,6 +16,10 @@ export class CourseService {
     private titleService: TitleService,
   ) {}
 
+  async findOne(courseId: number): Promise<Course> {
+    return await this.repo.findOne(courseId);
+  }
+
   async find(providerId: number): Promise<Course[]> {
     return await this.repo.createQueryBuilder('course').where({ provider_id: providerId }).getMany();
   }

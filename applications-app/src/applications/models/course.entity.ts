@@ -13,6 +13,8 @@ import { Title } from './title.entity';
 import { Provider } from './provider.entity';
 import { SchedulePeriod } from './schedule-period.entity';
 import { SchedulePeriodHistory } from './schedule-period-history.entity';
+import { Resource } from './resource.entity';
+import { ResourceRequest } from './resource-request.entity';
 
 @InputType('course')
 @ObjectType()
@@ -115,6 +117,10 @@ export class Course {
   @Field(() => Boolean, { nullable: true })
   deleted: boolean;
 
+  @Column('int', { nullable: true })
+  @Field(() => Int, { nullable: true })
+  resource_id?: number;
+
   @ManyToOne(() => Provider, (provider) => provider.Courses, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
@@ -139,4 +145,16 @@ export class Course {
   @OneToMany(() => SchedulePeriodHistory, (schedulePeriodHistory) => schedulePeriodHistory.Course)
   @Field(() => [SchedulePeriodHistory], { nullable: true })
   SchedulePeriodHistories: SchedulePeriodHistory[];
+
+  @ManyToOne(() => Resource, (resource) => resource.Courses, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'resource_id', referencedColumnName: 'resource_id' }])
+  @Field(() => Resource, { nullable: true })
+  Resource: Resource;
+
+  @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.Course)
+  // @Field(() => [ResourceRequest], { nullable: true })
+  ResourceRequests: ResourceRequest[];
 }

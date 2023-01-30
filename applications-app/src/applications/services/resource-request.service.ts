@@ -14,6 +14,7 @@ import { UserRegionService } from './user-region.service';
 import { ResourceRequestEmail } from '../models/resource-request-email.entity';
 import { UpdateResourceRequestInput } from '../dto/update-resource-request.inputs';
 import { ResourceService } from './resource.service';
+import { ResourceRequestInput } from '../dto/resource-request.inputs';
 
 @Injectable()
 export class ResourceRequestService {
@@ -45,7 +46,7 @@ export class ResourceRequestService {
 
     if (filter) {
       // TODO relations and courses filter
-      const { studentStatuses, statuses, features, types, resources } = filter;
+      const { studentStatuses, statuses, features, types, resources, courses } = filter;
       if (studentStatuses?.length) {
         const hasMidYear = studentStatuses?.includes(`${StudentStatusEnum.MID_YEAR}`);
         if (hasMidYear) studentStatuses.splice(studentStatuses.indexOf(`${StudentStatusEnum.MID_YEAR}`), 1);
@@ -91,6 +92,9 @@ export class ResourceRequestService {
       }
       if (resources?.length) {
         qb.andWhere(`Resource.resource_id IN ("${resources.join('","')}")`);
+      }
+      if (courses?.length) {
+        qb.andWhere(`resourceRequest.course_id IN ("${courses.join('","')}")`);
       }
     }
 
@@ -255,6 +259,25 @@ export class ResourceRequestService {
         std_password: password,
       });
       return resourceRequest;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  async create(resourceRequestInput: ResourceRequestInput): Promise<ResourceRequest> {
+    try {
+      const { student_id: studentId, resource_id: resourceId, course_id: courseId } = resourceRequestInput;
+      const existing = await this.repo.findOne({ student_id: studentId, resource_id: resourceId });
+      if (!existing) {
+        const resourceRequest = await this.repo.save({
+          student_id: studentId,
+          resource_id: resourceId,
+          course_id: courseId,
+          status: ResourceRequestStatus.REQUESTED,
+        });
+        return resourceRequest;
+      }
+      return existing;
     } catch (e) {
       return e;
     }
