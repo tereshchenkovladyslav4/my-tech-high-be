@@ -17,7 +17,7 @@ export class ResourceService {
   ) {}
 
   async find(studentId: number, schoolYearId: number): Promise<Resource[]> {
-    const studentGradeLevel = await this.studentGradeLevelService.find(studentId, schoolYearId);
+    const studentGradeLevel = await this.studentGradeLevelService.findForStudentBySchoolYear(studentId, schoolYearId);
 
     if (!studentGradeLevel) {
       return [];

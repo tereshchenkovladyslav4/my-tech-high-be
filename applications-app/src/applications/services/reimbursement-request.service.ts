@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update-reimbursement-receipt.input';
 import { CreateOrUpdateReimbursementRequestInputs } from '../dto/create-or-update-reimbursement-request.inputs';
 import { ReimbursementRequestSearchInput } from '../dto/reimbursement-request-search.inputs';
 import { ReimbursementRequestStatus } from '../enums';
+import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
 import { ReimbursementRequest } from '../models/reimbursement-request.entity';
 
 @Injectable()
@@ -11,6 +13,8 @@ export class ReimbursementRequestService {
   constructor(
     @InjectRepository(ReimbursementRequest)
     private readonly repo: Repository<ReimbursementRequest>,
+    @InjectRepository(ReimbursementReceipt)
+    private readonly receiptRepo: Repository<ReimbursementReceipt>,
   ) {}
 
   async findByFilter(param: ReimbursementRequestSearchInput): Promise<ReimbursementRequest[]> {
@@ -22,6 +26,7 @@ export class ReimbursementRequestService {
       .leftJoinAndSelect('reimbursementRequest.Student', 'Student')
       .leftJoinAndSelect('Student.person', 'person')
       .leftJoinAndSelect('reimbursementRequest.SchoolYear', 'SchoolYear')
+      .leftJoinAndSelect('reimbursementRequest.ReimbursementReceipts', 'ReimbursementReceipts')
       .where(`reimbursementRequest.SchoolYearId = ${SchoolYearId}`);
 
     if (StudentIds?.length) {
@@ -31,6 +36,14 @@ export class ReimbursementRequestService {
     }
 
     return qb.getMany();
+  }
+
+  async saveReceipts(receiptsInput: CreateOrUpdateReimbursementReceiptInput): Promise<ReimbursementReceipt[]> {
+    try {
+      return await this.receiptRepo.save(receiptsInput?.receipts);
+    } catch (error) {
+      return error;
+    }
   }
 
   async save(requestInput: CreateOrUpdateReimbursementRequestInputs): Promise<ReimbursementRequest> {

@@ -490,7 +490,7 @@ export class PacketsService {
         ) AS t1
         LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
         LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
-        WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id}
+        WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id} and t1.is_age_issue = 0
         GROUP BY t1.status`,
     );
     const statusArray = {

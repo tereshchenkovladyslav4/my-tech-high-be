@@ -274,59 +274,67 @@ export class ScheduleService {
   }
 
   async sendEmail(emailScheduleInput: EmailScheduleInput): Promise<ScheduleEmail[]> {
-    const { schedule_ids, schedule_status, subject, body, from, region_id } = emailScheduleInput;
-    const qb = this.repo
-      .createQueryBuilder('schedule')
-      .leftJoinAndSelect('schedule.ScheduleStudent', 'ScheduleStudent')
-      .leftJoinAndSelect('schedule.SchoolYear', 'SchoolYear')
-      .leftJoinAndSelect('ScheduleStudent.person', 'person')
-      .leftJoinAndSelect('ScheduleStudent.parent', 'parent')
-      .leftJoinAndSelect('parent.person', 'p_person')
-      .andWhere(`schoolYear.RegionId = ${region_id}`);
-    if (schedule_ids && schedule_ids.length > 0) {
-      qb.whereInIds(schedule_ids);
-    }
-    if (schedule_status && schedule_status.length > 0) {
-      qb.andWhere('schedule.status IN (:status)', { status: schedule_status });
-    }
-    const [results] = await qb.getManyAndCount();
-    Promise.all(
-      results &&
-        results.length > 0 &&
-        results.map(async (item) => {
-          await this.sesEmailService.sendEmail({
-            email: item.ScheduleStudent.parent.person.email,
-            subject: subject.toString(),
-            content: body.toString(),
-            from,
-            region_id,
-            template_name: 'Schedule Page',
+    try {
+      const { schedule_ids, schedule_status, subject, body, from, region_id } = emailScheduleInput;
+      const qb = this.repo
+        .createQueryBuilder('schedule')
+        .leftJoinAndSelect('schedule.ScheduleStudent', 'ScheduleStudent')
+        .leftJoinAndSelect('schedule.SchoolYear', 'SchoolYear')
+        .leftJoinAndSelect('ScheduleStudent.person', 'person')
+        .leftJoinAndSelect('ScheduleStudent.parent', 'parent')
+        .leftJoinAndSelect('parent.person', 'p_person')
+        .andWhere(`schoolYear.RegionId = ${region_id}`);
+      if (schedule_ids && schedule_ids.length > 0) {
+        qb.whereInIds(schedule_ids);
+      }
+      if (schedule_status && schedule_status.length > 0) {
+        qb.andWhere('schedule.status IN (:status)', { status: schedule_status });
+      }
+      const [results] = await qb.getManyAndCount();
+      if (results && results.length > 0) {
+        Promise.all(
+          results.map(async (item) => {
+            await this.sesEmailService.sendEmail({
+              email: item.ScheduleStudent.parent.person.email,
+              subject: subject.toString(),
+              content: body.toString(),
+              from,
+              region_id,
+              template_name: 'Schedule Page',
+            });
+          }),
+        );
+
+        let newScheduleIds = [];
+        if (schedule_ids && schedule_ids.length > 0) {
+          newScheduleIds = schedule_ids;
+        }
+        if (schedule_status && schedule_status.length > 0) {
+          newScheduleIds = results.map((ret) => {
+            return ret.schedule_id;
           });
-        }),
-    );
+        }
 
-    let newScheduleIds = [];
-    if (schedule_ids && schedule_ids.length > 0) {
-      newScheduleIds = schedule_ids;
+        if (newScheduleIds.length > 0) {
+          const scheduleEmails = Promise.all(
+            newScheduleIds.map(async (id) => {
+              return await this.scheduleEmailsService.create({
+                schedule_id: +id,
+                subject: subject,
+                body: body,
+                from_email: from,
+                template_name: 'Schedule Page',
+              });
+            }),
+          );
+          return scheduleEmails;
+        }
+        return null;
+      }
+      return null;
+    } catch (error) {
+      return error;
     }
-    if (schedule_status && schedule_status.length > 0) {
-      newScheduleIds = results.map((ret) => {
-        return ret.schedule_id;
-      });
-    }
-
-    const scheduleEmails = Promise.all(
-      newScheduleIds.map(async (id) => {
-        return await this.scheduleEmailsService.create({
-          schedule_id: +id,
-          subject: subject,
-          body: body,
-          from_email: from,
-          template_name: 'Schedule Page',
-        });
-      }),
-    );
-    return scheduleEmails;
   }
 
   async find(schoolYearId: number): Promise<Schedule[]> {

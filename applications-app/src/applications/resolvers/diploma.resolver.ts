@@ -1,4 +1,4 @@
-import { Args, Query, Resolver, Mutation } from '@nestjs/graphql';
+import { Args, Query, Resolver, Mutation, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { ApplicationEvent } from '../models/event.entity';
@@ -24,10 +24,10 @@ export class DiplomaResolver {
   @Query(() => DiplomaQuestion, { name: 'getDiplomaQuestionForStudent', nullable: true })
   @UseGuards(new AuthGuard())
   async getDiplomaQuestionForStudent(
-    @Args('diplomaQuestionInput')
-    diplomaQuestionInput: DiplomaQuestionInput,
+    @Args({ name: 'studentId', type: () => Int }) studentId: number,
+    @Args({ name: 'schoolYearId', type: () => Int }) schoolYearId: number,
   ): Promise<DiplomaQuestion> {
-    return this.diplomaService.getDiplomaQuestionForStudent(diplomaQuestionInput);
+    return this.diplomaService.getDiplomaQuestionForStudent(studentId, schoolYearId);
   }
 
   @Query(() => DiplomaAnswer, { name: 'getDiplomaAnswer', nullable: true })

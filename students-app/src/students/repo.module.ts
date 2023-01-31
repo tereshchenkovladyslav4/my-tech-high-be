@@ -61,6 +61,10 @@ import { ReimbursementSetting } from './models/reimbursement-setting.entity';
 import { MTHHomeroomStudent } from './models/homeroom-student.entity';
 import { MTHClasses } from './models/classes.entity';
 import { ResourceRequest } from './models/resource-request.entity';
+import { DiplomaService } from './services/diploma.service';
+import { DiplomaAnswerService } from './services/diploma-answer.service';
+import { DiplomaQuestion } from './models/diploma-question.entity';
+import { DiplomaAnswer } from './models/diploma-answer.entity';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -86,6 +90,8 @@ const servicesImports = [
   PeriodService,
   ScheduleService,
   ProviderService,
+  DiplomaService,
+  DiplomaAnswerService,
 ];
 
 @Global()
@@ -129,6 +135,8 @@ const servicesImports = [
       MTHHomeroomStudent,
       MTHClasses,
       ResourceRequest,
+      DiplomaQuestion,
+      DiplomaAnswer,
     ]),
   ],
   providers: [...servicesImports],

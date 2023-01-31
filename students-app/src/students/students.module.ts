@@ -37,6 +37,8 @@ import { ProviderResolver } from './resolvers/provider.resolver';
 import { MTHHomeroomStudent } from './models/homeroom-student.entity';
 import { MTHClasses } from './models/classes.entity';
 import { ResourceRequest } from './models/resource-request.entity';
+import { DiplomaQuestion } from './models/diploma-question.entity';
+import { DiplomaAnswer } from './models/diploma-answer.entity';
 
 const graphQLImports = [
   StudentsResolver,
@@ -84,6 +86,8 @@ const graphQLImports = [
           MTHHomeroomStudent,
           MTHClasses,
           ResourceRequest,
+          DiplomaQuestion,
+          DiplomaAnswer,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

@@ -15,7 +15,7 @@ export class StudentGradeLevelsService {
     return this.studentGradeLevelsRepository.find(studentGradeLevelsArgs);
   }
 
-  find(studentId: number, schoolYearId: number): Promise<StudentGradeLevel> {
+  findForStudentBySchoolYear(studentId: number, schoolYearId: number): Promise<StudentGradeLevel> {
     return this.studentGradeLevelsRepository.findOne({
       student_id: studentId,
       school_year_id: schoolYearId,

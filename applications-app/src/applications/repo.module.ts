@@ -144,6 +144,7 @@ import { ReimbursementQuestionService } from './services/reimbursement-question.
 import { ReimbursementQuestion } from './models/reimbursement-question.entity';
 import { ReimbursementRequestService } from './services/reimbursement-request.service';
 import { ReimbursementRequest } from './models/reimbursement-request.entity';
+import { ReimbursementReceipt } from './models/reimbursement-receipt.entity';
 
 const servicesImports = [
   UsersService,
@@ -298,6 +299,7 @@ const servicesImports = [
       ResourceCart,
       ReimbursementQuestion,
       ReimbursementRequest,
+      ReimbursementReceipt,
     ]),
   ],
   providers: [...servicesImports],

@@ -9,7 +9,6 @@ import { ScheduleStatus } from '../enums';
 import { Schedule } from '../models/schedule.entity';
 import { CourseService } from './course.service';
 import { ResourceRequestService } from './resource-request.service';
-import { ResourceService } from './resource.service';
 
 @Injectable()
 export class SchedulePeriodService {

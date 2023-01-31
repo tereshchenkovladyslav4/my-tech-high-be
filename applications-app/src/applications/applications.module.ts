@@ -95,6 +95,7 @@ import { ReimbursementQuestionResolver } from './resolvers/reimbursement-questio
 import { ReimbursementQuestion } from './models/reimbursement-question.entity';
 import { ReimbursementRequestResolver } from './resolvers/reimbursement-request.resolver';
 import { ReimbursementRequest } from './models/reimbursement-request.entity';
+import { ReimbursementReceipt } from './models/reimbursement-receipt.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -202,6 +203,7 @@ const graphQLImports = [
           ResourceCart,
           ReimbursementQuestion,
           ReimbursementRequest,
+          ReimbursementReceipt,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

@@ -1,6 +1,7 @@
 import { Directive, Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { ReimbursementFormType } from '../enums';
+import { ReimbursementReceipt } from './reimbursement-receipt.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
 
@@ -92,4 +93,8 @@ export class ReimbursementRequest extends BaseEntity {
   @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
   @Field(() => Student, { nullable: true })
   Student: Student;
+
+  @OneToMany(() => ReimbursementReceipt, (reimbursementRecipt) => reimbursementRecipt.ReimbursementRequest)
+  @Field(() => [ReimbursementReceipt], { nullable: true })
+  ReimbursementReceipts: ReimbursementReceipt[];
 }

@@ -5,6 +5,8 @@ import { ReimbursementRequest } from '../models/reimbursement-request.entity';
 import { ReimbursementRequestSearchInput } from '../dto/reimbursement-request-search.inputs';
 import { ReimbursementRequestService } from '../services/reimbursement-request.service';
 import { CreateOrUpdateReimbursementRequestInputs } from '../dto/create-or-update-reimbursement-request.inputs';
+import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
+import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update-reimbursement-receipt.input';
 
 @Resolver(() => ReimbursementRequest)
 export class ReimbursementRequestResolver {
@@ -22,6 +24,14 @@ export class ReimbursementRequestResolver {
     @Args('requestInput') requestInput: CreateOrUpdateReimbursementRequestInputs,
   ): Promise<ReimbursementRequest> {
     return this.service.save(requestInput);
+  }
+
+  @Mutation(() => [ReimbursementReceipt], { name: 'createOrUpdateReimbursementReceipts' })
+  @UseGuards(new AuthGuard())
+  async createOrUpdateReimbursementReceipts(
+    @Args('requestInput') requestInput: CreateOrUpdateReimbursementReceiptInput,
+  ): Promise<ReimbursementReceipt[]> {
+    return this.service.saveReceipts(requestInput);
   }
 
   @Mutation(() => Boolean, { name: 'deleteReimbursementRequest' })
