@@ -101,10 +101,6 @@ export class PacketsService {
         qb.andWhere('packet.is_age_issue = 0');
       }
       if (search) {
-        const date = search
-          .split('/')
-          .filter((v) => v)
-          .join('-');
         qb.andWhere(
           new Brackets((sub) => {
             if (
@@ -127,8 +123,19 @@ export class PacketsService {
                 .orWhere('p_person.first_name like :text', {
                   text: `%${search}%`,
                 })
-                .orWhere('p_person.last_name like :text', { text: `%${search}%` })
-                .orWhere('packet.deadline like :text', { text: `%${date}%` });
+                .orWhere('p_person.last_name like :text', { text: `%${search}%` });
+              if (search) {
+                if (search.includes(' - ') && search.split(' - ').length == 2) {
+                  const [fromDate, toDate] = search.split(' - ');
+                  sub.orWhere('packet.deadline between :fromDate and :toDate', { fromDate, toDate });
+                } else {
+                  const date = search
+                    .split('/')
+                    .filter((v) => v)
+                    .join('-');
+                  sub.orWhere('packet.deadline like :text', { text: `%${date}%` });
+                }
+              }
               if (Moment(search, 'MM/DD/YY', true).isValid()) {
                 sub.orWhere('packet.deadline like :text', {
                   text: `%${Moment(search).format('YYYY-MM-DD')}%`,
