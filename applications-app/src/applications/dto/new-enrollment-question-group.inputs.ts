@@ -17,4 +17,7 @@ export class NewEnrollmentQuestionGroupInput {
 
   @Field(() => [NewEnrollmentQuestionsInput], { defaultValue: [] })
   questions?: NewEnrollmentQuestionsInput[];
+
+  @Field(() => String, { nullable: true })
+  school_year_id?: string;
 }

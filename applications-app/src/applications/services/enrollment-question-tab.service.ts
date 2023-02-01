@@ -15,27 +15,28 @@ export class EnrollmentQuestionTabService {
     private readonly repo: Repository<EnrollmentQuestionTab>,
     private enrollmentQuestionGroupService: EnrollmentQuestionGroupService,
     private emailTemplateService: EmailTemplatesService,
-  ) {}
+  ) { }
 
   async find(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionTab[]> {
     if (input) {
-      return await this.repo.find({
-        where: {
-          region_id: input.region_id,
-        },
-      });
+      const result = this.repo
+        .createQueryBuilder('tabs')
+        .leftJoinAndSelect('mth_enrollment_question_group', 'groups', 'groups.tab_id = tabs.id')
+        .where(`tabs.region_id = "${input.region_id}"`)
+        .where(`groups.school_year_id = "${input.school_year_id}"`).getMany();
+      return result;
     }
     return await this.repo.find();
   }
 
   async findByActive(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionTab[]> {
     if (input) {
-      return await this.repo.find({
-        where: {
-          region_id: input.region_id,
-          is_active: 1,
-        },
-      });
+      return this.repo
+        .createQueryBuilder('tabs')
+        .leftJoinAndSelect('mth_enrollment_question_group', 'groups', 'groups.tab_id = tabs.id')
+        .where(`tabs.is_active = 1`)
+        .where(`tabs.region_id = "${input.region_id}"`)
+        .where(`groups.school_year_id = "${input.school_year_id}"`).getMany();
     }
     return await this.repo.find();
   }
@@ -53,7 +54,7 @@ export class EnrollmentQuestionTabService {
   }
 
   async createOrUpdate(input: NewEnrollmentQuestionTabInput): Promise<EnrollmentQuestionTab> {
-    const { id, is_active, tab_name, region_id, groups } = input;
+    const { id, is_active, tab_name, region_id, groups, school_year_id } = input;
     const tabData = await this.repo.save({
       id,
       is_active,
@@ -66,6 +67,7 @@ export class EnrollmentQuestionTabService {
           await this.enrollmentQuestionGroupService.createOrUpdate({
             ...el,
             tab_id: tabData.id,
+            school_year_id: school_year_id
           }),
       ),
     );

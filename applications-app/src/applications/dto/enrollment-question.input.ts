@@ -6,4 +6,8 @@ export class EnrollmentQuestionsInput {
   @Field(() => Int)
   @IsNotEmpty()
   region_id?: number;
+
+  @Field(() => String)
+  @IsNotEmpty()
+  school_year_id?: string;
 }
