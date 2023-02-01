@@ -5,6 +5,9 @@ import { ReimbursementRequest } from '../models/reimbursement-request.entity';
 import { ReimbursementRequestSearchInput } from '../dto/reimbursement-request-search.inputs';
 import { ReimbursementRequestService } from '../services/reimbursement-request.service';
 import { CreateOrUpdateReimbursementRequestInputs } from '../dto/create-or-update-reimbursement-request.inputs';
+import { Pagination } from '../../paginate';
+import { ReimbursementRequestPagination } from '../models/reimbursement-request-pagination.entity';
+import { ReimbursementRequestsArgs } from '../dto/reimbursement-requests.args';
 import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
 import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update-reimbursement-receipt.input';
 
@@ -12,10 +15,17 @@ import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update
 export class ReimbursementRequestResolver {
   constructor(private service: ReimbursementRequestService) {}
 
-  @Query(() => [ReimbursementRequest], { name: 'reimbursementRequests' })
+  @Query(() => ReimbursementRequestPagination, { name: 'reimbursementRequests' })
+  async getReimbursementRequests(@Args() params: ReimbursementRequestsArgs): Promise<Pagination<ReimbursementRequest>> {
+    return await this.service.find(params);
+  }
+
+  @Query(() => [ReimbursementRequest], { name: 'reimbursementRequestsForStudents' })
   @UseGuards(new AuthGuard())
-  getReimbursementRequests(@Args('param') param: ReimbursementRequestSearchInput): Promise<ReimbursementRequest[]> {
-    return this.service.findByFilter(param);
+  getReimbursementRequestsForStudents(
+    @Args('param') param: ReimbursementRequestSearchInput,
+  ): Promise<ReimbursementRequest[]> {
+    return this.service.findForStudents(param);
   }
 
   @Mutation(() => ReimbursementRequest, { name: 'createOrUpdateReimbursementRequest' })

@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update-reimbursement-receipt.input';
 import { CreateOrUpdateReimbursementRequestInputs } from '../dto/create-or-update-reimbursement-request.inputs';
 import { ReimbursementRequestSearchInput } from '../dto/reimbursement-request-search.inputs';
-import { ReimbursementRequestStatus } from '../enums';
+import { ReimbursementRequestStatus, ReimbursementRequestType } from '../enums';
 import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
 import { ReimbursementRequest } from '../models/reimbursement-request.entity';
+import { Pagination } from '../../paginate';
+import { ReimbursementRequestsArgs } from '../dto/reimbursement-requests.args';
 
 @Injectable()
 export class ReimbursementRequestService {
@@ -17,7 +19,110 @@ export class ReimbursementRequestService {
     private readonly receiptRepo: Repository<ReimbursementReceipt>,
   ) {}
 
-  async findByFilter(param: ReimbursementRequestSearchInput): Promise<ReimbursementRequest[]> {
+  async find(args: ReimbursementRequestsArgs): Promise<Pagination<ReimbursementRequest>> {
+    const { schoolYearId, skip, take, sort, filter, search } = args;
+    const qb = await this.repo
+      .createQueryBuilder('reimbursementRequest')
+      .leftJoinAndSelect('reimbursementRequest.Student', 'Student')
+      .leftJoinAndSelect('Student.person', 'Person')
+      .leftJoinAndSelect('Student.grade_levels', 'GradeLevels', `GradeLevels.school_year_id = ${schoolYearId}`)
+      .leftJoinAndSelect('Student.parent', 'Parent')
+      .leftJoinAndSelect('Parent.person', 'ParentPerson')
+      .where(`reimbursementRequest.SchoolYearId = ${schoolYearId}`);
+
+    if (filter) {
+      // TODO others filter
+      const { requests, types, statuses, grades } = filter;
+      if (
+        requests?.includes(`${ReimbursementRequestType.DIRECT_ORDER}`) &&
+        !requests?.includes(`${ReimbursementRequestType.REIMBURSEMENT}`)
+      ) {
+        qb.andWhere('reimbursementRequest.is_direct_order = true');
+      }
+      if (
+        requests?.includes(`${ReimbursementRequestType.REIMBURSEMENT}`) &&
+        !requests?.includes(`${ReimbursementRequestType.DIRECT_ORDER}`)
+      ) {
+        qb.andWhere('reimbursementRequest.is_direct_order = false');
+      }
+
+      if (types?.length) {
+        qb.andWhere(`reimbursementRequest.form_type IN ("${types.join('","')}")`);
+      }
+
+      if (statuses?.length) {
+        qb.andWhere(`reimbursementRequest.status IN ("${statuses.join('","')}")`);
+      }
+
+      if (grades?.length) {
+        qb.andWhere(`GradeLevels.grade_level IN ("${grades.join('","')}")`);
+      }
+    }
+
+    if (search) {
+      qb.andWhere(
+        new Brackets((sub) => {
+          sub.where('Person.first_name like :text', { text: `%${search}%` });
+          sub.orWhere('Person.last_name like :text', { text: `%${search}%` });
+          sub.orWhere('Person.email like :text', { text: `%${search}%` });
+        }),
+      );
+    }
+
+    if (sort) {
+      const [sortBy, sortOrder] = sort.split('|');
+      switch (sortBy) {
+        case 'date_submitted': {
+          qb.orderBy('reimbursementRequest.date_submitted', sortOrder === 'asc' ? 'DESC' : 'ASC');
+          break;
+        }
+        case 'total_amount': {
+          qb.orderBy('reimbursementRequest.total_amount', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+        case 'studentName': {
+          qb.orderBy('Person.last_name', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          qb.addOrderBy('Person.first_name', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+        case 'grade': {
+          qb.orderBy('GradeLevels.grade_level', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+        case 'parentName': {
+          qb.orderBy('ParentPerson.last_name', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          qb.addOrderBy('ParentPerson.first_name', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+        case 'requestStatus': {
+          qb.orderBy('reimbursementRequest.status', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+        case 'date_paid': {
+          qb.orderBy('reimbursementRequest.date_paid', sortOrder === 'asc' ? 'DESC' : 'ASC');
+          qb.addOrderBy('reimbursementRequest.date_ordered', sortOrder === 'asc' ? 'DESC' : 'ASC');
+          break;
+        }
+        case 'form_type': {
+          qb.orderBy('reimbursementRequest.form_type', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+        case 'periods': {
+          qb.orderBy('reimbursementRequest.periods', sortOrder === 'asc' ? 'ASC' : 'DESC');
+          break;
+        }
+      }
+    }
+
+    const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
+
+    return new Pagination<ReimbursementRequest>({
+      results,
+      total,
+    });
+  }
+
+  async findForStudents(param: ReimbursementRequestSearchInput): Promise<ReimbursementRequest[]> {
     const { filter } = param;
     const { SchoolYearId, StudentIds } = filter;
 
@@ -57,16 +162,15 @@ export class ReimbursementRequestService {
           requestInput.date_paid = new Date();
           break;
       }
-      const result = await this.repo.save(requestInput);
-      return result;
+      return await this.repo.save(requestInput);
     } catch (error) {
       return error;
     }
   }
 
-  async delete(remimbursement_request_id: number): Promise<boolean> {
+  async delete(reimbursement_request_id: number): Promise<boolean> {
     try {
-      await this.repo.delete(remimbursement_request_id);
+      await this.repo.delete(reimbursement_request_id);
       return true;
     } catch (error) {
       return error;

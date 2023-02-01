@@ -11,7 +11,7 @@ import { StudentHiddenResource } from './student-hidden-resource.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels, SchoolYear")',
+  '@key(fields: "resource_id, SchoolYearId, title, image, subtitle, price, website, grades, std_username_format, std_user_name, std_password, detail, priority, is_active, resource_limit, add_resource_level, family_resource, allow_request, deleted, ResourceLevels, SchoolYear")',
 )
 @Entity({ name: 'mth_resource_settings' })
 export class Resource extends BaseEntity {
@@ -61,6 +61,11 @@ export class Resource extends BaseEntity {
   @Field(() => String, { nullable: true })
   @Directive('@external')
   grades: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  std_username_format: string;
 
   @Column()
   @Field(() => String, { nullable: true })

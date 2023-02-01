@@ -27,6 +27,9 @@ export class CreateOrUpdateResourceInput {
   grades?: string;
 
   @Field(() => String, { nullable: true })
+  std_username_format?: string;
+
+  @Field(() => String, { nullable: true })
   std_user_name?: string;
 
   @Field(() => String, { nullable: true })
