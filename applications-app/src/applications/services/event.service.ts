@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getConnection, Repository, createQueryBuilder } from 'typeorm';
 import { ApplicationEvent } from '../models/event.entity';
@@ -17,6 +17,7 @@ import { StudentAssessmentOption } from '../models/student-assessment-option.ent
 import { StudentStatusEnum } from '../enums';
 @Injectable()
 export class EventsService {
+  private readonly logger = new Logger(EventsService.name);
   constructor(
     @InjectRepository(ApplicationEvent)
     private readonly eventsRepository: Repository<ApplicationEvent>,
@@ -67,8 +68,8 @@ export class EventsService {
   }
 
   async findAll(param: FindEventsByRegionIdSearch): Promise<Array<ApplicationEvent>> {
+    const queryRunner = await getConnection().createQueryRunner();
     try {
-      const queryRunner = await getConnection().createQueryRunner();
       let subCond = '';
       if (param.search_field) {
         let filter_grades = '';
@@ -158,7 +159,7 @@ export class EventsService {
           .printSql()
           .getMany();
 
-        const studentIds = students.map((student: Student) => student.student_id);
+        const studentIds = students.length > 0 ? students.map((student: Student) => student.student_id) : [0];
 
         const studentsAssessments = await createQueryBuilder('StudentAssessmentOption')
           .innerJoinAndSelect('StudentAssessmentOption.AssessmentOption', 'AssessmentOption')
@@ -248,10 +249,12 @@ export class EventsService {
         });
       }
 
-      queryRunner.release();
       return results;
     } catch (error) {
+      this.logger.error(error);
       return [];
+    } finally {
+      await queryRunner.release();
     }
   }
 

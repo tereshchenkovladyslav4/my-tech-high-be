@@ -15,7 +15,7 @@ export class EnrollmentQuestionTabService {
     private readonly repo: Repository<EnrollmentQuestionTab>,
     private enrollmentQuestionGroupService: EnrollmentQuestionGroupService,
     private emailTemplateService: EmailTemplatesService,
-  ) { }
+  ) {}
 
   async find(input?: EnrollmentQuestionsInput): Promise<EnrollmentQuestionTab[]> {
     if (input) {
@@ -23,7 +23,8 @@ export class EnrollmentQuestionTabService {
         .createQueryBuilder('tabs')
         .leftJoinAndSelect('mth_enrollment_question_group', 'groups', 'groups.tab_id = tabs.id')
         .where(`tabs.region_id = "${input.region_id}"`)
-        .where(`groups.school_year_id = "${input.school_year_id}"`).getMany();
+        .where(`groups.school_year_id = "${input.school_year_id}"`)
+        .getMany();
       return result;
     }
     return await this.repo.find();
@@ -36,7 +37,8 @@ export class EnrollmentQuestionTabService {
         .leftJoinAndSelect('mth_enrollment_question_group', 'groups', 'groups.tab_id = tabs.id')
         .where(`tabs.is_active = 1`)
         .where(`tabs.region_id = "${input.region_id}"`)
-        .where(`groups.school_year_id = "${input.school_year_id}"`).getMany();
+        .where(`groups.school_year_id = "${input.school_year_id}"`)
+        .getMany();
     }
     return await this.repo.find();
   }
@@ -67,7 +69,7 @@ export class EnrollmentQuestionTabService {
           await this.enrollmentQuestionGroupService.createOrUpdate({
             ...el,
             tab_id: tabData.id,
-            school_year_id: school_year_id
+            school_year_id: school_year_id,
           }),
       ),
     );

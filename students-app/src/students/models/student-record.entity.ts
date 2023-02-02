@@ -10,6 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Region } from './region.entity';
+import { SchoolYear } from './schoolyear.entity';
 import { StudentRecordFile } from './student-record-file.entity';
 import { Student } from './student.entity';
 
@@ -26,9 +27,9 @@ export class StudentRecord extends BaseEntity {
   @Field(() => Int, { nullable: true })
   StudentId: number | null;
 
-  @Column({ type: 'int', name: 'RegionId', nullable: true })
+  @Column({ type: 'int', name: 'SchoolYearId', nullable: true })
   @Field(() => Int, { nullable: true })
-  RegionId: number | null;
+  SchoolYearId: number | null;
 
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
@@ -46,13 +47,13 @@ export class StudentRecord extends BaseEntity {
   @Field(() => Student, { nullable: true })
   Student: Student;
 
-  @ManyToOne(() => Region, (region) => region.Records, {
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.StudentRecords, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'RegionId', referencedColumnName: 'id' })
-  @Field(() => Region, { nullable: true })
-  Region: Region;
+  @JoinColumn({ name: 'SchoolYearId', referencedColumnName: 'school_year_id' })
+  @Field(() => SchoolYear, { nullable: true })
+  SchoolYear: SchoolYear;
 
   @OneToMany(() => StudentRecordFile, (studentRecordFile) => studentRecordFile.StudentRecord)
   @Field(() => [StudentRecordFile], { nullable: true })

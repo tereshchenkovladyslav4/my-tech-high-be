@@ -400,7 +400,7 @@ export class ApplicationsService {
         const school_year = await this.schoolYearService.findOneById(application.school_year_id);
 
         if (!school_year.enrollment_packet) {
-          await this.studentRecordService.createStudentRecord(student.student_id, school_year.RegionId, 6, null);
+          await this.studentRecordService.createStudentRecord(student.student_id, school_year.school_year_id, 6, null);
         }
 
         if (emailTemplate && !fromAdmin) {

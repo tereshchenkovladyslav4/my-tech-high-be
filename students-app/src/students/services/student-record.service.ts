@@ -16,7 +16,7 @@ export class StudentRecordService {
     const { pagination, filter, search_key } = param;
     const { skip, take } = pagination;
     const {
-      region_id,
+      school_year_id,
       grade_level_1,
       grade_level_2,
       program_year,
@@ -38,7 +38,7 @@ export class StudentRecordService {
       .leftJoinAndSelect('StudentRecordFiles.File', 'File')
       .leftJoinAndSelect('Student.status', 'student_status')
       .leftJoinAndSelect('Student.status_history', 'status_history')
-      .where(`record.RegionId = ${region_id}`);
+      .where(`record.SchoolYearId = ${school_year_id}`);
 
     const grades = [];
     if (grade_level_1) {
@@ -89,7 +89,7 @@ export class StudentRecordService {
           SELECT * FROM infocenter.mth_application ${cond}
         ) AS application
         LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
-        WHERE schoolYear.RegionId = ${region_id};`,
+        WHERE schoolYear.school_year_id = ${school_year_id};`,
       );
       queryRunner.release();
       result.map((item) => {
@@ -197,7 +197,7 @@ export class StudentRecordService {
 
   async createStudentRecord(
     studentId: number,
-    regionId: number,
+    schoolYearId: number,
     fileId: number,
     fileKind: StudentRecordFileKind,
   ): Promise<boolean> {
@@ -213,9 +213,9 @@ export class StudentRecordService {
       } else {
         const record = await queryRunner.query(`
           INSERT INTO infocenter.mth_student_record
-            (StudentId, RegionId, created_at, updated_at)
+            (StudentId, SchoolYearId, created_at, updated_at)
           VALUES
-            (${studentId}, ${regionId}, NOW(), NOW());
+            (${studentId}, ${schoolYearId}, NOW(), NOW());
         `);
         recordId = record.insertId;
       }
@@ -262,17 +262,17 @@ export class StudentRecordService {
     }
   }
 
-  async save(region_id: number, student_id: number): Promise<boolean> {
+  async save(school_year_id: number, student_id: number): Promise<boolean> {
     try {
       const record = await this.repo.find({
         where: {
-          RegionId: region_id,
+          SchoolYearId: school_year_id,
           StudentId: student_id,
         },
       });
       if (!record || record.length == 0) {
         await this.repo.save({
-          RegionId: region_id,
+          SchoolYearId: school_year_id,
           StudentId: student_id,
         });
       }

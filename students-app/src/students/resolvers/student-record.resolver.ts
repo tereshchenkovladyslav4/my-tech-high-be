@@ -38,9 +38,9 @@ export class StudentRecordResolver {
 
   @Mutation((returns) => Boolean, { name: 'createStudentRecord' })
   async createStudentRecord(
-    @Args({ name: 'region_id', type: () => ID }) region_id: number,
+    @Args({ name: 'school_year_id', type: () => ID }) school_year_id: number,
     @Args({ name: 'student_id', type: () => ID }) student_id: number,
   ) {
-    return await this.service.save(region_id, student_id);
+    return await this.service.save(school_year_id, student_id);
   }
 }

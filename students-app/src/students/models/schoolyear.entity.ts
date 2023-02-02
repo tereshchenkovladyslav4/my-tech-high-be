@@ -5,6 +5,7 @@ import { ScheduleBuilder } from './scheduler-builder.entity';
 import { SchoolPartner } from './school-partner.entity';
 import { ReduceFunds } from '../enums';
 import { ReimbursementSetting } from './reimbursement-setting.entity';
+import { StudentRecord } from './student-record.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -402,4 +403,8 @@ export class SchoolYear extends BaseEntity {
   @Field(() => ReimbursementSetting, { nullable: true })
   @Directive('@external')
   ReimbursementSetting: ReimbursementSetting;
+
+  @OneToMany(() => StudentRecord, (studentRecord) => studentRecord.SchoolYear)
+  @Field(() => [StudentRecord], { nullable: true })
+  StudentRecords: StudentRecord[];
 }

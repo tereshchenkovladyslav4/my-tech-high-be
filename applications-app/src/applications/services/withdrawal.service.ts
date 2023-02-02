@@ -966,7 +966,7 @@ export class WithdrawalService {
       if (!uploadFile) throw new ServiceUnavailableException(`Upload file failed: ${withdrawalId}`);
       await this.studentRecordService.createStudentRecord(
         studentId,
-        schoolYear.RegionId,
+        schoolYear.school_year_id,
         uploadFile.file_id,
         StudentRecordFileKind.WITHDRAWAL_FORM,
       );

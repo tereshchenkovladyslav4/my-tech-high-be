@@ -4,7 +4,7 @@ import { Field, Int, InputType, ArgsType } from '@nestjs/graphql';
 @ArgsType()
 export class StudentRecordFilterInput {
   @Field((type) => Int, { nullable: true })
-  region_id: number;
+  school_year_id: number;
 
   @Field((type) => String, { nullable: true })
   grade_level_1?: string;

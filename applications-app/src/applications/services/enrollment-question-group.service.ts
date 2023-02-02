@@ -11,7 +11,7 @@ export class EnrollmentQuestionGroupService {
     @InjectRepository(EnrollmentQuestionGroup)
     private readonly repo: Repository<EnrollmentQuestionGroup>,
     private enrollmentQuestionsService: EnrollmentQuestionsService,
-  ) { }
+  ) {}
 
   async findOneByParent(parent_id: number): Promise<EnrollmentQuestionGroup[]> {
     return await this.repo

@@ -9,7 +9,7 @@ export class StudentRecordService {
 
   async createStudentRecord(
     studentId: number,
-    regionId: number,
+    schoolYearId: number,
     fileId: number,
     fileKind: StudentRecordFileKind,
   ): Promise<boolean> {
@@ -25,9 +25,9 @@ export class StudentRecordService {
       } else {
         const record = await queryRunner.query(`
           INSERT INTO infocenter.mth_student_record
-            (StudentId, RegionId, created_at, updated_at)
+            (StudentId, SchoolYearId, created_at, updated_at)
           VALUES
-            (${studentId}, ${regionId}, NOW(), NOW());
+            (${studentId}, ${schoolYearId}, NOW(), NOW());
         `);
         recordId = record.insertId;
       }

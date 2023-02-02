@@ -1,6 +1,5 @@
 import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { StudentRecord } from './student-record.entity';
 import { UserRegion } from './user-region.entity';
 
 @ObjectType()
@@ -44,8 +43,4 @@ export class Region extends BaseEntity {
   @Field(() => UserRegion, { nullable: true })
   @Directive('@external')
   region: UserRegion;
-
-  @OneToMany(() => StudentRecord, (record) => record.Region)
-  @Field(() => [StudentRecord], { nullable: true })
-  Records: StudentRecord[];
 }

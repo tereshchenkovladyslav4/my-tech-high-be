@@ -705,7 +705,7 @@ export class PacketsService {
 
       await this.studentRecordService.createStudentRecord(
         student_id,
-        region_id,
+        schoolYear?.school_year_id,
         uploadFile.file_id,
         StudentRecordFileKind.STUDENT_PACKET,
       );
