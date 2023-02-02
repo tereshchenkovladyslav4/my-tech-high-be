@@ -279,7 +279,7 @@ export class ScheduleService {
       const qb = this.repo
         .createQueryBuilder('schedule')
         .leftJoinAndSelect('schedule.ScheduleStudent', 'ScheduleStudent')
-        .leftJoinAndSelect('schedule.SchoolYear', 'SchoolYear')
+        .leftJoinAndSelect('schedule.SchoolYear', 'schoolYear')
         .leftJoinAndSelect('ScheduleStudent.person', 'person')
         .leftJoinAndSelect('ScheduleStudent.parent', 'parent')
         .leftJoinAndSelect('parent.person', 'p_person')
