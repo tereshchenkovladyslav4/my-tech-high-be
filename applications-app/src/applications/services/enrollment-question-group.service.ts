@@ -26,9 +26,9 @@ export class EnrollmentQuestionGroupService {
   }
 
   async createOrUpdate(input: NewEnrollmentQuestionGroupInput): Promise<EnrollmentQuestionGroup> {
-    const { id, order, group_name, tab_id, questions, school_year_id } = input;
+    const { id, order, group_name, tab_id, questions } = input;
 
-    const groupData = await this.repo.save({ id, order, group_name, tab_id, school_year_id });
+    const groupData = await this.repo.save({ id, order, group_name, tab_id });
     Promise.all(
       questions.map(
         async (el) =>

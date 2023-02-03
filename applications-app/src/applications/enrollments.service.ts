@@ -84,6 +84,12 @@ export class EnrollmentsService {
         }
 
         const { grade_level } = student;
+        let current_grade_level = grade_level;
+
+        if (!grade_level) {
+          const grade_levels = await this.studentGradeLevelsService.forStudentsBySchoolYear(student_id, school_year_id);
+          if (grade_levels) current_grade_level = grade_levels[0].grade_level;
+        }
         if (school_year_id && grade_level && student_id) {
           await this.studentGradeLevelsService.createOrUpdate({
             student_id,
@@ -104,10 +110,16 @@ export class EnrollmentsService {
         if (school_year.birth_date_cut) {
           if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
 
-          const age = studentPerson.date_of_birth
+          let age = studentPerson.date_of_birth
             ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
             : 0;
-          const grade_age = parseGradeLevel(grade_level);
+
+          if (
+            Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD')
+          ) {
+            if (Moment().format('YYYY/MM/DD') > Moment(studentPerson.date_of_birth).format('YYYY/MM/DD')) age += 1;
+          }
+          const grade_age = parseGradeLevel(current_grade_level);
 
           if (studentPerson.date_of_birth && grade_age != 0) {
             if (age != grade_age) is_age_issue = true;
@@ -137,7 +149,7 @@ export class EnrollmentsService {
       }
 
       let studentPacket = null;
-      if (status != 'Submitted' && status != 'Resubmitted') is_age_issue = false;
+      if (status != 'Submitted' && status != 'Resubmitted' && status != 'Conditional') is_age_issue = false;
 
       if (status == PacketStatus.ACCEPTED) {
         studentPacket = await this.packetsService.update({
@@ -431,11 +443,10 @@ export class EnrollmentsService {
           ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
           : 0;
 
-        if (
-          Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD') &&
-          age != 0
-        )
-          age -= 1;
+        if (Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD')) {
+          if (Moment().format('YYYY/MM/DD') > Moment(studentPerson.date_of_birth).format('YYYY/MM/DD')) age += 1;
+        }
+
         const grade_age = parseGradeLevel(grade_level);
 
         if (studentPerson.date_of_birth && grade_age != 0) {

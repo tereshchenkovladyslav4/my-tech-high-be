@@ -20,7 +20,8 @@ export class StudentRecordService {
       grade_level_1,
       grade_level_2,
       program_year,
-      status,
+      program_year_status,
+      enrollment_status,
       school_of_enrollment,
       special_ed,
       enrollment_packet_document,
@@ -99,16 +100,15 @@ export class StudentRecordService {
       });
     }
 
-    if (status) {
-      const statusList = JSON.parse(status);
+    if (program_year_status) {
+      const statusList = JSON.parse(program_year_status);
       qb.andWhere(
         new Brackets((sub) => {
-          if (statusList.includes('Withdrawn')) sub.orWhere(`student_status.status = ${StudentStatusEnum.WITHDRAWN}`);
-          if (statusList.includes('Returning'))
+          if (statusList?.includes('Returning'))
             sub.orWhere(
               `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE}) AND status_history.student_id IS NOT NULL AND (status_history.status = ${StudentStatusEnum.PENDING} OR status_history.status = ${StudentStatusEnum.ACTIVE})`,
             );
-          if (statusList.includes('New'))
+          if (statusList?.includes('New'))
             sub.orWhere(
               `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE}) AND status_history.student_id IS NULL`,
             );
@@ -119,6 +119,13 @@ export class StudentRecordService {
       qb.andWhere(
         `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE})`,
       );
+    }
+
+    if (enrollment_status) {
+      const enrollmentStatusList = JSON.parse(enrollment_status);
+      if (enrollmentStatusList?.includes('Withdrawn')) {
+        qb.andWhere(`student_status.status = ${StudentStatusEnum.WITHDRAWN}`);
+      }
     }
 
     if (search_key) {

@@ -15,6 +15,14 @@ export class ApplicationQuestion extends BaseEntity {
   type: number;
 
   @Column()
+  @Field(() => Int)
+  school_year_id: number;
+
+  @Column()
+  @Field(() => Boolean)
+  mid_year: boolean;
+
+  @Column()
   @Field(() => Int, { defaultValue: 0 })
   order: number;
 

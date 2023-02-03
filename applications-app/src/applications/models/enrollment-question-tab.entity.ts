@@ -24,4 +24,12 @@ export class EnrollmentQuestionTab extends BaseEntity {
 
   @OneToMany(() => EnrollmentQuestionGroup, (enrollmentQuestionGroup) => enrollmentQuestionGroup.tab_id)
   groups?: EnrollmentQuestionGroup[];
+
+  @Column()
+  @Field(() => Int, { nullable: true })
+  school_year_id?: number;
+
+  @Column()
+  @Field(() => Boolean, { nullable: true })
+  mid_year?: boolean;
 }

@@ -19,6 +19,12 @@ export class StudentGradeLevelsService {
     return this.studentGradeLevelsRepository.find({ where: { student_id: student_id } });
   }
 
+  async forStudentsBySchoolYear(student_id: number, school_year_id: number): Promise<StudentGradeLevel[]> {
+    return this.studentGradeLevelsRepository.find({
+      where: { student_id: student_id, school_year_id: school_year_id },
+    });
+  }
+
   findForStudentBySchoolYear(studentId: number, schoolYearId: number): Promise<StudentGradeLevel> {
     return this.studentGradeLevelsRepository.findOne({
       student_id: studentId,

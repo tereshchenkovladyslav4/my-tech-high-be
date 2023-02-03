@@ -16,7 +16,8 @@ export class ApplicationQuestionsService {
     if (input) {
       return await this.repo.find({
         where: {
-          region_id: input.region_id,
+          school_year_id: input.school_year_id,
+          mid_year: input.mid_year ? 1 : 0,
         },
       });
     }
@@ -29,6 +30,8 @@ export class ApplicationQuestionsService {
         where: {
           region_id: input.region_id,
           student_question: 1,
+          school_year_id: input.school_year_id,
+          mid_year: input.mid_year ? 1 : 0,
         },
       });
     }

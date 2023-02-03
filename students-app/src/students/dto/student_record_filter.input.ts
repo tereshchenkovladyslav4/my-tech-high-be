@@ -16,7 +16,10 @@ export class StudentRecordFilterInput {
   program_year?: string;
 
   @Field((type) => String, { nullable: true })
-  status?: string;
+  program_year_status?: string;
+
+  @Field((type) => String, { nullable: true })
+  enrollment_status?: string;
 
   @Field((type) => String, { nullable: true })
   school_of_enrollment?: string;

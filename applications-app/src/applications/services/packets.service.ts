@@ -74,6 +74,10 @@ export class PacketsService {
         });
       }
 
+      const hasAgeIssue = filters.includes('Age Issue') ? true : false;
+      let new_filters = filters;
+      if (hasAgeIssue && filters.length != 1) new_filters = filters.filter((filter) => filter != 'Age Issue');
+
       const userEmails = this.packetEmailsService.findByOrder();
 
       const qb = this.packetsRepository
@@ -89,16 +93,18 @@ export class PacketsService {
         .leftJoinAndSelect('student.grade_levels', 'grade_levels')
         .leftJoinAndSelect('packet.packet_emails', 'packet_emails')
         .leftJoinAndSelect('packet.packet_emails', '(' + userEmails + ')')
-        .where('packet.status IN (:status)', { status: filters })
+        .where('packet.status IN (:status)', { status: new_filters })
         .andWhere(`school_year.RegionId = ${region_id}`)
         .andWhere(`school_year.school_year_id = ${selectedYearId}`);
 
-      if (filters.includes('Age Issue')) {
-        qb.orWhere('packet.is_age_issue = :isAgeIssue', { isAgeIssue: 1 });
-        qb.andWhere(`school_year.RegionId = ${region_id}`);
-        qb.andWhere(`school_year.school_year_id = ${selectedYearId}`);
-      } else {
+      if (!hasAgeIssue) {
         qb.andWhere('packet.is_age_issue = 0');
+      } else {
+        if (new_filters.length == 1 && new_filters.includes('Age Issue')) {
+          qb.orWhere('packet.is_age_issue = 1');
+          qb.andWhere(`school_year.RegionId = ${region_id}`);
+          qb.andWhere(`school_year.school_year_id = ${selectedYearId}`);
+        }
       }
       if (search) {
         qb.andWhere(
@@ -467,9 +473,13 @@ export class PacketsService {
     if (school_year.birth_date_cut) {
       if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
 
-      const age = studentPerson.date_of_birth
+      let age = studentPerson.date_of_birth
         ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
         : 0;
+
+      if (Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD')) {
+        if (Moment().format('YYYY/MM/DD') > Moment(studentPerson.date_of_birth).format('YYYY/MM/DD')) age += 1;
+      }
       const grade_age = parseGradeLevel(student.grade_levels[0].grade_level);
 
       if (studentPerson.date_of_birth && grade_age != 0) {
@@ -477,7 +487,8 @@ export class PacketsService {
       }
     }
 
-    if (packet.status != 'Submitted' && packet.status != 'Resubmitted') is_age_issue = false;
+    if (packet.status != 'Submitted' && packet.status != 'Resubmitted' && packet.status != 'Conditional')
+      is_age_issue = false;
 
     this.update({
       packet_id: packet.packet_id,

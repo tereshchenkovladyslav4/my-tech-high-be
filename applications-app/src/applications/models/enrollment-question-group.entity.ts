@@ -17,10 +17,6 @@ export class EnrollmentQuestionGroup extends BaseEntity {
 
   @Column()
   @Field(() => String, { nullable: true })
-  school_year_id?: string;
-
-  @Column()
-  @Field(() => String, { nullable: true })
   group_name?: string;
 
   @Column()

@@ -20,6 +20,9 @@ export class NewEnrollmentQuestionTabInput {
   @IsNotEmpty()
   region_id?: number;
 
-  @Field(() => String)
-  school_year_id?: string;
+  @Field(() => Int)
+  school_year_id?: number;
+
+  @Field(() => Boolean)
+  mid_year?: boolean;
 }

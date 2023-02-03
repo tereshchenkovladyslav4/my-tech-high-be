@@ -25,6 +25,12 @@ export class NewApplicationQuestionsInput {
   @IsNotEmpty()
   region_id?: number;
 
+  @Field(() => Int)
+  school_year_id?: number;
+
+  @Field(() => Boolean)
+  mid_year?: boolean;
+
   @Field(() => Int, { defaultValue: 0 })
   validation?: number;
 
