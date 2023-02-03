@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class UpdateStudentTable1675229252020 implements MigrationInterface {
-  name = 'UpdateStudentTable1675229252020';
+export class UpdateStudentTable1675430447989 implements MigrationInterface {
+  name = 'UpdateStudentTable1675430447989';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE \`mth_student\` ADD \`username_first\` varchar(255) NULL`);
@@ -36,54 +36,62 @@ export class UpdateStudentTable1675229252020 implements MigrationInterface {
     );
     await queryRunner.query(`ALTER TABLE \`mth_student\` ADD \`username_student_email\` varchar(255) NULL`);
     await queryRunner.query(`ALTER TABLE \`mth_student\` ADD \`username_parent_email\` varchar(255) NULL`);
-
     await queryRunner.query(`
-        UPDATE \`mth_student\`
-            LEFT JOIN \`mth_person\`
-        ON \`mth_person\`.person_id = \`mth_student\`.person_id
-            LEFT JOIN (
-            SELECT MAX (application_id) latest_application_id, student_id, school_year_id
-            FROM \`mth_application\`
-            GROUP BY student_id
-            ) \`application_latest\` ON \`application_latest\`.student_id = \`mth_student\`.student_id
-            LEFT JOIN \`mth_schoolyear\` ON \`application_latest\`.school_year_id = \`mth_schoolyear\`.school_year_id
-            LEFT JOIN \`mth_parent\` ON \`mth_parent\`.parent_id = \`mth_student\`.parent_id
-            LEFT JOIN \`mth_person\` \`parent_person\` ON \`parent_person\`.person_id = \`mth_parent\`.person_id
-            SET
-                \`mth_student\`.username_first = LOWER (\`mth_person\`.first_name), \`mth_student\`.username_last = LOWER (\`mth_person\`.last_name)
-        WHERE \`mth_student\`.student_id > 0
+      UPDATE \`mth_student\`
+      LEFT JOIN \`mth_person\` ON \`mth_person\`.person_id = \`mth_student\`.person_id
+      LEFT JOIN \`mth_parent\` ON \`mth_parent\`.parent_id = \`mth_student\`.parent_id
+      LEFT JOIN \`mth_person\` \`parent_person\` ON \`parent_person\`.person_id = \`mth_parent\`.person_id
+      SET \`mth_student\`.username_first = LOWER(\`mth_person\`.first_name), \`mth_student\`.username_last = LOWER(\`mth_person\`.last_name), \`mth_student\`.username_student_email = \`mth_person\`.email, \`mth_student\`.username_parent_email = \`parent_person\`.email
+      WHERE \`mth_student\`.student_id > 0
     `);
 
-    await queryRunner.query(`
-                            UPDATE \`mth_student\`
-                             SET \`username_parent_email\` =
-                                     (WITH \`UpdateData\` AS
-                                               (SELECT \`student_id\`,
-                                                       CONCAT(\`username_last\`, SUBSTRING(\`username_first\`, 1, 1)) AS \`username\`,
-                                                       ROW_NUMBER()                                                      OVER(PARTITION BY \`username\` ORDER BY \`student_id\`) AS \`RowNumber\`
-                                                FROM \`mth_student\`)
-                                      SELECT IF(\`RowNumber\` > 1, CONCAT('_', \`RowNumber\` - 1), '')
-                                      FROM \`UpdateData\`
-                                      WHERE \`mth_student\`.\`student_id\` = \`UpdateData\`.\`student_id\`)
-                             WHERE \`student_id\` > 0
-    `);
+    while (1) {
+      const students = await queryRunner.query(
+        `SELECT * FROM \`mth_student\`WHERE \`mth_student\`.username_first_last IS NULL LIMIT 1`,
+      );
+      if (!students?.length) break;
+      const student = students[0];
+      const studentId = student.student_id;
+      const applications = await queryRunner.query(
+        `SELECT * FROM \`mth_application\` WHERE \`mth_application\`.student_id = ${studentId} ORDER BY \`application_id\` LIMIT 1`,
+      );
+      let schoolYear;
+      if (applications?.length) {
+        const schoolYearId = applications[0].school_year_id;
+        const schoolYears = await queryRunner.query(
+          `SELECT * FROM \`mth_schoolyear\` WHERE \`mth_schoolyear\`.school_year_id = ${schoolYearId}`,
+        );
+        schoolYear = schoolYears[0];
+      }
+      const person = (
+        await queryRunner.query(`SELECT * FROM \`mth_person\` WHERE \`mth_person\`.person_id = ${student.person_id}`)
+      )?.[0];
+      const username_first = student.username_first;
+      const username_last = student.username_last;
+      const year = new Date(schoolYear?.date_begin || new Date()).getFullYear().toString();
+      const usernameBirthYear = new Date(person?.date_of_birth || new Date()).getFullYear().toString();
 
-    await queryRunner.query(`
-        UPDATE \`mth_student\`
-            LEFT JOIN \`mth_person\`
-        ON \`mth_person\`.person_id = \`mth_student\`.person_id
-            LEFT JOIN (
-            SELECT MAX (application_id) latest_application_id, student_id, school_year_id
-            FROM \`mth_application\`
-            GROUP BY student_id
-            ) \`application_latest\` ON \`application_latest\`.student_id = \`mth_student\`.student_id
-            LEFT JOIN \`mth_schoolyear\` ON \`application_latest\`.school_year_id = \`mth_schoolyear\`.school_year_id
-            LEFT JOIN \`mth_parent\` ON \`mth_parent\`.parent_id = \`mth_student\`.parent_id
-            LEFT JOIN \`mth_person\` \`parent_person\` ON \`parent_person\`.person_id = \`mth_parent\`.person_id
-            SET
-                \`mth_student\`.username_first_last = CONCAT(\`mth_student\`.username_first, \`mth_student\`.username_last, \`mth_student\`.username_parent_email), \`mth_student\`.username_last_first = CONCAT(\`mth_student\`.username_last, \`mth_student\`.username_first, \`mth_student\`.username_parent_email), \`mth_student\`.username_last_first_year = CONCAT(\`mth_student\`.username_last, \`mth_student\`.username_first, \`mth_student\`.username_parent_email, DATE_FORMAT(\`mth_schoolyear\`.date_begin, '%Y')), \`mth_student\`.username_last_firstinitial = CONCAT(\`mth_student\`.username_last, SUBSTRING (\`mth_student\`.username_first, 1, 1), \`mth_student\`.username_parent_email), \`mth_student\`.username_last_first_mth = CONCAT(\`mth_student\`.username_last, \`mth_student\`.username_first, \`mth_student\`.username_parent_email, 'mth'), \`mth_student\`.username_last_first_birth = CONCAT(\`mth_student\`.username_last, \`mth_student\`.username_first, \`mth_student\`.username_parent_email, DATE_FORMAT(\`mth_person\`.date_of_birth, '%Y')), \`mth_student\`.username_first_last_domain = CONCAT(\`mth_student\`.username_first, \`mth_student\`.username_last, \`mth_student\`.username_parent_email, '@mytechhigh.com'), \`mth_student\`.username_student_email = \`mth_person\`.email, \`mth_student\`.username_parent_email = \`parent_person\`.email
-        WHERE \`mth_student\`.student_id > 0
-    `);
+      let usernameAccount = 0;
+      while (true) {
+        const usernameAccountSuffix = usernameAccount ? `${usernameAccount}` : '';
+        const username_first_last = `${username_first}${username_last}${usernameAccountSuffix}`;
+        const username_last_first = `${username_last}${username_first}${usernameAccountSuffix}`;
+        const username_last_first_year = `${username_last}${username_first}${usernameAccountSuffix}${year}`;
+        const username_last_firstinitial = `${username_last}${username_first?.[0]}${usernameAccountSuffix}`;
+        const username_last_first_mth = `${username_last}${username_first}${usernameAccountSuffix}mth`;
+        const username_last_first_birth = `${username_last}${username_first}${usernameAccountSuffix}${usernameBirthYear}`;
+        const username_first_last_domain = `${username_first}${username_last}${usernameAccountSuffix}@mytechhigh.com`;
+        const duplicateStudents = await queryRunner.query(
+          `SELECT * FROM \`mth_student\`WHERE \`mth_student\`.username_first_last = "${username_first_last}" OR \`mth_student\`.username_last_first = "${username_last_first}" OR \`mth_student\`.username_last_firstinitial = "${username_last_firstinitial}" AND student_id <> ${studentId}`,
+        );
+        usernameAccount += 1;
+        if (duplicateStudents?.length) continue;
+        await queryRunner.query(`UPDATE \`mth_student\`
+            SET \`mth_student\`.username_first_last = "${username_first_last}", \`mth_student\`.username_last_first = "${username_last_first}", \`mth_student\`.username_last_first_year = "${username_last_first_year}", \`mth_student\`.username_last_firstinitial = "${username_last_firstinitial}", \`mth_student\`.username_last_first_mth = "${username_last_first_mth}", \`mth_student\`.username_last_first_birth ="${username_last_first_birth}", \`mth_student\`.username_first_last_domain = "${username_first_last_domain}"
+            WHERE \`mth_student\`.student_id = ${studentId}`);
+        break;
+      }
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
