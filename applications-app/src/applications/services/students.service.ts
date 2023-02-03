@@ -9,6 +9,8 @@ import { UpdateStudentInput } from '../dto/update-student.inputs';
 import { StudentStatusService } from './student-status.service';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentAssessmentService } from './student-assessment.service';
+import * as Moment from 'moment';
+
 @Injectable()
 export class StudentsService {
   constructor(
@@ -59,10 +61,6 @@ export class StudentsService {
     // return this.studentsRepository.find({ where: { parent_id: parent_id } });
   }
 
-  findOneByPersonId(person_id: number): Promise<Student> {
-    return this.studentsRepository.findOne({ person_id });
-  }
-
   async create(student: CreateStudentInput): Promise<Student> {
     return this.studentsRepository.save(student);
   }
@@ -102,5 +100,44 @@ export class StudentsService {
     } catch (error) {
       return false;
     }
+  }
+
+  async generateUsername(student_id: number): Promise<Student> {
+    const student = await this.studentsRepository.findOne({
+      where: { student_id },
+      relations: ['person', 'applications', 'applications.school_year', 'parent', 'parent.person'],
+    });
+
+    const username_first = student.person.first_name?.toLowerCase();
+    const username_last = student.person.last_name?.toLowerCase();
+    const year = Moment(
+      student.applications?.[student.applications?.length - 1]?.school_year?.date_begin || new Date(),
+    ).format('YYYY');
+    const username_account = await this.studentsRepository.count({
+      where: `(
+      username_first_last = "${username_first}${username_last}" OR 
+      username_last_first = "${username_last}${username_first}" OR 
+      username_last_firstinitial = "${username_last}${username_first?.[0]}" 
+      ) AND student_id <> ${student_id}`,
+    });
+    const usernameAccountSuffix = username_account ? `_${username_account}` : '';
+    const username_birthyear = Moment(student.person.date_of_birth || new Date()).format('YYYY');
+    const username_email = student.person.email;
+    const username_parent_email = student.parent.person.email;
+
+    return await this.studentsRepository.save({
+      student_id,
+      username_first,
+      username_last,
+      username_first_last: `${username_first}${username_last}${usernameAccountSuffix}`,
+      username_last_first: `${username_last}${username_first}${usernameAccountSuffix}`,
+      username_last_first_year: `${username_last}${username_first}${usernameAccountSuffix}${year}`,
+      username_last_firstinitial: `${username_last}${username_first?.[0]}${usernameAccountSuffix}`,
+      username_last_first_mth: `${username_last}${username_first}${usernameAccountSuffix}mth`,
+      username_last_first_birth: `${username_last}${username_first}${usernameAccountSuffix}${username_birthyear}`,
+      username_first_last_domain: `${username_first}${username_last}${usernameAccountSuffix}@mytechhigh.com`,
+      username_student_email: `${username_email}`,
+      username_parent_email: `${username_parent_email}`,
+    });
   }
 }

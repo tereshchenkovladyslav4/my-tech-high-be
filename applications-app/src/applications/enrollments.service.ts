@@ -26,6 +26,7 @@ import { DeleteEnrollmentPacketDocumentsInput } from './dto/delete-enrollment-pa
 import { StatusEnum } from './models/packet.entity';
 
 import * as common_1 from '@nestjs/common';
+import { PacketStatus } from './enums';
 
 const templates = {
   Accepted: 'Packet Accepted',
@@ -138,7 +139,7 @@ export class EnrollmentsService {
       let studentPacket = null;
       if (status != 'Submitted' && status != 'Resubmitted') is_age_issue = false;
 
-      if (status == 'Accepted') {
+      if (status == PacketStatus.ACCEPTED) {
         studentPacket = await this.packetsService.update({
           packet_id: packet_id,
           ...packet,
@@ -231,6 +232,10 @@ export class EnrollmentsService {
             template_name: templates[status],
           });
         }
+      }
+
+      if (status == PacketStatus.ACCEPTED) {
+        await this.studentsService.generateUsername(student_id);
       }
 
       return {

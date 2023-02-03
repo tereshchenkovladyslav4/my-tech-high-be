@@ -30,7 +30,7 @@ import { MTHHomeroomStudent } from './homeroom-student.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id")',
+  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id, username_first, username_last, username_first_last, username_last_first, username_last_first_year, username_last_firstinitial, username_last_first_mth, username_last_first_birth, username_first_last_domain, username_student_email, username_parent_email")',
 )
 @Entity('mth_student')
 export class Student extends BaseEntity {
@@ -86,6 +86,50 @@ export class Student extends BaseEntity {
   @Column({ nullable: true })
   @Field(() => Int, { nullable: true })
   opt_out_form_signature_file_id: number;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  username_first?: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  username_last?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  username_first_last?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  username_last_first?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  username_last_first_year?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  username_last_firstinitial?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  username_last_first_mth?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  username_last_first_birth?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  username_first_last_domain?: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  username_student_email?: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  username_parent_email?: string;
 
   @OneToOne(() => Parent)
   @JoinColumn({ name: 'parent_id' })

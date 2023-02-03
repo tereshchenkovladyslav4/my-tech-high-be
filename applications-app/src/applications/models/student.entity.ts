@@ -18,7 +18,7 @@ import { ReimbursementRequest } from './reimbursement-request.entity';
 @ObjectType()
 @Directive('@extends')
 @Directive(
-  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id")',
+  '@key(fields: "student_id, parent_id, person_id, special_ed, diploma_seeking, testing_preference, opt_out_form_signature_name, opt_out_form_signature_file_id, username_first, username_last, username_first_last, username_last_first, username_last_first_year, username_last_firstinitial, username_last_first_mth, username_last_first_birth, username_first_last_domain, username_student_email, username_parent_email")',
 )
 @Entity('mth_student')
 export class Student extends BaseEntity {
@@ -85,6 +85,61 @@ export class Student extends BaseEntity {
   @Field(() => Int, { nullable: true })
   @Directive('@external')
   opt_out_form_signature_file_id?: number;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_first?: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_last?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_first_last?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_last_first?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_last_first_year?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_last_firstinitial?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_last_first_mth?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_last_first_birth?: string;
+
+  @Column({ nullable: true, unique: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_first_last_domain?: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_student_email?: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  username_parent_email?: string;
 
   @OneToMany(() => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })

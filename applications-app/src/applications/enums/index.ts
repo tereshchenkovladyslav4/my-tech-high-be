@@ -1,5 +1,6 @@
 export * from './checklist-status.enum';
 export * from './email-template.enum';
+export * from './packet-status.enum';
 export * from './pdf-template.enum';
 export * from './period.enum';
 export * from './question-type.enum';

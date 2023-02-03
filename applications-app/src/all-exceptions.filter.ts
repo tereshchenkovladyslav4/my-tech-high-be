@@ -7,7 +7,7 @@ export class AllExceptionsFilter implements GqlExceptionFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
-    const gqlHost = GqlArgumentsHost.create(host);
+    GqlArgumentsHost.create(host);
     return exception;
   }
 }
