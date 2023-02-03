@@ -17,6 +17,8 @@ import { TitleService } from './title.service';
 import { ProviderService } from './provider.service';
 import { CourseService } from './course.service';
 import { PeriodService } from './period.service';
+import { ApplicationQuestionService } from './application-question.service';
+import { EnrollmentQuestionTabService } from './enrollment-question-tab.service';
 
 @Injectable()
 export class SchoolYearsService {
@@ -34,6 +36,8 @@ export class SchoolYearsService {
     private providerService: ProviderService,
     private courseService: CourseService,
     private periodService: PeriodService,
+    private applicationQuestionService: ApplicationQuestionService,
+    private enrollmentQuestionTabService: EnrollmentQuestionTabService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -157,6 +161,7 @@ export class SchoolYearsService {
     if (createSchoolYearInput.cloneSchoolYearId) {
       // Clone homeroom resources, assessments, diploma question...
       const newSchoolYearId = updatedRecord.school_year_id;
+
       await this.resourceService.cloneForSchoolYear(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
       await this.assessmentService.cloneForSchoolYear(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
       await this.diplomaService.cloneDiplomaQuestion(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
@@ -193,6 +198,16 @@ export class SchoolYearsService {
         const idMap = await this.courseService.cloneForProvider(cloneProviderId, newProviderId, titleIdMap);
         Object.assign(courseIdMap, courseIdMap, idMap);
       }
+
+      // clone application, enrollment questions
+      await this.applicationQuestionService.cloneForSchoolYear(
+        createSchoolYearInput.cloneSchoolYearId,
+        newSchoolYearId,
+      );
+      await this.enrollmentQuestionTabService.cloneForSchoolYear(
+        createSchoolYearInput.cloneSchoolYearId,
+        newSchoolYearId,
+      );
     }
     return updatedRecord;
   }

@@ -68,6 +68,14 @@ import { CourseService } from './services/course.service';
 import { SchedulePeriod } from '../models/schedule-period.entity';
 import { SchedulePeriodHistory } from 'src/models/schedule-period-history.entity';
 import { ReimbursementSetting } from '../models/reimbursement-setting.entity';
+import { ApplicationQuestion } from 'src/models/application-question.entity';
+import { ApplicationQuestionService } from './services/application-question.service';
+import { EnrollmentQuestionTab } from 'src/models/enrollment-question-tab.entity';
+import { EnrollmentQuestionGroup } from 'src/models/enrollment-question-group.entity';
+import { EnrollmentQuestions } from 'src/models/enrollment-questions.entity';
+import { EnrollmentQuestionTabService } from './services/enrollment-question-tab.service';
+import { EnrollmentQuestionGroupService } from './services/enrollment-question-group.service';
+import { EnrollmentQuestionService } from './services/enrollment-question.service';
 
 const RepoServices = [
   UsersService,
@@ -101,6 +109,10 @@ const RepoServices = [
   TitleService,
   ProviderService,
   CourseService,
+  ApplicationQuestionService,
+  EnrollmentQuestionTabService,
+  EnrollmentQuestionGroupService,
+  EnrollmentQuestionService,
 ];
 
 @Global()
@@ -147,6 +159,10 @@ const RepoServices = [
       SchedulePeriod,
       SchedulePeriodHistory,
       ReimbursementSetting,
+      ApplicationQuestion,
+      EnrollmentQuestionTab,
+      EnrollmentQuestionGroup,
+      EnrollmentQuestions,
     ]),
   ],
   providers: RepoServices,
