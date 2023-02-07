@@ -2,6 +2,7 @@ import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Resource } from './resource.entity';
 import { Student } from './student.entity';
+import { ResourceLevel } from './resource-level.entity';
 
 @ObjectType()
 @Directive('@key(fields: "student_id, resource_id, resource_level_id, waitlist_confirmed, created_at")')
@@ -42,4 +43,12 @@ export class ResourceCart {
   @JoinColumn([{ name: 'resource_id', referencedColumnName: 'resource_id' }])
   @Field(() => Resource, { nullable: true })
   Resource: Resource;
+
+  @ManyToOne(() => ResourceLevel, (resourceLevel) => resourceLevel.ResourceRequests, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'resource_level_id', referencedColumnName: 'resource_level_id' }])
+  @Field(() => ResourceLevel, { nullable: true })
+  ResourceLevel: ResourceLevel;
 }

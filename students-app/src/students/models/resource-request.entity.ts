@@ -74,7 +74,7 @@ export class ResourceRequest {
 
   @ManyToOne(() => ResourceLevel, (resourceLevel) => resourceLevel.ResourceRequests, {
     onDelete: 'SET NULL',
-    onUpdate: 'SET NULL',
+    onUpdate: 'CASCADE',
   })
   @JoinColumn([{ name: 'resource_level_id', referencedColumnName: 'resource_level_id' }])
   @Field(() => ResourceLevel, { nullable: true })

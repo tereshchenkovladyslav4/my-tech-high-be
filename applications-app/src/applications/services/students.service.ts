@@ -113,31 +113,47 @@ export class StudentsService {
     const year = Moment(
       student.applications?.[student.applications?.length - 1]?.school_year?.date_begin || new Date(),
     ).format('YYYY');
-    const username_account = await this.studentsRepository.count({
-      where: `(
-      username_first_last = "${username_first}${username_last}" OR 
-      username_last_first = "${username_last}${username_first}" OR 
-      username_last_firstinitial = "${username_last}${username_first?.[0]}" 
-      ) AND student_id <> ${student_id}`,
-    });
-    const usernameAccountSuffix = username_account ? `_${username_account}` : '';
-    const username_birthyear = Moment(student.person.date_of_birth || new Date()).format('YYYY');
+
+    const usernameBirthYear = Moment(student.person.date_of_birth || new Date()).format('YYYY');
     const username_email = student.person.email;
     const username_parent_email = student.parent.person.email;
 
-    return await this.studentsRepository.save({
-      student_id,
-      username_first,
-      username_last,
-      username_first_last: `${username_first}${username_last}${usernameAccountSuffix}`,
-      username_last_first: `${username_last}${username_first}${usernameAccountSuffix}`,
-      username_last_first_year: `${username_last}${username_first}${usernameAccountSuffix}${year}`,
-      username_last_firstinitial: `${username_last}${username_first?.[0]}${usernameAccountSuffix}`,
-      username_last_first_mth: `${username_last}${username_first}${usernameAccountSuffix}mth`,
-      username_last_first_birth: `${username_last}${username_first}${usernameAccountSuffix}${username_birthyear}`,
-      username_first_last_domain: `${username_first}${username_last}${usernameAccountSuffix}@mytechhigh.com`,
-      username_student_email: `${username_email}`,
-      username_parent_email: `${username_parent_email}`,
-    });
+    let usernameAccount = 0;
+    while (true) {
+      const usernameAccountSuffix = usernameAccount ? `${usernameAccount}` : '';
+      const username_first_last = `${username_first}${username_last}${usernameAccountSuffix}`;
+      const username_last_first = `${username_last}${username_first}${usernameAccountSuffix}`;
+      const username_last_first_year = `${username_last}${username_first}${usernameAccountSuffix}${year}`;
+      const username_last_firstinitial = `${username_last}${username_first?.[0]}${usernameAccountSuffix}`;
+      const username_last_first_mth = `${username_last}${username_first}${usernameAccountSuffix}mth`;
+      const username_last_first_birth = `${username_last}${username_first}${usernameAccountSuffix}${usernameBirthYear}`;
+      const username_first_last_domain = `${username_first}${username_last}${usernameAccountSuffix}@mytechhigh.com`;
+      const duplicateStudents = await this.studentsRepository.count({
+        where: `(
+          username_first_last = "${username_first_last}" OR 
+          username_last_first = "${username_last_first}" OR 
+          username_last_firstinitial = "${username_last_firstinitial}" 
+          ) AND student_id <> ${student_id}`,
+      });
+      usernameAccount += 1;
+      if (duplicateStudents) continue;
+
+      return await this.studentsRepository.save({
+        student_id,
+        username_first,
+        username_last,
+        username_first_last: `${username_first_last}`,
+        username_last_first: `${username_last_first}`,
+        username_last_first_year: `${username_last_first_year}`,
+        username_last_firstinitial: `${username_last_firstinitial}`,
+        username_last_first_mth: `${username_last_first_mth}`,
+        username_last_first_birth: `${username_last_first_birth}`,
+        username_first_last_domain: `${username_first_last_domain}`,
+        username_student_email: `${username_email}`,
+        username_parent_email: `${username_parent_email}`,
+      });
+
+      break;
+    }
   }
 }

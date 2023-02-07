@@ -5,6 +5,7 @@ export * from './pdf-template.enum';
 export * from './period.enum';
 export * from './question-type.enum';
 export * from './reimbursement-form-type.enum';
+export * from './reimbursement-other-filter.enum';
 export * from './reimbursement-request-status.enum';
 export * from './reimbursement-request-type.enum';
 export * from './resource-feature.enum';

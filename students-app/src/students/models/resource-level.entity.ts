@@ -2,6 +2,7 @@ import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Resource } from './resource.entity';
 import { ResourceRequest } from './resource-request.entity';
+import { ResourceCart } from './resource-cart.entity';
 
 @ObjectType()
 @Directive('@extends')
@@ -49,4 +50,8 @@ export class ResourceLevel {
   @OneToMany(() => ResourceRequest, (resourceRequest) => resourceRequest.ResourceLevel)
   @Field(() => [ResourceRequest], { nullable: true })
   ResourceRequests: ResourceRequest[];
+
+  @OneToMany(() => ResourceCart, (resourceCart) => resourceCart.ResourceLevel)
+  @Field(() => [ResourceCart], { nullable: true })
+  ResourceCarts: ResourceCart[];
 }

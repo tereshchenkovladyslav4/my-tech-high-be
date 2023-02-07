@@ -4,7 +4,7 @@ import { Brackets, Repository } from 'typeorm';
 import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update-reimbursement-receipt.input';
 import { CreateOrUpdateReimbursementRequestInputs } from '../dto/create-or-update-reimbursement-request.inputs';
 import { ReimbursementRequestSearchInput } from '../dto/reimbursement-request-search.inputs';
-import { ReimbursementRequestStatus, ReimbursementRequestType } from '../enums';
+import { ReimbursementOtherFilter, ReimbursementRequestStatus, ReimbursementRequestType } from '../enums';
 import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
 import { ReimbursementRequest } from '../models/reimbursement-request.entity';
 import { Pagination } from '../../paginate';
@@ -32,7 +32,7 @@ export class ReimbursementRequestService {
 
     if (filter) {
       // TODO others filter
-      const { requests, types, statuses, grades } = filter;
+      const { requests, types, others, statuses, grades } = filter;
       if (
         requests?.includes(`${ReimbursementRequestType.DIRECT_ORDER}`) &&
         !requests?.includes(`${ReimbursementRequestType.REIMBURSEMENT}`)
@@ -52,6 +52,9 @@ export class ReimbursementRequestService {
 
       if (statuses?.length) {
         qb.andWhere(`reimbursementRequest.status IN ("${statuses.join('","')}")`);
+      }
+
+      if (others?.includes(`${ReimbursementOtherFilter.GRADE_REQUIREMENT}`)) {
       }
 
       if (grades?.length) {
