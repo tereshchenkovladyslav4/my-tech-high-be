@@ -66,6 +66,24 @@ export class FilesService {
       message: 'Deleted Successfully',
     };
   }
+  async deleteFileByPath(path: string): Promise<ResponseDTO> {
+    const attachmentId = path.includes('http') ? path.split('/').slice(3).join('/') : path;
+    const fileId = (await this.filesRepository.findOne({ where: { item1: attachmentId } })).file_id;
+    await this.packetFileRepository.delete({
+      mth_file_id: fileId,
+    });
+
+    await this.filesRepository.delete({
+      file_id: fileId,
+    });
+
+    this.s3Service.deleteFile(attachmentId);
+
+    return <ResponseDTO>{
+      error: false,
+      message: 'Deleted Successfully',
+    };
+  }
 
   async create(file: CreateFileInput): Promise<File> {
     return this.filesRepository.save(file);

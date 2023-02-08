@@ -19,6 +19,7 @@ import { CourseService } from './course.service';
 import { PeriodService } from './period.service';
 import { ApplicationQuestionService } from './application-question.service';
 import { EnrollmentQuestionTabService } from './enrollment-question-tab.service';
+import { QuestionService } from './question.service';
 
 @Injectable()
 export class SchoolYearsService {
@@ -38,6 +39,7 @@ export class SchoolYearsService {
     private periodService: PeriodService,
     private applicationQuestionService: ApplicationQuestionService,
     private enrollmentQuestionTabService: EnrollmentQuestionTabService,
+    private questionService: QuestionService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -208,6 +210,9 @@ export class SchoolYearsService {
         createSchoolYearInput.cloneSchoolYearId,
         newSchoolYearId,
       );
+
+      // clone withdraw question
+      await this.questionService.clone(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
     }
     return updatedRecord;
   }

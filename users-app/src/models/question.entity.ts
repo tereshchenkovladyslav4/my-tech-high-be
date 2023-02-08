@@ -16,6 +16,14 @@ export class Question extends BaseEntity {
   region_id: number;
 
   @Column()
+  @Field(() => Int, { nullable: true })
+  school_year_id: number;
+
+  @Column()
+  @Field(() => Boolean, { nullable: true })
+  mid_year: boolean;
+
+  @Column()
   @Field(() => String, { nullable: true })
   section: string;
 

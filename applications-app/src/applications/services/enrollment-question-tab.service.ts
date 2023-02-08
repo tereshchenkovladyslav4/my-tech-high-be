@@ -45,8 +45,9 @@ export class EnrollmentQuestionTabService {
     if (input) {
       return await this.repo.find({
         where: {
-          region_id: input.region_id,
           is_active: 1,
+          school_year_id: input.school_year_id,
+          mid_year: input.mid_year,
         },
       });
     }

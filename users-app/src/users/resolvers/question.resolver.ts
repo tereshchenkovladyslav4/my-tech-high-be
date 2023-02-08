@@ -1,7 +1,8 @@
-import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Question } from 'src/models/question.entity';
 import { QuestionInput } from 'src/users/dto/question.input';
 import { QuestionService } from 'src/users/services/question.service';
+import { WithdrawQuestionInput } from '../dto/withdraw-question.input';
 
 @Resolver(() => Question)
 export class QuestionResolver {
@@ -9,10 +10,10 @@ export class QuestionResolver {
 
   @Query(() => [Question], { name: 'questionsByRegion' })
   questionsByRegion(
-    @Args({ name: 'regionId', type: () => ID }) regionId: number,
-    @Args({ name: 'section', type: () => String }) section: string,
+    @Args('withdrawQuestionInput')
+    withdrawQuestionInput: WithdrawQuestionInput,
   ): Promise<Question[]> {
-    return this.service.findByRegion(regionId, section);
+    return this.service.findByRegion(withdrawQuestionInput);
   }
 
   @Mutation(() => Boolean, { name: 'saveQuestions' })

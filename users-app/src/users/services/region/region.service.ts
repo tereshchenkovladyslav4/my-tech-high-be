@@ -97,7 +97,7 @@ export class RegionService {
       resource_confirm_details: updateRegionInput.resource_confirm_details,
     };
     Object.keys(data).forEach((key) => {
-      if (!data[key]) {
+      if (key != 'state_logo' && !data[key]) {
         delete data[key];
       }
     });

@@ -5,9 +5,9 @@ export class EnrollmentQuestionsInput {
   @Field(() => Int)
   region_id?: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   school_year_id?: number;
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   mid_year?: boolean;
 }

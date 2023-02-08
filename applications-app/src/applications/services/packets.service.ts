@@ -131,15 +131,20 @@ export class PacketsService {
                 })
                 .orWhere('p_person.last_name like :text', { text: `%${search}%` });
               if (search) {
-                if (search.includes(' - ') && search.split(' - ').length == 2) {
-                  const [fromDate, toDate] = search.split(' - ');
-                  sub.orWhere('packet.deadline between :fromDate and :toDate', { fromDate, toDate });
-                } else {
-                  const date = search
-                    .split('/')
-                    .filter((v) => v)
-                    .join('-');
-                  sub.orWhere('packet.deadline like :text', { text: `%${date}%` });
+                if (search.includes(' - ')) {
+                  if (search.split(' - ').length == 2) {
+                    const [fromDate, toDate] = search.split(' - ');
+                    sub.orWhere('packet.deadline between :fromDate and :toDate', { fromDate, toDate });
+                  } else if (search.split(' - ').length == 6) {
+                    sub.orWhere(
+                      new Brackets((sub2) => {
+                        const [f1, t1, f2, t2, f3, t3] = search.split(' - ');
+                        sub2.orWhere('packet.deadline between :f1 and :t1', { f1, t1 });
+                        sub2.orWhere('packet.deadline between :f2 and :t2', { f2, t2 });
+                        sub2.orWhere('packet.deadline between :f3 and :t3', { f3, t3 });
+                      }),
+                    );
+                  }
                 }
               }
               if (Moment(search, 'MM/DD/YY', true).isValid()) {

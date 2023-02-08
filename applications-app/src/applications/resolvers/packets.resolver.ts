@@ -219,6 +219,11 @@ export class PacketsResolver {
     return this.fileService.deleteFile(input);
   }
 
+  @Mutation(() => ResponseDTO)
+  deleteFileByPath(@Args('path', { type: () => String }) path: string): Promise<ResponseDTO> {
+    return this.fileService.deleteFileByPath(path);
+  }
+
   @ResolveField(() => [PacketEmail], { name: 'packet_emails' })
   public async getPacketEmails(@Parent() packet: Packet): Promise<PacketEmail[]> {
     return this.packetEmailsService.findByPacket(packet.packet_id);
