@@ -20,6 +20,7 @@ import { PeriodService } from './period.service';
 import { ApplicationQuestionService } from './application-question.service';
 import { EnrollmentQuestionTabService } from './enrollment-question-tab.service';
 import { QuestionService } from './question.service';
+import { EmailTemplatesService } from './email-templates/email-templates.service';
 
 @Injectable()
 export class SchoolYearsService {
@@ -40,6 +41,7 @@ export class SchoolYearsService {
     private applicationQuestionService: ApplicationQuestionService,
     private enrollmentQuestionTabService: EnrollmentQuestionTabService,
     private questionService: QuestionService,
+    private emailTemplateService: EmailTemplatesService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -213,6 +215,9 @@ export class SchoolYearsService {
 
       // clone withdraw question
       await this.questionService.clone(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
+
+      // clone email template
+      await this.emailTemplateService.clone(createSchoolYearInput.cloneSchoolYearId, newSchoolYearId);
     }
     return updatedRecord;
   }

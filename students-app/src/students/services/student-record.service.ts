@@ -78,7 +78,7 @@ export class StudentRecordService {
       const programYear = JSON.parse(program_year);
       let cond = '';
       if (!programYear.includes('midYear') && programYear.includes('schoolYear')) {
-        cond = 'WHERE midyear_application <> 1';
+        cond = 'WHERE midyear_application = 0 OR midyear_application IS NULL';
       } else if (programYear.includes('midYear') && !programYear.includes('schoolYear')) {
         cond = 'WHERE midyear_application = 1';
       }
@@ -112,6 +112,13 @@ export class StudentRecordService {
             sub.orWhere(
               `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE}) AND status_history.student_id IS NULL`,
             );
+
+          if (enrollment_status) {
+            const enrollmentStatusList = JSON.parse(enrollment_status);
+            if (enrollmentStatusList?.includes('Withdrawn')) {
+              sub.orWhere(`student_status.status = ${StudentStatusEnum.WITHDRAWN}`);
+            }
+          }
           return sub;
         }),
       );
@@ -119,13 +126,6 @@ export class StudentRecordService {
       qb.andWhere(
         `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE})`,
       );
-    }
-
-    if (enrollment_status) {
-      const enrollmentStatusList = JSON.parse(enrollment_status);
-      if (enrollmentStatusList?.includes('Withdrawn')) {
-        qb.andWhere(`student_status.status = ${StudentStatusEnum.WITHDRAWN}`);
-      }
     }
 
     if (search_key) {

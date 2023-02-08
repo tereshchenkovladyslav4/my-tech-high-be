@@ -19,8 +19,12 @@ export class EmailTemplateResolver {
     return this.emailTemplatesService.findByTemplateAndRegion(template, regionId);
   }
   @Query(() => [EmailTemplate], { name: 'emailTemplatesByRegion' })
-  getEmailTemplatesByRegion(@Args({ name: 'regionId', type: () => ID }) regionId: number): Promise<EmailTemplate[]> {
-    return this.emailTemplatesService.findByRegion(regionId);
+  getEmailTemplatesByRegion(
+    @Args({ name: 'regionId', type: () => ID }) regionId: number,
+    @Args({ name: 'school_year_id', type: () => Number, nullable: true }) school_year_id: number,
+    @Args({ name: 'mid_year', type: () => Boolean, nullable: true }) mid_year: boolean,
+  ): Promise<EmailTemplate[]> {
+    return this.emailTemplatesService.findByRegion(regionId, school_year_id, mid_year);
   }
 
   @Mutation(() => EmailTemplate, { name: 'createEmailTemplate' })

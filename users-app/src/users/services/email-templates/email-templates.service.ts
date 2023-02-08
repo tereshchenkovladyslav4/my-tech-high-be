@@ -35,12 +35,18 @@ export class EmailTemplatesService {
     }*/
   }
 
-  async findByRegion(regionId: number): Promise<EmailTemplate[]> {
-    const data = await this.emailTemplateRepository.find({
-      where: { region_id: regionId },
-      relations: ['category', 'region'],
-    });
-    return data;
+  async findByRegion(regionId: number, school_year_id?: number, mid_year?: boolean): Promise<EmailTemplate[]> {
+    if (school_year_id) {
+      return await this.emailTemplateRepository.find({
+        where: { region_id: regionId, school_year_id: school_year_id, mid_year: mid_year },
+        relations: ['category', 'region'],
+      });
+    } else {
+      return await this.emailTemplateRepository.find({
+        where: { region_id: regionId },
+        relations: ['category', 'region'],
+      });
+    }
   }
 
   async findById(id: number): Promise<EmailTemplate> {
@@ -108,5 +114,24 @@ export class EmailTemplatesService {
       }
     }
     return template;
+  }
+
+  async clone(oldSchoolYearId: number, newSchoolYearId: number): Promise<boolean> {
+    const oldTemplates = await this.emailTemplateRepository.find({ school_year_id: oldSchoolYearId });
+    for (let i = 0; i < oldTemplates.length; i++) {
+      const item = oldTemplates[i];
+      const reminders = await this.emailReminderService.findByTemplateId(item['id']);
+      delete item['id'];
+      const newEmailTemplate = await this.emailTemplateRepository.save({
+        ...item,
+        school_year_id: newSchoolYearId,
+      });
+      for (let k = 0; k < reminders.length; k++) {
+        const remiderItem = reminders[k];
+        delete remiderItem['reminder_id'];
+        await this.emailReminderService.create({ ...remiderItem, email_template_id: newEmailTemplate.id });
+      }
+    }
+    return true;
   }
 }

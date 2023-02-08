@@ -12,6 +12,14 @@ export class EmailTemplate extends BaseEntity {
   id: number;
 
   @Column()
+  @Field(() => Number)
+  school_year_id?: number;
+
+  @Column()
+  @Field(() => Boolean)
+  mid_year?: boolean;
+
+  @Column()
   @Field(() => String)
   template_name: string;
 

@@ -387,7 +387,7 @@ export class WithdrawalService {
           schoolYear.date_begin AS date_begin,
           schoolYear.date_end AS date_end
         FROM (
-          SELECT withdrawal_id, StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal WHERE status='${WithdrawalStatus.NOTIFIED}' and StudentId IS NOT NULL
+          SELECT withdrawal_id, StudentId AS student_id, datediff(now(), date) AS diff_date, school_year_id FROM infocenter.withdrawal WHERE status='${WithdrawalStatus.NOTIFIED}' and StudentId IS NOT NULL
         ) AS withdrawal
         LEFT JOIN infocenter.mth_application application ON (application.student_id = withdrawal.student_id)
         LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = withdrawal.school_year_id)
@@ -418,7 +418,7 @@ export class WithdrawalService {
           schoolYear.date_begin AS date_begin,
           schoolYear.date_end AS date_end
 				FROM (
-					SELECT StudentId AS student_id, datediff(now(), date) AS diff_date FROM infocenter.withdrawal WHERE status='${
+					SELECT StudentId AS student_id, datediff(now(), date) AS diff_date, school_year_id FROM infocenter.withdrawal WHERE status='${
             WithdrawalStatus.NOTIFIED
           }' and StudentId IS NOT NULL
 				) AS withdrawal
