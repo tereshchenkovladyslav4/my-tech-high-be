@@ -15,5 +15,6 @@ export * from './schedule-period-status.enum';
 export * from './schedule-status.enum';
 export * from './student-record-file-kind.enum';
 export * from './student-status.enum';
+export * from './username-format.enum';
 export * from './withdrawal-option.enum';
 export * from './withdrawal-status.enum';

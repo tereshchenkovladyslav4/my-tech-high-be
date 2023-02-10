@@ -5,13 +5,22 @@ import { CreateOrUpdateResourceInput } from '../dto/create-or-update-resource.in
 import { ResourceLevel } from '../models/resource-level.entity';
 import { Resource } from '../models/resource.entity';
 import { ResourceLevelService } from './resource-level.service';
+import { ResourceRequestStatus, ResourceSubtitle, UsernameFormat } from '../enums';
+import { StudentsService } from './students.service';
+import { ResourceRequest } from '../models/resource-request.entity';
+import { ResourceCart } from '../models/resource-cart.entity';
 
 @Injectable()
 export class ResourceService {
   constructor(
     @InjectRepository(Resource)
     private readonly repo: Repository<Resource>,
+    @InjectRepository(ResourceRequest)
+    private readonly resourceRequestRepo: Repository<ResourceRequest>,
+    @InjectRepository(ResourceCart)
+    private readonly resourceCartRepo: Repository<ResourceCart>,
     private resourceLevelService: ResourceLevelService,
+    private studentsService: StudentsService,
   ) {}
 
   async find(schoolYearId: number): Promise<Resource[]> {
@@ -60,6 +69,8 @@ export class ResourceService {
         }
       }
 
+      await this.processIncludeResource(result);
+
       return result;
     } catch (error) {
       return error;
@@ -71,6 +82,38 @@ export class ResourceService {
       await this.repo.delete(resource_id);
       return true;
     } catch (error) {
+      return false;
+    }
+  }
+
+  async processIncludeResource(resource: Resource): Promise<boolean> {
+    try {
+      const { subtitle, std_username_format, std_user_name } = resource;
+      if (subtitle == ResourceSubtitle.INCLUDED) {
+        const students = await this.studentsService.findStudentsForResource(resource.SchoolYearId, resource.grades);
+        students.map(async (student) => {
+          const { student_id: studentId } = student;
+          const { resource_id: resourceId } = resource;
+          const status =
+            std_username_format === UsernameFormat.GENERIC && !!std_user_name
+              ? ResourceRequestStatus.ACCEPTED
+              : ResourceRequestStatus.REQUESTED;
+
+          await this.resourceCartRepo.delete({ student_id: studentId, resource_id: resourceId });
+          const existing = await this.resourceRequestRepo.findOne({ student_id: studentId, resource_id: resourceId });
+          if (!existing) {
+            await this.resourceRequestRepo.save({
+              student_id: studentId,
+              resource_id: resourceId,
+              status,
+            });
+          } else if (status != existing.status) {
+            await this.resourceRequestRepo.save({ ...existing, status });
+          }
+        });
+      }
+      return true;
+    } catch {
       return false;
     }
   }

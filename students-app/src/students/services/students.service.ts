@@ -27,6 +27,7 @@ import { YEAR_STATUS } from '../enums/year-status.enum';
 import { cloneDeep } from 'lodash';
 import { Provider } from '../models/provider.entity';
 import { StudentsHomeroomArgs } from '../dto/student-homeroom.args';
+import { RESOURCE_ACTIVE_STATUSES } from '../constants';
 
 @Injectable()
 export class StudentsService {
@@ -830,5 +831,19 @@ export class StudentsService {
       .execute();
 
     return student;
+  }
+
+  async findSiblingsForResource(parentId: number, schoolYearId: number, grades: string): Promise<Student[]> {
+    const students = await this.studentsRepository
+      .createQueryBuilder('student')
+      .leftJoinAndSelect('student.status', 'StudentStatus')
+      .leftJoinAndSelect('student.grade_levels', 'GradeLevels')
+      .where(`student.parent_id = ${parentId}`)
+      .andWhere(`StudentStatus.school_year_id = ${schoolYearId}`)
+      .andWhere(`GradeLevels.school_year_id = ${schoolYearId}`)
+      .andWhere(`FIND_IN_SET(GradeLevels.grade_level,'${grades}') <> 0`)
+      .andWhere(`StudentStatus.status IN ("${RESOURCE_ACTIVE_STATUSES.join('","')}")`)
+      .getMany();
+    return students;
   }
 }

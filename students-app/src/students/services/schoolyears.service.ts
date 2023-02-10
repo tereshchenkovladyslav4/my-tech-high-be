@@ -63,7 +63,7 @@ export class SchoolYearsService {
   }
 
   async getActiveHomeroomResourceSchoolYears(studentId: number): Promise<SchoolYear[]> {
-    const activeSchoolYearIds = (await this.studentStatusService.findActive(studentId)).map(
+    const activeSchoolYearIds = (await this.studentStatusService.findResourceActive(studentId)).map(
       (item) => item.school_year_id,
     );
 

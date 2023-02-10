@@ -97,6 +97,8 @@ import { ReimbursementRequestResolver } from './resolvers/reimbursement-request.
 import { ReimbursementRequest } from './models/reimbursement-request.entity';
 import { ReimbursementRequestPagination } from './models/reimbursement-request-pagination.entity';
 import { ReimbursementReceipt } from './models/reimbursement-receipt.entity';
+import { HomeroomSettingsResolver } from './resolvers/homeroom-settings.resolver';
+import { HomeroomSettings } from './models/homeroom-settings.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -137,6 +139,7 @@ const graphQLImports = [
   ResourceRequestResolver,
   ReimbursementQuestionResolver,
   ReimbursementRequestResolver,
+  HomeroomSettingsResolver,
 ];
 @Module({
   imports: [
@@ -206,6 +209,7 @@ const graphQLImports = [
           ReimbursementRequest,
           ReimbursementRequestPagination,
           ReimbursementReceipt,
+          HomeroomSettings,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

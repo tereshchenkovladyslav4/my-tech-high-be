@@ -145,6 +145,8 @@ import { ReimbursementQuestion } from './models/reimbursement-question.entity';
 import { ReimbursementRequestService } from './services/reimbursement-request.service';
 import { ReimbursementRequest } from './models/reimbursement-request.entity';
 import { ReimbursementReceipt } from './models/reimbursement-receipt.entity';
+import { HomeroomSettings } from './models/homeroom-settings.entity';
+import { HomeroomSettingsService } from './services/homeroom-settings.service';
 
 const servicesImports = [
   UsersService,
@@ -221,6 +223,7 @@ const servicesImports = [
   ResourceRequestEmailsService,
   ReimbursementQuestionService,
   ReimbursementRequestService,
+  HomeroomSettingsService,
 ];
 
 @Global()
@@ -300,6 +303,7 @@ const servicesImports = [
       ReimbursementQuestion,
       ReimbursementRequest,
       ReimbursementReceipt,
+      HomeroomSettings,
     ]),
   ],
   providers: [...servicesImports],

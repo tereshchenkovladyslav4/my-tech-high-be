@@ -6,7 +6,8 @@ import { ToggleHiddenResourceInput } from '../dto/toggle-resource-hidden.input';
 import { RequestResourcesInput } from '../dto/request-resources.input';
 import { Resource } from '../models/resource.entity';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
-import { ResourceRequestStatus, StudentStatusEnum } from '../enums';
+import { ResourceRequestStatus } from '../enums';
+import { StudentsService } from './students.service';
 
 @Injectable()
 export class ResourceService {
@@ -14,6 +15,7 @@ export class ResourceService {
     @InjectRepository(Resource)
     private readonly repo: Repository<Resource>,
     private studentGradeLevelService: StudentGradeLevelsService,
+    private studentsService: StudentsService,
   ) {}
 
   async find(studentId: number, schoolYearId: number): Promise<Resource[]> {
@@ -180,17 +182,7 @@ export class ResourceService {
         if (resource?.family_resource && parentId) {
           const { SchoolYearId: schoolYearId, grades } = resource;
 
-          eligibleSiblings = await queryRunner.query(`
-            SELECT student.student_id FROM infocenter.mth_student as student
-            LEFT JOIN mth_student_status as student_status ON student_status.student_id = student.student_id
-            LEFT JOIN mth_student_grade_level as student_grade_level ON student_grade_level.student_id = student.student_id
-            WHERE 
-              parent_id = ${parentId} AND 
-              student_status.school_year_id = ${schoolYearId} AND 
-              student_status.status = ${StudentStatusEnum.ACTIVE} AND 
-              student_grade_level.school_year_id = ${schoolYearId} 
-              AND FIND_IN_SET(student_grade_level.grade_level,'${grades}') <> 0;
-          `);
+          eligibleSiblings = await this.studentsService.findSiblingsForResource(parentId, schoolYearId, grades);
         }
 
         const students = eligibleSiblings || [{ student_id: stdId }];

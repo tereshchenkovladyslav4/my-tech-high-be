@@ -22,6 +22,7 @@ import { ReimbursementSetting } from './reimbursement-setting.entity';
 import { ReimbursementQuestion } from './reimbursement-question.entity';
 import { StateCodes } from './state-codes.entity';
 import { ReimbursementRequest } from './reimbursement-request.entity';
+import { HomeroomSettings } from './homeroom-settings.entity';
 
 @InputType('schoolyear')
 @ObjectType()
@@ -366,4 +367,8 @@ export class SchoolYear extends BaseEntity {
   @OneToMany(() => StateCodes, (stateCodes) => stateCodes.SchoolYear)
   @Field(() => [StateCodes], { nullable: true })
   StateCodes: StateCodes[];
+
+  @OneToMany(() => HomeroomSettings, (homeroomSettings) => homeroomSettings.SchoolYear)
+  @Field(() => [HomeroomSettings], { nullable: true })
+  HomeroomSettings: HomeroomSettings[];
 }

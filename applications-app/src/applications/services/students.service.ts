@@ -10,6 +10,7 @@ import { StudentStatusService } from './student-status.service';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentAssessmentService } from './student-assessment.service';
 import * as Moment from 'moment';
+import { RESOURCE_ACTIVE_STATUSES } from '../constants';
 
 @Injectable()
 export class StudentsService {
@@ -155,5 +156,18 @@ export class StudentsService {
 
       break;
     }
+  }
+
+  async findStudentsForResource(schoolYearId: number, grades: string): Promise<Student[]> {
+    const students = await this.studentsRepository
+      .createQueryBuilder('student')
+      .leftJoinAndSelect('student.status', 'StudentStatus')
+      .leftJoinAndSelect('student.grade_levels', 'GradeLevels')
+      .andWhere(`StudentStatus.school_year_id = ${schoolYearId}`)
+      .andWhere(`GradeLevels.school_year_id = ${schoolYearId}`)
+      .andWhere(`FIND_IN_SET(GradeLevels.grade_level,'${grades}') <> 0`)
+      .andWhere(`StudentStatus.status IN ("${RESOURCE_ACTIVE_STATUSES.join('","')}")`)
+      .getMany();
+    return students;
   }
 }
