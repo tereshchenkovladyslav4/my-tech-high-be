@@ -17,6 +17,7 @@ export class StateCodesService {
   async save(stateCodesInput: StateCodesInput[]): Promise<boolean> {
     let result = true;
     stateCodesInput.forEach(async (item) => {
+      await this.stateCodesRepository.delete({ SchoolYearId: item.SchoolYearId });
       await this.stateCodesRepository.save(item).catch(() => (result = false));
     });
     return result;

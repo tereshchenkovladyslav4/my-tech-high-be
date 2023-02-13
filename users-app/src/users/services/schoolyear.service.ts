@@ -223,6 +223,23 @@ export class SchoolYearsService {
   }
 
   async updateSchoolYear(updateSchoolYearInput: UpdateSchoolYearInput): Promise<any> {
+    const schoolYear = await this.schoolYearsRepository.findOne({
+      where: {
+        school_year_id: updateSchoolYearInput.school_year_id,
+      },
+    });
+    if (updateSchoolYearInput.reimbursements && schoolYear.reimbursements != updateSchoolYearInput.reimbursements) {
+      updateSchoolYearInput.reimbursement_open = null;
+      updateSchoolYearInput.reimbursement_close = null;
+      updateSchoolYearInput.mid_reimbursement_open = null;
+      updateSchoolYearInput.mid_reimbursement_close = null;
+    }
+    if (updateSchoolYearInput.direct_orders && schoolYear.direct_orders != updateSchoolYearInput.direct_orders) {
+      updateSchoolYearInput.direct_order_open = null;
+      updateSchoolYearInput.direct_order_close = null;
+      updateSchoolYearInput.mid_direct_order_open = null;
+      updateSchoolYearInput.mid_direct_order_close = null;
+    }
     const res = await this.schoolYearsRepository.save(updateSchoolYearInput);
 
     if (res) {
