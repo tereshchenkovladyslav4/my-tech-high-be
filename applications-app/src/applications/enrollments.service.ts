@@ -74,10 +74,12 @@ export class EnrollmentsService {
     try {
       let is_age_issue = false;
       if (student_person_id) {
-        const studentPerson = await this.personsService.update({
+        await this.personsService.update({
           person_id: student_person_id,
           ...student,
         });
+
+        const studentPerson = await this.personsService.findOneById(student_person_id);
 
         if (student.address) {
           await this.personAddressService.createOrUpdate(studentPerson, student.address);
@@ -110,15 +112,7 @@ export class EnrollmentsService {
         if (school_year.birth_date_cut) {
           if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
 
-          let age = studentPerson.date_of_birth
-            ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
-            : 0;
-
-          if (
-            Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD')
-          ) {
-            if (Moment().format('YYYY/MM/DD') > Moment(studentPerson.date_of_birth).format('YYYY/MM/DD')) age += 1;
-          }
+          const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
           const grade_age = parseGradeLevel(current_grade_level);
 
           if (studentPerson.date_of_birth && grade_age != 0) {
@@ -386,10 +380,12 @@ export class EnrollmentsService {
         ...enrollmentPacketContactInput.parent,
       });
 
-      const studentPerson = await this.personsService.update({
+      await this.personsService.update({
         person_id: studentPersonId,
         ...enrollmentPacketContactInput.student,
       });
+
+      const studentPerson = await this.personsService.findOneById(studentPersonId);
 
       await this.personAddressService.createOrUpdate(parentPerson, enrollmentPacketContactInput.student.address);
       // const street2 = enrollmentPacketContactInput.student.address.street2 || "";
@@ -439,14 +435,7 @@ export class EnrollmentsService {
       if (school_year.birth_date_cut) {
         if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
 
-        let age = studentPerson.date_of_birth
-          ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
-          : 0;
-
-        if (Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD')) {
-          if (Moment().format('YYYY/MM/DD') > Moment(studentPerson.date_of_birth).format('YYYY/MM/DD')) age += 1;
-        }
-
+        const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
         const grade_age = parseGradeLevel(grade_level);
 
         if (studentPerson.date_of_birth && grade_age != 0) {

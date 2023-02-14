@@ -21,7 +21,7 @@ import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.input
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 import { StudentsService } from './students.service';
-import { EmailTemplateEnum, PdfTemplate, StudentRecordFileKind, StudentStatusEnum } from '../enums';
+import { EmailTemplateEnum, PacketStatus, PdfTemplate, StudentRecordFileKind, StudentStatusEnum } from '../enums';
 import { FilesService } from './files.service';
 import { StudentRecordService } from './student-record.service';
 import { S3Service } from './s3.service';
@@ -64,7 +64,7 @@ export class PacketsService {
 
   async findAll(packetsArgs: PacketsArgs): Promise<Pagination<Packet>> {
     try {
-      const { skip, take, sort, filters, search, region_id, selectedYearId } = packetsArgs;
+      const { skip, take, sort, filters, search, timezoneOffsetStr, region_id, selectedYearId } = packetsArgs;
       const _sortBy = sort.split('|');
 
       if (filters.length === 0) {
@@ -109,50 +109,59 @@ export class PacketsService {
       if (search) {
         qb.andWhere(
           new Brackets((sub) => {
+            // search grade level(1 char match)
+            const matchArray = search.match(/(\d+)(s|t|r|n)/);
             if (
-              search.indexOf('st') > -1 ||
-              search.indexOf('th') > -1 ||
-              search.indexOf('rd') > -1 ||
-              search.indexOf('nd') > -1
+              matchArray &&
+              matchArray.index == 0 &&
+              matchArray.length >= 2 &&
+              ((parseInt(matchArray[1]) > 3 &&
+                'th grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())) ||
+                (matchArray[1] == '1' &&
+                  'st grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())) ||
+                (matchArray[1] == '2' &&
+                  'nd grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())) ||
+                (matchArray[1] == '3' && 'rd grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())))
             ) {
-              sub.where('grade_levels.grade_level like :text', {
-                text: `%${search.match(/\d+/)[0]}%`,
-              });
-            } else {
-              sub
-                .orWhere('packet.status like :text', { text: `%${search}%` })
-                .orWhere('packet.packet_id like :text', { text: `%${search}%` })
-                .orWhere('s_person.first_name like :text', {
-                  text: `%${search}%`,
-                })
-                .orWhere('s_person.last_name like :text', { text: `%${search}%` })
-                .orWhere('p_person.first_name like :text', {
-                  text: `%${search}%`,
-                })
-                .orWhere('p_person.last_name like :text', { text: `%${search}%` });
-              if (search) {
-                if (search.includes(' - ')) {
-                  if (search.split(' - ').length == 2) {
-                    const [fromDate, toDate] = search.split(' - ');
-                    sub.orWhere('packet.deadline between :fromDate and :toDate', { fromDate, toDate });
-                  } else if (search.split(' - ').length == 6) {
-                    sub.orWhere(
-                      new Brackets((sub2) => {
-                        const [f1, t1, f2, t2, f3, t3] = search.split(' - ');
-                        sub2.orWhere('packet.deadline between :f1 and :t1', { f1, t1 });
-                        sub2.orWhere('packet.deadline between :f2 and :t2', { f2, t2 });
-                        sub2.orWhere('packet.deadline between :f3 and :t3', { f3, t3 });
-                      }),
-                    );
-                  }
-                }
-              }
-              if (Moment(search, 'MM/DD/YY', true).isValid()) {
-                sub.orWhere('packet.deadline like :text', {
-                  text: `%${Moment(search).format('YYYY-MM-DD')}%`,
-                });
-              }
+              sub.orWhere('grade_levels.grade_level=:grade', { grade: matchArray[1] });
             }
+            // date_submitted, deadline, packet_emails.created_at
+            if (((parseInt(search) || 0) >= 0 && (parseInt(search) || 0) < 100) || search.includes('/')) {
+              sub
+                .orWhere(
+                  `packet.status IN ('${PacketStatus.SUBMITTED}','${PacketStatus.RESUBMITTED}','${PacketStatus.MISSING_INFO}','${PacketStatus.CONDITIONAL}')
+                     AND DATE_FORMAT(CONVERT_TZ(packet.date_submitted,'+00:00',:offset),'%m/%d/%y') like :search`,
+                  {
+                    offset: timezoneOffsetStr,
+                    search: `%${search}%`,
+                  },
+                )
+                .orWhere("DATE_FORMAT(CONVERT_TZ(packet.deadline,'+00:00',:offset),'%m/%d/%y') like :search", {
+                  offset: timezoneOffsetStr,
+                  search: `%${search}%`,
+                })
+                .orWhere("DATE_FORMAT(CONVERT_TZ(packet_emails.created_at,'+00:00',:offset),'%m/%d/%y') like :search", {
+                  offset: timezoneOffsetStr,
+                  search: `%${search}%`,
+                });
+            }
+            // student status
+            if ('Update'.toLocaleLowerCase().includes(search.toLocaleLowerCase())) {
+              sub.orWhere("student.reenrolled>'0'");
+            } else if ('New'.toLocaleLowerCase().includes(search.toLocaleLowerCase())) {
+              sub.orWhere("student.reenrolled<='0'");
+            }
+            sub
+              .orWhere('grade_levels.grade_level like :search', { search: `%${search}%` })
+              .orWhere('packet.status like :search', { search: `%${search}%` })
+              // .orWhere('packet.packet_id like :search', { search: `%${search}%` })
+
+              .orWhere("concat(s_person.last_name, ', ', s_person.first_name)  like :search", {
+                search: `%${search}%`,
+              })
+              .orWhere("concat(p_person.last_name, ', ', p_person.first_name)  like :search", {
+                search: `%${search}%`,
+              });
           }),
         );
       }
@@ -210,7 +219,6 @@ export class PacketsService {
           result = results.slice(skip || 0, take + (skip || 0));
         }
       }
-
       return new Pagination<Packet>({
         results: result,
         total,
@@ -478,15 +486,8 @@ export class PacketsService {
     if (school_year.birth_date_cut) {
       if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
 
-      let age = studentPerson.date_of_birth
-        ? Moment(school_year.birth_date_cut).diff(studentPerson.date_of_birth, 'years', false)
-        : 0;
-
-      if (Moment(school_year.birth_date_cut).format('MM/DD') < Moment(studentPerson.date_of_birth).format('MM/DD')) {
-        if (Moment().format('YYYY/MM/DD') > Moment(studentPerson.date_of_birth).format('YYYY/MM/DD')) age += 1;
-      }
+      const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
       const grade_age = parseGradeLevel(student.grade_levels[0].grade_level);
-
       if (studentPerson.date_of_birth && grade_age != 0) {
         if (age != grade_age) is_age_issue = true;
       }
@@ -513,7 +514,7 @@ export class PacketsService {
         ) AS t1
         LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
         LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
-        WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id} and t1.is_age_issue = 0
+        WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id}
         GROUP BY t1.status`,
     );
     const statusArray = {

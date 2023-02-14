@@ -93,7 +93,8 @@ export class AnnouncementsService {
           filter_others,
           filter_providers,
         });
-        userEmailList.map(async (user) => {
+        for (let i = 0; i < userEmailList.length; i++) {
+          const user = userEmailList[i];
           await this.sesEmailService.sendAnnouncementEmail({
             body,
             subject,
@@ -101,7 +102,7 @@ export class AnnouncementsService {
             user,
             announcementId: result.announcement_id,
           });
-        });
+        }
       }
       return result;
     } catch (error) {

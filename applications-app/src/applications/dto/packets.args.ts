@@ -27,6 +27,9 @@ export class PacketsArgs {
   @Max(50)
   search = '';
 
+  @Field(() => String)
+  timezoneOffsetStr = '';
+
   @Field(() => Int)
   selectedYearId = null;
 
