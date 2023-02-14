@@ -13,8 +13,8 @@ export class StudentRecordService {
     fileId: number,
     fileKind: StudentRecordFileKind,
   ): Promise<boolean> {
+    const queryRunner = await getConnection().createQueryRunner();
     try {
-      const queryRunner = await getConnection().createQueryRunner();
       let recordId;
       const records = await queryRunner.query(`
         SELECT * FROM infocenter.mth_student_record
@@ -68,10 +68,11 @@ export class StudentRecordService {
         }
       }
 
-      queryRunner.release();
       return true;
     } catch {
       return false;
+    } finally {
+      await queryRunner.release();
     }
   }
 }

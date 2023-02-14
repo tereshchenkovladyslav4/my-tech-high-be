@@ -26,8 +26,6 @@ export class ResourceService {
     }
 
     const { grade_level: gradeLevel } = studentGradeLevel;
-
-    const queryRunner = await getConnection().createQueryRunner();
     // TODO Total requests should be calculated for only accepted requests
 
     const data = await this.repo
@@ -57,14 +55,13 @@ export class ResourceService {
       ),
     );
 
-    await queryRunner.release();
     return data;
   }
 
   async toggleHiddenResource(toggleHiddenResourceInput: ToggleHiddenResourceInput): Promise<boolean> {
+    const queryRunner = await getConnection().createQueryRunner();
     try {
       const { student_id, resource_id, hidden } = toggleHiddenResourceInput;
-      const queryRunner = await getConnection().createQueryRunner();
       const existing = await queryRunner.query(`
         SELECT * FROM infocenter.mth_student_hidden_resource
         WHERE student_id = ${student_id} AND resource_id = ${resource_id};
@@ -86,17 +83,18 @@ export class ResourceService {
         `);
         }
       }
-      await queryRunner.release();
       return true;
     } catch (error) {
       return error;
+    } finally {
+      await queryRunner.release();
     }
   }
 
   async toggleResourceCart(toggleResourceCartInput: ToggleResourceCartInput): Promise<boolean> {
+    const queryRunner = await getConnection().createQueryRunner();
     try {
       const { student_id, resource_id, resource_level_id, waitlist_confirmed, inCart } = toggleResourceCartInput;
-      const queryRunner = await getConnection().createQueryRunner();
       const existing = await queryRunner.query(`
         SELECT * FROM infocenter.mth_resource_cart
         WHERE student_id = ${student_id} AND resource_id = ${resource_id};
@@ -124,18 +122,18 @@ export class ResourceService {
           `);
         }
       }
-      await queryRunner.release();
       return true;
     } catch (error) {
       return error;
+    } finally {
+      await queryRunner.release();
     }
   }
 
   async requestResources(requestResourcesInput: RequestResourcesInput): Promise<boolean> {
+    const queryRunner = await getConnection().createQueryRunner();
     try {
       const { student_id: stdId } = requestResourcesInput;
-
-      const queryRunner = await getConnection().createQueryRunner();
       const resourcesInCart = await queryRunner.query(`
           SELECT * FROM infocenter.mth_resource_cart
           WHERE student_id = ${stdId};
@@ -225,10 +223,11 @@ export class ResourceService {
         await queryRunner.release();
         return false;
       }
-      await queryRunner.release();
       return true;
     } catch (error) {
       return error;
+    } finally {
+      await queryRunner.release();
     }
   }
 }

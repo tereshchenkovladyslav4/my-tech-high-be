@@ -186,95 +186,99 @@ export class StudentsService {
     }
     if (filterSibling) {
       const queryRunner = await getConnection().createQueryRunner();
-      const qbOnlyParentSelect = cloneDeep(qb);
-      qbOnlyParentSelect.select('student.parent_id');
-      const [parentsIds] = qbOnlyParentSelect.getQueryAndParameters();
-      qb.addSelect('student.*');
-      const allStudent = this.studentsRepository
-        .createQueryBuilder('student')
-        .leftJoinAndSelect('student.grade_levels', 'grade_levels')
-        .leftJoinAndSelect('student.status', 'status')
-        .leftJoinAndSelect('student.person', 'person')
-        .leftJoinAndSelect('student.parent', 'parent')
-        .leftJoinAndSelect('parent.person', 'p_person')
-        .leftJoinAndSelect('p_person.person_address', 'p_address')
-        .leftJoinAndSelect('p_address.address', 'address')
-        .leftJoinAndSelect('student.currentSoe', 'currentSoe')
-        .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
-        .leftJoinAndSelect('student.previousSoe', 'previousSoe')
-        .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
-        .leftJoinAndSelect('student.packets', 'packets')
-        .addSelect('student.*')
-        .where(`student.parent_id IN (${parentsIds})`);
+      try {
+        const qbOnlyParentSelect = cloneDeep(qb);
+        qbOnlyParentSelect.select('student.parent_id');
+        const [parentsIds] = qbOnlyParentSelect.getQueryAndParameters();
+        qb.addSelect('student.*');
+        const allStudent = this.studentsRepository
+          .createQueryBuilder('student')
+          .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+          .leftJoinAndSelect('student.status', 'status')
+          .leftJoinAndSelect('student.person', 'person')
+          .leftJoinAndSelect('student.parent', 'parent')
+          .leftJoinAndSelect('parent.person', 'p_person')
+          .leftJoinAndSelect('p_person.person_address', 'p_address')
+          .leftJoinAndSelect('p_address.address', 'address')
+          .leftJoinAndSelect('student.currentSoe', 'currentSoe')
+          .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
+          .leftJoinAndSelect('student.previousSoe', 'previousSoe')
+          .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+          .leftJoinAndSelect('student.packets', 'packets')
+          .addSelect('student.*')
+          .where(`student.parent_id IN (${parentsIds})`);
 
-      const sortBy = _sortBy?.[1]?.toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
-      let sortParent = 'ASC';
-      if (sort && _sortBy[0] === 'parent') {
-        sortParent = sortBy;
-      }
-      // RECHECK: parent name order rule
-      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, grade_levels_school_year_id=${filter.schoolYear} DESC`;
-      // Group sorting
-      if (filter?.grades?.length) {
-        const filterGrade = filter.grades;
-        if (sort) {
-          if (_sortBy[0] === 'grade') {
-            filterGrade.sort((a, b) => {
-              if (sortBy === 'DESC') return a > b ? -1 : 1;
-              else return a > b ? -1 : 1;
-            });
+        const sortBy = _sortBy?.[1]?.toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
+        let sortParent = 'ASC';
+        if (sort && _sortBy[0] === 'parent') {
+          sortParent = sortBy;
+        }
+        // RECHECK: parent name order rule
+        let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, grade_levels_school_year_id=${filter.schoolYear} DESC`;
+        // Group sorting
+        if (filter?.grades?.length) {
+          const filterGrade = filter.grades;
+          if (sort) {
+            if (_sortBy[0] === 'grade') {
+              filterGrade.sort((a, b) => {
+                if (sortBy === 'DESC') return a > b ? -1 : 1;
+                else return a > b ? -1 : 1;
+              });
+            }
+          }
+          const gradeOrders = filterGrade
+            .map((filterValue) => `grade_levels_grade_level='${filterValue}' DESC`)
+            .join(',');
+          orderByFilter += `, ${gradeOrders}`;
+        } else {
+          if (sort) {
+            if (_sortBy[0] === 'grade') {
+              orderByFilter += `, grade_levels_grade_level ${sortBy}`;
+            }
           }
         }
-        const gradeOrders = filterGrade
-          .map((filterValue) => `grade_levels_grade_level='${filterValue}' DESC`)
-          .join(',');
-        orderByFilter += `, ${gradeOrders}`;
-      } else {
-        if (sort) {
-          if (_sortBy[0] === 'grade') {
-            orderByFilter += `, grade_levels_grade_level ${sortBy}`;
-          }
-        }
-      }
 
-      const [sqlAll] = allStudent.getQueryAndParameters();
-      const [sql1] = qb.getQueryAndParameters();
-      const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
+        const [sqlAll] = allStudent.getQueryAndParameters();
+        const [sql1] = qb.getQueryAndParameters();
+        const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
                         UNION ${sqlAll}) aaa GROUP BY student_id`;
 
-      let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
-      const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
+        let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
+        const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
 
-      results = results.map((res) => {
-        const rrr = { ...res };
+        results = results.map((res) => {
+          const rrr = { ...res };
 
-        const currentSoe = [];
-        const previousSoe = [];
+          const currentSoe = [];
+          const previousSoe = [];
 
-        if (res.currentPartner_name) {
-          currentSoe.push({
-            partner: { name: res.currentPartner_name, abbreviation: res.currentPartner_abbreviation },
-          });
-        }
+          if (res.currentPartner_name) {
+            currentSoe.push({
+              partner: { name: res.currentPartner_name, abbreviation: res.currentPartner_abbreviation },
+            });
+          }
 
-        if (res.previousPartner_name) {
-          previousSoe.push({
-            partner: { name: res.previousPartner_name, abbreviation: res.previousPartner_abbreviation },
-          });
-        }
+          if (res.previousPartner_name) {
+            previousSoe.push({
+              partner: { name: res.previousPartner_name, abbreviation: res.previousPartner_abbreviation },
+            });
+          }
 
-        rrr.currentSoe = currentSoe;
-        rrr.previousSoe = previousSoe;
+          rrr.currentSoe = currentSoe;
+          rrr.previousSoe = previousSoe;
 
-        return this.studentsRepository.create(rrr);
-      });
+          return this.studentsRepository.create(rrr);
+        });
 
-      queryRunner.release();
-
-      return new Pagination<Student>({
-        results,
-        total: totalRes?.[0]?.total || 0,
-      });
+        return new Pagination<Student>({
+          results,
+          total: totalRes?.[0]?.total || 0,
+        });
+      } catch (error) {
+        return error;
+      } finally {
+        await queryRunner.release();
+      }
     } else {
       if (sort) {
         const sortBy = _sortBy[1].toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
@@ -462,95 +466,99 @@ export class StudentsService {
     }
     if (filterSibling) {
       const queryRunner = await getConnection().createQueryRunner();
-      const qbOnlyParentSelect = cloneDeep(qb);
-      qbOnlyParentSelect.select('student.parent_id');
-      const [parentsIds] = qbOnlyParentSelect.getQueryAndParameters();
-      qb.addSelect('student.*');
-      const allStudent = this.studentsRepository
-        .createQueryBuilder('student')
-        .leftJoinAndSelect('student.grade_levels', 'grade_levels')
-        .leftJoinAndSelect('student.status', 'status')
-        .leftJoinAndSelect('student.person', 'person')
-        .leftJoinAndSelect('student.parent', 'parent')
-        .leftJoinAndSelect('parent.person', 'p_person')
-        .leftJoinAndSelect('p_person.person_address', 'p_address')
-        .leftJoinAndSelect('p_address.address', 'address')
-        .leftJoinAndSelect('student.currentSoe', 'currentSoe')
-        .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
-        .leftJoinAndSelect('student.previousSoe', 'previousSoe')
-        .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
-        .leftJoinAndSelect('student.packets', 'packets')
-        .addSelect('student.*')
-        .where(`student.parent_id IN (${parentsIds})`);
+      try {
+        const qbOnlyParentSelect = cloneDeep(qb);
+        qbOnlyParentSelect.select('student.parent_id');
+        const [parentsIds] = qbOnlyParentSelect.getQueryAndParameters();
+        qb.addSelect('student.*');
+        const allStudent = this.studentsRepository
+          .createQueryBuilder('student')
+          .leftJoinAndSelect('student.grade_levels', 'grade_levels')
+          .leftJoinAndSelect('student.status', 'status')
+          .leftJoinAndSelect('student.person', 'person')
+          .leftJoinAndSelect('student.parent', 'parent')
+          .leftJoinAndSelect('parent.person', 'p_person')
+          .leftJoinAndSelect('p_person.person_address', 'p_address')
+          .leftJoinAndSelect('p_address.address', 'address')
+          .leftJoinAndSelect('student.currentSoe', 'currentSoe')
+          .leftJoinAndSelect('currentSoe.partner', 'currentPartner')
+          .leftJoinAndSelect('student.previousSoe', 'previousSoe')
+          .leftJoinAndSelect('previousSoe.partner', 'previousPartner')
+          .leftJoinAndSelect('student.packets', 'packets')
+          .addSelect('student.*')
+          .where(`student.parent_id IN (${parentsIds})`);
 
-      const sortBy = _sortBy?.[1]?.toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
-      let sortParent = 'ASC';
-      if (sort && _sortBy[0] === 'parent') {
-        sortParent = sortBy;
-      }
-      // RECHECK: parent name order rule
-      let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, grade_levels_school_year_id=${filter.schoolYear} DESC`;
-      // Group sorting
-      if (filter?.grades?.length) {
-        const filterGrade = filter.grades;
-        if (sort) {
-          if (_sortBy[0] === 'grade') {
-            filterGrade.sort((a, b) => {
-              if (sortBy === 'DESC') return a > b ? -1 : 1;
-              else return a > b ? -1 : 1;
-            });
+        const sortBy = _sortBy?.[1]?.toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
+        let sortParent = 'ASC';
+        if (sort && _sortBy[0] === 'parent') {
+          sortParent = sortBy;
+        }
+        // RECHECK: parent name order rule
+        let orderByFilter = `ORDER BY p_person_last_name ${sortParent}, p_person_first_name ${sortParent}, grade_levels_school_year_id=${filter.schoolYear} DESC`;
+        // Group sorting
+        if (filter?.grades?.length) {
+          const filterGrade = filter.grades;
+          if (sort) {
+            if (_sortBy[0] === 'grade') {
+              filterGrade.sort((a, b) => {
+                if (sortBy === 'DESC') return a > b ? -1 : 1;
+                else return a > b ? -1 : 1;
+              });
+            }
+          }
+          const gradeOrders = filterGrade
+            .map((filterValue) => `grade_levels_grade_level='${filterValue}' DESC`)
+            .join(',');
+          orderByFilter += `, ${gradeOrders}`;
+        } else {
+          if (sort) {
+            if (_sortBy[0] === 'grade') {
+              orderByFilter += `, grade_levels_grade_level ${sortBy}`;
+            }
           }
         }
-        const gradeOrders = filterGrade
-          .map((filterValue) => `grade_levels_grade_level='${filterValue}' DESC`)
-          .join(',');
-        orderByFilter += `, ${gradeOrders}`;
-      } else {
-        if (sort) {
-          if (_sortBy[0] === 'grade') {
-            orderByFilter += `, grade_levels_grade_level ${sortBy}`;
-          }
-        }
-      }
 
-      const [sqlAll] = allStudent.getQueryAndParameters();
-      const [sql1] = qb.getQueryAndParameters();
-      const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
+        const [sqlAll] = allStudent.getQueryAndParameters();
+        const [sql1] = qb.getQueryAndParameters();
+        const query = `SELECT *, GROUP_CONCAT(currentPartner_name) AS currentPartner_names, GROUP_CONCAT(previousPartner_name) AS previousPartner_names FROM (${sql1} 
                         UNION ${sqlAll}) aaa GROUP BY student_id`;
 
-      let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
-      const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
+        let results = await queryRunner.query(`${query} ${orderByFilter} LIMIT ${skip}, ${take}`);
+        const totalRes = await queryRunner.query(`SELECT COUNT(*) AS total FROM (${query}) tt`);
 
-      results = results.map((res) => {
-        const rrr = { ...res };
+        results = results.map((res) => {
+          const rrr = { ...res };
 
-        const currentSoe = [];
-        const previousSoe = [];
+          const currentSoe = [];
+          const previousSoe = [];
 
-        if (res.currentPartner_name) {
-          currentSoe.push({
-            partner: { name: res.currentPartner_name, abbreviation: res.currentPartner_abbreviation },
-          });
-        }
+          if (res.currentPartner_name) {
+            currentSoe.push({
+              partner: { name: res.currentPartner_name, abbreviation: res.currentPartner_abbreviation },
+            });
+          }
 
-        if (res.previousPartner_name) {
-          previousSoe.push({
-            partner: { name: res.previousPartner_name, abbreviation: res.previousPartner_abbreviation },
-          });
-        }
+          if (res.previousPartner_name) {
+            previousSoe.push({
+              partner: { name: res.previousPartner_name, abbreviation: res.previousPartner_abbreviation },
+            });
+          }
 
-        rrr.currentSoe = currentSoe;
-        rrr.previousSoe = previousSoe;
+          rrr.currentSoe = currentSoe;
+          rrr.previousSoe = previousSoe;
 
-        return this.studentsRepository.create(rrr);
-      });
+          return this.studentsRepository.create(rrr);
+        });
 
-      queryRunner.release();
-
-      return new Pagination<Student>({
-        results,
-        total: totalRes?.[0]?.total || 0,
-      });
+        return new Pagination<Student>({
+          results,
+          total: totalRes?.[0]?.total || 0,
+        });
+      } catch (error) {
+        return error;
+      } finally {
+        await queryRunner.release();
+      }
     } else {
       if (sort) {
         const sortBy = _sortBy[1].toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
