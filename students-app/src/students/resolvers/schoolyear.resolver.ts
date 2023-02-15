@@ -28,6 +28,11 @@ export class SchoolYearResolver {
     return this.schoolYearsService.getActiveScheduleSchoolYears(studentId);
   }
 
+  @Query(() => [SchoolYear], { name: 'activeHomeroomSchoolYears' })
+  async getActiveHomeroomSchoolYears(@Args('studentId', { type: () => Int }) studentId: number): Promise<SchoolYear[]> {
+    return this.schoolYearsService.getActiveHomeroomSchoolYears(studentId);
+  }
+
   @Query(() => [SchoolYear], { name: 'reimbursementRequestSchoolYears' })
   async getReimbursementRequestSchoolYears(
     @Args('regionId', { type: () => Int }) regionId: number,

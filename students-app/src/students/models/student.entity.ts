@@ -26,7 +26,7 @@ import { StudentRecord } from './student-record.entity';
 import { ResourceRequest } from './resource-request.entity';
 import { Schedule } from './schedule.entity';
 import { ScheduleHistory } from './schedule-history.entity';
-import { MTHHomeroomStudent } from './homeroom-student.entity';
+import { HomeroomStudent } from './homeroom-student.entity';
 
 @ObjectType()
 @Directive(
@@ -163,15 +163,15 @@ export class Student extends BaseEntity {
   @Field(() => [SchoolEnrollment], { nullable: true })
   previousSoe: SchoolEnrollment[];
 
-  @ManyToOne(() => MTHHomeroomStudent, (homeroom) => homeroom.student)
+  @ManyToOne(() => HomeroomStudent, (homeroom) => homeroom.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
-  @Field(() => MTHHomeroomStudent, { nullable: true })
-  currentHomeroom: MTHHomeroomStudent;
+  @Field(() => HomeroomStudent, { nullable: true })
+  currentHomeroom: HomeroomStudent;
 
-  @ManyToOne(() => MTHHomeroomStudent, (homeroom) => homeroom.student)
+  @ManyToOne(() => HomeroomStudent, (homeroom) => homeroom.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })
-  @Field(() => MTHHomeroomStudent, { nullable: true })
-  previousHomeroom: MTHHomeroomStudent;
+  @Field(() => HomeroomStudent, { nullable: true })
+  previousHomeroom: HomeroomStudent;
 
   @OneToMany(() => StudentStatus, (studentStatus) => studentStatus.student)
   @JoinColumn({ name: 'student_id', referencedColumnName: 'student_id' })

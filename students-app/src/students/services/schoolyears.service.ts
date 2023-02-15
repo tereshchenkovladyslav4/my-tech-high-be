@@ -10,6 +10,7 @@ import { User } from '../models/user.entity';
 import { Student } from '../models/student.entity';
 import { UserRegion } from '../models/user-region.entity';
 import { ScheduleService } from './schedule.service';
+import { StudentLearningLogService } from './student-learning-log.service';
 
 @Injectable()
 export class SchoolYearsService {
@@ -19,6 +20,7 @@ export class SchoolYearsService {
     private timezoneService: TimezoneService,
     private studentStatusService: StudentStatusService,
     private scheduleService: ScheduleService,
+    private studentLearningLogService: StudentLearningLogService,
   ) {}
 
   findOneById(school_year_id: number): Promise<SchoolYear> {
@@ -114,6 +116,37 @@ export class SchoolYearsService {
       item.IsCurrentYear = item.date_begin <= now && item.date_end >= now;
       item.IsScheduleBuilderOpen = item.schedule_builder_open <= now && item.schedule_builder_close >= now;
       item.IsSecondSemesterOpen = item.second_semester_open <= now && item.second_semester_close >= now;
+    });
+    return result;
+  }
+
+  async getActiveHomeroomSchoolYears(studentId: number): Promise<SchoolYear[]> {
+    const learningLogs = await this.studentLearningLogService.findAllByStudentId(studentId);
+    const activeHomeroomSchoolYearIds = learningLogs.map((item) => item.SchoolYearId);
+
+    const activeHomeroomSchoolYears = await this.schoolYearsRepository.find({
+      where: {
+        school_year_id: In(activeHomeroomSchoolYearIds),
+      },
+      relations: ['HomeroomSettings'],
+    });
+
+    const regionId = await this.getRegionId(studentId);
+
+    const now = await this.timezoneService.getTimezoneDate(regionId);
+    const openHomeroomSchoolYears = await this.schoolYearsRepository.find({
+      where: {
+        RegionId: regionId,
+        school_year_id: Not(In(activeHomeroomSchoolYearIds)),
+        date_begin: LessThanOrEqual(now),
+        date_end: MoreThanOrEqual(now),
+      },
+      relations: ['HomeroomSettings'],
+    });
+
+    const result = activeHomeroomSchoolYears.concat(openHomeroomSchoolYears);
+    result.map((item) => {
+      item.IsCurrentYear = item.date_begin <= now && item.date_end >= now;
     });
     return result;
   }

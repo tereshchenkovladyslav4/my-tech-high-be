@@ -76,6 +76,7 @@ import { EnrollmentQuestions } from 'src/models/enrollment-questions.entity';
 import { EnrollmentQuestionTabService } from './services/enrollment-question-tab.service';
 import { EnrollmentQuestionGroupService } from './services/enrollment-question-group.service';
 import { EnrollmentQuestionService } from './services/enrollment-question.service';
+import { StudentLearningLog } from 'src/models/student-learning-log.entity';
 
 const RepoServices = [
   UsersService,
@@ -163,6 +164,7 @@ const RepoServices = [
       EnrollmentQuestionTab,
       EnrollmentQuestionGroup,
       EnrollmentQuestions,
+      StudentLearningLog,
     ]),
   ],
   providers: RepoServices,

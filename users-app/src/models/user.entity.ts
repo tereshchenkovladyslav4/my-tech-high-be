@@ -18,7 +18,7 @@ import { UserAccess } from './user-access.entity';
 import { UserRegion } from './user-region.entity';
 
 @ObjectType()
-@Directive('@key(fields: "user_id, email")')
+@Directive('@key(fields: "user_id, email, first_name, last_name")')
 @Entity({ name: 'core_users' })
 export class User extends BaseEntity {
   @Column()

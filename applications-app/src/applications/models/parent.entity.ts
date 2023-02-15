@@ -1,15 +1,15 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ObjectType, Int } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Observer } from './observer.entity';
 import { Person } from './person.entity';
 import { Student } from './student.entity';
 
 @ObjectType()
-@Directive('@key(fields: "parent_id, person_id")')
+@Directive('@key(fields: "parent_id, person_id, notes")')
 @Entity({ name: 'mth_parent' })
 export class Parent extends BaseEntity {
-  @Column()
-  @Field(() => ID, { nullable: true })
+  @Column('int')
+  @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
   parent_id?: number;
 

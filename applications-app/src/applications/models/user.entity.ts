@@ -17,7 +17,7 @@ import { Classes } from './classes.entity';
 @InputType('users')
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "user_id, email")')
+@Directive('@key(fields: "user_id, email, first_name, last_name")')
 @Entity({ name: 'core_users' })
 export class User extends BaseEntity {
   @Column()
@@ -43,6 +43,16 @@ export class User extends BaseEntity {
   lastName?: string;
 
   @Column()
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  first_name?: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  @Directive('@external')
+  last_name?: string;
+
+  @Column()
   level?: number;
 
   @CreateDateColumn()
@@ -60,7 +70,7 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'level', referencedColumnName: 'id' })
   role: Role;
 
-  @OneToMany(() => Classes, (classes) => classes.primaryTeacher)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'primary_id' })
-  classes: Classes[];
+  @OneToMany(() => Classes, (classes) => classes.PrimaryTeacher)
+  @Field(() => [Classes], { nullable: true })
+  Classes: Classes[];
 }

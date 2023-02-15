@@ -147,6 +147,8 @@ import { ReimbursementRequest } from './models/reimbursement-request.entity';
 import { ReimbursementReceipt } from './models/reimbursement-receipt.entity';
 import { HomeroomSettings } from './models/homeroom-settings.entity';
 import { HomeroomSettingsService } from './services/homeroom-settings.service';
+import { StudentLearningLogService } from './services/student-learning-log.service';
+import { StudentLearningLog } from './models/student-learning-log.entity';
 
 const servicesImports = [
   UsersService,
@@ -224,6 +226,7 @@ const servicesImports = [
   ReimbursementQuestionService,
   ReimbursementRequestService,
   HomeroomSettingsService,
+  StudentLearningLogService,
 ];
 
 @Global()
@@ -304,6 +307,7 @@ const servicesImports = [
       ReimbursementRequest,
       ReimbursementReceipt,
       HomeroomSettings,
+      StudentLearningLog,
     ]),
   ],
   providers: [...servicesImports],

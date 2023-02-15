@@ -1,8 +1,11 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import { JoinColumn } from 'typeorm/decorator/relations/JoinColumn';
 import { ManyToOne } from 'typeorm/decorator/relations/ManyToOne';
 import { Master } from './master.entity';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, OneToMany } from 'typeorm';
+import { StudentLearningLog } from './student-learning-log.entity';
+
+@InputType('assignment')
 @ObjectType()
 @Directive('@key(fields: "master_id")')
 @Entity('mth_assignments')
@@ -44,8 +47,15 @@ export class Assignment extends BaseEntity {
   @Field(() => Int)
   page_count: number;
 
-  @ManyToOne(() => Master, (master) => master.masterAssignments)
-  @Field(() => Master)
+  @ManyToOne(() => Master, (master) => master.Assignments, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @Field(() => Master, { nullable: true })
   @JoinColumn([{ name: 'master_id', referencedColumnName: 'master_id' }])
-  master: Master;
+  Master: Master;
+
+  @OneToMany(() => StudentLearningLog, (studentLearningLog) => studentLearningLog.Assignment)
+  @Field(() => [StudentLearningLog], { nullable: true })
+  StudentLearningLogs: StudentLearningLog[];
 }

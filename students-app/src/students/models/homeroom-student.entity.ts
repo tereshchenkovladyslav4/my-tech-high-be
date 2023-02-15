@@ -1,31 +1,37 @@
 import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { MTHClasses } from './classes.entity';
+import { Classes } from './classes.entity';
 import { Student } from './student.entity';
 
 @ObjectType()
-@Directive('@key(fields: "id,student_id,school_year_id,teacher_id,auto_grade,teacher")')
+@Directive('@extends')
+@Directive('@key(fields: "id, student_id, school_year_id, class_id, auto_grade, Class")')
 @Entity('mth_homeroom_student')
-export class MTHHomeroomStudent extends BaseEntity {
+export class HomeroomStudent extends BaseEntity {
   @Column()
   @Field((type) => ID)
   @PrimaryGeneratedColumn()
+  @Directive('@external')
   id?: number;
 
   @Column()
   @Field(() => Int)
+  @Directive('@external')
   student_id?: number;
 
   @Column()
   @Field(() => Int)
+  @Directive('@external')
   school_year_id?: number;
 
   @Column()
   @Field(() => Int)
-  teacher_id?: number;
+  @Directive('@external')
+  class_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
+  @Directive('@external')
   auto_grade?: string;
 
   @OneToMany((type) => Student, (student) => student.currentHomeroom)
@@ -33,8 +39,12 @@ export class MTHHomeroomStudent extends BaseEntity {
   @Field(() => [Student], { nullable: true })
   student: Student[];
 
-  @ManyToOne((type) => MTHClasses, (classes) => classes.homeroom)
-  @JoinColumn({ name: 'teacher_id', referencedColumnName: 'class_id' })
-  @Field(() => MTHClasses, { nullable: true })
-  teacher: MTHClasses;
+  @ManyToOne((type) => Classes, (classes) => classes.homeroom, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'class_id', referencedColumnName: 'class_id' })
+  @Field(() => Classes, { nullable: true })
+  @Directive('@external')
+  Class: Classes;
 }

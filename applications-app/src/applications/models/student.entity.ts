@@ -13,6 +13,7 @@ import { Schedule } from './schedule.entity';
 import { ScheduleHistory } from './schedule-history.entity';
 import { ResourceRequest } from './resource-request.entity';
 import { ReimbursementRequest } from './reimbursement-request.entity';
+import { StudentLearningLog } from './student-learning-log.entity';
 
 @InputType('student')
 @ObjectType()
@@ -176,4 +177,8 @@ export class Student extends BaseEntity {
   @OneToMany(() => ReimbursementRequest, (reimbursementRequest) => reimbursementRequest.Student)
   @Field(() => [ReimbursementRequest], { nullable: true })
   ReimbursementRequests: ReimbursementRequest[];
+
+  @OneToMany(() => StudentLearningLog, (studentLearningLog) => studentLearningLog.Student)
+  @Field(() => [StudentLearningLog], { nullable: true })
+  StudentLearningLogs: StudentLearningLog[];
 }

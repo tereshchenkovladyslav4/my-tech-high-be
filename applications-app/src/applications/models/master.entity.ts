@@ -1,7 +1,8 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, CreateDateColumn, OneToMany, JoinColumn } from 'typeorm';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, CreateDateColumn, OneToMany } from 'typeorm';
 import { Assignment } from './assignment.entity';
 import { Classes } from './classes.entity';
+@InputType('master')
 @ObjectType()
 @Directive('@key(fields: "master_id")')
 @Entity('mth_master')
@@ -23,15 +24,13 @@ export class Master extends BaseEntity {
   @Field(() => String, { nullable: true })
   instructions?: string;
 
-  @OneToMany(() => Classes, (classes) => classes.master)
-  @JoinColumn({ name: 'master_id', referencedColumnName: 'master_id' })
+  @OneToMany(() => Classes, (classes) => classes.Master)
   @Field(() => [Classes], { nullable: true })
-  masterClasses: Classes[];
+  Classes: Classes[];
 
-  @OneToMany(() => Assignment, (assignment) => assignment.master)
-  @JoinColumn({ name: 'master_id', referencedColumnName: 'master_id' })
+  @OneToMany(() => Assignment, (assignment) => assignment.Master)
   @Field(() => [Assignment], { nullable: true })
-  masterAssignments: Assignment[];
+  Assignments: Assignment[];
 
   @Field(() => Date, { nullable: true })
   @CreateDateColumn()

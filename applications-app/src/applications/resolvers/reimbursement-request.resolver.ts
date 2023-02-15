@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
 import { ReimbursementRequest } from '../models/reimbursement-request.entity';
@@ -18,6 +18,13 @@ export class ReimbursementRequestResolver {
   @Query(() => ReimbursementRequestPagination, { name: 'reimbursementRequests' })
   async getReimbursementRequests(@Args() params: ReimbursementRequestsArgs): Promise<Pagination<ReimbursementRequest>> {
     return await this.service.find(params);
+  }
+
+  @Query(() => ReimbursementRequest, { name: 'reimbursementRequest' })
+  async getReimbursementRequest(
+    @Args('reimbursementRequestId', { type: () => Int }) reimbursementRequestId: number,
+  ): Promise<ReimbursementRequest> {
+    return await this.service.findOne(reimbursementRequestId);
   }
 
   @Query(() => [ReimbursementRequest], { name: 'reimbursementRequestsForStudents' })

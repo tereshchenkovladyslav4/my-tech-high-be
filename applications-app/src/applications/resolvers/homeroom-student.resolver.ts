@@ -1,11 +1,11 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
-import { Master } from '../models/master.entity';
 import { HomeroomStudentService } from '../services/homeroom-student.service';
 import { HomeroomStudentInput } from '../dto/homeroom-student.inputs';
+import { HomeroomStudent } from '../models/homeroom-student.entity';
 
-@Resolver(() => Master)
+@Resolver(() => HomeroomStudent)
 export class HomeroomStudentResolver {
   constructor(private service: HomeroomStudentService) {}
 

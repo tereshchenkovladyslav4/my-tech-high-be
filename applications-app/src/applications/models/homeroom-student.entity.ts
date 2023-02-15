@@ -1,9 +1,10 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
 import { Classes } from './classes.entity';
 
+@InputType('homeroomStudent')
 @ObjectType()
-@Directive('@key(fields: "id,student_id,school_year_id,teacher_id,auto_grade")')
+@Directive('@key(fields: "id, student_id, school_year_id, class_id, auto_grade, Class")')
 @Entity('mth_homeroom_student')
 export class HomeroomStudent extends BaseEntity {
   @Column()
@@ -21,14 +22,17 @@ export class HomeroomStudent extends BaseEntity {
 
   @Column()
   @Field(() => Int)
-  teacher_id?: number;
+  class_id?: number;
 
   @Column()
   @Field(() => String, { nullable: true })
   auto_grade?: string;
 
-  @ManyToOne(() => Classes, (classes) => classes.homeroomStudent)
-  @Field(() => Classes)
-  @JoinColumn([{ name: 'teacher_id', referencedColumnName: 'class_id' }])
-  classes: Classes;
+  @ManyToOne(() => Classes, (classes) => classes.HomeroomStudents, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @Field(() => Classes, { nullable: true })
+  @JoinColumn([{ name: 'class_id', referencedColumnName: 'class_id' }])
+  Class: Classes;
 }

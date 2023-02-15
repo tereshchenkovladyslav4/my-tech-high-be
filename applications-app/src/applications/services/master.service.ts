@@ -17,10 +17,10 @@ export class MasterService {
   async getAll(schoolYearId: number): Promise<Master[]> {
     const result = await this.masterRepository
       .createQueryBuilder('master')
-      .leftJoinAndSelect('master.masterClasses', 'masterClasses')
-      .leftJoinAndSelect('master.masterAssignments', 'masterAssignments')
-      .leftJoinAndSelect('masterClasses.primaryTeacher', 'primaryTeacher')
-      .leftJoinAndSelect('masterClasses.homeroomStudent', 'homeroomStudent')
+      .leftJoinAndSelect('master.Classes', 'Classes')
+      .leftJoinAndSelect('master.Assignments', 'Assignments')
+      .leftJoinAndSelect('Classes.PrimaryTeacher', 'PrimaryTeacher')
+      .leftJoinAndSelect('Classes.HomeroomStudents', 'HomeroomStudents')
       .where('master.school_year_id = :schoolYearId', { schoolYearId: schoolYearId })
       .getMany();
 

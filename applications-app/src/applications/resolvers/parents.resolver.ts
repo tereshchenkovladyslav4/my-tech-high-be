@@ -14,8 +14,6 @@ import { StudentsService } from '../services/students.service';
 import { ParentsService } from '../services/parents.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guard';
-import { Address } from '../models/address.entity';
-import { AddressService } from '../services/address.service';
 import { UpdatePersonAddressInput } from '../dto/update-person-address.inputs';
 import { Observer } from '../models/observer.entity';
 import { ObserversService } from '../services/observers.service';
@@ -24,13 +22,12 @@ export class ParentsResolver {
   constructor(
     private studentsService: StudentsService,
     private parentsService: ParentsService,
-    private addressService: AddressService,
     private observersService: ObserversService,
   ) {}
 
   @ResolveReference()
-  resolveReference(reference: { __typename: string; address_id: number }): Promise<Address> {
-    return this.addressService.findOneById(reference.address_id);
+  resolveReference(reference: { __typename: string; parent_id: number }): Promise<Parent> {
+    return this.parentsService.findOneById(reference.parent_id);
   }
 
   @ResolveField(() => [Student], { name: 'students' })

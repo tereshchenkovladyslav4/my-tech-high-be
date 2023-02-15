@@ -361,13 +361,13 @@ export class StudentsService {
         'currentHomeroom',
         `currentHomeroom.school_year_id=${filter.schoolYear}`,
       )
-      .leftJoinAndSelect('currentHomeroom.teacher', 'currentTeacher')
+      .leftJoinAndSelect('currentHomeroom.Class', 'currentTeacher')
       .leftJoinAndSelect(
         'student.previousHomeroom',
         'previousHomeroom',
         `previousHomeroom.school_year_id=${previousSchoolYear}`,
       )
-      .leftJoinAndSelect('previousHomeroom.teacher', 'previousTeacher')
+      .leftJoinAndSelect('previousHomeroom.Class', 'previousTeacher')
       .leftJoinAndSelect('student.packets', 'packets')
       .where(`grade_levels.school_year_id = ${filter.schoolYear} AND status.status IN (0, 1)`);
 

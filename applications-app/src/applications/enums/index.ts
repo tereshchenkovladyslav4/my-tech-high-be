@@ -18,3 +18,4 @@ export * from './student-status.enum';
 export * from './username-format.enum';
 export * from './withdrawal-option.enum';
 export * from './withdrawal-status.enum';
+export * from './student-learning-log-status.enum';

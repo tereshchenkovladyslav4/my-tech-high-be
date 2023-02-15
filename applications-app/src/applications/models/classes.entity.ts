@@ -1,4 +1,4 @@
-import { Directive, Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, Int, InputType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -12,8 +12,9 @@ import {
 import { HomeroomStudent } from './homeroom-student.entity';
 import { Master } from './master.entity';
 import { User } from './user.entity';
+@InputType('classes')
 @ObjectType()
-@Directive('@key(fields: "class_id,master_id,class_name,primary_id,addition_id")')
+@Directive('@key(fields: "class_id, master_id, class_name, primary_id, addition_id, created_at, PrimaryTeacher")')
 @Entity('mth_classes')
 export class Classes extends BaseEntity {
   @Column()
@@ -37,22 +38,27 @@ export class Classes extends BaseEntity {
   @Field(() => String, { nullable: true })
   addition_id: string;
 
-  @ManyToOne(() => Master, (master) => master.masterClasses)
-  @Field(() => Master)
-  @JoinColumn([{ name: 'master_id', referencedColumnName: 'master_id' }])
-  master: Master;
-
-  @ManyToOne(() => User, (user) => user.classes)
-  @Field(() => User, { nullable: true })
-  @JoinColumn({ name: 'primary_id', referencedColumnName: 'user_id' })
-  primaryTeacher: User;
-
   @Field(() => Date, { nullable: true })
   @CreateDateColumn()
   created_at?: Date;
 
-  @OneToMany(() => HomeroomStudent, (homeroomStudent) => homeroomStudent.classes)
-  @Field(() => [HomeroomStudent])
-  @JoinColumn({ name: 'class_id', referencedColumnName: 'teacher_id' })
-  homeroomStudent: HomeroomStudent[];
+  @ManyToOne(() => Master, (master) => master.Classes, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @Field(() => Master, { nullable: true })
+  @JoinColumn([{ name: 'master_id', referencedColumnName: 'master_id' }])
+  Master: Master;
+
+  @ManyToOne(() => User, (user) => user.Classes, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @Field(() => User, { nullable: true })
+  @JoinColumn([{ name: 'primary_id', referencedColumnName: 'user_id' }])
+  PrimaryTeacher: User;
+
+  @OneToMany(() => HomeroomStudent, (homeroomStudent) => homeroomStudent.Class)
+  @Field(() => [HomeroomStudent], { nullable: true })
+  HomeroomStudents: HomeroomStudent[];
 }

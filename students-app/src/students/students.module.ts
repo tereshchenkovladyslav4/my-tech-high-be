@@ -34,11 +34,12 @@ import { PeriodResolver } from './resolvers/period.resolver';
 import { Schedule } from './models/schedule.entity';
 import { SchedulePeriod } from './models/schedule-period.entity';
 import { ProviderResolver } from './resolvers/provider.resolver';
-import { MTHHomeroomStudent } from './models/homeroom-student.entity';
-import { MTHClasses } from './models/classes.entity';
+import { HomeroomStudent } from './models/homeroom-student.entity';
+import { Classes } from './models/classes.entity';
 import { ResourceRequest } from './models/resource-request.entity';
 import { DiplomaQuestion } from './models/diploma-question.entity';
 import { DiplomaAnswer } from './models/diploma-answer.entity';
+import { StudentHomeroomResolver } from './resolvers/student-homeroom.resolver';
 
 const graphQLImports = [
   StudentsResolver,
@@ -53,6 +54,7 @@ const graphQLImports = [
   StudentRecordResolver,
   PeriodResolver,
   ProviderResolver,
+  StudentHomeroomResolver,
 ];
 @Module({
   imports: [
@@ -83,8 +85,8 @@ const graphQLImports = [
           SchoolEnrollment,
           Schedule,
           SchedulePeriod,
-          MTHHomeroomStudent,
-          MTHClasses,
+          HomeroomStudent,
+          Classes,
           ResourceRequest,
           DiplomaQuestion,
           DiplomaAnswer,

@@ -125,6 +125,25 @@ export class ReimbursementRequestService {
     });
   }
 
+  async findOne(reimbursementRequestId: number): Promise<ReimbursementRequest> {
+    return await this.repo
+      .createQueryBuilder('reimbursementRequest')
+      .leftJoinAndSelect('reimbursementRequest.Student', 'Student')
+      .leftJoinAndSelect('Student.person', 'Person')
+      .leftJoinAndSelect(
+        'Student.grade_levels',
+        'GradeLevels',
+        `GradeLevels.school_year_id = reimbursementRequest.SchoolYearId`,
+      )
+      .leftJoinAndSelect('Student.parent', 'Parent')
+      .leftJoinAndSelect('Parent.person', 'ParentPerson')
+      .leftJoinAndSelect('reimbursementRequest.SchoolYear', 'SchoolYear')
+      .leftJoinAndSelect('SchoolYear.ReimbursementSetting', 'ReimbursementSetting')
+      .leftJoinAndSelect('reimbursementRequest.ReimbursementReceipts', 'ReimbursementReceipts')
+      .where(`reimbursementRequest.reimbursement_request_id = ${reimbursementRequestId}`)
+      .getOne();
+  }
+
   async findForStudents(param: ReimbursementRequestSearchInput): Promise<ReimbursementRequest[]> {
     const { filter } = param;
     const { SchoolYearId, StudentIds } = filter;

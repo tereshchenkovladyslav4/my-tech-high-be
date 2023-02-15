@@ -13,7 +13,7 @@ import { UserRegion } from './user-region.entity';
 
 @ObjectType()
 @Directive('@extends')
-@Directive('@key(fields: "user_id, email")')
+@Directive('@key(fields: "user_id, email, first_name, last_name")')
 @Entity({ name: 'core_users' })
 export class User extends BaseEntity {
   @Column()
@@ -32,6 +32,16 @@ export class User extends BaseEntity {
 
   @Column()
   lastName?: string;
+
+  @Column()
+  @Directive('@external')
+  @Field(() => String, { nullable: true })
+  first_name?: string;
+
+  @Column()
+  @Directive('@external')
+  @Field(() => String, { nullable: true })
+  last_name?: string;
 
   @Column()
   password?: string;

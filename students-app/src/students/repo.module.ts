@@ -58,13 +58,16 @@ import { ScheduleHistory } from './models/schedule-history.entity';
 import { SchedulePeriodHistory } from './models/schedule-period-history.entity';
 import { ProviderService } from './services/provider.service';
 import { ReimbursementSetting } from './models/reimbursement-setting.entity';
-import { MTHHomeroomStudent } from './models/homeroom-student.entity';
-import { MTHClasses } from './models/classes.entity';
+import { HomeroomStudent } from './models/homeroom-student.entity';
+import { Classes } from './models/classes.entity';
 import { ResourceRequest } from './models/resource-request.entity';
 import { DiplomaService } from './services/diploma.service';
 import { DiplomaAnswerService } from './services/diploma-answer.service';
 import { DiplomaQuestion } from './models/diploma-question.entity';
 import { DiplomaAnswer } from './models/diploma-answer.entity';
+import { StudentLearningLogService } from './services/student-learning-log.service';
+import { StudentLearningLog } from './models/student-learning-log.entity';
+import { StudentHomeroomService } from './services/student-homeroom.service';
 const servicesImports = [
   UsersService,
   PersonsService,
@@ -92,6 +95,8 @@ const servicesImports = [
   ProviderService,
   DiplomaService,
   DiplomaAnswerService,
+  StudentLearningLogService,
+  StudentHomeroomService,
 ];
 
 @Global()
@@ -132,11 +137,12 @@ const servicesImports = [
       ScheduleHistory,
       SchedulePeriodHistory,
       ReimbursementSetting,
-      MTHHomeroomStudent,
-      MTHClasses,
+      HomeroomStudent,
+      Classes,
       ResourceRequest,
       DiplomaQuestion,
       DiplomaAnswer,
+      StudentLearningLog,
     ]),
   ],
   providers: [...servicesImports],

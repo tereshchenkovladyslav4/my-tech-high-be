@@ -9,7 +9,7 @@ export class HomeroomStudentInput {
   school_year_id: number;
 
   @Field(() => Int)
-  teacher_id: number;
+  class_id: number;
 
   @Field(() => String, { nullable: true })
   auto_grade: string;
