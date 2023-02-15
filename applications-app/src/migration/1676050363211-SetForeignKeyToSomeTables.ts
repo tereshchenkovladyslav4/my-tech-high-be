@@ -14,6 +14,7 @@ export class SetForeignKeyToSomeTables1676050363211 implements MigrationInterfac
     await queryRunner.query(
       `ALTER TABLE \`mth_classes\` ADD CONSTRAINT \`FK_58ee56bb4d214f00807130030c2\` FOREIGN KEY (\`primary_id\`) REFERENCES \`core_users\`(\`user_id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
     );
+    await queryRunner.query(`TRUNCATE TABLE \`mth_assignments\``);
     await queryRunner.query(
       `ALTER TABLE \`mth_assignments\` ADD CONSTRAINT \`FK_570a18338a72abe762b16e13a47\` FOREIGN KEY (\`master_id\`) REFERENCES \`mth_master\`(\`master_id\`) ON DELETE CASCADE ON UPDATE CASCADE`,
     );
