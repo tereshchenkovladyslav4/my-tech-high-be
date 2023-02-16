@@ -36,17 +36,39 @@ export class EmailTemplatesService {
   }
 
   async findByRegion(regionId: number, school_year_id?: number, mid_year?: boolean): Promise<EmailTemplate[]> {
+    let templates: EmailTemplate[] = [];
     if (school_year_id) {
-      return await this.emailTemplateRepository.find({
+      templates = await this.emailTemplateRepository.find({
         where: { region_id: regionId, school_year_id: school_year_id, mid_year: mid_year },
         relations: ['category', 'region'],
       });
     } else {
-      return await this.emailTemplateRepository.find({
+      templates = await this.emailTemplateRepository.find({
         where: { region_id: regionId },
         relations: ['category', 'region'],
       });
     }
+    // if there isn't templates that are matched to this school year, we have to create email templates about that school year.
+    if (templates.length === 0) {
+      const regionTemplates = await this.emailTemplateRepository.find({
+        where: { region_id: regionId },
+        relations: ['category', 'region'],
+      });
+      if (regionTemplates.length > 0) {
+        await this.cloneWithMid(
+          regionTemplates[0].school_year_id,
+          school_year_id,
+          regionTemplates[0].mid_year,
+          mid_year,
+        );
+        templates = await this.emailTemplateRepository.find({
+          where: { region_id: regionId, school_year_id: school_year_id, mid_year: mid_year },
+          relations: ['category', 'region'],
+        });
+      }
+    }
+
+    return templates;
   }
 
   async findById(id: number): Promise<EmailTemplate> {
@@ -125,6 +147,34 @@ export class EmailTemplatesService {
       const newEmailTemplate = await this.emailTemplateRepository.save({
         ...item,
         school_year_id: newSchoolYearId,
+      });
+      for (let k = 0; k < reminders.length; k++) {
+        const remiderItem = reminders[k];
+        delete remiderItem['reminder_id'];
+        await this.emailReminderService.create({ ...remiderItem, email_template_id: newEmailTemplate.id });
+      }
+    }
+    return true;
+  }
+
+  async cloneWithMid(
+    oldSchoolYearId: number,
+    newSchoolYearId: number,
+    oldMidYear: boolean,
+    newMidYear: boolean,
+  ): Promise<boolean> {
+    const oldTemplates = await this.emailTemplateRepository.find({
+      school_year_id: oldSchoolYearId,
+      mid_year: oldMidYear,
+    });
+    for (let i = 0; i < oldTemplates.length; i++) {
+      const item = oldTemplates[i];
+      const reminders = await this.emailReminderService.findByTemplateId(item['id']);
+      delete item['id'];
+      const newEmailTemplate = await this.emailTemplateRepository.save({
+        ...item,
+        school_year_id: newSchoolYearId,
+        mid_year: newMidYear,
       });
       for (let k = 0; k < reminders.length; k++) {
         const remiderItem = reminders[k];

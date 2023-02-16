@@ -671,72 +671,79 @@ export class EnrollmentsService {
     try {
       const MailData = [];
       const emailTemplates = await this.emailTemplateService.findAllByTemplate('Packet Reminders');
-
+      const usedRegionIds = [];
       if (emailTemplates.length > 0) {
         emailTemplates.forEach(async (emailTemplate) => {
-          const emailReminder = await this.emailReminderService.findByTemplateId(emailTemplate.id);
-          if (emailReminder.length > 0) {
-            emailReminder.forEach(async (remind) => {
-              const reminder = remind.reminder;
-              const reminderDate = new Date();
-              reminderDate.setDate(reminderDate.getDate() + reminder);
-              const packets = await this.packetsService.findReminders(reminderDate, reminder, emailTemplate.region_id);
-              if (emailTemplate) {
-                await Promise.all(
-                  packets.map(async (packet) => {
-                    // remove sending duplicate mail
-                    const pack_ids = Object.keys(MailData);
-                    const duplicate = pack_ids.map((b) => {
-                      if (parseInt(b) == packet.packet_id && MailData[b] == remind.reminder_id) {
-                        return true;
-                      }
-                    });
-                    if (!duplicate.includes(true)) {
-                      MailData[packet.packet_id] = remind.reminder_id;
-
-                      const webAppUrl = process.env.WEB_APP_URL;
-                      const student = packet.student.person;
-                      const parent = packet.student.parent.person;
-                      const school_year = packet.student.applications[0].school_year;
-                      const currApplication = packet.student.applications[0];
-                      const email = packet.student.parent.person.email;
-
-                      const setAdditionalLinksInfo = (content) => {
-                        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
-                        const yearend = new Date(school_year.date_end).getFullYear().toString();
-
-                        const yearText = currApplication.midyear_application
-                          ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
-                          : `${yearbegin}-${yearend.substring(2, 4)}`;
-
-                        const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`;
-                        return content
-                          .toString()
-                          .replace(/\[STUDENT\]/g, student.first_name)
-                          .replace(/\[PARENT\]/g, parent.first_name)
-                          .replace(/\[YEAR\]/g, yearText)
-                          .replace(/\[APPLICATION_YEAR\]/g, yearText)
-                          .replace(/\[DEADLINE\]/g, `${Moment(packet.deadline).format('MM/DD/yy')}`)
-                          .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`);
-                      };
-
-                      const body = setAdditionalLinksInfo(remind.body || emailTemplate.body);
-                      const emailSubject = setAdditionalLinksInfo(remind.subject || emailTemplate.subject);
-
-                      await this.sesEmailService.sendEmail({
-                        email: email,
-                        subject: emailSubject,
-                        content: body,
-                        bcc: emailTemplate.bcc,
-                        from: emailTemplate.from,
-                        template_name: 'Packet Reminders',
-                        region_id: emailTemplate.region_id,
-                      });
-                    }
-                  }),
+          if (!usedRegionIds.includes(emailTemplate.id)) {
+            const emailReminder = await this.emailReminderService.findByTemplateId(emailTemplate.id);
+            if (emailReminder.length > 0) {
+              emailReminder.forEach(async (remind) => {
+                const reminder = remind.reminder;
+                const reminderDate = new Date();
+                reminderDate.setDate(reminderDate.getDate() + reminder);
+                const packets = await this.packetsService.findReminders(
+                  reminderDate,
+                  reminder,
+                  emailTemplate.region_id,
                 );
-              }
-            });
+                if (emailTemplate) {
+                  await Promise.all(
+                    packets.map(async (packet) => {
+                      // remove sending duplicate mail
+                      const pack_ids = Object.keys(MailData);
+                      const duplicate = pack_ids.map((b) => {
+                        if (parseInt(b) == packet.packet_id && MailData[b] == remind.reminder_id) {
+                          return true;
+                        }
+                      });
+                      if (!duplicate.includes(true)) {
+                        MailData[packet.packet_id] = remind.reminder_id;
+
+                        const webAppUrl = process.env.WEB_APP_URL;
+                        const student = packet.student.person;
+                        const parent = packet.student.parent.person;
+                        const school_year = packet.student.applications[0].school_year;
+                        const currApplication = packet.student.applications[0];
+                        const email = packet.student.parent.person.email;
+
+                        const setAdditionalLinksInfo = (content) => {
+                          const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+                          const yearend = new Date(school_year.date_end).getFullYear().toString();
+
+                          const yearText = currApplication.midyear_application
+                            ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+                            : `${yearbegin}-${yearend.substring(2, 4)}`;
+
+                          const link = `${webAppUrl}/homeroom/enrollment/${packet.student.student_id}`;
+                          return content
+                            .toString()
+                            .replace(/\[STUDENT\]/g, student.first_name)
+                            .replace(/\[PARENT\]/g, parent.first_name)
+                            .replace(/\[YEAR\]/g, yearText)
+                            .replace(/\[APPLICATION_YEAR\]/g, yearText)
+                            .replace(/\[DEADLINE\]/g, `${Moment(packet.deadline).format('MM/DD/yy')}`)
+                            .replace(/\[LINK\]/g, `<a href='${link}'>${link}</a>`);
+                        };
+
+                        const body = setAdditionalLinksInfo(remind.body || emailTemplate.body);
+                        const emailSubject = setAdditionalLinksInfo(remind.subject || emailTemplate.subject);
+
+                        await this.sesEmailService.sendEmail({
+                          email: email,
+                          subject: emailSubject,
+                          content: body,
+                          bcc: emailTemplate.bcc,
+                          from: emailTemplate.from,
+                          template_name: 'Packet Reminders',
+                          region_id: emailTemplate.region_id,
+                        });
+                      }
+                    }),
+                  );
+                }
+              });
+            }
+            usedRegionIds.push(emailTemplate.id);
           }
         });
       }
