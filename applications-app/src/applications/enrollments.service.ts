@@ -331,11 +331,18 @@ export class EnrollmentsService {
           grade_level,
         });
       }
-
+      const school_year = await this.schoolYearService.findOneById(school_year_id);
+      const status = packetData.status == StatusEnum.missing_info ? StatusEnum.resubmitted : StatusEnum.started;
+      const is_age_issue = this.packetsService.getAgeIssueByStudent(
+        grade_level,
+        studentPerson.date_of_birth,
+        status,
+        school_year.birth_date_cut,
+      );
       const studentPacket = await this.packetsService.createOrUpdate({
         packet_id,
         student_id,
-        status: packetData.status == StatusEnum.missing_info ? StatusEnum.resubmitted : StatusEnum.started,
+        status: status,
         deadline: packetData ? packetData.deadline.toISOString() : new Date().toISOString(),
         date_accepted: null,
         date_submitted: new Date(),
@@ -343,6 +350,7 @@ export class EnrollmentsService {
         secondary_contact_first: packet.secondary_contact_first,
         secondary_contact_last: packet.secondary_contact_last,
         school_district: packet.school_district,
+        is_age_issue,
         meta: packet.meta,
         special_ed: String(special_ed),
       });

@@ -462,15 +462,46 @@ export class PacketsService {
   }
 
   async setAgeIssueByStudent(student_id: number, school_year_id: number): Promise<Packet> {
-    let is_age_issue = false;
     const student = await this.studentService.findOneById(student_id);
-    if (student == null) {
+    if (!student) {
       return null;
     }
     const packet = await this.findOneByStudentId(student.student_id);
-    const studentPerson = await this.personsService.findOneById(student.person_id);
-    if (packet == null) {
+    if (!packet) {
       return null;
+    }
+    const studentPerson = await this.personsService.findOneById(student.person_id);
+    if (!studentPerson) {
+      return null;
+    }
+
+    const school_year = await this.schoolYearService.findOneById(school_year_id);
+    if (!school_year) {
+      return null;
+    }
+    const is_age_issue = this.getAgeIssueByStudent(
+      student.grade_levels[0].grade_level,
+      studentPerson.date_of_birth,
+      packet.status,
+      school_year.birth_date_cut,
+    );
+
+    this.update({
+      packet_id: packet.packet_id,
+      is_age_issue: is_age_issue,
+    });
+
+    return packet;
+  }
+  getAgeIssueByStudent(
+    student_grade_level: string | undefined,
+    student_date_of_birth: Date | undefined,
+    packet_status: string | undefined,
+    school_year_birth_date_cut: string | undefined,
+  ): boolean {
+    let is_age_issue = false;
+    if (!student_grade_level || !packet_status || !student_date_of_birth || !school_year_birth_date_cut) {
+      return false;
     }
 
     const parseGradeLevel = (value: number | string): number => {
@@ -480,28 +511,20 @@ export class PacketsService {
       return Number(value) + 5;
     };
 
-    const school_year = await this.schoolYearService.findOneById(school_year_id);
-    if (school_year == null) return null;
+    if (school_year_birth_date_cut) {
+      if (Moment(student_date_of_birth).isAfter(school_year_birth_date_cut)) is_age_issue = true;
 
-    if (school_year.birth_date_cut) {
-      if (Moment(studentPerson.date_of_birth).isAfter(school_year.birth_date_cut)) is_age_issue = true;
-
-      const age = studentPerson.date_of_birth ? Moment().diff(studentPerson.date_of_birth, 'years', false) : 0;
-      const grade_age = parseGradeLevel(student.grade_levels[0].grade_level);
-      if (studentPerson.date_of_birth && grade_age != 0) {
+      const age = student_date_of_birth ? Moment().diff(student_date_of_birth, 'years', false) : 0;
+      const grade_age = parseGradeLevel(student_grade_level);
+      if (student_date_of_birth && grade_age != 0) {
         if (age != grade_age) is_age_issue = true;
       }
     }
 
-    if (packet.status != 'Submitted' && packet.status != 'Resubmitted' && packet.status != 'Conditional')
+    if (packet_status != 'Submitted' && packet_status != 'Resubmitted' && packet_status != 'Conditional')
       is_age_issue = false;
 
-    this.update({
-      packet_id: packet.packet_id,
-      is_age_issue: is_age_issue,
-    });
-
-    return packet;
+    return is_age_issue;
   }
 
   async getPacketCountByRegionId(region_id: number, school_year_id: number): Promise<ResponseDTO> {
