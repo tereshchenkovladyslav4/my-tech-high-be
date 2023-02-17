@@ -6,12 +6,12 @@ export class CreateStudentUserInput {
   @Field()
   @MaxLength(60)
   @IsOptional()
-  firstName?: string;
+  first_name?: string;
 
   @Field()
   @MaxLength(60)
   @IsOptional()
-  lastName?: string;
+  last_name?: string;
 
   @Field()
   @IsEmail()

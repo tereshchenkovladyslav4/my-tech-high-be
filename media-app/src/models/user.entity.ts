@@ -13,10 +13,10 @@ export class User extends BaseEntity {
   password?: string;
 
   @Column()
-  firstName?: string;
+  first_name?: string;
 
   @Column()
-  lastName?: string;
+  last_name?: string;
 
   @Column()
   level?: number;

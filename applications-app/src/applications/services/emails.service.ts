@@ -51,14 +51,14 @@ export class EmailsService {
       const setEmailBodyInfo = (user) => {
         return emailTemplate.body
           .toString()
-          .replace(/\[USER\]/g, user.firstName)
+          .replace(/\[USER\]/g, user.first_name)
           .replace(/\[LINK\]/g, link);
       };
 
       const setEmailSubjectInfo = (user) => {
         return emailTemplate.subject
           .toString()
-          .replace(/\[USER\]/g, user.firstName)
+          .replace(/\[USER\]/g, user.first_name)
           .replace(/\[LINK\]/g, link);
       };
 

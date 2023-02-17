@@ -62,8 +62,8 @@ export class ObserversService {
 
     const password = this.generatePassword();
     const user = await this.usersService.create({
-      firstName: first_name,
-      lastName: last_name,
+      first_name: first_name,
+      last_name: last_name,
       email: email,
       level: 14,
       updateAt: new Date().toString(),

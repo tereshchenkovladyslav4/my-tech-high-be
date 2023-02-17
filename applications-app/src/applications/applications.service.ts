@@ -280,8 +280,8 @@ export class ApplicationsService {
 
     const password = this.generatePassword();
     const user = await this.usersService.create({
-      firstName: parentPerson.first_name,
-      lastName: parentPerson.last_name,
+      first_name: parentPerson.first_name,
+      last_name: parentPerson.last_name,
       email: parentPerson.email,
       level: 15,
       updateAt: new Date().toString(),

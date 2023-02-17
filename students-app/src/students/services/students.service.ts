@@ -801,8 +801,8 @@ export class StudentsService {
     // create user if pass provide
     if (password) {
       const user = await this.usersService.create({
-        firstName: person.first_name,
-        lastName: person.last_name,
+        first_name: person.first_name,
+        last_name: person.last_name,
         email: person.email,
         level: 12,
         updateAt: new Date().toString(),

@@ -40,12 +40,6 @@ export class User extends BaseEntity {
   last_name?: string;
 
   @Column()
-  firstName?: string;
-
-  @Column()
-  lastName?: string;
-
-  @Column()
   level?: number;
 
   @UpdateDateColumn()

@@ -74,7 +74,7 @@ export class UsersService {
     const createZendeskAPI = process.env.ZENDESK_URL + '/users';
     const zendeskToken = process.env.ZENDESK_TOKEN;
 
-    let fullName = user.firstName + ' ' + user.lastName;
+    let fullName = user.first_name + ' ' + user.last_name;
     fullName = fullName ? fullName : 'Anonymous User';
 
     await axios({

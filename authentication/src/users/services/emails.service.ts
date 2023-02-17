@@ -39,7 +39,7 @@ export class EmailsService {
     const recipientEmail = email;
     const queryRunner = await getConnection().createQueryRunner();
     const response = (await queryRunner.query(
-      `SELECT level, first_name as firstName FROM infocenter.core_users WHERE email = '${recipientEmail}'`,
+      `SELECT level, first_name FROM infocenter.core_users WHERE email = '${recipientEmail}'`,
     )) as User[];
     queryRunner.release();
 
@@ -48,13 +48,13 @@ export class EmailsService {
 
     if (template && response.length > 0) {
       content = template.body.toString();
-      content = content.replace('[USER]', response[0].firstName);
+      content = content.replace('[USER]', response[0].first_name);
       content = content.replace(
         '[LINK]',
         `<p><a href="${webAppUrl}/reset-password/?token=${token}">${webAppUrl}/reset-password</a><br></p>`,
       );
       subject = template.subject.toString();
-      subject = subject.replace('[USER]', response[0].firstName);
+      subject = subject.replace('[USER]', response[0].first_name);
       subject = subject.replace(
         '[LINK]',
         `<p><a href="${webAppUrl}/reset-password/?token=${token}">${webAppUrl}/reset-password</a><br></p>`,
@@ -123,7 +123,7 @@ export class EmailsService {
     const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(emailVerifier.user_id);
     const queryRunner = await getConnection().createQueryRunner();
     const response = (await queryRunner.query(
-      `SELECT level, first_name as firstName FROM infocenter.core_users WHERE user_id = ${emailVerifier.user_id}`,
+      `SELECT level, first_name FROM infocenter.core_users WHERE user_id = ${emailVerifier.user_id}`,
     )) as User[];
     queryRunner.release();
 
@@ -139,14 +139,14 @@ export class EmailsService {
     if (template) {
       content = template.body.toString();
 
-      content = content.replace('[USER]', response[0].firstName);
+      content = content.replace('[USER]', response[0].first_name);
       content = content.replace(
         '[LINK]',
         `<p><a href="${webAppUrl}/confirm/?token=${token}">${webAppUrl}/confirm</a><br></p>`,
       );
 
       subject = template.subject.toString();
-      subject = subject.replace('[USER]', response[0].firstName);
+      subject = subject.replace('[USER]', response[0].first_name);
       subject = subject.replace(
         '[LINK]',
         `<p><a href="${webAppUrl}/confirm/?token=${token}">${webAppUrl}/confirm</a><br></p>`,

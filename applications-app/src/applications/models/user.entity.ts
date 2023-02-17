@@ -36,14 +36,6 @@ export class User extends BaseEntity {
 
   @Column()
   @Field(() => String, { nullable: true })
-  firstName?: string;
-
-  @Column()
-  @Field(() => String, { nullable: true })
-  lastName?: string;
-
-  @Column()
-  @Field(() => String, { nullable: true })
   @Directive('@external')
   first_name?: string;
 

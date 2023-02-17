@@ -28,12 +28,6 @@ export class User extends BaseEntity {
   email?: string;
 
   @Column()
-  firstName?: string;
-
-  @Column()
-  lastName?: string;
-
-  @Column()
   @Directive('@external')
   @Field(() => String, { nullable: true })
   first_name?: string;
