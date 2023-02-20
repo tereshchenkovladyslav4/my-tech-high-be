@@ -24,6 +24,7 @@ import { EmailTemplateEnum, ScheduleStatus, SEMESTER_TYPE, StudentStatusEnum } f
 import { SchedulesGroupCountArgs } from '../dto/schedules-group-count.args';
 import { EmailUpdatesAllowedInput } from '../dto/email-update-allowed.inputs';
 import { TimezonesService } from './timezones.service';
+import { UsersService } from './users.service';
 
 @Injectable()
 export class ScheduleService {
@@ -40,6 +41,7 @@ export class ScheduleService {
     private studentStatusService: StudentStatusService,
     private schoolYearService: SchoolYearService,
     private timezoneService: TimezonesService,
+    private userService: UsersService,
   ) {}
 
   async findAll(schedulesArgs: SchedulesArgs): Promise<Pagination<Schedule>> {
@@ -172,12 +174,12 @@ export class ScheduleService {
   async sendUpdatesReqiredEmail(updateRequiredEmail: EmailUpdatesRequiredInput): Promise<boolean> {
     try {
       const { student_id, from, subject, body, region_id, schedule_id } = updateRequiredEmail;
-      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      const studentInfo = await this.studentService.findOneById(student_id);
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
         EmailTemplateEnum.UPDATES_REQUIRED,
-        region_id,
+        studentInfo?.student_grade_level?.school_year_id,
       );
       if (emailTemplate) {
-        const studentInfo = await this.studentService.findOneById(student_id);
         const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
         const yearbegin = Moment(schoolYear?.date_begin).format('YYYY');
         const yearend = Moment(schoolYear?.date_end).format('YYYY');
@@ -198,8 +200,9 @@ export class ScheduleService {
           .replace(/\[PARENT\]/g, studentInfo.parent?.person?.first_name)
           .replace(/\[YEAR\]/g, yearText)
           .replace(/\[SCHEDULE_YEAR\]/g, yearText);
+        const parentUserInfo = await this.userService.findOneById(studentInfo?.parent?.person?.user_id);
         await this.sesEmailService.sendEmail({
-          email: studentInfo?.parent?.person?.email,
+          email: parentUserInfo?.email,
           subject: email_subject,
           content: email_body,
           from: from,
@@ -224,9 +227,11 @@ export class ScheduleService {
   async sendUpdatesAllowedEmail(updateRequiredEmail: EmailUpdatesAllowedInput): Promise<boolean> {
     try {
       const { student_id, region_id, schedule_id } = updateRequiredEmail;
-      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      const studentInfo = await this.studentService.findOneById(student_id);
+      const parentUserInfo = await this.userService.findOneById(studentInfo?.parent?.person?.user_id);
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
         EmailTemplateEnum.UPDATES_ALLOWED,
-        region_id,
+        studentInfo?.student_grade_level?.school_year_id,
       );
       if (emailTemplate) {
         const studentInfo = await this.studentService.findOneById(student_id);
@@ -251,7 +256,7 @@ export class ScheduleService {
           .replace(/\[YEAR\]/g, yearText)
           .replace(/\[SCHEDULE_YEAR\]/g, yearText);
         await this.sesEmailService.sendEmail({
-          email: studentInfo?.parent?.person?.email,
+          email: parentUserInfo?.email,
           subject: email_subject,
           content: email_body,
           from: emailTemplate.from,
@@ -412,6 +417,7 @@ export class ScheduleService {
         if (scheduleInput.is_sending_email) {
           // Sending Accepted Email To Parent
           const studentInfo = await this.studentService.findOneById(student_id);
+          const parentUserInfo = await this.userService.findOneById(studentInfo.parent?.person?.user_id);
           const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(
             studentInfo.parent?.person?.user_id,
           );
@@ -421,11 +427,11 @@ export class ScheduleService {
             region_id = regions[0].region_id;
           }
 
-          const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+          const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
             scheduleInput.is_second_semester
               ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
               : EmailTemplateEnum.SCHEDULE_ACCEPTED,
-            region_id,
+            school_year_id,
           );
           if (emailTemplate) {
             const schoolYear = await this.schoolYearService.findOneById(
@@ -452,7 +458,7 @@ export class ScheduleService {
               .replace(/\[SCHEDULE_YEAR\]/g, yearText);
 
             await this.sesEmailService.sendEmail({
-              email: studentInfo?.parent?.person?.email,
+              email: parentUserInfo?.email,
               subject: email_subject,
               content: email_body,
               from: emailTemplate.from,
@@ -611,11 +617,12 @@ export class ScheduleService {
         .getMany();
       schedules?.map(async (schedule) => {
         const region_id = schedule?.SchoolYear?.RegionId;
+        const school_year_id = schedule?.SchoolYear?.school_year_id;
         const now = await this.timezoneService.getTimezoneDate(region_id);
         if (schedule?.SchoolYear?.second_semester_open <= now && schedule?.SchoolYear?.second_semester_close >= now) {
-          const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+          const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
             EmailTemplateEnum.SECOND_SEMESTER_UNLOCKED,
-            region_id,
+            school_year_id,
           );
           const studentInfo = await this.studentService.findOneById(schedule?.ScheduleStudent?.student_id);
           if (emailTemplate) {
@@ -638,8 +645,11 @@ export class ScheduleService {
               .replace(/\[PARENT\]/g, schedule?.ScheduleStudent?.parent?.person?.first_name)
               .replace(/\[YEAR\]/g, yearText)
               .replace(/\[SCHEDULE_YEAR\]/g, yearText);
+            const parentUserInfo = await this.userService.findOneById(
+              schedule?.ScheduleStudent?.parent?.person?.user_id,
+            );
             await this.sesEmailService.sendEmail({
-              email: schedule?.ScheduleStudent?.parent?.person?.email,
+              email: parentUserInfo?.email,
               subject: email_subject,
               content: email_body,
               from: emailTemplate.from,

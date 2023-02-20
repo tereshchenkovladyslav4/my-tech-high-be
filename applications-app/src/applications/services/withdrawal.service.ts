@@ -107,11 +107,11 @@ export class WithdrawalService {
           region_id = regions[0].region_id;
         }
 
-        const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+        const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
           withdrawalOption == WithdrawalOption.NOTIFY_PARENT_OF_WITHDRAW
             ? EmailTemplateEnum.NOTIFY_OF_WITHDRAW
             : EmailTemplateEnum.UNDECLARED_WITHDRAW,
-          region_id,
+          school_year_id,
         );
 
         const deadline = new Date();
@@ -586,30 +586,27 @@ export class WithdrawalService {
           email: item.Student.parent.person.email,
           body: setAdditionalLinksInfo(body, item.Student, school_year, cur_application),
           subject: setAdditionalLinksInfo(subject, item.Student, school_year, cur_application),
+          school_year_id: cur_application.school_year_id,
         };
         emailBody.push(temp);
       }),
     );
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-      EmailTemplateEnum.WITHDRAW_PAGE,
-      region_id,
-    );
-
-    emailBody.map(async (emailData) => {
-      await this.emailService.sendEmail({
-        email: emailData.email,
-        subject: emailData.subject,
-        content: emailData.body,
-        from: from || emailTemplate.from,
-        bcc: emailTemplate.bcc,
-        region_id: region_id,
-        template_name: EmailTemplateEnum.WITHDRAW_PAGE,
-      });
-    });
-
     return Promise.all(
       emailBody.map(async (emailData) => {
+        const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
+          EmailTemplateEnum.WITHDRAW_PAGE,
+          emailData?.school_year_id,
+        );
+        await this.emailService.sendEmail({
+          email: emailData.email,
+          subject: emailData.subject,
+          content: emailData.body,
+          from: from || emailTemplate.from,
+          bcc: emailTemplate.bcc,
+          region_id: region_id,
+          template_name: EmailTemplateEnum.WITHDRAW_PAGE,
+        });
         return await this.withdrawalEmailService.create({
           withdrawal_id: emailData.withdrawal_id,
           subject: emailData.subject,
@@ -656,10 +653,6 @@ export class WithdrawalService {
       if (!results?.length) throw new ServiceUnavailableException(`Not found Withdrawal data`);
 
       const queryRunner = await getConnection().createQueryRunner();
-      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-        EmailTemplateEnum.WITHDRAW_CONFIRMATION,
-        region_id,
-      );
 
       const setAdditionalLinksInfo = (content, student, school_year, cur_application) => {
         const yearBegin = new Date(school_year.date_begin).getFullYear().toString();
@@ -685,6 +678,11 @@ export class WithdrawalService {
         const schoolYearId = cur_application.school_year_id;
         const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
         const studentId = item.Student.student_id;
+
+        const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
+          EmailTemplateEnum.WITHDRAW_CONFIRMATION,
+          schoolYearId,
+        );
 
         const isPdfGenerated = await this.generateWithdrawalFormPdf(withdrawalId);
         if (isPdfGenerated) {
@@ -802,9 +800,9 @@ export class WithdrawalService {
       };
       const emailBody = [];
       const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
-      const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+      const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
         EmailTemplateEnum.WITHDRAW_PAGE,
-        region_id,
+        cur_application.school_year_id,
       );
       const temp = {
         withdrawal_id: withdraw.withdrawal_id,

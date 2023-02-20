@@ -13,8 +13,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  findOneById(user_id: number): Promise<User> {
-    return this.usersRepository.findOne(user_id);
+  async findOneById(user_id: number): Promise<User> {
+    return await this.usersRepository.findOne(user_id);
   }
 
   private encryptPassword(password: string) {

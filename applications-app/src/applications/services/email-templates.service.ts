@@ -38,6 +38,13 @@ export class EmailTemplatesService {
     return data;
   }
 
+  async findByTemplateAndSchoolYearId(template: string, schoolYearId: number): Promise<ApplicationEmailTemplate> {
+    const data = await this.emailTemplateRepository.findOne({
+      where: { template_name: template, school_year_id: schoolYearId },
+    });
+    return data;
+  }
+
   async updateEmailTemplate(
     id: number,
     from: string,

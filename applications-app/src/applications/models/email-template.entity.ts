@@ -14,6 +14,10 @@ export class ApplicationEmailTemplate extends BaseEntity {
   template_name: string;
 
   @Column()
+  @Field(() => Number)
+  school_year_id?: number;
+
+  @Column()
   @Field(() => String, { nullable: true })
   title: string;
 
