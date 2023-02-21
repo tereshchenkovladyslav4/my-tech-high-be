@@ -32,6 +32,20 @@ export class StudentLearningLogService {
     }
   }
 
+  async getUngradedLearningLogs(masterId: number): Promise<number> {
+    const result = await this.assignmentRepository
+      .createQueryBuilder('assignments')
+      .leftJoinAndSelect('assignments.StudentLearningLogs', 'studentLearningLogs')
+      .where(`assignments.master_id = ${masterId}`)
+      .andWhere('assignments.teacher_deadline < :teacherDeadline', { teacherDeadline: new Date() })
+      .andWhere('studentLearningLogs.status IS NULL')
+      .getMany();
+    let ungraded = 0;
+    result.map((obj) => {
+      ungraded += obj.StudentLearningLogs.length;
+    });
+    return ungraded;
+  }
   async findLearningLogsForStudent(studentLearningLogArgs: StudentLearningLogArgs): Promise<Pagination<Assignment>> {
     const { skip, take, sort, filter } = studentLearningLogArgs;
     const _sortBy = sort.split('|');

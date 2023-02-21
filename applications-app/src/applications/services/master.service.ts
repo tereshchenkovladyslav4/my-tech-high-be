@@ -23,7 +23,6 @@ export class MasterService {
       .leftJoinAndSelect('Classes.HomeroomStudents', 'HomeroomStudents')
       .where('master.school_year_id = :schoolYearId', { schoolYearId: schoolYearId })
       .getMany();
-
     return result;
   }
 
