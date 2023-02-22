@@ -35,4 +35,13 @@ export class TitleResolver {
   ): Promise<boolean> {
     return this.service.clone(titleId);
   }
+
+  @Mutation(() => Boolean, { name: 'createStateCodesByTitleId' })
+  @UseGuards(new AuthGuard())
+  async createStateCodesByTitleId(
+    @Args('schoolYearId')
+    schoolYearId: number,
+  ): Promise<boolean> {
+    return this.service.createStateCodesBySchoolYearId(schoolYearId);
+  }
 }

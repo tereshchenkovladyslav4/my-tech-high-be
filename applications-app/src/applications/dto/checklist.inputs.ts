@@ -24,5 +24,8 @@ export class ChecklistInput {
   subject?: string;
 
   @Field(() => String, { nullable: true })
+  file_name?: string;
+
+  @Field(() => String, { nullable: true })
   status?: string;
 }

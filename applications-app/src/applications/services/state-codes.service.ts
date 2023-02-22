@@ -17,7 +17,7 @@ export class StateCodesService {
   async save(stateCodesInput: StateCodesInput[]): Promise<boolean> {
     let result = true;
     stateCodesInput.forEach(async (item) => {
-      await this.stateCodesRepository.delete({ SchoolYearId: item.SchoolYearId });
+      await this.stateCodesRepository.delete({ SchoolYearId: item.SchoolYearId, TitleId: item.TitleId });
       await this.stateCodesRepository.save(item).catch(() => (result = false));
     });
     return result;
@@ -36,7 +36,8 @@ export class StateCodesService {
       .leftJoinAndSelect('stateCodes.SchoolYear', 'schoolYear')
       .leftJoinAndMapOne('stateCodes.Title', Title, 'title', 'title.title_id = stateCodes.TitleId')
       .where(`schoolYear.RegionId = ${region_id}`)
-      .orderBy('stateCodes.TitleId', 'ASC');
+      .orderBy('stateCodes.TitleId', 'ASC')
+      .addOrderBy('stateCodes.grade', 'ASC');
 
     if (filter && filter.selectedYearId) {
       qb.andWhere(`schoolYear.school_year_id = ${filter.selectedYearId}`);

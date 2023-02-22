@@ -3,7 +3,7 @@ import { IsIn } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, CreateDateColumn } from 'typeorm';
 import { CHECKLIST_STATUS } from '../enums';
 @ObjectType()
-@Directive('@key(fields: "id,checklist_id,region_id,school_year_id,subject,goal")')
+@Directive('@key(fields: "id,checklist_id,region_id,school_year_id,subject,goal,file_name")')
 @Entity('mth_checklist')
 export class Checklist extends BaseEntity {
   @Column('int', { name: 'id', nullable: true })
@@ -34,6 +34,10 @@ export class Checklist extends BaseEntity {
   @Column()
   @Field(() => String, { nullable: true })
   goal: string | null;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  file_name: string | null;
 
   @Column({ type: 'enum', enum: CHECKLIST_STATUS })
   @Field(() => String, { nullable: true })

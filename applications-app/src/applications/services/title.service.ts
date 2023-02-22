@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Title } from '../models/title.entity';
 import { CreateOrUpdateTitleInput } from '../dto/create-or-update-title.inputs';
 import { Subject } from '../models/subject.entity';
+import { StateCodes } from '../models/state-codes.entity';
 
 @Injectable()
 export class TitleService {
@@ -12,6 +13,8 @@ export class TitleService {
     private readonly repo: Repository<Title>,
     @InjectRepository(Subject)
     private readonly subjectRepo: Repository<Subject>,
+    @InjectRepository(StateCodes)
+    private readonly stateCodesRepo: Repository<StateCodes>,
   ) {}
 
   async find(subjectId: number): Promise<Title[]> {
@@ -62,6 +65,43 @@ export class TitleService {
       const title = await this.repo.findOne(titleId);
       delete title.title_id;
       await this.repo.save(title);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async createStateCodesBySchoolYearId(schoolYearId: number): Promise<boolean> {
+    try {
+      const titles = await this.repo
+        .createQueryBuilder('title')
+        .leftJoinAndSelect('title.Subject', 'subject')
+        .andWhere(`subject.SchoolYearId = ${schoolYearId}`)
+        .orderBy({ title_id: 'ASC' })
+        .getMany();
+
+      titles.map(async (obj) => {
+        const newStateCodes = [];
+        const grades: number[] = [obj.min_grade, obj.min_alt_grade, obj.max_grade, obj.max_alt_grade].filter(
+          (item) => !!item,
+        ) as number[];
+        const minGrade = Math.min(...grades, Number.POSITIVE_INFINITY);
+        const maxGrade = Math.max(...grades, Number.NEGATIVE_INFINITY);
+        if (minGrade !== maxGrade) {
+          for (let i = minGrade === -1 ? 0 : minGrade; i <= (maxGrade === -1 ? 0 : maxGrade); i++) {
+            newStateCodes.push({
+              TitleId: obj.title_id,
+              title_name: obj.name,
+              SchoolYearId: obj.Subject.SchoolYearId,
+              subject: obj.Subject.name,
+              grade: i === 0 ? 'K' : i.toString(),
+              stateCode: '',
+              teacher: '',
+            });
+          }
+          await this.stateCodesRepo.save(newStateCodes);
+        }
+      });
       return true;
     } catch (error) {
       return false;
