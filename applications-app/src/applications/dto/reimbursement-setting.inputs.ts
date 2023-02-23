@@ -73,4 +73,7 @@ export class ReimbursementSettingInput {
 
   @Field(() => String, { nullable: true })
   remaining_funds?: string;
+
+  @Field(() => String, { nullable: true })
+  notification_grades?: string;
 }

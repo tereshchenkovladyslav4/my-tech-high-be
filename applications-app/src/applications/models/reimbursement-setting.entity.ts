@@ -5,7 +5,7 @@ import { SchoolYear } from './schoolyear.entity';
 @InputType('reimbursement_setting')
 @ObjectType()
 @Directive(
-  '@key(fields: "id, school_year_id, information, supplemental_reimbursements_forms, supplemental_direct_order_forms, technology_reimbursements_forms, technology_direct_order_forms, custom_reimbursements_forms, custom_direct_order_forms, is_merged_periods, merged_periods, merged_periods_reimbursements_forms, merged_periods_direct_order_forms, third_party_reimbursements_forms, require_software_reimbursements_forms, max_receipts, require_passing_grade, min_grade_percentage, allow_delete, allow_submit_with_updates_required, auto_delete_updates_required, num_days_delete_updates_required, display_remaining_funds, SchoolYear, remaining_funds")',
+  '@key(fields: "id, school_year_id, information, supplemental_reimbursements_forms, supplemental_direct_order_forms, technology_reimbursements_forms, technology_direct_order_forms, custom_reimbursements_forms, custom_direct_order_forms, is_merged_periods, merged_periods, merged_periods_reimbursements_forms, merged_periods_direct_order_forms, third_party_reimbursements_forms, require_software_reimbursements_forms, max_receipts, require_passing_grade, min_grade_percentage, allow_delete, allow_submit_with_updates_required, auto_delete_updates_required, num_days_delete_updates_required, display_remaining_funds, SchoolYear, remaining_funds, notification_grades")',
 )
 @Entity({ name: 'mth_reimbursement_setting' })
 export class ReimbursementSetting extends BaseEntity {
@@ -105,6 +105,10 @@ export class ReimbursementSetting extends BaseEntity {
   @Column('text', { nullable: true })
   @Field(() => String, { nullable: true })
   remaining_funds: string;
+
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  notification_grades: string;
 
   @OneToOne(() => SchoolYear, (schoolYear) => schoolYear.school_year_id, {
     onDelete: 'SET NULL',
