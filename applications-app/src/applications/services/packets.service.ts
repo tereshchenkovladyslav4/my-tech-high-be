@@ -102,31 +102,32 @@ export class PacketsService {
       } else {
         if (new_filters.length == 1 && new_filters.includes('Age Issue')) {
           qb.orWhere('packet.is_age_issue = 1');
-          qb.andWhere(`school_year.RegionId = ${region_id}`);
-          qb.andWhere(`school_year.school_year_id = ${selectedYearId}`);
         }
       }
       if (search) {
+        const searchLower = search.toLowerCase();
         qb.andWhere(
           new Brackets((sub) => {
-            // search grade level(1 char match)
-            const matchArray = search.match(/(\d+)(s|t|r|n)/);
-            if (
-              matchArray &&
-              matchArray.index == 0 &&
-              matchArray.length >= 2 &&
-              ((parseInt(matchArray[1]) > 3 &&
-                'th grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())) ||
-                (matchArray[1] == '1' &&
-                  'st grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())) ||
-                (matchArray[1] == '2' &&
-                  'nd grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())) ||
-                (matchArray[1] == '3' && 'rd grade'.startsWith(search.replace(matchArray[1], '').toLocaleLowerCase())))
-            ) {
-              sub.orWhere('grade_levels.grade_level=:grade', { grade: matchArray[1] });
+            // search grade level
+            const grades = [];
+            if ('1st grade'.includes(searchLower)) grades.push(1);
+            if ('2nd grade'.includes(searchLower)) grades.push(2);
+            if ('3rd grade'.includes(searchLower)) grades.push(3);
+            if ('4th grade'.includes(searchLower)) grades.push(4);
+            if ('5th grade'.includes(searchLower)) grades.push(5);
+            if ('6th grade'.includes(searchLower)) grades.push(6);
+            if ('7th grade'.includes(searchLower)) grades.push(7);
+            if ('8th grade'.includes(searchLower)) grades.push(8);
+            if ('9th grade'.includes(searchLower)) grades.push(9);
+            if ('10th grade'.includes(searchLower)) grades.push(10);
+            if ('11th grade'.includes(searchLower)) grades.push(11);
+            if ('12th grade'.includes(searchLower)) grades.push(12);
+            if (grades.length) {
+              sub.orWhere('grade_levels.grade_level in (:grades)', { grades });
             }
-            // date_submitted, deadline, packet_emails.created_at
-            if (((parseInt(search) || 0) >= 0 && (parseInt(search) || 0) < 100) || search.includes('/')) {
+            // date search: date_submitted, deadline, packet_emails.created_at
+            const searchInt = parseInt(search) || 0;
+            if ((searchInt >= 0 && searchInt < 100) || search.includes('/')) {
               sub
                 .orWhere(
                   `packet.status IN ('${PacketStatus.SUBMITTED}','${PacketStatus.RESUBMITTED}','${PacketStatus.MISSING_INFO}','${PacketStatus.CONDITIONAL}')
@@ -146,15 +147,14 @@ export class PacketsService {
                 });
             }
             // student status
-            if ('Update'.toLocaleLowerCase().includes(search.toLocaleLowerCase())) {
+            if ('update'.includes(searchLower)) {
               sub.orWhere("student.reenrolled>'0'");
-            } else if ('New'.toLocaleLowerCase().includes(search.toLocaleLowerCase())) {
+            } else if ('new'.includes(searchLower)) {
               sub.orWhere("student.reenrolled<='0'");
             }
             sub
               .orWhere('grade_levels.grade_level like :search', { search: `%${search}%` })
               .orWhere('packet.status like :search', { search: `%${search}%` })
-              // .orWhere('packet.packet_id like :search', { search: `%${search}%` })
 
               .orWhere("concat(s_person.last_name, ', ', s_person.first_name)  like :search", {
                 search: `%${search}%`,
@@ -162,6 +162,10 @@ export class PacketsService {
               .orWhere("concat(p_person.last_name, ', ', p_person.first_name)  like :search", {
                 search: `%${search}%`,
               });
+            // age issue
+            if ('age issue'.includes(searchLower)) {
+              sub.orWhere('packet.is_age_issue = 1');
+            }
           }),
         );
       }
@@ -527,7 +531,7 @@ export class PacketsService {
     return is_age_issue;
   }
 
-  async getPacketCountByRegionId(region_id: number, school_year_id: number): Promise<ResponseDTO> {
+  async getPacketCountByRegionId(region_id: number, school_year_id: number, filters: string[]): Promise<ResponseDTO> {
     const qb = await this.packetsRepository.query(
       `SELECT
           t1.status AS status,
@@ -553,17 +557,27 @@ export class PacketsService {
       statusArray[item.status] = +item.count;
     });
 
-    const age_issue_qb = await this.packetsRepository.query(
-      `SELECT
-          *
-        FROM (
-          SELECT * FROM infocenter.mth_packet
-        ) AS t1
-        LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
-        LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
-        WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id} and t1.is_age_issue = 1 and t1.status != "Age Issue" `,
-    );
-    statusArray['Age Issue'] += age_issue_qb.length;
+    if (
+      filters.some((filter) => filter === 'Submitted') ||
+      filters.some((filter) => filter === 'Resubmitted') ||
+      filters.some((filter) => filter === 'Conditional')
+    ) {
+      const age_issue_qb = await this.packetsRepository.query(
+        `SELECT
+            *
+          FROM (
+            SELECT * FROM infocenter.mth_packet
+          ) AS t1
+          LEFT JOIN infocenter.mth_application application ON (application.student_id = t1.student_id)
+          LEFT JOIN infocenter.mth_schoolyear schoolYear ON (schoolYear.school_year_id = application.school_year_id)
+          WHERE schoolYear.RegionId=${region_id} AND schoolYear.school_year_id=${school_year_id} and t1.is_age_issue = 1 and t1.status in(${
+          "'" + filters.join("','") + "'"
+        })`,
+      );
+      statusArray['Age Issue'] += age_issue_qb.length;
+    } else {
+      statusArray['Age Issue'] = 0;
+    }
 
     return <ResponseDTO>{
       error: false,

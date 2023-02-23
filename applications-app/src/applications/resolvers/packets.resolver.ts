@@ -38,6 +38,7 @@ import { UpdateSchoolYearIdsInput } from '../dto/school-update-application.input
 import { StudentPacketPDFInput } from '../dto/generate-student-packet-pdf.input';
 import { PacketsActionInput } from '../dto/packets-action.input';
 import { DeleteEnrollmentPacketDocumentsInput } from '../dto/delete-enrollment-packet-documents.input';
+import { PacketCountArgs } from '../dto/packet-count-filter.args';
 
 @Resolver(() => Packet)
 export class PacketsResolver {
@@ -262,11 +263,10 @@ export class PacketsResolver {
 
   @Query(() => ResponseDTO, { name: 'packetCountByRegionId' })
   @UseGuards(new AuthGuard())
-  async getPacketCountByRegionId(
-    @Args({ name: 'region_id', type: () => ID }) region_id: number,
-    @Args({ name: 'school_year_id', type: () => ID }) school_year_id: number,
-  ): Promise<ResponseDTO> {
-    return this.packetsService.getPacketCountByRegionId(region_id, school_year_id);
+  async getPacketCountByRegionId(@Args() packetCountArgs: PacketCountArgs): Promise<ResponseDTO> {
+    const { region_id: regionId, school_year_id: schoolYearId } = packetCountArgs;
+    const filters = packetCountArgs.filters.filter((filter) => filter !== 'Age Issue');
+    return this.packetsService.getPacketCountByRegionId(regionId, schoolYearId, filters);
   }
 
   @Mutation(() => Boolean, { name: 'updateEnrollmentSchoolYearByIds' })
