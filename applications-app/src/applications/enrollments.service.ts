@@ -81,10 +81,6 @@ export class EnrollmentsService {
 
         const studentPerson = await this.personsService.findOneById(student_person_id);
 
-        if (student.address) {
-          await this.personAddressService.createOrUpdate(studentPerson, student.address);
-        }
-
         const { grade_level } = student;
         let current_grade_level = grade_level;
 
@@ -122,10 +118,14 @@ export class EnrollmentsService {
       }
 
       if (parent_person_id) {
-        await this.personsService.update({
+        const parentPerson = await this.personsService.update({
           person_id: parent_person_id,
           ...parent,
         });
+
+        if (student.address) {
+          await this.personAddressService.createOrUpdate(parentPerson, student.address);
+        }
 
         const parentPhone = await this.phonesService.findOneByPersonId(parent_person_id);
         if (!parentPhone) {

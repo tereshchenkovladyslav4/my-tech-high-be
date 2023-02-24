@@ -93,6 +93,17 @@ export class EmailTemplatesService {
     return data;
   }
 
+  async getEmailTemplateByNameAndSchoolYearId(
+    template_name: string,
+    school_year_id: number,
+    mid_year = false,
+  ): Promise<EmailTemplate> {
+    const data = await this.emailTemplateRepository.findOne({
+      where: { template_name: template_name, school_year_id: school_year_id, mid_year: mid_year },
+    });
+    return data;
+  }
+
   async createEmailTemplate(createEmailTemplateInput: CreateEmailTemplateInput): Promise<EmailTemplate> {
     const { emailTemplate, category } = createEmailTemplateInput;
     let categoryId = null;

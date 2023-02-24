@@ -64,6 +64,7 @@ export class StudentLearningLogService {
         'studentLearningLogs',
         `studentLearningLogs.SchoolYearId = ${filter.school_year_id} AND studentLearningLogs.StudentId = ${filter.student_id}`,
       )
+      .leftJoinAndSelect('assignments.Master', 'Master')
       .where(`assignments.master_id = ${classes?.master_id}`);
 
     if (filter) {

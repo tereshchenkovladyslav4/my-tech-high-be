@@ -1,4 +1,4 @@
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { EmailTemplate } from 'src/models/email-template.entity';
 import { EmailTemplatesService } from 'src/users/services/email-templates/email-templates.service';
 import { CreateEmailTemplateInput } from 'src/users/dto/emailTemplate/create-email-template.input';
@@ -11,6 +11,7 @@ export class EmailTemplateResolver {
   getEmailTemplate(@Args({ name: 'templateId', type: () => ID }) id: number): Promise<EmailTemplate> {
     return this.emailTemplatesService.findById(id);
   }
+
   @Query(() => EmailTemplate, { name: 'emailTemplateName', nullable: true })
   getEmailTemplateByName(
     @Args({ name: 'template', type: () => String }) template: string,
@@ -18,6 +19,16 @@ export class EmailTemplateResolver {
   ): Promise<EmailTemplate> {
     return this.emailTemplatesService.findByTemplateAndRegion(template, regionId);
   }
+
+  @Query(() => EmailTemplate, { name: 'getEmailTemplateByNameAndSchoolYearId', nullable: true })
+  getEmailTemplateByNameAndSchoolYearId(
+    @Args({ name: 'template_name', type: () => String }) template_name: string,
+    @Args({ name: 'school_year_id', type: () => Int }) school_year_id: number,
+    @Args({ name: 'mid_year', type: () => Boolean }) mid_year: boolean,
+  ): Promise<EmailTemplate> {
+    return this.emailTemplatesService.getEmailTemplateByNameAndSchoolYearId(template_name, school_year_id, mid_year);
+  }
+
   @Query(() => [EmailTemplate], { name: 'emailTemplatesByRegion' })
   getEmailTemplatesByRegion(
     @Args({ name: 'regionId', type: () => ID }) regionId: number,
