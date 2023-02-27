@@ -8,6 +8,7 @@ import { Resource } from '../models/resource.entity';
 import { StudentGradeLevelsService } from './student-grade-levels.service';
 import { ResourceRequestStatus } from '../enums';
 import { StudentsService } from './students.service';
+import { resourceUsername } from '../utils';
 
 @Injectable()
 export class ResourceService {
@@ -183,26 +184,30 @@ export class ResourceService {
           eligibleSiblings = await this.studentsService.findSiblingsForResource(parentId, schoolYearId, grades);
         }
 
-        const students = eligibleSiblings || [{ student_id: stdId }];
+        const students = eligibleSiblings || [student?.[0]];
         for (let j = 0; j < students?.length; j++) {
           const { student_id: studentId } = students[j];
           const existing = await queryRunner.query(`
             SELECT * FROM infocenter.mth_resource_request
             WHERE student_id = ${studentId} AND resource_id = ${resourceId};
           `);
+          const username = resourceUsername(resource, students[j]);
+          const password = resource.std_password;
           if (!existing.length) {
             await queryRunner.query(`
               INSERT INTO infocenter.mth_resource_request
-                (student_id, resource_id, resource_level_id, status, created_at, updated_at)
+                (student_id, resource_id, resource_level_id, status, username, password, created_at, updated_at)
               VALUES
                 (${studentId}, ${resourceId}, ${resourceLevelId}, "${
               waitlistConfirmed ? ResourceRequestStatus.WAITLIST : ResourceRequestStatus.REQUESTED
-            }", NOW(), NOW());
+            }", "${username}", "${password}", NOW(), NOW());
             `);
           } else {
             await queryRunner.query(`
               UPDATE infocenter.mth_resource_request
               SET
+                username = "${username}",
+                password = "${password}",
                 status = "${waitlistConfirmed ? ResourceRequestStatus.WAITLIST : ResourceRequestStatus.REQUESTED}"
               WHERE 
                 student_id = ${studentId} AND

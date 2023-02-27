@@ -9,6 +9,7 @@ import { ResourceRequestStatus, ResourceSubtitle, UsernameFormat } from '../enum
 import { StudentsService } from './students.service';
 import { ResourceRequest } from '../models/resource-request.entity';
 import { ResourceCart } from '../models/resource-cart.entity';
+import { resourceUsername } from '../utils';
 
 @Injectable()
 export class ResourceService {
@@ -22,6 +23,10 @@ export class ResourceService {
     private resourceLevelService: ResourceLevelService,
     private studentsService: StudentsService,
   ) {}
+
+  async findOneById(resourceId: number): Promise<Resource> {
+    return this.repo.findOne(resourceId);
+  }
 
   async find(schoolYearId: number): Promise<Resource[]> {
     return await this.repo
@@ -101,10 +106,14 @@ export class ResourceService {
 
           await this.resourceCartRepo.delete({ student_id: studentId, resource_id: resourceId });
           const existing = await this.resourceRequestRepo.findOne({ student_id: studentId, resource_id: resourceId });
+          const username = resourceUsername(resource, student);
+          const password = resource.std_password;
           if (!existing) {
             await this.resourceRequestRepo.save({
               student_id: studentId,
               resource_id: resourceId,
+              username,
+              password,
               status,
             });
           } else if (status != existing.status) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository } from 'typeorm';
 import { ResourceRequest } from '../models/resource-request.entity';
@@ -15,6 +15,10 @@ import { ResourceRequestEmail } from '../models/resource-request-email.entity';
 import { UpdateResourceRequestInput } from '../dto/update-resource-request.inputs';
 import { ResourceService } from './resource.service';
 import { ResourceRequestInput } from '../dto/resource-request.inputs';
+import { gradeShortText, resourceRequestCost, resourceUsername, showDate } from '../utils';
+import { StudentsService } from './students.service';
+import * as Moment from 'moment';
+import { studentStatusText } from '../utils/student-status.util';
 
 @Injectable()
 export class ResourceRequestService {
@@ -25,6 +29,7 @@ export class ResourceRequestService {
     private resourceRequestEmailsService: ResourceRequestEmailsService,
     private userRegionService: UserRegionService,
     private resourceService: ResourceService,
+    private studentsService: StudentsService,
   ) {}
 
   async find(args: ResourceRequestsArgs): Promise<Pagination<ResourceRequest>> {
@@ -248,15 +253,112 @@ export class ResourceRequestService {
 
   async save(updateResourceRequestInput: UpdateResourceRequestInput): Promise<ResourceRequest> {
     try {
-      const { id, resource_level_id, username, password } = updateResourceRequestInput;
+      const {
+        id,
+        resource_level_id,
+        username,
+        password,
+        vendor,
+        resource_level_name,
+        created_at,
+        status,
+        student_id,
+        student_first_name,
+        student_last_name,
+        student_email,
+        grade_level,
+        date_of_birth,
+        parent_first_name,
+        parent_last_name,
+        parent_email,
+        cost,
+        returning_status,
+        student_status,
+      } = updateResourceRequestInput;
+
+      let resourceRequest = await this.repo
+        .createQueryBuilder('resourceRequest')
+        .leftJoinAndSelect('resourceRequest.Student', 'Student')
+        .leftJoinAndSelect('Student.person', 'Person')
+        .leftJoinAndSelect('resourceRequest.Resource', 'Resource')
+        .leftJoinAndSelect('Resource.ResourceLevels', 'ResourceLevels')
+        .leftJoinAndSelect('Student.parent', 'Parent')
+        .leftJoinAndSelect('Student.applications', 'applications')
+        .leftJoinAndSelect('Student.status', 'StudentStatus', `StudentStatus.school_year_id = Resource.SchoolYearId`)
+        .leftJoinAndSelect('Student.grade_levels', 'GradeLevels', `GradeLevels.school_year_id = Resource.SchoolYearId`)
+        .leftJoinAndSelect('Parent.person', 'ParentPerson')
+        .leftJoinAndSelect('resourceRequest.ResourceLevel', 'ResourceLevel')
+        .leftJoinAndSelect('resourceRequest.ResourceRequestEmails', 'ResourceRequestEmails')
+        .where(`resourceRequest.id = ${id}`)
+        .getOne();
+
+      const errors: string[] = [];
+      if (vendor !== undefined && vendor !== resourceRequest.Resource?.title) {
+        errors.push(`Vendor`);
+      }
+      if (resource_level_name !== undefined && resource_level_name !== resourceRequest.ResourceLevel?.name) {
+        errors.push(`Resource Level`);
+      }
+      if (created_at !== undefined && created_at !== Moment(resourceRequest.created_at).format('MM/DD/YYYY')) {
+        errors.push(`Submitted`);
+      }
+      if (status !== undefined && status !== resourceRequest.status) {
+        errors.push(`Status`);
+      }
+      if (student_id !== undefined && +student_id !== resourceRequest.student_id) {
+        errors.push(`Student ID`);
+      }
+      if (student_first_name !== undefined && student_first_name !== resourceRequest.Student?.person?.first_name) {
+        errors.push(`Student First Name`);
+      }
+      if (student_last_name !== undefined && student_last_name !== resourceRequest.Student?.person?.last_name) {
+        errors.push(`Student Last Name`);
+      }
+      if (student_email !== undefined && student_email !== resourceRequest.Student?.person?.email) {
+        errors.push(`Student Email`);
+      }
+      if (
+        grade_level !== undefined &&
+        grade_level !== gradeShortText(resourceRequest?.Student?.grade_levels?.[0]?.grade_level)
+      ) {
+        errors.push(`Grade`);
+      }
+      if (date_of_birth !== undefined && date_of_birth !== showDate(resourceRequest?.Student?.person?.date_of_birth)) {
+        errors.push(`Student Birthdate`);
+      }
+      if (
+        parent_first_name !== undefined &&
+        parent_first_name !== resourceRequest?.Student?.parent?.person?.first_name
+      ) {
+        errors.push(`Parent First Name`);
+      }
+      if (parent_last_name !== undefined && parent_last_name !== resourceRequest?.Student?.parent?.person?.last_name) {
+        errors.push(`Parent Last Name`);
+      }
+      if (parent_email !== undefined && parent_email !== resourceRequest?.Student?.parent?.person?.email) {
+        errors.push(`Parent Email`);
+      }
+      if (cost !== undefined && cost !== resourceRequestCost(resourceRequest)) {
+        errors.push(`Cost`);
+      }
+      if (returning_status !== undefined && returning_status !== 'No') {
+        errors.push(`Returning Status`);
+      }
+      if (student_status !== undefined && student_status !== studentStatusText(resourceRequest?.Student?.status?.[0])) {
+        errors.push(`Student Status`);
+      }
+
+      if (errors.length) {
+        throw new ServiceUnavailableException(`Can\'t edit ` + errors.join(', '));
+      }
       if (resource_level_id !== undefined) {
         await this.repo.save({ id, resource_level_id });
       }
-      const resourceRequest = await this.repo.findOne(id);
-      await this.resourceService.save({
-        resource_id: resourceRequest.resource_id,
-        std_user_name: username,
-        std_password: password,
+
+      resourceRequest = await this.repo.save({
+        id,
+        username: username,
+        password: password,
       });
       return resourceRequest;
     } catch (e) {
@@ -269,11 +371,15 @@ export class ResourceRequestService {
       const { student_id: studentId, resource_id: resourceId, course_id: courseId } = resourceRequestInput;
       const existing = await this.repo.findOne({ student_id: studentId, resource_id: resourceId });
       if (!existing) {
+        const resource = await this.resourceService.findOneById(resourceId);
+        const student = await this.studentsService.findOneById(studentId);
         const resourceRequest = await this.repo.save({
           student_id: studentId,
           resource_id: resourceId,
           course_id: courseId,
           status: ResourceRequestStatus.REQUESTED,
+          username: resourceUsername(resource, student),
+          password: resource.std_password,
         });
         return resourceRequest;
       }

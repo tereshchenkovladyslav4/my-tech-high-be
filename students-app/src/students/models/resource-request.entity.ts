@@ -17,7 +17,7 @@ import { Course } from './course.entity';
 
 @ObjectType()
 @Directive(
-  '@key(fields: "id, student_id, resource_id, resource_level_id, course_id, status, created_at, updated_at, Student, Resource, ResourceLevel, Course")',
+  '@key(fields: "id, student_id, resource_id, resource_level_id, course_id, status, username, password, created_at, updated_at, Student, Resource, ResourceLevel, Course")',
 )
 @Entity('mth_resource_request')
 export class ResourceRequest {
@@ -47,6 +47,14 @@ export class ResourceRequest {
   @Column('int', { nullable: true })
   @Field(() => Int, { nullable: true })
   course_id?: number;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  username: string;
+
+  @Column()
+  @Field(() => String, { nullable: true })
+  password: string;
 
   @CreateDateColumn()
   @Field(() => Date, { nullable: true })
