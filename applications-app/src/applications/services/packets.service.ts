@@ -630,7 +630,7 @@ export class PacketsService {
 
   async generateStudentPacketPDF(param: StudentPacketPDFInput): Promise<boolean> {
     try {
-      const { student_id, region_id } = param;
+      const { student_id, school_year_id, mid_year } = param;
 
       const contactInfo: QuestionItem[] = [];
       const personalInfo: QuestionItem[] = [];
@@ -684,7 +684,7 @@ export class PacketsService {
         ) as questions
         LEFT JOIN infocenter.mth_enrollment_question_group questionGroup ON (questionGroup.id = questions.group_id)
         LEFT JOIN infocenter.mth_enrollment_question_tab questionTab ON (questionTab.id = questionGroup.tab_id)
-        WHERE questionTab.region_id = ${region_id}
+        WHERE questionTab.school_year_id = ${school_year_id} AND questionTab.mid_year = ${mid_year} 
         ORDER BY questionTab.id, questionGroup.order, questions.order;
       `);
       queryRunner.release();

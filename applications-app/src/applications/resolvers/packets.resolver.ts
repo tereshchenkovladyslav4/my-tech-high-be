@@ -278,7 +278,7 @@ export class PacketsResolver {
   }
 
   @Mutation(() => Boolean, { name: 'generateStudentPacketPDF' })
-  //@UseGuards(new AuthGuard())
+  @UseGuards(new AuthGuard())
   async generateStudentPacketPDF(
     @Args('generatePacketPdfInput')
     generatePacketPdfInput: StudentPacketPDFInput,

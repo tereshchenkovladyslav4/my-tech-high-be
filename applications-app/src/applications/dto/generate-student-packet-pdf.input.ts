@@ -6,5 +6,8 @@ export class StudentPacketPDFInput {
   student_id?: number;
 
   @Field(() => Int)
-  region_id: number;
+  school_year_id: number;
+
+  @Field(() => Boolean)
+  mid_year = false;
 }
