@@ -86,11 +86,23 @@ export class EmailTemplatesService {
     return data;
   }
 
-  async findByTemplateAndRegion(template: string, regionId: number): Promise<EmailTemplate> {
-    const data = await this.emailTemplateRepository.findOne({
-      where: { template_name: template, region_id: regionId },
-    });
-    return data;
+  async findByTemplateAndRegion(
+    template: string,
+    regionId: number,
+    schoolYearId?: number,
+    midYear?: boolean,
+  ): Promise<EmailTemplate> {
+    if (schoolYearId) {
+      const data = await this.emailTemplateRepository.findOne({
+        where: { template_name: template, school_year_id: schoolYearId, mid_year: midYear, region_id: regionId },
+      });
+      return data;
+    } else {
+      const data = await this.emailTemplateRepository.findOne({
+        where: { template_name: template, region_id: regionId },
+      });
+      return data;
+    }
   }
 
   async getEmailTemplateByNameAndSchoolYearId(

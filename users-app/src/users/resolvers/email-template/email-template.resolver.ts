@@ -16,8 +16,10 @@ export class EmailTemplateResolver {
   getEmailTemplateByName(
     @Args({ name: 'template', type: () => String }) template: string,
     @Args({ name: 'regionId', type: () => ID }) regionId: number,
+    @Args({ name: 'schoolYearId', type: () => Number, nullable: true }) schoolYearId: number,
+    @Args({ name: 'midYear', type: () => Boolean, nullable: true }) midYear: boolean,
   ): Promise<EmailTemplate> {
-    return this.emailTemplatesService.findByTemplateAndRegion(template, regionId);
+    return this.emailTemplatesService.findByTemplateAndRegion(template, regionId, schoolYearId, midYear);
   }
 
   @Query(() => EmailTemplate, { name: 'getEmailTemplateByNameAndSchoolYearId', nullable: true })
