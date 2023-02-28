@@ -236,17 +236,22 @@ export class UsersService {
     if (!user) return user;
 
     const queryRunner = await getConnection().createQueryRunner();
-    const response = (await queryRunner.query(
-      `SELECT person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id FROM infocenter.mth_person WHERE user_id = ${user.user_id}`,
-    )) as Person[];
+    try {
+      const response = (await queryRunner.query(
+        `SELECT person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id FROM infocenter.mth_person WHERE user_id = ${user.user_id}`,
+      )) as Person[];
 
-    if (response.length == 0) {
-      await queryRunner.query(
-        `INSERT INTO infocenter.mth_person (person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id)
-        VALUES (0, '${user.first_name}', '${user.last_name}', '', '', '', 'Male', '${user.email}', NOW(), ${user.user_id});`,
-      );
+      if (response.length == 0) {
+        await queryRunner.query(
+          `INSERT INTO infocenter.mth_person (person_id, first_name, last_name, middle_name, preferred_first_name, preferred_last_name, gender, email, date_of_birth, user_id)
+          VALUES (0, '${user.first_name}', '${user.last_name}', '', '', '', 'Male', '${user.email}', NOW(), ${user.user_id});`,
+        );
+      }
+    } catch (error) {
+      return error;
+    } finally {
+      await queryRunner.release();
     }
-    await queryRunner.release();
 
     return await this.usersRepository.findOne({
       where: {
