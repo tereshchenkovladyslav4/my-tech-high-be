@@ -8,6 +8,7 @@ import { CreateNewClassInput } from '../dto/create-new-class.input';
 import { ClassesService } from '../services/classes.service';
 import { CreateOrUpdateInstructions } from '../dto/create-new-master-instruction.input';
 import { ResponseDTO } from '../dto/response.dto';
+import { Classes } from '../models/classes.entity';
 
 @Resolver(() => Master)
 export class MasterResolver {
@@ -77,5 +78,11 @@ export class MasterResolver {
   @UseGuards(new AuthGuard())
   async getTeachersByUserId(@Args('userId', { type: () => Int }) userId: number): Promise<ResponseDTO> {
     return this.classesService.getTeachersByUserId(userId);
+  }
+
+  @Query(() => Classes, { name: 'getClassById' })
+  @UseGuards(new AuthGuard())
+  async classById(@Args('classId', { type: () => Int }) classId: number): Promise<Classes> {
+    return this.classesService.getClassById(classId);
   }
 }

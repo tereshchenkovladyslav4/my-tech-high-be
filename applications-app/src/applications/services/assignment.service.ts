@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { Assignment } from '../models/assignment.entity';
 import { CreateNewAssignmentInput } from '../dto/create-new-assignment.input';
 import { Pagination } from 'src/paginate';
 import { AssignmentArgs } from '../dto/assignment.args';
 import { LearningLogQuestionService } from './learning-log-question.service';
+import { TeacherAssignmentArgs } from '../dto/teacher-assignment.args';
+import { AssignmentFilterStatus, StudentLearningLogStatus } from '../enums';
+import { Classes } from '../models/classes.entity';
+import moment from 'moment';
 
 @Injectable()
 export class AssignmentService {
@@ -13,6 +17,8 @@ export class AssignmentService {
     @InjectRepository(Assignment)
     private readonly repository: Repository<Assignment>,
     private learningLogQuestionService: LearningLogQuestionService,
+    @InjectRepository(Classes)
+    private readonly classesRepository: Repository<Classes>,
   ) {}
 
   async getAssignmentsByMasterId(assignmentArgs: AssignmentArgs): Promise<Pagination<Assignment>> {
@@ -79,5 +85,50 @@ export class AssignmentService {
   async deleteById(assignmentId: number): Promise<boolean> {
     await this.repository.delete({ id: assignmentId });
     return true;
+  }
+
+  async findTeacherAssignment(teacherAssignmentArgs: TeacherAssignmentArgs): Promise<Pagination<Assignment>> {
+    const { skip, take, filter, search } = teacherAssignmentArgs;
+    try {
+      const classResult = await this.classesRepository.findOne({ where: { class_id: Number(filter.classId) } });
+      const qb = this.repository
+        .createQueryBuilder('assignments')
+        .leftJoinAndSelect('assignments.StudentLearningLogs', 'studentLearningLogs')
+        .where(`assignments.master_id = ${classResult.master_id}`)
+        .orderBy('assignments.due_date', 'DESC');
+
+      if (filter.status === AssignmentFilterStatus.UNGRADED) {
+        qb.andWhere(
+          `(studentLearningLogs.status NOT IN ('${
+            StudentLearningLogStatus.GRADED
+          }') || studentLearningLogs.status IN ('${
+            (StudentLearningLogStatus.SUBMITTED, StudentLearningLogStatus.RESUBMITTED)
+          }'))`,
+        );
+      }
+      if (search) {
+        qb.andWhere(
+          new Brackets((sub) => {
+            sub
+              .orWhere('assignments.title like :text', {
+                text: `%${search}%`,
+              })
+              .orWhere('assignments.due_date like :text', {
+                text: `%${search}%`,
+              })
+              .orWhere('assignments.teacher_deadline like :text', {
+                text: `%${search}%`,
+              });
+          }),
+        );
+      }
+      const [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
+      return new Pagination<any>({
+        results,
+        total,
+      });
+    } catch (error) {
+      return error;
+    }
   }
 }

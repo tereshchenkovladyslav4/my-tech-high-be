@@ -100,24 +100,17 @@ export class StudentRecordService {
       });
     }
 
-    if (program_year_status) {
-      const statusList = JSON.parse(program_year_status);
+    if (enrollment_status) {
+      const enrollmentStatusList = JSON.parse(enrollment_status);
       qb.andWhere(
         new Brackets((sub) => {
-          if (statusList?.includes('Returning'))
-            sub.orWhere(
-              `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE}) AND status_history.student_id IS NOT NULL AND (status_history.status = ${StudentStatusEnum.PENDING} OR status_history.status = ${StudentStatusEnum.ACTIVE})`,
-            );
-          if (statusList?.includes('New'))
-            sub.orWhere(
-              `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE}) AND status_history.student_id IS NULL`,
-            );
-
-          if (enrollment_status) {
-            const enrollmentStatusList = JSON.parse(enrollment_status);
-            if (enrollmentStatusList?.includes('Withdrawn')) {
-              sub.orWhere(`student_status.status = ${StudentStatusEnum.WITHDRAWN}`);
-            }
+          if (enrollmentStatusList?.includes('Withdrawn')) {
+            sub.orWhere(`student_status.status = ${StudentStatusEnum.WITHDRAWN}`);
+          } else {
+            if (enrollmentStatusList?.includes('Pending'))
+              sub.orWhere(`student_status.status = ${StudentStatusEnum.PENDING}`);
+            if (enrollmentStatusList?.includes('Active'))
+              sub.orWhere(`student_status.status = ${StudentStatusEnum.ACTIVE}`);
           }
           return sub;
         }),
@@ -125,6 +118,21 @@ export class StudentRecordService {
     } else {
       qb.andWhere(
         `(student_status.status = ${StudentStatusEnum.PENDING} OR student_status.status = ${StudentStatusEnum.ACTIVE})`,
+      );
+    }
+
+    if (program_year_status) {
+      const statusList = JSON.parse(program_year_status);
+      qb.andWhere(
+        new Brackets((sub) => {
+          if (statusList?.includes('Returning'))
+            sub.orWhere(
+              `status_history.student_id IS NOT NULL AND (status_history.status = ${StudentStatusEnum.PENDING} OR status_history.status = ${StudentStatusEnum.ACTIVE})`,
+            );
+          if (statusList?.includes('New')) sub.orWhere(`status_history.student_id IS NULL`);
+          //if (statusList?.includes('Transferred')) sub.orWhere('');
+          return sub;
+        }),
       );
     }
 

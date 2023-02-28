@@ -66,4 +66,12 @@ export class ClassesService {
       };
     }
   }
+
+  async getClassById(classId: number): Promise<Classes> {
+    try {
+      return await this.classesRepository.findOne({ where: { class_id: +classId } });
+    } catch (error) {
+      return error;
+    }
+  }
 }

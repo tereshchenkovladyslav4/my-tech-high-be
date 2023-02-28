@@ -7,6 +7,7 @@ import { CreateNewAssignmentInput } from '../dto/create-new-assignment.input';
 import { Pagination } from 'src/paginate';
 import { AssignmentPagination } from '../models/assignment.pagination.entity';
 import { AssignmentArgs } from '../dto/assignment.args';
+import { TeacherAssignmentArgs } from '../dto/teacher-assignment.args';
 
 @Resolver(() => Assignment)
 export class AssignmentResolver {
@@ -55,5 +56,10 @@ export class AssignmentResolver {
   @UseGuards(new AuthGuard())
   async deleteAssignmentById(@Args('assignmentId', { type: () => Int }) assignmentId: number): Promise<boolean> {
     return this.service.deleteById(assignmentId);
+  }
+
+  @Query(() => AssignmentPagination, { name: 'getTeacherAssignments' })
+  async teacherAssignments(@Args() assignmentArgs: TeacherAssignmentArgs): Promise<Pagination<Assignment>> {
+    return await this.service.findTeacherAssignment(assignmentArgs);
   }
 }
