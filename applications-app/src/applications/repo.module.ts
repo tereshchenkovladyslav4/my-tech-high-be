@@ -149,6 +149,7 @@ import { HomeroomSettings } from './models/homeroom-settings.entity';
 import { HomeroomSettingsService } from './services/homeroom-settings.service';
 import { StudentLearningLogService } from './services/student-learning-log.service';
 import { StudentLearningLog } from './models/student-learning-log.entity';
+import { RegionsService } from './services/regions.service';
 
 const servicesImports = [
   UsersService,
@@ -227,6 +228,7 @@ const servicesImports = [
   ReimbursementRequestService,
   HomeroomSettingsService,
   StudentLearningLogService,
+  RegionsService,
 ];
 
 @Global()

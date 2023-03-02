@@ -32,8 +32,8 @@ export class UpdateAnnouncementInput {
   @Field(() => String, { nullable: true })
   filter_users?: string;
 
-  @Field(() => Boolean, { nullable: true })
-  isArchived?: boolean;
+  @Field(() => Number, { nullable: true })
+  isArchived?: number;
 
   @Field(() => String, { nullable: true })
   filter_program_years?: string;

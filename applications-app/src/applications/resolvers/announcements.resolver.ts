@@ -79,4 +79,12 @@ export class AnnouncementsResolver {
   ): Promise<Announcement> {
     return this.announcementsService.update(updateAnnouncementInput);
   }
+
+  @Mutation(() => Announcement, { name: 'archiveAnnouncement' })
+  @UseGuards(new AuthGuard())
+  async archiveAnnouncement(
+    @Args('announcement_id', { type: () => Int }) announcement_id: number,
+  ): Promise<Announcement> {
+    return this.announcementsService.archive(announcement_id);
+  }
 }

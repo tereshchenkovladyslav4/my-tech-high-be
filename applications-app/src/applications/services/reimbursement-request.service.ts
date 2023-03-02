@@ -9,6 +9,7 @@ import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
 import { ReimbursementRequest } from '../models/reimbursement-request.entity';
 import { Pagination } from '../../paginate';
 import { ReimbursementRequestsArgs } from '../dto/reimbursement-requests.args';
+import { ReimbursementReceiptsActionInput } from '../dto/reimbursement-receipts-action.input';
 
 @Injectable()
 export class ReimbursementRequestService {
@@ -171,6 +172,14 @@ export class ReimbursementRequestService {
     } catch (error) {
       return error;
     }
+  }
+
+  async deleteResourceRequests(reimbursementReceiptsActionInput: ReimbursementReceiptsActionInput): Promise<boolean> {
+    const { receiptIds } = reimbursementReceiptsActionInput;
+    receiptIds.map(async (receiptId) => {
+      await this.receiptRepo.delete({ reimbursement_receipt_id: receiptId });
+    });
+    return true;
   }
 
   async save(requestInput: CreateOrUpdateReimbursementRequestInputs): Promise<ReimbursementRequest> {

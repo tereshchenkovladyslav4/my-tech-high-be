@@ -101,6 +101,7 @@ import { HomeroomSettingsResolver } from './resolvers/homeroom-settings.resolver
 import { HomeroomSettings } from './models/homeroom-settings.entity';
 import { StudentLearningLogResolver } from './resolvers/student-learning-log.resolver';
 import { StudentLearningLog } from './models/student-learning-log.entity';
+import { RegionsResolver } from './resolvers/regions.resolver';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -143,6 +144,7 @@ const graphQLImports = [
   ReimbursementRequestResolver,
   HomeroomSettingsResolver,
   StudentLearningLogResolver,
+  RegionsResolver,
 ];
 @Module({
   imports: [

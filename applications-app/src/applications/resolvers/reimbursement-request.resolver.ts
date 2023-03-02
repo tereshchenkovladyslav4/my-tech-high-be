@@ -10,6 +10,7 @@ import { ReimbursementRequestPagination } from '../models/reimbursement-request-
 import { ReimbursementRequestsArgs } from '../dto/reimbursement-requests.args';
 import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
 import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update-reimbursement-receipt.input';
+import { ReimbursementReceiptsActionInput } from '../dto/reimbursement-receipts-action.input';
 
 @Resolver(() => ReimbursementRequest)
 export class ReimbursementRequestResolver {
@@ -49,6 +50,14 @@ export class ReimbursementRequestResolver {
     @Args('requestInput') requestInput: CreateOrUpdateReimbursementReceiptInput,
   ): Promise<ReimbursementReceipt[]> {
     return this.service.saveReceipts(requestInput);
+  }
+
+  @Mutation(() => Boolean, { name: 'deleteReimbursementReceipts' })
+  async deleteReimbursementReceipts(
+    @Args('reimbursementReceiptsActionInput')
+    reimbursementReceiptsActionInput: ReimbursementReceiptsActionInput,
+  ): Promise<boolean> {
+    return await this.service.deleteResourceRequests(reimbursementReceiptsActionInput);
   }
 
   @Mutation(() => Boolean, { name: 'deleteReimbursementRequest' })

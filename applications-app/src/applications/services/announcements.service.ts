@@ -140,7 +140,7 @@ export class AnnouncementsService {
           filter_others,
           filter_providers,
         });
-        if ((status == 'Published' && !isArchived) || status === 'Republished') {
+        if ((status == 'Published' && isArchived !== 1) || status === 'Republished') {
           userEmailList.map(async (user) => {
             await this.sesEmailService.sendAnnouncementEmail({
               body,
@@ -313,5 +313,15 @@ export class AnnouncementsService {
 
       return announcementUsers as User[];
     }
+  }
+
+  async archive(announcementId: number): Promise<Announcement> {
+    const announcement = await this.announcementsRepository.findOne(announcementId);
+    if (announcement.isArchived === 1) {
+      announcement.isArchived = 0;
+    } else {
+      announcement.isArchived = 1;
+    }
+    return this.announcementsRepository.save(announcement);
   }
 }

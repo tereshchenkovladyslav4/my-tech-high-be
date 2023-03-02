@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { SchoolYear } from '../models/schoolyear.entity';
+import { CreateSchoolYearInput } from '../dto/create-schoolyear.inputs';
 
 @Injectable()
 export class SchoolYearService {
@@ -57,5 +58,8 @@ export class SchoolYearService {
         date_end: MoreThanOrEqual(new Date()),
       },
     });
+  }
+  async create(createSchoolYearInput: CreateSchoolYearInput): Promise<SchoolYear> {
+    return this.schoolYearsRepository.save(createSchoolYearInput);
   }
 }

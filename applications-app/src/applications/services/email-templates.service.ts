@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApplicationEmailTemplate } from 'src/applications/models/email-template.entity';
+import { CreateEmailTemplateInput } from '../dto/create-email-template.inputs';
 @Injectable()
 export class EmailTemplatesService {
   constructor(
@@ -38,9 +39,31 @@ export class EmailTemplatesService {
     return data;
   }
 
-  async findByTemplateAndSchoolYearId(template: string, schoolYearId: number): Promise<ApplicationEmailTemplate> {
+  async findByRegion(regionId: number): Promise<ApplicationEmailTemplate[]> {
+    const data = await this.emailTemplateRepository.find({
+      where: { region_id: regionId },
+    });
+    return data;
+  }
+
+  async findByRegionAndSchoolYear(regionId: number, schoolYearId: number): Promise<ApplicationEmailTemplate[]> {
+    const data = await this.emailTemplateRepository.find({
+      where: { region_id: regionId, school_year_id: schoolYearId },
+    });
+    return data;
+  }
+
+  async create(createEmailTemplateInput: CreateEmailTemplateInput): Promise<ApplicationEmailTemplate> {
+    return await this.emailTemplateRepository.save(createEmailTemplateInput);
+  }
+
+  async findByTemplateAndSchoolYearId(
+    template: string,
+    schoolYearId: number,
+    midYear = false,
+  ): Promise<ApplicationEmailTemplate> {
     const data = await this.emailTemplateRepository.findOne({
-      where: { template_name: template, school_year_id: schoolYearId },
+      where: { template_name: template, school_year_id: schoolYearId, mid_year: midYear },
     });
     return data;
   }

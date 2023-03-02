@@ -50,7 +50,7 @@ export class Announcement extends BaseEntity {
 
   @Field(() => Boolean, { nullable: true })
   @Column('tinyint', { name: 'isArchived', nullable: true })
-  isArchived?: boolean;
+  isArchived?: number;
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })

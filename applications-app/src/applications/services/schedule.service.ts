@@ -178,6 +178,9 @@ export class ScheduleService {
       const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
         EmailTemplateEnum.UPDATES_REQUIRED,
         studentInfo?.student_grade_level?.school_year_id,
+        studentInfo?.applications?.find(
+          (application) => application.school_year_id == studentInfo?.student_grade_level?.school_year_id,
+        )?.midyear_application,
       );
       if (emailTemplate) {
         const schoolYear = await this.schoolYearService.findOneById(studentInfo?.student_grade_level?.school_year_id);
@@ -232,6 +235,9 @@ export class ScheduleService {
       const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
         EmailTemplateEnum.UPDATES_ALLOWED,
         studentInfo?.student_grade_level?.school_year_id,
+        studentInfo?.applications?.find(
+          (application) => application.school_year_id == studentInfo?.student_grade_level?.school_year_id,
+        )?.midyear_application,
       );
       if (emailTemplate) {
         const studentInfo = await this.studentService.findOneById(student_id);
@@ -432,6 +438,8 @@ export class ScheduleService {
               ? EmailTemplateEnum.SECOND_SEMESTER_ACCEPTED
               : EmailTemplateEnum.SCHEDULE_ACCEPTED,
             school_year_id,
+            studentInfo?.applications?.find((application) => application.school_year_id == school_year_id)
+              ?.midyear_application,
           );
           if (emailTemplate) {
             const schoolYear = await this.schoolYearService.findOneById(
@@ -620,11 +628,14 @@ export class ScheduleService {
         const school_year_id = schedule?.SchoolYear?.school_year_id;
         const now = await this.timezoneService.getTimezoneDate(region_id);
         if (schedule?.SchoolYear?.second_semester_open <= now && schedule?.SchoolYear?.second_semester_close >= now) {
+          const studentInfo = await this.studentService.findOneById(schedule?.ScheduleStudent?.student_id);
           const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
             EmailTemplateEnum.SECOND_SEMESTER_UNLOCKED,
             school_year_id,
+            studentInfo?.applications?.find((application) => application.school_year_id == school_year_id)
+              ?.midyear_application,
           );
-          const studentInfo = await this.studentService.findOneById(schedule?.ScheduleStudent?.student_id);
+
           if (emailTemplate) {
             const yearbegin = Moment(schedule?.SchoolYear?.date_begin).format('YYYY');
             const yearend = Moment(schedule?.SchoolYear?.date_end).format('YYYY');

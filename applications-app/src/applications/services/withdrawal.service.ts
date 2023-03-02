@@ -112,6 +112,7 @@ export class WithdrawalService {
             ? EmailTemplateEnum.NOTIFY_OF_WITHDRAW
             : EmailTemplateEnum.UNDECLARED_WITHDRAW,
           school_year_id,
+          cur_application.midyear_application,
         );
 
         const deadline = new Date();
@@ -587,6 +588,7 @@ export class WithdrawalService {
           body: setAdditionalLinksInfo(body, item.Student, school_year, cur_application),
           subject: setAdditionalLinksInfo(subject, item.Student, school_year, cur_application),
           school_year_id: cur_application.school_year_id,
+          midYear: cur_application.midyear_application,
         };
         emailBody.push(temp);
       }),
@@ -597,6 +599,7 @@ export class WithdrawalService {
         const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
           EmailTemplateEnum.WITHDRAW_PAGE,
           emailData?.school_year_id,
+          emailData?.midYear,
         );
         await this.emailService.sendEmail({
           email: emailData.email,
@@ -682,6 +685,7 @@ export class WithdrawalService {
         const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
           EmailTemplateEnum.WITHDRAW_CONFIRMATION,
           schoolYearId,
+          cur_application?.midyear_application,
         );
 
         const isPdfGenerated = await this.generateWithdrawalFormPdf(withdrawalId);
@@ -799,10 +803,11 @@ export class WithdrawalService {
           .replace(/\[Year\]/g, yearText);
       };
       const emailBody = [];
-      const school_year = await this.schoolYearService.findOneById(cur_application.school_year_id);
+      const school_year = await this.schoolYearService.findOneById(cur_application?.school_year_id);
       const emailTemplate = await this.emailTemplateService.findByTemplateAndSchoolYearId(
         EmailTemplateEnum.WITHDRAW_PAGE,
-        cur_application.school_year_id,
+        cur_application?.school_year_id,
+        cur_application?.midyear_application,
       );
       const temp = {
         withdrawal_id: withdraw.withdrawal_id,
