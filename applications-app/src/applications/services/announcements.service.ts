@@ -262,22 +262,13 @@ export class AnnouncementsService {
             schoolPartnerIds: schoolPartners,
           });
 
-          const filteredOutUnassigned = schoolPartners.filter((item) => item !== 'Unassigned');
-          if (filteredOutUnassigned?.length > 0) {
-            parentQuery.andWhere(
-              new Brackets((qb) => {
-                qb.where('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
-                  schoolPartnerIds: filteredOutUnassigned,
-                })
-              }),
-            );
-          } else {
-            parentQuery.andWhere(
-              new Brackets((qb) => {
-                qb.orWhere('schoolEnrollment.school_partner_id IS NULL');
-              }),
-            );
-          }
+          parentQuery.andWhere(
+            new Brackets((qb) => {
+              qb.where('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
+                schoolPartnerIds: schoolPartners,
+              }).orWhere('schoolEnrollment.school_partner_id IS NULL');
+            }),
+          );
         }
 
         if (filterOther.indexOf('testing-opt-in') !== -1 && filterOther.indexOf('testing-opt-out') !== -1) {
