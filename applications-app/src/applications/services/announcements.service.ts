@@ -258,17 +258,24 @@ export class AnnouncementsService {
           });
 
         if (Array.isArray(schoolPartners) && schoolPartners.length > 0) {
-          parentQuery.andWhere('schoolPartner.school_partner_id IN(:...schoolPartnerIds)', {
-            schoolPartnerIds: schoolPartners,
-          });
-
-          parentQuery.andWhere(
-            new Brackets((qb) => {
-              qb.where('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
-                schoolPartnerIds: schoolPartners,
-              }).orWhere('schoolEnrollment.school_partner_id IS NULL');
-            }),
-          );
+          if (schoolPartners.includes('Unassigned')) {
+            const filteredOutUnassigned = schoolPartners.filter((item) => item !== 'Unassigned');
+            if (filteredOutUnassigned?.length > 0) {
+              parentQuery.andWhere(
+                new Brackets((qb) => {
+                  qb.where('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
+                    schoolPartnerIds: filteredOutUnassigned,
+                  }).orWhere('schoolEnrollment.school_partner_id IS NULL');
+                }),
+              );
+            } else {
+              parentQuery.andWhere('schoolEnrollment.school_partner_id IS NULL');
+            }
+          } else {
+            parentQuery.andWhere('schoolEnrollment.school_partner_id IN(:...schoolPartnerIds)', {
+              schoolPartnerIds: schoolPartners,
+            });
+          }
         }
 
         if (filterOther.indexOf('testing-opt-in') !== -1 && filterOther.indexOf('testing-opt-out') !== -1) {

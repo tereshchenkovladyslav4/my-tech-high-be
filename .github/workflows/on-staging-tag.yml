@@ -285,29 +285,29 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: ${{ failure() || cancelled() }}
 
-  #send-slack-success-message:
-  #  name: Send Slack Success Message
-  #  runs-on: ubuntu-latest
-  #  needs:
-  #    [
-  #      generate-tag,
-  #      build-application-service,
-  #      build-authentication-service,
-  #      build-students-service,
-  #      build-users-service,
-  #      build-gateway-service,
-  #      build-media-service,
-  #    ]
-  #  steps:
-  #    - uses: 8398a7/action-slack@v3
-  #      with:
-  #        status: custom
-  #        custom_payload: |
-  #          {
-  #            attachments: [{
-  #              color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-  #              text: 'Backend Deployment to Staging Successful!',
-  #            }]
-  #          }
-  #      env:
-  #        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  send-slack-success-message:
+    name: Send Slack Success Message
+    runs-on: ubuntu-latest
+    needs:
+      [
+        generate-tag,
+        build-application-service,
+        build-authentication-service,
+        build-students-service,
+        build-users-service,
+        build-gateway-service,
+        build-media-service,
+      ]
+    steps:
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: 'Backend Deployment to Staging Successful!',
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
