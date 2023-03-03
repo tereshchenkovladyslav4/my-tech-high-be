@@ -77,6 +77,7 @@ export class TitleService {
         .createQueryBuilder('title')
         .leftJoinAndSelect('title.Subject', 'subject')
         .andWhere(`subject.SchoolYearId = ${schoolYearId}`)
+        .andWhere('subject.is_active = true')
         .orderBy({ title_id: 'ASC' })
         .getMany();
 
