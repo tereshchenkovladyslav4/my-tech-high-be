@@ -392,9 +392,11 @@ export class ApplicationsService {
           status: 6,
         });
 
-        const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-          EmailTemplateEnum.APPLICATION_ACCEPTED,
+        const emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
+          EmailTemplateEnum.APPLICATION_RECEIVED,
           region_id,
+          application.school_year_id,
+          application.midyear_application,
         );
 
         const school_year = await this.schoolYearService.findOneById(application.school_year_id);

@@ -68,12 +68,6 @@ export class WithdrawalService {
         .where({ StudentId: StudentId, status: WithdrawalStatus.NOTIFIED })
         .getManyAndCount();
 
-      await this.studentStatusService.update({
-        student_id: StudentId,
-        status: StudentStatusEnum.WITHDRAWN,
-        school_year_id,
-      });
-
       const existingWithdrawalId = notifiedWithdrawals?.length ? notifiedWithdrawals[0].withdrawal_id : 0;
       const withdrawalResponse = await this.repo.save({
         withdrawal_id: withdrawal_id || existingWithdrawalId,
@@ -336,7 +330,7 @@ export class WithdrawalService {
 
     //	Get total count
     const queryRunner = await getConnection().createQueryRunner();
-    const res = await queryRunner.query(`SELECT COUNT(*) cnt ${main_query}`);
+    // const res = await queryRunner.query(`SELECT COUNT(*) cnt ${main_query}`);
 
     //	Order
     switch (sort.split('|')[0]) {
@@ -379,7 +373,8 @@ export class WithdrawalService {
 
     return new Pagination<Withdrawal>({
       results,
-      total: res[0].cnt,
+      total: 1000,
+      // total: res[0].cnt,
     });
   }
 

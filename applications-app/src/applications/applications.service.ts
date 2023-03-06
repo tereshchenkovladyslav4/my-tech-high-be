@@ -106,6 +106,58 @@ export class ApplicationsService {
       newApplication.midyear_application,
     );
 
+    const person = await this.personsService.findOneById(parent.person_id);
+
+    const emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
+      EmailTemplateEnum.APPLICATION_RECEIVED,
+      Number(newApplication.state),
+      newApplication.program_year,
+      newApplication.midyear_application,
+    );
+
+    if (emailTemplate) {
+      const setAdditionalLinksInfo = async (content, school_year, student) => {
+        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({
+          school_year_id: school_year.school_year_id,
+          student_id: student.student_id,
+        });
+        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+
+        const yearend = new Date(school_year.date_end).getFullYear().toString();
+        const yearText = currApplication.midyear_application
+          ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+          : `${yearbegin}-${yearend.substring(2, 4)}`;
+
+        return content
+          .toString()
+          .replace(/\[STUDENT\]/g, student.person.first_name)
+          .replace(/\[PARENT\]/g, person.first_name)
+          .replace(/\[YEAR\]/g, yearText)
+          .replace(/\[APPLICATION_YEAR\]/g, `${yearbegin}-${yearend.substring(2, 4)}`);
+      };
+
+      if (students.length > 0) {
+        students.forEach(async (student) => {
+          const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
+
+          const school_year = await this.schoolYearService.findOneById(gradeLevels[0]?.school_year_id);
+
+          const emailBody = await setAdditionalLinksInfo(emailTemplate.body, school_year, student);
+          const emailSubject = await setAdditionalLinksInfo(emailTemplate.subject, school_year, student);
+
+          await this.emailsService.sendEmail({
+            email: person?.email,
+            subject: emailSubject,
+            content: emailBody,
+            bcc: emailTemplate.bcc,
+            from: emailTemplate.from,
+            region_id: Number(newApplication.state),
+            template_name: 'Application Received',
+          });
+        });
+      }
+    }
+
     return {
       parent,
       students,
