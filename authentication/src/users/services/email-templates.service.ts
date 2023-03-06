@@ -30,4 +30,16 @@ export class EmailTemplatesService {
     });
     return data;
   }
+
+  async findByTemplateSchoolYear(
+    template: string,
+    region_id: number,
+    schoolYearId: number,
+    midYear: boolean,
+  ): Promise<EmailTemplate> {
+    const data = await this.emailTemplateRepository.findOne({
+      where: { template_name: template, region_id: region_id, school_year_id: schoolYearId, mid_year: midYear },
+    });
+    return data;
+  }
 }

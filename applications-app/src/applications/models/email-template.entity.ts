@@ -18,6 +18,10 @@ export class ApplicationEmailTemplate extends BaseEntity {
   school_year_id?: number;
 
   @Column()
+  @Field(() => Boolean)
+  mid_year?: boolean;
+
+  @Column()
   @Field(() => String, { nullable: true })
   title: string;
 

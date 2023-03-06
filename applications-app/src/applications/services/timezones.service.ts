@@ -11,9 +11,11 @@ export class TimezonesService {
     return -420;
   }
 
-  async getTimezoneDate(region_id: number): Promise<string> {
-    const tzOffset = await this.timezoneOffset(region_id);
-    const nowDate = Moment().utcOffset(tzOffset).format(MYSQL_DATE_FORMAT);
+  async getTimezoneDate(regionId: number, date?: Date): Promise<string> {
+    const tzOffset = await this.timezoneOffset(regionId);
+    const nowDate = Moment(date || '')
+      .utcOffset(tzOffset)
+      .format(MYSQL_DATE_FORMAT);
     return nowDate;
   }
 }

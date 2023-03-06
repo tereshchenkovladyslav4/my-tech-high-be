@@ -11,6 +11,7 @@ import { User } from '../models/user.entity';
 
 import * as base64 from 'base-64';
 import * as Moment from 'moment';
+import { SchoolYearsService } from './schoolyear.service';
 
 @Injectable()
 export class EmailsService {
@@ -19,6 +20,7 @@ export class EmailsService {
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
     private emailRecordsService: EmailRecordsService,
+    private schoolYearsService: SchoolYearsService,
   ) {}
 
   async sendAccountResetPasswordEmail(
@@ -32,7 +34,15 @@ export class EmailsService {
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
-    const template = await this.emailTemplateService.findByTemplateAndRegion('Forgot Password', region_id);
+
+    const currentSchoolYear = await this.schoolYearsService.getCurrentSchoolYearByRegion(region_id);
+
+    const template = await this.emailTemplateService.findByTemplateSchoolYear(
+      'Forgot Password',
+      region_id,
+      currentSchoolYear.school_year_id,
+      false,
+    );
 
     const webAppUrl = process.env.WEB_APP_URL;
     const token = this.encrypt(user_id, email, date_created);

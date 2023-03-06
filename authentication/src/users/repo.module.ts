@@ -12,9 +12,11 @@ import { SESService } from './services/ses.service';
 import { UserRegionService } from './services/user-region.service';
 import { EmailRecordsService } from './services/email-records.service';
 import { EmailRecord } from './models/email-record.entity';
+import { SchoolYearsService } from './services/schoolyear.service';
+import { SchoolYear } from './models/schoolyear.entity';
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([User, EmailVerifier, EmailTemplate, UserRegion, EmailRecord])],
+  imports: [TypeOrmModule.forFeature([User, EmailVerifier, EmailTemplate, UserRegion, EmailRecord, SchoolYear])],
   providers: [
     UsersService,
     EmailVerifierService,
@@ -23,6 +25,7 @@ import { EmailRecord } from './models/email-record.entity';
     SESService,
     UserRegionService,
     EmailRecordsService,
+    SchoolYearsService,
   ],
   exports: [
     UsersService,
@@ -32,6 +35,7 @@ import { EmailRecord } from './models/email-record.entity';
     SESService,
     UserRegionService,
     EmailRecordsService,
+    SchoolYearsService,
   ],
 })
 class RepoModule {}

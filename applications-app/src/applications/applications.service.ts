@@ -97,9 +97,14 @@ export class ApplicationsService {
     if (!emailVerifier) {
       throw new ServiceUnavailableException('EmailVerifier Not Created');
     }
-    await this.emailsService.sendAccountVerificationEmail(emailVerifier, {
-      recipients: newApplication.parent.email,
-    });
+    await this.emailsService.sendAccountVerificationEmail(
+      emailVerifier,
+      {
+        recipients: newApplication.parent.email,
+      },
+      newApplication.program_year,
+      newApplication.midyear_application,
+    );
 
     return {
       parent,
@@ -115,39 +120,44 @@ export class ApplicationsService {
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-      EmailTemplateEnum.APPLICATION_RECEIVED,
-      region_id,
-    );
-    if (emailTemplate) {
-      const person = await this.personsService.findOneByUserId(user.user_id);
-      const parent = await this.parentsService.findOneByEmail(email);
 
-      const students = await this.studentsService.findOneByParent(parent.parent_id);
+    const person = await this.personsService.findOneByUserId(user.user_id);
+    const parent = await this.parentsService.findOneByEmail(email);
 
-      const setAdditionalLinksInfo = async (content: string, school_year: SchoolYear, student: Student) => {
-        const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
-        const yearend = new Date(school_year.date_end).getFullYear().toString();
+    const students = await this.studentsService.findOneByParent(parent.parent_id);
 
-        const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({
-          school_year_id: school_year.school_year_id,
-          student_id: student.student_id,
-        });
+    const setAdditionalLinksInfo = async (content: string, school_year: SchoolYear, student: Student) => {
+      const yearbegin = new Date(school_year.date_begin).getFullYear().toString();
+      const yearend = new Date(school_year.date_end).getFullYear().toString();
 
-        const yearText = currApplication.midyear_application
-          ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
-          : `${yearbegin}-${yearend.substring(2, 4)}`;
+      const currApplication = await this.studentApplicationsService.findBySchoolYearAndStudent({
+        school_year_id: school_year.school_year_id,
+        student_id: student.student_id,
+      });
 
-        return content
-          .toString()
-          .replace(/\[STUDENT\]/g, student.person.first_name)
-          .replace(/\[PARENT\]/g, person.first_name)
-          .replace(/\[YEAR\]/g, yearText)
-          .replace(/\[APPLICATION_YEAR\]/g, yearText);
-      };
+      const yearText = currApplication.midyear_application
+        ? `${yearbegin}-${yearend.substring(2, 4)} Mid-year`
+        : `${yearbegin}-${yearend.substring(2, 4)}`;
 
-      if (students.length > 0) {
-        students.forEach(async (student) => {
+      return content
+        .toString()
+        .replace(/\[STUDENT\]/g, student.person.first_name)
+        .replace(/\[PARENT\]/g, person.first_name)
+        .replace(/\[YEAR\]/g, yearText)
+        .replace(/\[APPLICATION_YEAR\]/g, yearText);
+    };
+
+    if (students.length > 0) {
+      students.forEach(async (student) => {
+        const studentApplication = await this.studentApplicationsService.findByStudent(student.student_id);
+        const emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
+          EmailTemplateEnum.APPLICATION_RECEIVED,
+          region_id,
+          studentApplication[0].school_year_id,
+          studentApplication[0].midyear_application,
+        );
+
+        if (emailTemplate) {
           const gradeLevels = await this.studentGradeLevelsService.forStudents(student.student_id);
 
           const school_year = await this.schoolYearService.findOneById(gradeLevels[0]?.school_year_id);
@@ -163,12 +173,10 @@ export class ApplicationsService {
             region_id: region_id,
             template_name: 'Application Received',
           });
-        });
-      }
-      return true;
-    } else {
-      return false;
+        }
+      });
     }
+    return true;
   }
 
   async createNewStudentApplications(
@@ -206,9 +214,11 @@ export class ApplicationsService {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+    const emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
       EmailTemplateEnum.APPLICATION_RECEIVED,
       region_id,
+      newApplication.program_year,
+      newApplication.midyear_application,
     );
 
     if (emailTemplate) {

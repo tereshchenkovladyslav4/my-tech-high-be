@@ -48,6 +48,7 @@ export class EmailTemplatesService {
         relations: ['category', 'region'],
       });
     }
+
     // if there isn't templates that are matched to this school year, we have to create email templates about that school year.
     if (templates.length === 0) {
       const regionTemplates = await this.emailTemplateRepository.find({
@@ -60,6 +61,7 @@ export class EmailTemplatesService {
           school_year_id,
           regionTemplates[0].mid_year,
           mid_year,
+          regionId,
         );
         templates = await this.emailTemplateRepository.find({
           where: { region_id: regionId, school_year_id: school_year_id, mid_year: mid_year },
@@ -185,10 +187,12 @@ export class EmailTemplatesService {
     newSchoolYearId: number,
     oldMidYear: boolean,
     newMidYear: boolean,
+    regionId: number,
   ): Promise<boolean> {
     const oldTemplates = await this.emailTemplateRepository.find({
       school_year_id: oldSchoolYearId,
       mid_year: oldMidYear,
+      region_id: regionId,
     });
     for (let i = 0; i < oldTemplates.length; i++) {
       const item = oldTemplates[i];

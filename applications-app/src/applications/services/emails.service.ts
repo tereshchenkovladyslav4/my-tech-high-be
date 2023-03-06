@@ -26,7 +26,12 @@ export class EmailsService {
     private emailRecordsService: EmailRecordsService, //private announcementsService: AnnouncementsService,
   ) {}
 
-  async sendAccountVerificationEmail(emailVerifier: EmailVerifier, emailInput: EmailInput): Promise<any> {
+  async sendAccountVerificationEmail(
+    emailVerifier: EmailVerifier,
+    emailInput: EmailInput,
+    schoolYearId?: number,
+    midYear?: boolean,
+  ): Promise<any> {
     const webAppUrl = process.env.WEB_APP_URL;
     const regions: UserRegion[] = await this.userRegionService.findUserRegionByUserId(emailVerifier.user_id);
 
@@ -35,10 +40,22 @@ export class EmailsService {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
-      EmailTemplateEnum.EMAIL_VERIFICATION,
-      region_id,
-    );
+    let emailTemplate;
+
+    if (schoolYearId && midYear) {
+      emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
+        EmailTemplateEnum.EMAIL_VERIFICATION,
+        region_id,
+        schoolYearId,
+        midYear,
+      );
+    } else {
+      emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+        EmailTemplateEnum.EMAIL_VERIFICATION,
+        region_id,
+      );
+    }
+
     const token = this.encrypt(emailVerifier);
     const recipientEmail = emailInput.recipients || emailVerifier.email;
     const emailVerificationLink = webAppUrl + '/confirm/?token=' + token;

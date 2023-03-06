@@ -116,12 +116,12 @@
           </div>
           {{#each this.questions}} {{#ifCond this.answer '!=' 'Checked'}}
           <div class="list_item">
-            <p class="list_label">{{this.question}}:</p>
+            <p class="list_label">{{{this.question}}}:</p>
             <p class="list_value">{{this.answer}}</p>
           </div>
           {{/ifCond}} {{#ifCond this.answer '==' 'Checked'}}
           <div class="list_item">
-            <p>{{this.question}}</p>
+            <p>{{{this.question}}}</p>
           </div>
           {{/ifCond}}{{/each}} {{/each}}
         </div>
@@ -132,7 +132,7 @@
           </div>
           {{#each this.questions}} {{#ifCond this.answer '!=' 'Checked'}}
           <div class="list_item">
-            <p class="list_label">{{this.question}}:</p>
+            <p class="list_label">{{{this.question}}}:</p>
             <p class="list_value">{{this.answer}}</p>
           </div>
           {{/ifCond}} {{#ifCond this.answer '==' 'Checked'}}
@@ -145,7 +145,7 @@
           </div>
           {{#each this.questions}} {{#ifCond this.answer '!=' 'Checked'}}
           <div class="list_item">
-            <p class="list_label">{{this.question}}:</p>
+            <p class="list_label">{{{this.question}}}:</p>
             <p class="list_value">{{this.answer}}</p>
           </div>
           {{/ifCond}} {{#ifCond this.answer '==' 'Checked'}}
@@ -158,7 +158,7 @@
           {{#each submissionInfo}} {{#each this.questions}} {{#ifCond this.answer '==' 'Checked'}}
           <p class="text_align_center">{{{this.question}}}</p>
           {{/ifCond}} {{#ifCond this.answer '!=' 'Checked'}}
-          <p class="text_align_center">{{this.question}}: {{this.answer}}</p>
+          <p class="text_align_center">{{{this.question}}}: {{this.answer}}</p>
           {{/ifCond}} {{/each}}{{/each}}
         </div>
         <div class="subscribe">

@@ -37,6 +37,7 @@ import { StudentRecordService } from './student-record.service';
 import { S3DirectoryStudentRecords } from '../utils';
 import { gradeText } from '../utils';
 import { PDFService } from './pdf.service';
+import { StudentStatusService } from './student-status.service';
 @Injectable()
 export class WithdrawalService {
   constructor(
@@ -53,6 +54,7 @@ export class WithdrawalService {
     private filesService: FilesService,
     private studentRecordService: StudentRecordService,
     private pdfService: PDFService,
+    private studentStatusService: StudentStatusService,
   ) {}
 
   async save(withdrawalInput: WithdrawalInput): Promise<boolean> {
@@ -65,6 +67,12 @@ export class WithdrawalService {
         .createQueryBuilder('withdrawal')
         .where({ StudentId: StudentId, status: WithdrawalStatus.NOTIFIED })
         .getManyAndCount();
+
+      await this.studentStatusService.update({
+        student_id: StudentId,
+        status: StudentStatusEnum.WITHDRAWN,
+        school_year_id,
+      });
 
       const existingWithdrawalId = notifiedWithdrawals?.length ? notifiedWithdrawals[0].withdrawal_id : 0;
       const withdrawalResponse = await this.repo.save({
@@ -288,7 +296,7 @@ export class WithdrawalService {
     let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
 			LEFT JOIN mth_application application ON (application.student_id = ${WITHDRAWAL_TABLE_NAME}.StudentId)
 			LEFT JOIN mth_student_grade_level gradeLevel ON (gradeLevel.student_id = application.student_id AND gradeLevel.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
-			LEFT JOIN mth_student student ON (student.student_id = application.student_id)
+			LEFT JOIN mth_student Student ON (Student.student_id = ${WITHDRAWAL_TABLE_NAME}.StudentId)
 			LEFT JOIN mth_person person ON (person.person_id = student.person_id) 
 			LEFT JOIN mth_schoolyear schoolYear ON (schoolYear.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
       LEFT JOIN (
@@ -363,6 +371,11 @@ export class WithdrawalService {
     main_query += ` LIMIT ${skip}, ${take}`;
     const results = await queryRunner.query(`${select_query}${main_query}`);
     await queryRunner.release();
+
+    for (let i = 0; i < results.length; i++) {
+      const student = await this.studentService.findOneById(results[i].StudentId);
+      results[i].Student = student;
+    }
 
     return new Pagination<Withdrawal>({
       results,

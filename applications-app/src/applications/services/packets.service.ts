@@ -317,9 +317,11 @@ export class PacketsService {
       };
       emailBody.push(temp);
     });
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+    const emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
       EmailTemplateEnum.ENROLLMENT_PACKET_PAGE,
       region_id,
+      tmp.student.applications[0].school_year_id,
+      tmp.student.applications[0].midyear_application,
     );
     if (emailTemplate) {
       await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
@@ -345,6 +347,7 @@ export class PacketsService {
         });
       }),
     );
+
     return packetEmails;
   }
 
@@ -674,7 +677,8 @@ export class PacketsService {
       };
 
       const queryRunner = await getConnection().createQueryRunner();
-      const enrollmentQuestions = await queryRunner.query(`
+      try {
+        const enrollmentQuestions = await queryRunner.query(`
         SELECT
           questionTab.tab_name,
           questionGroup.group_name,
@@ -687,44 +691,49 @@ export class PacketsService {
         WHERE questionTab.school_year_id = ${school_year_id} AND questionTab.mid_year = ${mid_year} 
         ORDER BY questionTab.id, questionGroup.order, questions.order;
       `);
-      queryRunner.release();
 
-      if (!enrollmentQuestions || enrollmentQuestions.length == 0)
-        throw new ServiceUnavailableException(`Not found Enrollment Questions for student: ${student_id}`);
+        if (!enrollmentQuestions || enrollmentQuestions.length == 0)
+          throw new ServiceUnavailableException(`Not found Enrollment Questions for student: ${student_id}`);
 
-      enrollmentQuestions?.map((question) => {
-        if (!question?.group_name.includes('Instructions')) {
-          const keyName = question.slug?.split('_')[0];
-          const fieldName = !question.slug?.includes('meta_')
-            ? question.slug?.replace(`${keyName}_`, '')
-            : question.slug;
-          const options = JSON.parse(question.options || '');
-          const answer =
-            options?.length && question?.type != 4 && question?.type != 3
-              ? options?.filter(
-                  (option) =>
-                    (typeof option.value == 'string' && option.value == `${packetPdfInfo[keyName][fieldName]}`) ||
-                    (typeof option.value != 'string' && option.value == Number(packetPdfInfo[keyName][fieldName])),
-                )?.[0]?.label || packetPdfInfo[keyName][fieldName]
-              : question?.type == 4 && packetPdfInfo[keyName][fieldName]
-              ? 'Checked'
-              : question?.type == 3 && packetPdfInfo[keyName][fieldName]
-              ? packetPdfInfo[keyName][fieldName]?.map((item) => item?.label)?.join(', ')
-              : packetPdfInfo[keyName][fieldName];
+        enrollmentQuestions?.map((question) => {
+          if (!question?.group_name.includes('Instructions')) {
+            const keyName = question.slug?.split('_')[0];
+            const fieldName = !question.slug?.includes('meta_')
+              ? question.slug?.replace(`${keyName}_`, '')
+              : question.slug;
+            const options = JSON.parse(question.options || '');
+            const answer =
+              options?.length && question?.type != 4 && question?.type != 3
+                ? options?.filter(
+                    (option) =>
+                      (typeof option.value == 'string' && option.value == `${packetPdfInfo[keyName][fieldName]}`) ||
+                      (typeof option.value != 'string' && option.value == Number(packetPdfInfo[keyName][fieldName])),
+                  )?.[0]?.label || packetPdfInfo[keyName][fieldName]
+                : question?.type == 4 && packetPdfInfo[keyName][fieldName]
+                ? 'Checked'
+                : question?.type == 3 && packetPdfInfo[keyName][fieldName]
+                ? packetPdfInfo[keyName][fieldName]?.map((item) => item?.label)?.join(', ')
+                : packetPdfInfo[keyName][fieldName];
 
-          if (answer) {
-            if (question?.tab_name == 'Contact') {
-              this.insertInfoToArray(contactInfo, question?.group_name, question?.question, answer);
-            } else if (question?.tab_name == 'Personal') {
-              this.insertInfoToArray(personalInfo, question?.group_name, question?.question, answer);
-            } else if (question?.tab_name == 'Education') {
-              this.insertInfoToArray(educationInfo, question?.group_name, question?.question, answer);
-            } else if (question?.tab_name == 'Submission') {
-              this.insertInfoToArray(submissionInfo, question?.group_name, question?.question, answer);
+            if (answer) {
+              if (question?.tab_name == 'Contact') {
+                this.insertInfoToArray(contactInfo, question?.group_name, question?.question, answer);
+              } else if (question?.tab_name == 'Personal') {
+                this.insertInfoToArray(personalInfo, question?.group_name, question?.question, answer);
+              } else if (question?.tab_name == 'Education') {
+                this.insertInfoToArray(educationInfo, question?.group_name, question?.question, answer);
+              } else if (question?.tab_name == 'Submission') {
+                this.insertInfoToArray(submissionInfo, question?.group_name, question?.question, answer);
+              }
             }
           }
-        }
-      });
+        });
+      } catch (error) {
+        queryRunner.release();
+        throw new ServiceUnavailableException(`Not found Student Packet Informations.for student: ${student_id}`);
+      } finally {
+        queryRunner.release();
+      }
 
       const signatureFileInfo = await this.filesService.findOneById(packet?.signature_file_id);
       if (!signatureFileInfo)

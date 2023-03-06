@@ -54,6 +54,9 @@ export class UpdateSchoolYearInput {
   opt_out_form_title?: string;
 
   @Field(() => String, { nullable: true })
+  opt_out_form_description?: string;
+
+  @Field(() => String, { nullable: true })
   direct_orders_technology_instructions?: string;
 
   @Field(() => String, { nullable: true })

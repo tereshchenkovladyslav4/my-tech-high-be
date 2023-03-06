@@ -9,7 +9,6 @@ import { LearningLogQuestionService } from './learning-log-question.service';
 import { TeacherAssignmentArgs } from '../dto/teacher-assignment.args';
 import { AssignmentFilterStatus, StudentLearningLogStatus } from '../enums';
 import { Classes } from '../models/classes.entity';
-import moment from 'moment';
 
 @Injectable()
 export class AssignmentService {

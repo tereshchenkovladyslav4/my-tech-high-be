@@ -17,8 +17,8 @@ import { ResourceService } from './resource.service';
 import { ResourceRequestInput } from '../dto/resource-request.inputs';
 import { gradeShortText, resourceRequestCost, resourceUsername, showDate } from '../utils';
 import { StudentsService } from './students.service';
-import * as Moment from 'moment';
-import { studentStatusText } from '../utils/student-status.util';
+import { studentStatusText } from '../utils';
+import { TimezonesService } from './timezones.service';
 
 @Injectable()
 export class ResourceRequestService {
@@ -30,6 +30,7 @@ export class ResourceRequestService {
     private userRegionService: UserRegionService,
     private resourceService: ResourceService,
     private studentsService: StudentsService,
+    private timezonesService: TimezonesService,
   ) {}
 
   async find(args: ResourceRequestsArgs): Promise<Pagination<ResourceRequest>> {
@@ -281,6 +282,7 @@ export class ResourceRequestService {
         .leftJoinAndSelect('resourceRequest.Student', 'Student')
         .leftJoinAndSelect('Student.person', 'Person')
         .leftJoinAndSelect('resourceRequest.Resource', 'Resource')
+        .leftJoinAndSelect('Resource.SchoolYear', 'SchoolYear')
         .leftJoinAndSelect('Resource.ResourceLevels', 'ResourceLevels')
         .leftJoinAndSelect('Student.parent', 'Parent')
         .leftJoinAndSelect('Student.applications', 'applications')
@@ -296,25 +298,43 @@ export class ResourceRequestService {
       if (vendor !== undefined && vendor !== resourceRequest.Resource?.title) {
         errors.push(`Vendor`);
       }
-      if (resource_level_name !== undefined && resource_level_name !== resourceRequest.ResourceLevel?.name) {
+      if (
+        resource_level_name !== undefined &&
+        (resource_level_name || '') !== (resourceRequest.ResourceLevel?.name || '')
+      ) {
         errors.push(`Resource Level`);
       }
-      if (created_at !== undefined && created_at !== Moment(resourceRequest.created_at).format('MM/DD/YYYY')) {
+      if (
+        created_at !== undefined &&
+        created_at !==
+          showDate(
+            await this.timezonesService.getTimezoneDate(
+              resourceRequest.Resource?.SchoolYear?.RegionId,
+              resourceRequest.created_at,
+            ),
+          )
+      ) {
         errors.push(`Submitted`);
       }
-      if (status !== undefined && status !== resourceRequest.status) {
+      if (status !== undefined && (status || '') !== (resourceRequest.status || '')) {
         errors.push(`Status`);
       }
       if (student_id !== undefined && +student_id !== resourceRequest.student_id) {
         errors.push(`Student ID`);
       }
-      if (student_first_name !== undefined && student_first_name !== resourceRequest.Student?.person?.first_name) {
+      if (
+        student_first_name !== undefined &&
+        (student_first_name || '') !== (resourceRequest.Student?.person?.first_name || '')
+      ) {
         errors.push(`Student First Name`);
       }
-      if (student_last_name !== undefined && student_last_name !== resourceRequest.Student?.person?.last_name) {
+      if (
+        student_last_name !== undefined &&
+        (student_last_name || '') !== (resourceRequest.Student?.person?.last_name || '')
+      ) {
         errors.push(`Student Last Name`);
       }
-      if (student_email !== undefined && student_email !== resourceRequest.Student?.person?.email) {
+      if (student_email !== undefined && (student_email || '') !== (resourceRequest.Student?.person?.email || '')) {
         errors.push(`Student Email`);
       }
       if (
@@ -328,14 +348,20 @@ export class ResourceRequestService {
       }
       if (
         parent_first_name !== undefined &&
-        parent_first_name !== resourceRequest?.Student?.parent?.person?.first_name
+        (parent_first_name || '') !== (resourceRequest?.Student?.parent?.person?.first_name || '')
       ) {
         errors.push(`Parent First Name`);
       }
-      if (parent_last_name !== undefined && parent_last_name !== resourceRequest?.Student?.parent?.person?.last_name) {
+      if (
+        parent_last_name !== undefined &&
+        (parent_last_name || '') !== (resourceRequest?.Student?.parent?.person?.last_name || '')
+      ) {
         errors.push(`Parent Last Name`);
       }
-      if (parent_email !== undefined && parent_email !== resourceRequest?.Student?.parent?.person?.email) {
+      if (
+        parent_email !== undefined &&
+        (parent_email || '') !== (resourceRequest?.Student?.parent?.person?.email || '')
+      ) {
         errors.push(`Parent Email`);
       }
       if (cost !== undefined && cost !== resourceRequestCost(resourceRequest)) {

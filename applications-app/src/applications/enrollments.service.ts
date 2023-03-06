@@ -186,8 +186,13 @@ export class EnrollmentsService {
           region_id = regions[0].region_id;
         }
 
-        const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(templates[status], region_id);
         const application = studentPerson.applications[0];
+        const emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
+          templates[status],
+          region_id,
+          school_year_id,
+          application.midyear_application,
+        );
 
         if (emailTemplate) {
           const setEmailBodyInfo = (student, school_year) => {

@@ -1,4 +1,4 @@
-import { Field, ObjectType, Int, Directive, InputType, Float } from '@nestjs/graphql';
+import { Field, ObjectType, Int, Directive, Float } from '@nestjs/graphql';
 import {
   Column,
   Entity,

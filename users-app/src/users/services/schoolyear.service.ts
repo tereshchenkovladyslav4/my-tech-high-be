@@ -257,4 +257,14 @@ export class SchoolYearsService {
       return false;
     }
   }
+
+  getCurrentSchoolYearByRegion(regionId: number): Promise<SchoolYear> {
+    return this.schoolYearsRepository.findOne({
+      where: {
+        date_begin: LessThanOrEqual(new Date()),
+        date_end: MoreThanOrEqual(new Date()),
+        RegionId: regionId,
+      },
+    });
+  }
 }

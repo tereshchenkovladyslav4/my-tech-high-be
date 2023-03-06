@@ -10,6 +10,7 @@ import { EmailRecordsService } from './email-records.service';
 import { getConnection } from 'typeorm';
 import { EmailTemplateEnum } from 'src/enums';
 import * as base64 from 'base-64';
+import { SchoolYearsService } from './schoolyear.service';
 
 @Injectable()
 export class EmailsService {
@@ -18,6 +19,7 @@ export class EmailsService {
     private emailTemplateService: EmailTemplatesService,
     private userRegionService: UserRegionService,
     private emailRecordsService: EmailRecordsService,
+    private schoolYearsService: SchoolYearsService,
   ) {}
 
   async sendAccountVerificationEmail(emailVerifier: EmailVerifier): Promise<any> {
@@ -94,9 +96,14 @@ export class EmailsService {
     if (regions.length != 0) {
       region_id = regions[0].region_id;
     }
+
+    const currentSchoolYear = await this.schoolYearsService.getCurrentSchoolYearByRegion(region_id);
+
     const template = await this.emailTemplateService.findByTemplateAndRegion(
       EmailTemplateEnum.EMAIL_CHANGED,
       region_id,
+      currentSchoolYear.school_year_id,
+      false,
     );
 
     let subject = 'Email Change';

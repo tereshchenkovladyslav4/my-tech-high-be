@@ -80,4 +80,16 @@ export class EmailTemplatesService {
   async updateStandardResponses(id: number, standard_responses: string): Promise<ApplicationEmailTemplate> {
     return await this.emailTemplateRepository.save({ id, standard_responses });
   }
+
+  async findByTemplateSchoolYear(
+    template: string,
+    region_id: number,
+    schoolYearId: number,
+    midYear: boolean,
+  ): Promise<ApplicationEmailTemplate> {
+    const data = await this.emailTemplateRepository.findOne({
+      where: { template_name: template, region_id: region_id, school_year_id: schoolYearId, mid_year: midYear },
+    });
+    return data;
+  }
 }

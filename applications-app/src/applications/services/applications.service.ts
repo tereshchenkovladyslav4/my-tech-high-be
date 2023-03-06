@@ -463,12 +463,19 @@ export class ApplicationsService {
       region_id = regions[0].region_id;
     }
 
-    const emailTemplate = await this.emailTemplateService.findByTemplateAndRegion(
+    let emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
       EmailTemplateEnum.APPLICATION_PAGE,
       region_id,
+      results[0].school_year_id,
+      results[0].midyear_application,
     );
     if (emailTemplate) {
-      await this.emailTemplateService.updateEmailTemplate(emailTemplate.id, emailTemplate.from, subject, body);
+      emailTemplate = await this.emailTemplateService.updateEmailTemplate(
+        emailTemplate.id,
+        emailTemplate.from,
+        subject,
+        body,
+      );
     }
 
     const setEmailBodyInfo = (student, school_year, application) => {
