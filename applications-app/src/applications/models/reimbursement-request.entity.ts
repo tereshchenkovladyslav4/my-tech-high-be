@@ -97,4 +97,7 @@ export class ReimbursementRequest extends BaseEntity {
   @OneToMany(() => ReimbursementReceipt, (reimbursementRecipt) => reimbursementRecipt.ReimbursementRequest)
   @Field(() => [ReimbursementReceipt], { nullable: true })
   ReimbursementReceipts: ReimbursementReceipt[];
+
+  @Field(() => [ReimbursementRequest], { nullable: true })
+  SameTypeRequests: ReimbursementRequest[];
 }

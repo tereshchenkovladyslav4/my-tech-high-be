@@ -229,10 +229,11 @@ export class WithdrawalService {
   }
 
   async getCountsByStatus(filterInput: FilterInput): Promise<ResponseDTO> {
-    const { filter } = filterInput;
-    const values = {};
+    try {
+      const { filter } = filterInput;
+      const values = {};
 
-    let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
+      let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
 			LEFT JOIN mth_application application ON (application.student_id = ${WITHDRAWAL_TABLE_NAME}.StudentId)
 			LEFT JOIN mth_student_grade_level gradeLevel ON (gradeLevel.student_id = application.student_id AND gradeLevel.school_year_id = application.school_year_id)
 			LEFT JOIN mth_student student ON (student.student_id = application.student_id)
@@ -240,57 +241,61 @@ export class WithdrawalService {
 			LEFT JOIN mth_schoolyear schoolYear ON (schoolYear.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
 			WHERE ${WITHDRAWAL_TABLE_NAME}.withdrawal_id > 0`;
 
-    if (filter.region_id) {
-      main_query += ` AND schoolYear.RegionId = ${filter.region_id}`;
-    }
-    if (filter.selectedYear) {
-      main_query += ` AND schoolYear.school_year_id = ${filter.selectedYear}`;
-    }
-    if (filter.status && filter.status.length > 0) {
-      main_query += ' AND withdrawal.status IN (""';
-      filter.status.forEach((status) => {
-        main_query += ', "' + status + '"';
-      });
-      main_query += ')';
-    }
-    if (filter.keyword && filter.keyword.trim() != '') {
-      //	submitted, effective, student, soe, emailed
-      //	TODO : grade, funding
-      const key: string = filter.keyword.trim();
-      main_query += ` AND (
+      if (filter.region_id) {
+        main_query += ` AND schoolYear.RegionId = ${Number(filter.region_id)}`;
+      }
+      if (filter.selectedYear) {
+        main_query += ` AND schoolYear.school_year_id = ${Number(filter.selectedYear)}`;
+      }
+      if (filter.status && filter.status.length > 0) {
+        main_query += ' AND withdrawal.status IN (""';
+        filter.status.forEach((status) => {
+          main_query += ', "' + status + '"';
+        });
+        main_query += ')';
+      }
+      if (filter.keyword && filter.keyword.trim() != '') {
+        //	submitted, effective, student, soe, emailed
+        //	TODO : grade, funding
+        const key: string = filter.keyword.trim();
+        main_query += ` AND (
 					date LIKE "%${key}%"
 					OR date_effective LIKE "%${key}%"
 					OR CONCAT(person.last_name, ", ", person.first_name) LIKE "%${key}%"
 					OR soe LIKE "%${key}%"
 					OR date_emailed LIKE "%${key}%")`;
+      }
+
+      //	Get total count
+      const query = `SELECT ${WITHDRAWAL_TABLE_NAME}.status, COUNT(*) cnt ${main_query} GROUP BY status ORDER BY status`;
+      const qb = await this.repo.query(query);
+      qb.map((item) => {
+        values[item.status] = +item.cnt;
+      });
+
+      return <ResponseDTO>{
+        error: false,
+        results: values,
+      };
+    } catch (error) {
+      return error;
     }
-
-    //	Get total count
-    const query = `SELECT ${WITHDRAWAL_TABLE_NAME}.status, COUNT(*) cnt ${main_query} GROUP BY status ORDER BY status`;
-    const qb = await this.repo.query(query);
-    qb.map((item) => {
-      values[item.status] = +item.cnt;
-    });
-
-    return <ResponseDTO>{
-      error: false,
-      results: values,
-    };
   }
 
   async find(paginationInput: PaginationInput, filterInput: FilterInput): Promise<Pagination<Withdrawal>> {
-    const { skip, take, sort } = paginationInput;
-    const { filter } = filterInput;
+    try {
+      const { skip, take, sort } = paginationInput;
+      const { filter } = filterInput;
 
-    const select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
+      const select_query = `SELECT ${WITHDRAWAL_TABLE_NAME}.withdrawal_id, ${WITHDRAWAL_TABLE_NAME}.status, ${WITHDRAWAL_TABLE_NAME}.soe, ${WITHDRAWAL_TABLE_NAME}.funding, 
     ${WITHDRAWAL_TABLE_NAME}.date_effective, ${WITHDRAWAL_TABLE_NAME}.response,${WITHDRAWAL_TABLE_NAME}.date,
 		CONCAT(person.last_name, ", ", person.first_name) student_name,
 		gradeLevel.grade_level, emails.email_date AS date_emailed, student.student_id AS StudentId`;
 
-    let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
+      let main_query = ` FROM ${WITHDRAWAL_TABLE_NAME}
 			LEFT JOIN mth_application application ON (application.student_id = ${WITHDRAWAL_TABLE_NAME}.StudentId)
 			LEFT JOIN mth_student_grade_level gradeLevel ON (gradeLevel.student_id = application.student_id AND gradeLevel.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
-			LEFT JOIN mth_student Student ON (Student.student_id = ${WITHDRAWAL_TABLE_NAME}.StudentId)
+			LEFT JOIN mth_student student ON (student.student_id = application.student_id)
 			LEFT JOIN mth_person person ON (person.person_id = student.person_id) 
 			LEFT JOIN mth_schoolyear schoolYear ON (schoolYear.school_year_id = ${WITHDRAWAL_TABLE_NAME}.school_year_id)
       LEFT JOIN (
@@ -300,82 +305,79 @@ export class WithdrawalService {
       ) emails ON emails.withdrawal_id = ${WITHDRAWAL_TABLE_NAME}.withdrawal_id
 			WHERE ${WITHDRAWAL_TABLE_NAME}.withdrawal_id > 0`;
 
-    if (filter.region_id) {
-      main_query += ` AND schoolYear.RegionId = ${filter.region_id}`;
-    }
-    if (filter.selectedYear) {
-      main_query += ` AND schoolYear.school_year_id = ${filter.selectedYear}`;
-    }
-    if (filter.status && filter.status.length > 0) {
-      main_query += ' AND withdrawal.status IN (""';
-      filter.status.forEach((status) => {
-        main_query += ', "' + status + '"';
-      });
-      main_query += ')';
-    } else {
-      main_query += ' AND withdrawal.status IN ("empty")';
-    }
+      if (filter.region_id) {
+        main_query += ` AND schoolYear.RegionId = ${Number(filter.region_id)}`;
+      }
+      if (filter.selectedYear) {
+        main_query += ` AND schoolYear.school_year_id = ${Number(filter.selectedYear)}`;
+      }
+      if (filter.status && filter.status.length > 0) {
+        main_query += ' AND withdrawal.status IN (""';
+        filter.status.forEach((status) => {
+          main_query += ', "' + status + '"';
+        });
+        main_query += ')';
+      } else {
+        main_query += ' AND withdrawal.status IN ("empty")';
+      }
 
-    if (filter.keyword && filter.keyword.trim() != '') {
-      //	submitted, effective, student, soe, emailed
-      //	TODO : grade, funding
-      const key: string = filter.keyword.trim();
-      main_query += ` AND (
+      if (filter.keyword && filter.keyword.trim() != '') {
+        //	submitted, effective, student, soe, emailed
+        //	TODO : grade, funding
+        const key: string = filter.keyword.trim();
+        main_query += ` AND (
 					date LIKE "%${key}%"
 					OR date_effective LIKE "%${key}%"
 					OR CONCAT(person.last_name, ", ", person.first_name) LIKE "%${key}%"
 					OR soe LIKE "%${key}%"
 					OR date_emailed LIKE "%${key}%")`;
+      }
+
+      //	Get total count
+      const queryRunner = await getConnection().createQueryRunner();
+      const res = await queryRunner.query(`SELECT COUNT(*) cnt ${main_query}`);
+
+      //	Order
+      switch (sort.split('|')[0]) {
+        case 'submitted':
+          main_query += ` ORDER BY date ${sort.split('|')[1]}`;
+          break;
+        case 'status':
+          main_query += ` ORDER BY status ${sort.split('|')[1]}`;
+          break;
+        case 'effective':
+          main_query += ` ORDER BY date_effective ${sort.split('|')[1]}`;
+          break;
+        case 'student':
+          main_query += ` ORDER BY student_name ${sort.split('|')[1]}`;
+          break;
+        case 'grade':
+          main_query += ` ORDER BY gradeLevel.grade_level+0 ${sort.split('|')[1]}`;
+          break;
+        case 'soe':
+          main_query += ` ORDER BY soe ${sort.split('|')[1]}`;
+          break;
+        case 'funding':
+          main_query += ` ORDER BY funding ${sort.split('|')[1]}`;
+          break;
+        case 'emailed':
+          main_query += ` ORDER BY date_emailed ${sort.split('|')[1]}`;
+          break;
+        default:
+          break;
+      }
+      //	Pagination
+      main_query += ` LIMIT ${skip}, ${take}`;
+      const results = await queryRunner.query(`${select_query}${main_query}`);
+      await queryRunner.release();
+
+      return new Pagination<Withdrawal>({
+        results,
+        total: res[0].cnt,
+      });
+    } catch (error) {
+      return error;
     }
-
-    //	Get total count
-    const queryRunner = await getConnection().createQueryRunner();
-    // const res = await queryRunner.query(`SELECT COUNT(*) cnt ${main_query}`);
-
-    //	Order
-    switch (sort.split('|')[0]) {
-      case 'submitted':
-        main_query += ` ORDER BY date ${sort.split('|')[1]}`;
-        break;
-      case 'status':
-        main_query += ` ORDER BY status ${sort.split('|')[1]}`;
-        break;
-      case 'effective':
-        main_query += ` ORDER BY date_effective ${sort.split('|')[1]}`;
-        break;
-      case 'student':
-        main_query += ` ORDER BY student_name ${sort.split('|')[1]}`;
-        break;
-      case 'grade':
-        main_query += ` ORDER BY gradeLevel.grade_level+0 ${sort.split('|')[1]}`;
-        break;
-      case 'soe':
-        main_query += ` ORDER BY soe ${sort.split('|')[1]}`;
-        break;
-      case 'funding':
-        main_query += ` ORDER BY funding ${sort.split('|')[1]}`;
-        break;
-      case 'emailed':
-        main_query += ` ORDER BY date_emailed ${sort.split('|')[1]}`;
-        break;
-      default:
-        break;
-    }
-    //	Pagination
-    main_query += ` LIMIT ${skip}, ${take}`;
-    const results = await queryRunner.query(`${select_query}${main_query}`);
-    await queryRunner.release();
-
-    for (let i = 0; i < results.length; i++) {
-      const student = await this.studentService.findOneById(results[i].StudentId);
-      results[i].Student = student;
-    }
-
-    return new Pagination<Withdrawal>({
-      results,
-      total: 1000,
-      // total: res[0].cnt,
-    });
   }
 
   async runScheduleReminders(remind_date = 0): Promise<string> {

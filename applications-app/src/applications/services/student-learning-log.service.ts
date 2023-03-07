@@ -46,61 +46,69 @@ export class StudentLearningLogService {
     });
     return ungraded;
   }
-  async findLearningLogsForStudent(studentLearningLogArgs: StudentLearningLogArgs): Promise<Pagination<Assignment>> {
-    const { skip, take, sort, filter } = studentLearningLogArgs;
-    const _sortBy = sort.split('|');
+  async findLearningLogsForStudent(
+    studentLearningLogArgs: StudentLearningLogArgs,
+  ): Promise<Pagination<Assignment> | null> {
+    try {
+      const { skip, take, sort, filter } = studentLearningLogArgs;
+      const _sortBy = sort.split('|');
 
-    const homeroom = await this.studentHomeroomRepository.findOne({
-      school_year_id: filter?.school_year_id,
-      student_id: filter?.student_id,
-    });
+      const homeroom = await this.studentHomeroomRepository.findOne({
+        school_year_id: filter?.school_year_id,
+        student_id: filter?.student_id,
+      });
 
-    const classes = await this.classRepository.findOne({ class_id: homeroom?.class_id });
+      const classes = await this.classRepository.findOne({ class_id: homeroom?.class_id });
 
-    const qb = this.assignmentRepository
-      .createQueryBuilder('assignments')
-      .leftJoinAndSelect(
-        'assignments.StudentLearningLogs',
-        'studentLearningLogs',
-        `studentLearningLogs.SchoolYearId = ${filter.school_year_id} AND studentLearningLogs.StudentId = ${filter.student_id}`,
-      )
-      .leftJoinAndSelect('assignments.Master', 'Master')
-      .where(`assignments.master_id = ${classes?.master_id}`);
+      if (classes) {
+        const qb = this.assignmentRepository
+          .createQueryBuilder('assignments')
+          .leftJoinAndSelect(
+            'assignments.StudentLearningLogs',
+            'studentLearningLogs',
+            `studentLearningLogs.SchoolYearId = ${filter.school_year_id} AND studentLearningLogs.StudentId = ${filter.student_id}`,
+          )
+          .leftJoinAndSelect('assignments.Master', 'Master')
+          .where(`assignments.master_id = ${classes?.master_id}`);
 
-    if (filter) {
-      const { showAll } = filter;
-      if (!showAll) {
-        qb.andWhere(
-          `(studentLearningLogs.status NOT IN ('${StudentLearningLogStatus.GRADED}', '${StudentLearningLogStatus.EXCUSED}', '${StudentLearningLogStatus.NANDA}') || studentLearningLogs.status IS NULL)`,
-        );
-      }
+        if (filter) {
+          const { showAll } = filter;
+          if (!showAll) {
+            qb.andWhere(
+              `(studentLearningLogs.status NOT IN ('${StudentLearningLogStatus.GRADED}', '${StudentLearningLogStatus.EXCUSED}', '${StudentLearningLogStatus.NANDA}') || studentLearningLogs.status IS NULL)`,
+            );
+          }
+        }
+
+        if (sort) {
+          const sortBy = _sortBy[1].toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
+          switch (_sortBy[0]) {
+            case 'dueDate':
+              qb.orderBy('assignments.due_date', sortBy);
+              break;
+            case 'learningLogName':
+              qb.orderBy('assignments.title', sortBy);
+              break;
+            case 'grade':
+              qb.orderBy('studentLearningLogs.grade', sortBy);
+              break;
+            case 'status':
+              qb.orderBy('studentLearningLogs.status', sortBy);
+              break;
+            default:
+              qb.orderBy('assignments.due_date', sortBy);
+              break;
+          }
+        }
+
+        const [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
+        return new Pagination<Assignment>({
+          results,
+          total,
+        });
+      } else return null;
+    } catch (error) {
+      return error;
     }
-
-    if (sort) {
-      const sortBy = _sortBy[1].toLocaleLowerCase() === 'desc' ? 'DESC' : 'ASC';
-      switch (_sortBy[0]) {
-        case 'dueDate':
-          qb.orderBy('assignments.due_date', sortBy);
-          break;
-        case 'learningLogName':
-          qb.orderBy('assignments.title', sortBy);
-          break;
-        case 'grade':
-          qb.orderBy('studentLearningLogs.grade', sortBy);
-          break;
-        case 'status':
-          qb.orderBy('studentLearningLogs.status', sortBy);
-          break;
-        default:
-          qb.orderBy('assignments.due_date', sortBy);
-          break;
-      }
-    }
-
-    const [results, total] = await qb.skip(skip).take(take).printSql().getManyAndCount();
-    return new Pagination<any>({
-      results,
-      total,
-    });
   }
 }

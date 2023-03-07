@@ -1,6 +1,7 @@
 import { Directive, Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsIn, IsInt } from 'class-validator';
 import { Column, Entity, ManyToOne, JoinColumn, BaseEntity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
 import { WithdrawalEmail } from './withdrawal-email.entity';
 
@@ -78,6 +79,13 @@ export class Withdrawal extends BaseEntity {
   @JoinColumn({ name: 'StudentId', referencedColumnName: 'student_id' })
   @Field(() => Student, { nullable: true })
   Student: Student;
+
+  @ManyToOne(() => SchoolYear, (schoolYear) => schoolYear.Withdrawal, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'school_year_id', referencedColumnName: 'school_year_id' }])
+  SchoolYear: SchoolYear;
 
   @OneToMany(() => WithdrawalEmail, (withdrawalEmail) => withdrawalEmail.Withdrawal)
   @Field(() => [WithdrawalEmail], { nullable: true })

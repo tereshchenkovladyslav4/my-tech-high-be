@@ -17,7 +17,7 @@ export class StudentLearningLogResolver {
   @UseGuards(new AuthGuard())
   async getLearningLogsForStudent(
     @Args() studentLearningLogArgs: StudentLearningLogArgs,
-  ): Promise<Pagination<Assignment>> {
+  ): Promise<Pagination<Assignment> | null> {
     return this.service.findLearningLogsForStudent(studentLearningLogArgs);
   }
 

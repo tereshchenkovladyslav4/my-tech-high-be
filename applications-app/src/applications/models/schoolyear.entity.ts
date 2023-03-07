@@ -24,6 +24,7 @@ import { StateCodes } from './state-codes.entity';
 import { ReimbursementRequest } from './reimbursement-request.entity';
 import { HomeroomSettings } from './homeroom-settings.entity';
 import { StudentLearningLog } from './student-learning-log.entity';
+import { Withdrawal } from './withdrawal.entity';
 
 @InputType('schoolyear')
 @ObjectType()
@@ -376,4 +377,8 @@ export class SchoolYear extends BaseEntity {
   @OneToMany(() => StudentLearningLog, (studentLearningLog) => studentLearningLog.SchoolYear)
   @Field(() => [StudentLearningLog], { nullable: true })
   StudentLearningLogs: StudentLearningLog[];
+
+  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.SchoolYear)
+  @Field(() => [Withdrawal], { nullable: true })
+  Withdrawal: Withdrawal[];
 }

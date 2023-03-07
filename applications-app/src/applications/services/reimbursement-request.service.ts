@@ -127,7 +127,7 @@ export class ReimbursementRequestService {
   }
 
   async findOne(reimbursementRequestId: number): Promise<ReimbursementRequest> {
-    return await this.repo
+    const result = await this.repo
       .createQueryBuilder('reimbursementRequest')
       .leftJoinAndSelect('reimbursementRequest.Student', 'Student')
       .leftJoinAndSelect('Student.person', 'Person')
@@ -143,6 +143,24 @@ export class ReimbursementRequestService {
       .leftJoinAndSelect('reimbursementRequest.ReimbursementReceipts', 'ReimbursementReceipts')
       .where(`reimbursementRequest.reimbursement_request_id = ${reimbursementRequestId}`)
       .getOne();
+
+    const sameTypeRequestQb = await this.repo
+      .createQueryBuilder('reimbursementRequest')
+      .where(`reimbursementRequest.form_type = "${result.form_type}"`)
+      .andWhere(`StudentId = ${result.StudentId}`)
+      .andWhere(`reimbursement_request_id <> ${result.reimbursement_request_id}`)
+      .andWhere(`status <> "${ReimbursementRequestStatus.DRAFT}"`);
+    const { merged_periods } = result.SchoolYear.ReimbursementSetting;
+    if (!!merged_periods) {
+      const isMerged = result.periods?.split(',')?.length > 1;
+      if (isMerged) {
+        sameTypeRequestQb.andWhere(`(LENGTH(periods) - LENGTH(REPLACE(periods,",","")) + 1) > 1`);
+      } else {
+        sameTypeRequestQb.andWhere(`(LENGTH(periods) - LENGTH(REPLACE(periods,",","")) + 1) < 2`);
+      }
+    }
+    result.SameTypeRequests = await sameTypeRequestQb.getMany();
+    return result;
   }
 
   async findForStudents(param: ReimbursementRequestSearchInput): Promise<ReimbursementRequest[]> {
