@@ -371,6 +371,11 @@ export class WithdrawalService {
       const results = await queryRunner.query(`${select_query}${main_query}`);
       await queryRunner.release();
 
+      for (let i = 0; i < results.length; i++) {
+        const student = await this.studentService.findOneById(results[i].StudentId);
+        results[i].Student = student;
+      }
+
       return new Pagination<Withdrawal>({
         results,
         total: res[0].cnt,
