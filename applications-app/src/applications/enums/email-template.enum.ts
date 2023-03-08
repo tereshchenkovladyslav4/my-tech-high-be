@@ -23,6 +23,13 @@ export enum EmailTemplateEnum {
   WITHDRAW_CONFIRMATION = 'Withdraw Confirmation',
   WITHDRAW_PAGE = 'Withdraw Page',
   ANNOUNCEMENT = 'Announcemnet',
+  // Reimbursement Emails
+  RB_UPDATES_REQUIRED = 'Reimbursement Updates Required',
+  RB_APPROVED = 'Reimbursement Approved',
+  RB_PAID = 'Reimbursement Paid',
+  DO_UPDATES_REQUIRED = 'Direct Order Updates Required',
+  DO_APPROVED = 'Direct Order Approved',
+  DO_ORDERED = 'Direct Order Ordered',
 }
 
 registerEnumType(EmailTemplateEnum, {

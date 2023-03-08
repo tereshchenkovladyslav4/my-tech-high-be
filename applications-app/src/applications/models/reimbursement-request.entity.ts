@@ -4,6 +4,8 @@ import { ReimbursementFormType } from '../enums';
 import { ReimbursementReceipt } from './reimbursement-receipt.entity';
 import { SchoolYear } from './schoolyear.entity';
 import { Student } from './student.entity';
+import { ResourceRequestEmail } from './resource-request-email.entity';
+import { ReimbursementRequestEmail } from './reimbursement-request-email.entity';
 
 @InputType('reimbursement_request')
 @ObjectType()
@@ -100,4 +102,11 @@ export class ReimbursementRequest extends BaseEntity {
 
   @Field(() => [ReimbursementRequest], { nullable: true })
   SameTypeRequests: ReimbursementRequest[];
+
+  @OneToMany(
+    () => ReimbursementRequestEmail,
+    (reimbursementRequestEmail) => reimbursementRequestEmail.ReimbursementRequest,
+  )
+  @Field(() => [ReimbursementRequestEmail], { nullable: true })
+  ReimbursementRequestEmails: ReimbursementRequestEmail[];
 }

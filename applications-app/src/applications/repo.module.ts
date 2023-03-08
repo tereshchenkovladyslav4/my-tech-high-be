@@ -150,6 +150,8 @@ import { HomeroomSettingsService } from './services/homeroom-settings.service';
 import { StudentLearningLogService } from './services/student-learning-log.service';
 import { StudentLearningLog } from './models/student-learning-log.entity';
 import { RegionsService } from './services/regions.service';
+import { ReimbursementRequestEmail } from './models/reimbursement-request-email.entity';
+import { ReimbursementRequestEmailsService } from './services/reimbursement-request-emails.service';
 
 const servicesImports = [
   UsersService,
@@ -229,6 +231,7 @@ const servicesImports = [
   HomeroomSettingsService,
   StudentLearningLogService,
   RegionsService,
+  ReimbursementRequestEmailsService,
 ];
 
 @Global()
@@ -310,6 +313,7 @@ const servicesImports = [
       ReimbursementReceipt,
       HomeroomSettings,
       StudentLearningLog,
+      ReimbursementRequestEmail,
     ]),
   ],
   providers: [...servicesImports],

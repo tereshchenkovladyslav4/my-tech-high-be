@@ -102,6 +102,7 @@ import { HomeroomSettings } from './models/homeroom-settings.entity';
 import { StudentLearningLogResolver } from './resolvers/student-learning-log.resolver';
 import { StudentLearningLog } from './models/student-learning-log.entity';
 import { RegionsResolver } from './resolvers/regions.resolver';
+import { ReimbursementRequestEmail } from './models/reimbursement-request-email.entity';
 
 const graphQLImports = [
   ApplicationsResolver,
@@ -216,6 +217,7 @@ const graphQLImports = [
           ReimbursementReceipt,
           HomeroomSettings,
           StudentLearningLog,
+          ReimbursementRequestEmail,
         ],
       },
       context: ({ req }) => ({ headers: req.headers }),

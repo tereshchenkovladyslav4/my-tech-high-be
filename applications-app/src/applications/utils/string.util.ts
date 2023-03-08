@@ -12,3 +12,8 @@ export const toOrdinalSuffix = (number: number): string => {
     ? number + ordinals[digits[0] - 1]
     : number + ordinals[3];
 };
+
+export const renderCommaString = (str: string | undefined | null): string => {
+  const list = str?.split(',') || [];
+  return list.map((x, i) => (list.length > 1 && i === list.length - 1 ? `& ${x}` : x)).join(', ');
+};

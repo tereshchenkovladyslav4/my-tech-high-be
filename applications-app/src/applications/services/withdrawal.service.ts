@@ -2,7 +2,7 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Moment from 'moment';
 import { Pagination } from 'src/paginate';
-import { Repository, getConnection } from 'typeorm';
+import { Repository, getConnection, In } from 'typeorm';
 import { EmailWithdrawalInput } from '../dto/email-withdrawal.inputs';
 import { FilterInput } from '../dto/filter.input';
 import { IndividualWithdrawalInput } from '../dto/individual-withdrawal.inputs';
@@ -994,5 +994,12 @@ export class WithdrawalService {
       console.error('***************************withdrawal pdf error*******************', err);
       throw new ServiceUnavailableException(err, `${withdrawalId}`);
     }
+  }
+
+  async getWithdrawalsByIds(studentIds: number[]): Promise<Withdrawal[]> {
+    const withdrawals = await this.repo.find({
+      StudentId: In(studentIds),
+    });
+    return withdrawals;
   }
 }

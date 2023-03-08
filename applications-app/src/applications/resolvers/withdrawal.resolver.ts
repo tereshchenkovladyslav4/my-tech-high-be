@@ -53,6 +53,12 @@ export class WithdrawalResolver {
     return this.service.getStatus(filter);
   }
 
+  @Query(() => [Withdrawal], { name: 'getWithdrawalsByIds' })
+  @UseGuards(new AuthGuard())
+  getWithdrawalsByIds(@Args({ name: 'studentIds', type: () => [Number] }) studentIds: number[]): Promise<Withdrawal[]> {
+    return this.service.getWithdrawalsByIds(studentIds);
+  }
+
   @Mutation(() => Boolean, { name: 'saveWithdrawal' })
   async save(
     @Args('withdrawalInput')

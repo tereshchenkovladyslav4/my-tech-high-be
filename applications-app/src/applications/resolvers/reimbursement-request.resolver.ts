@@ -11,6 +11,7 @@ import { ReimbursementRequestsArgs } from '../dto/reimbursement-requests.args';
 import { ReimbursementReceipt } from '../models/reimbursement-receipt.entity';
 import { CreateOrUpdateReimbursementReceiptInput } from '../dto/create-or-update-reimbursement-receipt.input';
 import { ReimbursementReceiptsActionInput } from '../dto/reimbursement-receipts-action.input';
+import { ReimbursementRequestsActionInput } from '../dto/reimbursement-requests-action.input';
 
 @Resolver(() => ReimbursementRequest)
 export class ReimbursementRequestResolver {
@@ -44,6 +45,14 @@ export class ReimbursementRequestResolver {
     return this.service.save(requestInput);
   }
 
+  @Mutation(() => Boolean, { name: 'deleteReimbursementRequests' })
+  async deleteReimbursementRequests(
+    @Args('reimbursementRequestsActionInput')
+    reimbursementRequestsActionInput: ReimbursementRequestsActionInput,
+  ): Promise<boolean> {
+    return await this.service.deleteReimbursementRequests(reimbursementRequestsActionInput);
+  }
+
   @Mutation(() => [ReimbursementReceipt], { name: 'createOrUpdateReimbursementReceipts' })
   @UseGuards(new AuthGuard())
   async createOrUpdateReimbursementReceipts(
@@ -57,7 +66,7 @@ export class ReimbursementRequestResolver {
     @Args('reimbursementReceiptsActionInput')
     reimbursementReceiptsActionInput: ReimbursementReceiptsActionInput,
   ): Promise<boolean> {
-    return await this.service.deleteResourceRequests(reimbursementReceiptsActionInput);
+    return await this.service.deleteReimbursementReceipts(reimbursementReceiptsActionInput);
   }
 
   @Mutation(() => Boolean, { name: 'deleteReimbursementRequest' })

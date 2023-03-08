@@ -10,6 +10,15 @@ import { ReimbursementRequest } from '../models/reimbursement-request.entity';
 import { Pagination } from '../../paginate';
 import { ReimbursementRequestsArgs } from '../dto/reimbursement-requests.args';
 import { ReimbursementReceiptsActionInput } from '../dto/reimbursement-receipts-action.input';
+import { EmailsService } from './emails.service';
+import { EmailTemplatesService } from './email-templates.service';
+import { DO_EMAIL_TEMPLATES, RB_EMAIL_TEMPLATES } from '../constants';
+import { reimbursementRequestStatus, renderCommaString, showDate } from '../utils';
+import { TimezonesService } from './timezones.service';
+import * as process from 'process';
+import { ReimbursementRequestEmailsService } from './reimbursement-request-emails.service';
+import { ReimbursementRequestEmail } from '../models/reimbursement-request-email.entity';
+import { ReimbursementRequestsActionInput } from '../dto/reimbursement-requests-action.input';
 
 @Injectable()
 export class ReimbursementRequestService {
@@ -18,6 +27,10 @@ export class ReimbursementRequestService {
     private readonly repo: Repository<ReimbursementRequest>,
     @InjectRepository(ReimbursementReceipt)
     private readonly receiptRepo: Repository<ReimbursementReceipt>,
+    private sesEmailService: EmailsService,
+    private emailTemplateService: EmailTemplatesService,
+    private timezoneService: TimezonesService,
+    private reimbursementRequestEmailsService: ReimbursementRequestEmailsService,
   ) {}
 
   async find(args: ReimbursementRequestsArgs): Promise<Pagination<ReimbursementRequest>> {
@@ -29,6 +42,7 @@ export class ReimbursementRequestService {
       .leftJoinAndSelect('Student.grade_levels', 'GradeLevels', `GradeLevels.school_year_id = ${schoolYearId}`)
       .leftJoinAndSelect('Student.parent', 'Parent')
       .leftJoinAndSelect('Parent.person', 'ParentPerson')
+      .leftJoinAndSelect('reimbursementRequest.ReimbursementRequestEmails', 'ReimbursementRequestEmails')
       .where(`reimbursementRequest.SchoolYearId = ${schoolYearId}`);
 
     if (filter) {
@@ -117,6 +131,7 @@ export class ReimbursementRequestService {
         }
       }
     }
+    qb.addOrderBy('ReimbursementRequestEmails.created_at', 'DESC');
 
     const [results, total] = await qb.skip(skip).take(take).getManyAndCount();
 
@@ -184,6 +199,29 @@ export class ReimbursementRequestService {
     return qb.getMany();
   }
 
+  async deleteReimbursementRequests(
+    reimbursementRequestsActionInput: ReimbursementRequestsActionInput,
+  ): Promise<boolean> {
+    try {
+      const { reimbursementRequestIds } = reimbursementRequestsActionInput;
+      reimbursementRequestIds.map(async (reimbursementRequestId) => {
+        await this.repo.delete({ reimbursement_request_id: reimbursementRequestId });
+      });
+      return true;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async delete(reimbursement_request_id: number): Promise<boolean> {
+    try {
+      await this.repo.delete(reimbursement_request_id);
+      return true;
+    } catch (error) {
+      return error;
+    }
+  }
+
   async saveReceipts(receiptsInput: CreateOrUpdateReimbursementReceiptInput): Promise<ReimbursementReceipt[]> {
     try {
       return await this.receiptRepo.save(receiptsInput?.receipts);
@@ -192,7 +230,9 @@ export class ReimbursementRequestService {
     }
   }
 
-  async deleteResourceRequests(reimbursementReceiptsActionInput: ReimbursementReceiptsActionInput): Promise<boolean> {
+  async deleteReimbursementReceipts(
+    reimbursementReceiptsActionInput: ReimbursementReceiptsActionInput,
+  ): Promise<boolean> {
     const { receiptIds } = reimbursementReceiptsActionInput;
     receiptIds.map(async (receiptId) => {
       await this.receiptRepo.delete({ reimbursement_receipt_id: receiptId });
@@ -210,19 +250,85 @@ export class ReimbursementRequestService {
         case ReimbursementRequestStatus.PAID:
           requestInput.date_paid = new Date();
           break;
+        case ReimbursementRequestStatus.APPROVED:
+          requestInput.date_paid = new Date();
+          break;
       }
+
+      const request = await this.repo
+        .createQueryBuilder('reimbursementRequest')
+        .leftJoinAndSelect('reimbursementRequest.Student', 'Student')
+        .leftJoinAndSelect('Student.person', 'Person')
+        .leftJoinAndSelect('reimbursementRequest.SchoolYear', 'SchoolYear')
+        .leftJoinAndSelect('Student.parent', 'Parent')
+        .leftJoinAndSelect('Parent.person', 'ParentPerson')
+        .leftJoinAndSelect('Student.applications', 'applications')
+        .where({ reimbursement_request_id: requestInput.reimbursement_request_id })
+        .getOne();
+
+      if (request?.status && requestInput.status && request.status != requestInput.status) {
+        const templateName = (request.is_direct_order ? DO_EMAIL_TEMPLATES : RB_EMAIL_TEMPLATES)?.[requestInput.status];
+        if (templateName) {
+          const emailTemplate = await this.emailTemplateService.findByTemplateSchoolYear(
+            templateName,
+            request.SchoolYear?.RegionId,
+            request.SchoolYearId,
+            !!request.Student?.applications?.find((item) => item.school_year_id == request.SchoolYearId)
+              ?.midyear_application,
+          );
+          if (emailTemplate) {
+            const { subject, body, from, standard_responses } = emailTemplate;
+            await this.sendEmail(subject, body, from, request, standard_responses);
+          }
+        }
+      }
+
       return await this.repo.save(requestInput);
     } catch (error) {
       return error;
     }
   }
 
-  async delete(reimbursement_request_id: number): Promise<boolean> {
+  async sendEmail(
+    subject: string,
+    body: string,
+    from: string,
+    request: ReimbursementRequest,
+    standard_responses?: string,
+  ): Promise<ReimbursementRequestEmail> {
     try {
-      await this.repo.delete(reimbursement_request_id);
-      return true;
-    } catch (error) {
-      return error;
+      const content = body
+        .toString()
+        .replace(/\[STUDENT\]/g, request.Student.person.first_name)
+        .replace(/\[PARENT\]/g, request.Student.parent.person.first_name)
+        .replace(
+          /\[SUBMITTED\]/g,
+          showDate(await this.timezoneService.getTimezoneDate(request.SchoolYear?.RegionId, request.date_submitted)),
+        )
+        .replace(/\[AMOUNT\]/g, `$${(+request.total_amount || 0).toFixed(2)}`)
+        .replace(/\[CATEGORY\]/g, reimbursementRequestStatus(request.status as ReimbursementRequestStatus))
+        .replace(/\[PERIOD\]/g, `Period ${renderCommaString(request.periods)}`)
+        .replace(/\[LINK\]/g, `${process.env.WEB_APP_URL}/reimbursements`)
+        .replace(/\[INSTRUCTIONS\]/g, standard_responses)
+        .replace(/\[CONFIRMATION\]/g, '');
+
+      const email = await this.sesEmailService.sendEmail({
+        email: request.Student.parent.person.email,
+        subject: subject.toString(),
+        content,
+        from,
+        region_id: request.SchoolYear?.RegionId,
+        template_name: '',
+      });
+      return await this.reimbursementRequestEmailsService.create({
+        reimbursement_request_id: request.reimbursement_request_id,
+        email_record_id: email.results?.emailRecordId,
+        from_email: from,
+        subject: subject,
+        body: content,
+      });
+    } catch (e) {
+      return e;
     }
   }
 }

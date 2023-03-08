@@ -9,14 +9,14 @@ import {
   CreateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { ResourceRequest } from './resource-request.entity';
 import { EmailRecord } from './email-record.entity';
+import { ReimbursementRequest } from './reimbursement-request.entity';
 
-@InputType('resource_request_email')
+@InputType('reimbursement_request_email')
 @ObjectType()
 @Directive('@key(fields: "id")')
-@Entity('mth_resource_request_email')
-export class ResourceRequestEmail extends BaseEntity {
+@Entity('mth_reimbursement_request_email')
+export class ReimbursementRequestEmail extends BaseEntity {
   @Column('int')
   @Field(() => Int, { nullable: true })
   @PrimaryGeneratedColumn()
@@ -24,7 +24,7 @@ export class ResourceRequestEmail extends BaseEntity {
 
   @Column('int')
   @Field(() => Int, { nullable: true })
-  resource_request_id?: number;
+  reimbursement_request_id?: number;
 
   @Column('int')
   @Field(() => Int, { nullable: true })
@@ -46,10 +46,10 @@ export class ResourceRequestEmail extends BaseEntity {
   @Field(() => Date, { nullable: true })
   created_at?: Date;
 
-  @ManyToOne(() => ResourceRequest, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-  @JoinColumn({ name: 'resource_request_id', referencedColumnName: 'id' })
-  @Field(() => ResourceRequest, { nullable: true })
-  ResourceRequest: ResourceRequest;
+  @ManyToOne(() => ReimbursementRequest, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'reimbursement_request_id', referencedColumnName: 'reimbursement_request_id' })
+  @Field(() => ReimbursementRequest, { nullable: true })
+  ReimbursementRequest: ReimbursementRequest;
 
   @OneToOne(() => EmailRecord)
   @JoinColumn({ name: 'email_record_id', referencedColumnName: 'id' })
